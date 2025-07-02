@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>ServeWell.Net</title>
+		<meta name="description" content="ServeWell.Net is a place to help and to be helped">
+<style>
+	body {
+	    margin: 3rem;
+	    font-family: sans-serif;
+	    font-size: large;
+	}
+	details :not(summary) {
+	    padding-left: 0.5rem;
+	}
+</style>
+
+	</head>
+	<body>
+		<div>ServeWell.Net</div>
+
+		<ul>
+			<li>
+				To Do
+				<ul>
+					<li>
+						Settle on priority scenarios: Bible, Plants, etc.
+					</li>
+					<li>
+						Create a way to pull a module to create a client-side editor and Settings Details to show progress, modules
+					</li>
+					<li>
+						Create a way to log in and do a git PR
+					</li>
+					<li>
+						Use worker (src/index.ts) for something real so we can remove hello world, like use it for search perhaps
+					</li>
+				</ul>
+			</li>
+		</ul>
+		<h1 id="heading"></h1>
+		<p>This page comes from a static asset stored at `public/index.html` as configured in `wrangler.jsonc`.</p>
+		<button id="button" type="button">Fetch a random UUID</button>
+		<output id="random" for="button"></output>
+		<script>
+			fetch('/message')
+				.then((resp) => resp.text())
+				.then((text) => {
+					const h1 = document.getElementById('heading');
+					h1.textContent = text;
+				});
+
+			const button = document.getElementById("button");
+			button.addEventListener("click", () => {
+				fetch('/random')
+					.then((resp) => resp.text())
+					.then((text) => {
+						const random = document.getElementById('random');
+						random.textContent = text;
+					});
+			});
+		</script>
+	</body>
+</html>
