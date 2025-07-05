@@ -25,43 +25,31 @@
 				To Do
 				<ul>
 					<li>
-						Pray about settling on priority scenarios: Bible, Plants, etc.
-					</li>
-					<li>
 						Create a way to pull a module to create a client-side lexical editor and Settings Details to show progress, modules
 					</li>
 					<li>
 						Create a way to log in and do a git PR
 					</li>
 					<li>
-						Use worker (src/index.ts) for something real so we can remove hello world, like use it for search perhaps
+						Pray about settling on priority scenarios: Bible, Plants, etc.
+					</li>
+					<li>
+						Settle on priority scenarios: People Notes With Sensitivity Layers (embed from other folder), Reminders, etc.
 					</li>
 				</ul>
 			</li>
 		</ul>
-		<img src="/images/servewell-logo.png" alt="ServeWell.Net Logo" style="max-width: 100%; height: auto;" />
+		<!-- <img src="/images/servewell-logo.png" alt="ServeWell.Net Logo" style="max-width: 100%; height: auto;" /> -->
 		<img src="/images/fir.jpg" alt="Fir" style="max-width: 100%; height: auto;" />
-		<h1 id="heading"></h1>
-		<p>This page comes from a static asset stored at `public/index.html` as configured in `wrangler.jsonc`.</p>
-		<button id="button" type="button">Fetch a random UUID</button>
-		<output id="random" for="button"></output>
-		<script>
-			fetch('/message')
-				.then((resp) => resp.text())
-				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
+		
+		<div id="react-container"></div>
 
-			const button = document.getElementById("button");
-			button.addEventListener("click", () => {
-				fetch('/random')
-					.then((resp) => resp.text())
-					.then((text) => {
-						const random = document.getElementById('random');
-						random.textContent = text;
-					});
-			});
-		</script>
+		<script defer src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+		<script defer src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+		<!-- <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+		<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script> -->
+
+		<script defer src="my-react-component.js"></script>
 	</body>
 </html>
