@@ -17,10 +17,15 @@
 		</style>
 	</head>
 	<body>
-		<h1>Combine Static Cloudflare with Expo</h1>
-        <p>This tutorial offers an example of how to combine a static Cloudflare deployment with an Expo app. The goal is to create multiple static pages that can be served by Cloudflare, add React-based interactivity after the each page loads, and have it work both in web browsers and in Android and iOS mobile apps.</p>
+		<h1>Combine Cloudflare with Expo</h1>
+        <p>This tutorial offers an example of how to combine a static Cloudflare deployment with a static Expo app. </p>
+        <p>Static here doesn't mean no functionality. It means pages load quickly because nothing has to be built first, and CDNs can be used.</p>
+        <p>Expo lets you share as much code as possible between web and native mobile apps.</p>
+        <p>Pages are served to both web browsers and native apps by Cloudflare.</p>
+        <p>Expo adds React-based interactivity after the each page loads, whether in web browsers or Android or iOS mobile apps.</p>
         <p>Cloudflare recommends using Workers rather than Pages, so we'll use a worker.</p>
-        <p>Cloudflare provides the Wrangler CLI for developing apps. Expo provides their own CLI for developing apps. As of mid-2025, there's no official way to put those together.</p>
+        <p>Cloudflare provides the Wrangler CLI for developing apps. Expo provides their own CLI for developing apps.</p>
+        <p> At the time of writing (initially mid-2025), there's no official way to put those together from Expo or Cloudflare.</p>
         <p>This page as part of <a href="/index.html">ServeWell.Net</a> is being served from a combination of the two, proving that it can be done.</p>
         <p>This tutorial should be updated from time to time.</p>
         <p>This tutorial assumes you have already done the following, which may get their own articles soon.
@@ -32,8 +37,47 @@
             </ul>
         </p>
 
+        <h2>Steps</h2>
+        <p></p>
+
+        <h2>Other Approaches</h2>
+        <p>There is an <a href="https://github.com/heineiuo/expo-adapter-workers">example on GitHub</a> of using expo export's 'server' output. This is reasonable, especially if you're doing a fully React-based app, like Expo's introductory tutorial.</p>
+        <p>However, in this tutorial we'll use the expo export's 'static' output (i.e., SSG, not 'single' for CSR or 'server' for SSR/RSC) and then adapt it to progressively enhance Cloudflare's basic static webhosting.</p>
+
+        <h2>Current thoughts</h2>
+        <ul>
+            <li>.</li>
+        </ul>
+
+        <h2>Questions I'm currently working through</h2>
+        <p>
+            <ul>
+                <li>How to use Expo's 'single' output with Cloudflare Workers.</li>
+                <li>How to use a mobile app's local cache when the user is offline.</li>
+                    <ul>
+                        <li><a href="https://stackoverflow.com/a/74966760">https://stackoverflow.com/a/74966760</a></li>
+                        <li><a href="https://medium.com/@snehabagri.90/reactnative-webview-with-local-content-c98a09340801">https://medium.com/@snehabagri.90/reactnative-webview-with-local-content-c98a09340801/a></li>
+                        <li><a href="https://medium.com/@pranavmore/how-to-build-a-simple-webview-app-using-expo-and-react-native-a16f4015467c">https://medium.com/@pranavmore/how-to-build-a-simple-webview-app-using-expo-and-react-native-a16f4015467c</a></li>
+                        <li><a href="https://github.com/react-native-webview/react-native-webview/issues/428">https://github.com/react-native-webview/react-native-webview/issues/428</a></li>
+                        <li><a href="https://github.com/react-native-webview/react-native-webview/blob/master/docs/Guide.md#loading-local-html-files">https://github.com/react-native-webview/react-native-webview/blob/master/docs/Guide.md#loading-local-html-files</a></li>
+                    </ul>
+                </li>
+                <li>How to make a native tab that accepts any static-based #set-up-a-custom-domain-in-your-wrangler-configuration-file
+                    <ul>
+                       <li><a href="https://stackoverflow.com/questions/55570886/how-to-set-a-default-screen-route-in-react-tab-navigation-in-react-native"</a>https://stackoverflow.com/questions/55570886/how-to-set-a-default-screen-route-in-react-tab-navigation-in-react-native</li>
+                        <li><a href="https://stackoverflow.com/questions/55570886/how-to-set-a-default-screen-route-in-react-tab-navigation-in-react-native/71021149">https://stackoverflow.com/questions/55570886/how-to-set-a-default-screen-route-in-react-tab-navigation-in-react-native/71021149</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </p>
+        
+
+
         To address soon:
             <ul>
+                <li>
+                    WebView can be set up via <a href="https://github.com/react-native-webview/react-native-webview">react-native-webview</a> or <a href="https://docs.expo.dev/modules/native-view-tutorial/">fron scratch</a>
+                </li>
                 <li>
                     After setting up custom domain on Cloudflare website, it recommends keeping your wrangler config in sync: https://developers.cloudflare.com/workers/configuration/routing/custom-domains/#set-up-a-custom-domain-in-your-wrangler-configuration-file
                 </li>

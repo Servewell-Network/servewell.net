@@ -11,7 +11,7 @@
 		"global_fetch_strictly_public"
 	],
 	"assets": {
-		"directory": "./public"
+		"directory": "./swn-expo/dist"
 	},
 	"observability": {
 		"enabled": true
