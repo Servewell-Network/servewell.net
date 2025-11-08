@@ -4,20 +4,23 @@ import { MDXStyles } from "@bacons/mdx";
 
 export default function AboutScreen() {
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.text}>About screen</Text>
-      {/* <MDXStyles
-      > */}
+    // <ScrollView horizontal={true}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.text}>About screen</Text>
+        <MDXStyles 
+      >
         <Readme />
-      {/* </MDXStyles> */}
-    </ScrollView>
+        </MDXStyles>
+      </ScrollView>
+  //  </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: '10%',
+    paddingHorizontal: '1%',
+    
     // backgroundColor: '#222', 
     // color: '#fff',
   },
