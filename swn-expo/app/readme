@@ -1,0 +1,2 @@
+According to "convention"
+    "app directory: A special directory containing only routes and their layouts. Any files added to this directory become a screen inside our native app and a page on the web."
