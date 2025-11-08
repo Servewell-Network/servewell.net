@@ -5,25 +5,25 @@ This should be an app for streamlining the in-person work of caring for and empo
 
 It starts with a simple BSB Bible perhaps, but via Expo (for web+native) and Wrangler (for Cloudflare hosting).
 
-Basic foundations:
-- I think both Cloudflare/Wrangler and Expo use Node.js. I'm using v22 or v24 (LTS).
-- Cloudflare/Wrangler structures the base folder, ~/Documents/servewell.net (ref needed)
-- At that level, key commands are
-  - npx wrangler dev
-  - npx wrangler deploy
-- servewell.net/src/index.ts seems to have server-side code
-- client-side code server looks at servewell.net/wrangler.jsonc > assets > directory
-- Expo structures the second level in servewell.net/swn-expo (e.g., https://docs.expo.dev/more/create-expo/)
-- At that level, nxp expo start # (then press w) this command allows dev of both web and native mobile apps, and the w opens localhost:8081 (see Expo Go on phone to see android)
-- npx expo export --platform web # or npx expo export -p web # creates swn-expo/dist
-- Set servewell.net/wrangler.jsonc > assets > directory to "./swn-expo/dist"
-- cd ~/Documents/servewell.net; npx wrangler dev # puts expo's app in localhost:8787
-- (before npx wrangler deploy, servewell.net includes "Create a way to log in and do a git PR")
-- I thought git commit should do the trick. moving away from servewell.net/public... "abandon servewell.net/public, simplify and show expo dist" pushed at 3:16, still same 3:30, so I must be forgetting some piece there, but...
-- npx wrangler deploy wants me to remember how to log in (email mo), because it opens https://dash.cloudflare.com/login?login_challenge=1642f55524fc412dbb8d2be29aa16511, but once I logged in and granted permission, it immediately seemed to change what was served at https://servwell.net
+## Basic foundations
+   - I think both Cloudflare/Wrangler and Expo use Node.js. I'm using v22 or v24 (LTS).
+   - Cloudflare/Wrangler structures the base folder, ~/Documents/servewell.net (ref needed)
+   - At that level, key commands are
+   - npx wrangler dev
+   - npx wrangler deploy
+   - servewell.net/src/index.ts seems to have server-side code
+   - client-side code server looks at servewell.net/wrangler.jsonc > assets > directory
+   - Expo structures the second level in servewell.net/swn-expo (e.g., https://docs.expo.dev/more/create-expo/)
+   - At that level, nxp expo start # (then press w) this command allows dev of both web and native mobile apps, and the w opens localhost:8081 (see Expo Go on phone to see android)
+   - npx expo export --platform web # or npx expo export -p web # creates swn-expo/dist
+   - Set servewell.net/wrangler.jsonc > assets > directory to "./swn-expo/dist"
+   - cd ~/Documents/servewell.net; npx wrangler dev # puts expo's app in localhost:8787
+   - (before npx wrangler deploy, servewell.net includes "Create a way to log in and do a git PR")
+   - I thought git commit should do the trick. moving away from servewell.net/public... "abandon servewell.net/public, simplify and show expo dist" pushed at 3:16, still same 3:30, so I must be forgetting some piece there, but...
+   - npx wrangler deploy wants me to remember how to log in (email mo), because it opens https://dash.cloudflare.com/login?login_challenge=1642f55524fc412dbb8d2be29aa16511, but once I logged in and granted permission, it immediately seemed to change what was served at https://servwell.net
 
 
-Recent steps:
+## Recent steps:
 - cd swn-expo; npm run reset-project # /app-example created; delete when done with it
 - added tabs
 - added expo-mdx
@@ -32,9 +32,8 @@ Recent steps:
 - tested with js turned off -- worked in web!
 - bullets don't show up in android -- must be the bugginess they mentioned in expo-mdx
 
-<br />
 
-- Thinking about next steps
+## Thinking about next steps
   - A build step to compile markdown (including this) into react ssg in expo dist?
   - Demo has Home and Explore bottom tabs with routing in URL
   - A build step to compile bsb source into react ssg?
