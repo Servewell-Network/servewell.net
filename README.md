@@ -11,16 +11,64 @@ Basic foundations:
   - npx wrangler dev
   - npx wrangler deploy
 - servewell.net/src/index.ts seems to have server-side code
-- not sure when to use that deploy command vs simply committing to git
 - client-side code server looks at servewell.net/wrangler.jsonc > assets > directory
 - Expo structures the second level in servewell.net/swn-expo (e.g., https://docs.expo.dev/more/create-expo/)
-- At that level, nxp expo start # (then press w) this command allows dev of both web and native mobile apps, and the w opens localhost:8081
+- At that level, nxp expo start # (then press w) this command allows dev of both web and native mobile apps, and the w opens localhost:8081 (see Expo Go on phone to see android)
 - npx expo export --platform web # or npx expo export -p web # creates swn-expo/dist
 - Set servewell.net/wrangler.jsonc > assets > directory to "./swn-expo/dist"
 - cd ~/Documents/servewell.net; npx wrangler dev # puts expo's app in localhost:8787
 - (before npx wrangler deploy, servewell.net includes "Create a way to log in and do a git PR")
-- npx wrangler deploy wants me to remember how to log in, because it opens https://dash.cloudflare.com/login?login_challenge=1642f55524fc412dbb8d2be29aa16511 
-- git commit should do the trick. moving away from servewell.net/public...
+- I thought git commit should do the trick. moving away from servewell.net/public... "abandon servewell.net/public, simplify and show expo dist" pushed at 3:16, still same 3:30, so I must be forgetting some piece there, but...
+- npx wrangler deploy wants me to remember how to log in (email mo), because it opens https://dash.cloudflare.com/login?login_challenge=1642f55524fc412dbb8d2be29aa16511, but once I logged in and granted permission, it immediately seemed to change what was served at https://servwell.net
+- cd swn-expo; npm run reset-project # /app-example created; delete when done with it
+- 
+
+
+
+- Thinking about next steps
+  - A build step to compile markdown (including this) into react ssg in expo dist?
+  - Demo has Home and Explore bottom tabs with routing in URL
+  - A build step to compile bsb source into react ssg?
+  - An early experiment to get my mind around how build-time react works.
+  - Some of the React functions are in the client, which is not buildtime but runtime.
+  - I like the sound of mdx https://mdxjs.com/docs/getting-started/
+    - Seems a great intermediate build step (use basic node code to create mdx files)
+    - "A Node.js version of 16 or later is needed"
+    - "For more info on these tools, see their dedicated sections: ¶ Next.js, ¶ Node.js, ¶ Rollup, ¶ Vite, ¶ esbuild, and ¶ webpack."
+    - The Node.js link leads to this: https://mdxjs.com/packages/node-loader/
+        - But that seems to be for client side
+    - Expo says https://docs.expo.dev/more/expo-cli/ "The default bundler is Metro"
+      - Metro: "The JavaScript bundler for React Native"
+    - Expo plugins sounds promising but doesn't seem to include web
+    - https://github.com/EvanBacon/expo-mdx is more promising
+      - "Build-time MDX for Expo apps and websites" -- exactly
+      - https://docs.expo.dev/guides/customizing-metro/
+      - "Known Issues: ol, li, ul are all buggy. PRs welcome. Native image ratios are weird."
+    - Alternative should be mdx -> react ssg (html with react hydration)
+    - Another alternative would be generating jsx code by my own ts code
+    - Another alternative would be using TS tools to generate ts code
+        - makes it easier to wrap text in functionality
+        - jsx would be an optional part of this (as it's optional in react)
+        - I think I remember that TS tools allow typesafe generation of js and jsx code
+        - In what previous project did I use it? May need to search old computer.
+        - Create fns like reactSsgHtml = readLine(README.md).map(line => wrapLine(line))
+        - How does this relate to mdx? See stackoverflow "How to have markdown content in components in MDX files"
+            - I prefer MDX over reimplementing it myself, of course.
+            - mdx-expo has known bugs, so could help fix or workaround those or mdxjs
+            - It's possible to wrap md-rendered text in components, but can be awkward?
+            - Maybe some simple generating code that wraps md in components if needed
+            - 
+    - I really like section 3 of https://dev.to/brokarim/how-to-compile-and-run-mdx-in-react-9l
+        - how to wrap mdx in react to modify it (see github link for more details)
+        - how to tweak default md -> html conversion via a config file MDXComponents.jsx
+    - import remarkGfm from "remark-gfm"; // github-flavored markdown has tables, etc.
+    - import remarkFrontmatter from "remark-frontmatter"; // optimize for seo etc.
+
+  - The vscode extension sounds important too https://docs.expo.dev/develop/tools/
+  - Expo Go seems important too
+  - 
+
+
 
 
 Latest rough notes are in servewith.me/public/inner-admin/first-client-side-scripts.html, should move. Use what's above the delete warning. Next steps are proving that expo output can also be served by cloudflare and wrangler, not just by expo start. Also see in android and ios simulators. Also try to recall how wrangler directory was set up and record that in servewell.net/public/articles/combine-static-cloudflare-with-expo.html, where rough notes are converted to confident. But three notes places is too many right now, so consolidate somehow.
