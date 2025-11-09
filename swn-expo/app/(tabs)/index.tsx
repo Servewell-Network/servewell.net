@@ -14,20 +14,20 @@ export default function Index() {
 
         <View style={{ flexDirection: 'row' }}>
           <View style={{ width: 48 }} />
-          <Text style={styles.bulletMarker}>{'●'}</Text>
+          <Text style={styles.bulletMarker}>{'•'}</Text>
           <Text style={styles.bulletText}>Bullet 1.1</Text>
         </View>
         <View style={{ flexDirection: 'row' }}>
           <View style={{ width: 48 }} />
           <View style={{ width: 48 }} />
-          <Text style={styles.bulletMarker}>{'●'}</Text>
+          <Text style={styles.bulletMarker}>{'•'}</Text>
           <Text style={styles.bulletText}>Bullet 1.1.1</Text>
         </View>
         <View style={{ flexDirection: 'row' }}>
           <View style={{ width: 48 }} />
           <View style={{ width: 48 }} />
           <View style={{ width: 48 }} />
-          <Text style={styles.bulletMarker}>{'●'}</Text>
+          <Text style={styles.bulletMarker}>{'•'}</Text>
           <Text style={styles.bulletText}>Bullet 1.1.1.1</Text>
         </View>
         <View style={{ flexDirection: 'row' }}>
@@ -35,7 +35,7 @@ export default function Index() {
           <View style={{ width: 48 }} />
           <View style={{ width: 48 }} />
           <View style={{ width: 48 }} />
-          <Text style={styles.bulletMarker}>{'●'}</Text>
+          <Text style={styles.bulletMarker}>{'•'}</Text>
           <Text style={styles.bulletText}>Bullet 1.1.1.1.1 goes on and on and on</Text>
         </View>
       </ScrollView>
@@ -57,7 +57,8 @@ const styles = StyleSheet.create({
   },
   bulletMarker: {
     paddingLeft: 15,
-    fontSize: 21,
+    fontSize: 44,
+    marginTop: -16,
   },
   bulletText: {
     paddingLeft: 15,
