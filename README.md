@@ -19,5 +19,5 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
      - They want us to let you know this data came from https://github.com/STEPBible/STEPBible-Data/tree/master
      - They want us to report changes to STEPBible@gmail.com
      - For now, no changes, so to update simply copy from parallel repo copy:
-         - cp -r ../STEPBible-Data/Translators\ Amalgamated\ OT+NT src/stepAmalgamated
+         - cp -r ../STEPBible-Data/Translators\ Amalgamated\ OT+NT src/step-Phase1a
 
