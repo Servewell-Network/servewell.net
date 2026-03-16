@@ -17,7 +17,18 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
    - npx wrangler deploy wants me to remember how to log in (email mo), because it opens https://dash.cloudflare.com/login?login_challenge=1642f55524fc412dbb8d2be29aa16511, but once I logged in and granted permission, it immediately seemed to change what was served at https://servwell.net
    - Starting with STEP Bible data (Thankful for their generosity!)
      - They want us to let you know this data came from https://github.com/STEPBible/STEPBible-Data/tree/master
-     - They want us to report changes to STEPBible@gmail.com
+     - They say
+       - You can make corrections or report possible errors to be checked at STEPBibleATgmail.com
+         - I considered starting by reporting some english lemmas (last part of "Expanded Strong tags") start with ": ". Example: "Expanded Strong tags" for Gen.1.1#01=L includes "=: beginning»first:1_beginning". However, there are so many of them, it must be me that doesn't know the purpose of this. So I guess I'll hold off for now.
+       - Any changes made to data should be recorded and made available to subsequent users.
+          - I think this is fulfilled by everything I'm doing being open to the public right now. Example, in my code I have this: .replace(/^:/, '').trim(); // unsure why this occurs in step data
+          - But perhaps since I'm not actually altering the data, but making derivative data, they might not consider it to be changes.
      - For now, no changes, so to update simply copy from parallel repo copy:
          - cp -r ../STEPBible-Data/Translators\ Amalgamated\ OT+NT src/step-Phase1a
+         - npm run p1a-2
+    
+## Next steps
+ - get orig root script from expanded strongs (or from lexicon to get translit)
+ - create init pages with literal
+ - add BSB
 
