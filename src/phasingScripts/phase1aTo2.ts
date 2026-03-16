@@ -186,7 +186,8 @@ function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number): Morphe
   }
   const engMorpheme = fields[Verse.Translation].trim();
   const engInfo = fields[Verse.ExpandedStrongTags].split('=').pop()?.trim() || '';
-  const engWithoutColon = engInfo.replace(/^:/, '').trim(); // unsure why this occurs in step data
+  const engInfoSansBrace = engInfo.replace('}', ''); // surrounds primary morpheme in word
+  const engWithoutColon = engInfoSansBrace.replace(/^:/, '').trim(); // unsure why this occurs in step data
   const [engMain, engAdditional] = engWithoutColon.split('»').map(part => part.trim());
   return {
     OriginalMorphemeScript: fields[Verse.OrigScript],
