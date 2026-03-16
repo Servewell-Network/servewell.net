@@ -29,11 +29,27 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
     
 ## Next steps
  - create init pages with literal
+    - <button popovertarget="my-tooltip">Help</button>
+      <div id="my-tooltip" popover>
+        This is a native flyout that works on touch!
+      </div>
+    - .row {
+        display: grid;
+        grid-template-columns: 1fr; /* One column for mobile */
+        gap: 1rem;
+      }
+
+      @media (min-width: 600px) {
+        .row {
+          grid-template-columns: 1fr 1fr; /* Two parallel cells for wide */
+        }
+      }
+    - 
  - add a navigation system
     - dropdown-like carat on document name, chap and verse, skip taps if possible for chap and verse
  - how does traditional bible fit in json?
-    - can add suggested english ordinal, but that's supplemental/inadequate
-    - should be a separate list of words, separate from morphemes
+    - can add suggested english ordinal to morphemes, though that's supplemental
+    - should primarily be a list of words separate from morphemes
  - perhaps use BSB or LSV or similar
    - to get English order
    - to get alternate renderings (English morphemes)

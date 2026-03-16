@@ -29,7 +29,7 @@ enum Verse {
 }
 
 interface Morpheme { // unit of meaning = word or part of word
-  "SimpleMorphemeId"?: string; // e.g., "Gen1:1.1"
+  "StandardMorphemeId"?: string; // e.g., "Gen1:1.1"
   "WordNumber": number; // because morphemes are often grouped
   "OriginalMorphemeScript": string; // unicode of aramaic/greek chars
   "OriginalMorphemeTransliteration"?: string; // sounds for English readers
@@ -61,7 +61,7 @@ interface Morpheme { // unit of meaning = word or part of word
   "Source"?: string; // e.g., L for Leningrad Codex
 }
 interface Snippet {
-  "SimpleSnippetId"?: string; // e.g., "Gen1:1" for verse, "Gen1:1a" for partial verse
+  "StandardSnippetId"?: string; // e.g., "Gen1:1" for verse, "Gen1:1a" for partial verse
   "SnippetNumber": number; // verse like 12 or partial verse like 12.1 
   "CommentLinkTextsAndUrls"?: string[],
   "PreceedingComment"?: string;
@@ -73,7 +73,7 @@ interface Chapter {
   "PaddedNumWithDocAbbr": string; // e.g., "01-Gen"
   "ChapterNumber": number; // e.g., 3
   "PaddedChapterNumber": string; // e.g., "003"
-  "SimpleChapterId": string; // e.g., "Gen3"
+  "StandardChapterId": string; // e.g., "Gen3"
   "NumPrecedingVersesToInclude": number; // link text for prev chapter
   "SnippetsAndExplanations": Snippet[]; // verses for now
   "NumFollowingVersesToInclude": number; // link text for next chapter
@@ -145,7 +145,7 @@ async function processStepHebrewFile(fileName: string) {
         DocOrBookAbbreviation: chars1To3,
         PaddedNumWithDocAbbr: getNumberedDocAbbr(chars1To3),
         PaddedChapterNumber: `${chars1To3}${chapStr.toString().padStart(3, '0')}`,
-        SimpleChapterId: `${chars1To3}${chapStr}`,
+        StandardChapterId: `${chars1To3}${chapStr}`,
         ChapterNumber: Number(chapStr),
         NumPrecedingVersesToInclude: 1,
         NumFollowingVersesToInclude: 1,
@@ -162,7 +162,7 @@ async function processStepHebrewFile(fileName: string) {
     }
     if (!currentSnippet) {
       currentSnippet = {
-        SimpleSnippetId: `${currentChapter.SimpleChapterId}:${verseStr}`,
+        StandardSnippetId: `${currentChapter.StandardChapterId}:${verseStr}`,
         SnippetNumber: Number(verseStr), // explanation can be like v17.1
         Morphemes: []
       };
@@ -175,7 +175,7 @@ async function processStepHebrewFile(fileName: string) {
       if (!morphemeFields[Verse.OrigScript].trim()) {
         continue; // step data records blanks before paragraph end or section end markers
       }
-      const morpheme = createMorphemeFromStepVerse(morphemeFields, currentSnippet.Morphemes.length + 1, currentSnippet.SimpleSnippetId || '', Number(word), source);
+      const morpheme = createMorphemeFromStepVerse(morphemeFields, currentSnippet.Morphemes.length + 1, currentSnippet.StandardSnippetId || '', Number(word), source);
       currentSnippet.Morphemes.push(morpheme);
     }
 
@@ -193,7 +193,7 @@ function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number, snippet
   const engRoot = engInfo.startsWith(':') ? postArrowSplitByColon[0].trim() : preAndPostArrows[0].trim();
   const engSenseInfo = engInfo.startsWith(':') ? postArrowSplitByColon[1].trim() : '';
   const returnable: Morpheme = {
-    SimpleMorphemeId: `${snippetId}.${origOrd}`,
+    StandardMorphemeId: `${snippetId}.${origOrd}`,
     WordNumber: wordNumber,
     OriginalMorphemeScript: fields[Verse.OrigScript],
     EnglishMorphemeWithPunctuationInOriginalOrder: engMorpheme,
