@@ -31,7 +31,7 @@ enum Verse {
 interface Morpheme { // unit of meaning = word or part of word
   "SimpleMorphemeId"?: string; // e.g., "Gen1:1.1"
   "OriginalMorphemeScript": string; // unicode of aramaic/greek chars
-  "OriginalMorphemeTransliteration": string; // sounds for English readers
+  "OriginalMorphemeTransliteration"?: string; // sounds for English readers
   "OriginalMorphemeVerbalAspect"?: 'Whole Action' | 'Progressing Action'; // whole is traditionally called perfect; is there a repeated also?
   "OriginalMorphemeVerbalTenseOrTime"?: 'Past' | 'Present' | 'Future';
   "OriginalMorphemeVerbalPerson"?: 'First Person' | 'Second Person' | 'Third Person';
@@ -41,7 +41,7 @@ interface Morpheme { // unit of meaning = word or part of word
   "EnglishMorphemeWithPunctuationInEnglishOrder"?: string; // require later
   "AlternateEnglishInOriginalOrder"?: string[];
   "AlternateEnglishInEnglishOrder"?: string[];
-  "OriginalLexemeScript"?: string; // example Hiphil or Piel
+  "OriginalLexemeScript"?: string; // example binyan like Hiphil or Piel, sometimes ambiguous
   "OriginalLexemeTransliteration"?: string;
   "OriginalLexemeDetail"?: string;
   "EnglishLexemeTranslation"?: string;
@@ -51,6 +51,8 @@ interface Morpheme { // unit of meaning = word or part of word
   "ConstituentRootIds"?: string[];
   "OriginalRootDetail"?: string;
   "EnglishRootTranslation"?: string;
+  "EnglishSenseInformation"?: string; // e.g., definition 1 with example gloss(es)
+  "EnglishSubstitutionInfo"?: string; // reliably used as substitute for X in Y context
   "OriginalLanguage"?: "Hebrew" | "Aramaic" | "Greek";
   "OriginalMorphemeOrdinal": number; // orig position, redundant in array
   "EnglishMorphemeOrdinal"?: number; // where it's needed for English
@@ -182,21 +184,36 @@ async function processStepHebrewFile(fileName: string) {
 function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number, snippetId: string): Morpheme {
   const strongs = fields[Verse.dStrongs].replace('{', '').replace('}', '');
   const engMorpheme = fields[Verse.Translation].trim();
-  const engInfo = fields[Verse.ExpandedStrongTags].split('=').pop()?.trim() || '';
-  const engInfoSansBrace = engInfo.replace('}', ''); // surrounds primary morpheme in word
-  const engWithoutColon = engInfoSansBrace.replace(/^:/, '').trim(); // unsure why this occurs in step data
-  const [engMain, engAdditional] = engWithoutColon.split('»').map(part => part.trim());
-  return {
+  const engInfo = fields[Verse.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
+  const preAndPostArrows = engInfo.split('»');
+  const substitutionInfo = preAndPostArrows[1]?.includes('@') ? preAndPostArrows[1] : '';
+  const postArrowSplitByColon = preAndPostArrows[1]?.split(':') || ['', ''];
+  const engRoot = engInfo.startsWith(':') ? postArrowSplitByColon[0].trim() : preAndPostArrows[0].trim();
+  const engSenseInfo = engInfo.startsWith(':') ? postArrowSplitByColon[1].trim() : '';
+  const returnable: Morpheme = {
     SimpleMorphemeId: `${snippetId}.${origOrd}`,
     OriginalMorphemeScript: fields[Verse.OrigScript],
-    OriginalMorphemeTransliteration: fields[Verse.Transliteration],
     EnglishMorphemeWithPunctuationInOriginalOrder: engMorpheme,
-    EnglishLexemeTranslation: engAdditional,
-    EnglishRootTranslation: engMain,
-    IsPunctuation: !fields[Verse.Transliteration], // if no transliteration, it's likely punctuation
     OriginalRootStrongsID: strongs,
     OriginalMorphemeOrdinal: origOrd,
   };
+  const isPunctuation = !fields[Verse.Transliteration]; // if no transliteration, it's likely punctuation
+  if (isPunctuation) {
+    returnable.IsPunctuation = isPunctuation;
+  }
+  if (fields[Verse.Transliteration]) {
+    returnable.OriginalMorphemeTransliteration = fields[Verse.Transliteration];
+  }
+  if (engRoot) {
+    returnable.EnglishRootTranslation = engRoot;
+  }
+  if (substitutionInfo) {
+    returnable.EnglishSubstitutionInfo = substitutionInfo;
+  }
+  if (engSenseInfo) {
+    returnable.EnglishSenseInformation = engSenseInfo;
+  }
+  return returnable;
 }
 
 

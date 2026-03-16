@@ -28,6 +28,9 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
          - npm run p1a-2
     
 ## Next steps
+ - fix: I mixed up roots and lexemes somewhat
+    - =God»LORD@Gen.1.1-Heb
+    - =: call_by»to call:2_call_by;_name
  - create init pages with literal
  - add a navigation system
     - dropdown-like carat on document name, chap and verse, skip taps if possible for chap and verse
