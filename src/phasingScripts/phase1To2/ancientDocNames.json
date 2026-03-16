@@ -1,0 +1,569 @@
+[
+    {
+        "abbr1": "Gn",
+        "abbr2": "Gen",
+        "numPlusAbbr2": "01-Gen",
+        "name": "Genesis",
+        "longName": "Genesis"
+    },
+    {
+        "abbr1": "Ex",
+        "abbr2": "Exo",
+        "numPlusAbbr2": "02-Exo",
+        "name": "Exodus",
+        "longName": "Exodus"
+    },
+    {
+        "abbr1": "Lv",
+        "abbr2": "Lev",
+        "numPlusAbbr2": "03-Lev",
+        "name": "Leviticus",
+        "longName": "Leviticus"
+    },
+    {
+        "abbr1": "Nu",
+        "abbr2": "Num",
+        "numPlusAbbr2": "04-Num",
+        "name": "Numbers",
+        "longName": "Numbers"
+    },
+    {
+        "abbr1": "Dt",
+        "abbr2": "Deu",
+        "numPlusAbbr2": "05-Deu",
+        "name": "Deuteronomy",
+        "longName": "Deuteronomy"
+    },
+    {
+        "abbr1": "Js",
+        "abbr2": "Jos",
+        "numPlusAbbr2": "06-Jos",
+        "name": "Joshua",
+        "longName": "The Book of Joshua"
+    },
+    {
+        "abbr1": "Jg",
+        "abbr2": "Jdg",
+        "numPlusAbbr2": "07-Jdg",
+        "name": "Judges",
+        "longName": "The Book of Judges"
+    },
+    {
+        "abbr1": "Ru",
+        "abbr2": "Rut",
+        "numPlusAbbr2": "08-Rut",
+        "name": "Ruth",
+        "longName": "The Book of Ruth"
+    },
+    {
+        "abbr1": "1S",
+        "abbr2": "1Sa",
+        "numPlusAbbr2": "09-1Sa",
+        "name": "1 Samuel",
+        "longName": "The First Book of Samuel"
+    },
+    {
+        "abbr1": "2S",
+        "abbr2": "2Sa",
+        "numPlusAbbr2": "10-2Sa",
+        "name": "2 Samuel",
+        "longName": "The Second Book of Samuel"
+    },
+    {
+        "abbr1": "1K",
+        "abbr2": "1Ki",
+        "numPlusAbbr2": "11-1Ki",
+        "name": "1 Kings",
+        "longName": "The First Book of Kings"
+    },
+    {
+        "abbr1": "2K",
+        "abbr2": "2Ki",
+        "numPlusAbbr2": "12-2Ki",
+        "name": "2 Kings",
+        "longName": "The Second Book of Kings"
+    },
+    {
+        "abbr1": "1Ch",
+        "abbr2": "1Ch",
+        "numPlusAbbr2": "13-1Ch",
+        "name": "1 Chronicles",
+        "longName": "The First Book of Chronicles"
+    },
+    {
+        "abbr1": "2Ch",
+        "abbr2": "2Ch",
+        "numPlusAbbr2": "14-2Ch",
+        "name": "2 Chronicles",
+        "longName": "The Second Book of Chronicles"
+    },
+    {
+        "abbr1": "Ezra",
+        "abbr2": "Ezr",
+        "numPlusAbbr2": "15-Ezr",
+        "name": "Ezra",
+        "longName": "The Book of Ezra"
+    },
+    {
+        "abbr1": "Ne",
+        "abbr2": "Neh",
+        "numPlusAbbr2": "16-Neh",
+        "name": "Nehemiah",
+        "longName": "The Book of Nehemiah"
+    },
+    {
+        "abbr1": "Es",
+        "abbr2": "Est",
+        "numPlusAbbr2": "17-Est",
+        "name": "Esther",
+        "longName": "The Book of Esther"
+    },
+    {
+        "abbr1": "Job",
+        "abbr2": "Job",
+        "numPlusAbbr2": "18-Job",
+        "name": "Job",
+        "longName": "The Book of Job"
+    },
+    {
+        "abbr1": "Ps",
+        "abbr2": "Psa",
+        "numPlusAbbr2": "19-Psa",
+        "name": "Psalms",
+        "longName": "Psalms"
+    },
+    {
+        "abbr1": "Pr",
+        "abbr2": "Pro",
+        "numPlusAbbr2": "20-Pro",
+        "name": "Proverbs",
+        "longName": "Proverbs"
+    },
+    {
+        "abbr1": "Ec",
+        "abbr2": "Ecc",
+        "numPlusAbbr2": "21-Ecc",
+        "name": "Ecclesiastes",
+        "longName": "Ecclesiastes"
+    },
+    {
+        "abbr1": "Sgs",
+        "abbr2": "Sng",
+        "numPlusAbbr2": "22-Sng",
+        "name": "Song of Songs",
+        "longName": "Song of Songs"
+    },
+    {
+        "abbr1": "Is",
+        "abbr2": "Isa",
+        "numPlusAbbr2": "23-Isa",
+        "name": "Isaiah",
+        "longName": "The Book of Isaiah"
+    },
+    {
+        "abbr1": "Jr",
+        "abbr2": "Jer",
+        "numPlusAbbr2": "24-Jer",
+        "name": "Jeremiah",
+        "longName": "The Book of Jeremiah"
+    },
+    {
+        "abbr1": "Lm",
+        "abbr2": "Lam",
+        "numPlusAbbr2": "25-Lam",
+        "name": "Lamentations",
+        "longName": "Lamentations"
+    },
+    {
+        "abbr1": "Ez",
+        "abbr2": "Ezk",
+        "numPlusAbbr2": "26-Ezk",
+        "name": "Ezekiel",
+        "longName": "The Book of Ezekiel"
+    },
+    {
+        "abbr1": "Dn",
+        "abbr2": "Dan",
+        "numPlusAbbr2": "27-Dan",
+        "name": "Daniel",
+        "longName": "The Book of Daniel"
+    },
+    {
+        "abbr1": "Ho",
+        "abbr2": "Hos",
+        "numPlusAbbr2": "28-Hos",
+        "name": "Hosea",
+        "longName": "The Book of Hosea"
+    },
+    {
+        "abbr1": "Jl",
+        "abbr2": "Jol",
+        "numPlusAbbr2": "29-Jol",
+        "name": "Joel",
+        "longName": "The Book of Joel"
+    },
+    {
+        "abbr1": "Am",
+        "abbr2": "Amo",
+        "numPlusAbbr2": "30-Amo",
+        "name": "Amos",
+        "longName": "The Book of Amos"
+    },
+    {
+        "abbr1": "Ob",
+        "abbr2": "Oba",
+        "numPlusAbbr2": "31-Oba",
+        "name": "Obadiah",
+        "longName": "The Book of Obadiah"
+    },
+    {
+        "abbr1": "Jon",
+        "abbr2": "Jon",
+        "numPlusAbbr2": "32-Jon",
+        "name": "Jonah",
+        "longName": "The Book of Jonah"
+    },
+    {
+        "abbr1": "Mic",
+        "abbr2": "Mic",
+        "numPlusAbbr2": "33-Mic",
+        "name": "Micah",
+        "longName": "The Book of Micah"
+    },
+    {
+        "abbr1": "Nh",
+        "abbr2": "Nam",
+        "numPlusAbbr2": "34-Nam",
+        "name": "Nahum",
+        "longName": "The Book of Nahum"
+    },
+    {
+        "abbr1": "Hb",
+        "abbr2": "Hab",
+        "numPlusAbbr2": "35-Hab",
+        "name": "Habakkuk",
+        "longName": "The Book of Habakkuk"
+    },
+    {
+        "abbr1": "Zep",
+        "abbr2": "Zep",
+        "numPlusAbbr2": "36-Zep",
+        "name": "Zephaniah",
+        "longName": "The Book of Zephaniah"
+    },
+    {
+        "abbr1": "Hg",
+        "abbr2": "Hag",
+        "numPlusAbbr2": "37-Hag",
+        "name": "Haggai",
+        "longName": "The Book of Haggai"
+    },
+    {
+        "abbr1": "Zec",
+        "abbr2": "Zec",
+        "numPlusAbbr2": "38-Zec",
+        "name": "Zechariah",
+        "longName": "The Book of Zechariah"
+    },
+    {
+        "abbr1": "Ml",
+        "abbr2": "Mal",
+        "numPlusAbbr2": "39-Mal",
+        "name": "Malachi",
+        "longName": "The Book of Malachi"
+    },
+    {
+        "abbr1": "Mt",
+        "abbr2": "Mat",
+        "numPlusAbbr2": "40-Mat",
+        "name": "Matthew",
+        "longName": "The Gospel according to Matthew"
+    },
+    {
+        "abbr1": "Mk",
+        "abbr2": "Mrk",
+        "numPlusAbbr2": "41-Mrk",
+        "name": "Mark",
+        "longName": "The Gospel according to Mark"
+    },
+    {
+        "abbr1": "Lk",
+        "abbr2": "Luk",
+        "numPlusAbbr2": "42-Luk",
+        "name": "Luke",
+        "longName": "The Gospel according to Luke"
+    },
+    {
+        "abbr1": "Jn",
+        "abbr2": "Jhn",
+        "numPlusAbbr2": "43-Jhn",
+        "name": "John",
+        "longName": "The Gospel according to John"
+    },
+    {
+        "abbr1": "Ac",
+        "abbr2": "Act",
+        "numPlusAbbr2": "44-Act",
+        "name": "Acts",
+        "longName": "The Acts of the Apostles"
+    },
+    {
+        "abbr1": "Ro",
+        "abbr2": "Rom",
+        "numPlusAbbr2": "45-Rom",
+        "name": "Romans",
+        "longName": "Paul's Letter to the Romans"
+    },
+    {
+        "abbr1": "1Co",
+        "abbr2": "1Co",
+        "numPlusAbbr2": "46-1Co",
+        "name": "1 Corinthians",
+        "longName": "Paul's First Letter to the Corinthians"
+    },
+    {
+        "abbr1": "2Co",
+        "abbr2": "2Co",
+        "numPlusAbbr2": "47-2Co",
+        "name": "2 Corinthians",
+        "longName": "Paul's Second Letter to the Corinthians"
+    },
+    {
+        "abbr1": "Ga",
+        "abbr2": "Gal",
+        "numPlusAbbr2": "48-Gal",
+        "name": "Galatians",
+        "longName": "Paul's Letter to the Galatians"
+    },
+    {
+        "abbr1": "Eph",
+        "abbr2": "Eph",
+        "numPlusAbbr2": "49-Eph",
+        "name": "Ephesians",
+        "longName": "Paul's Letter to the Ephesians"
+    },
+    {
+        "abbr1": "Phil",
+        "abbr2": "Php",
+        "numPlusAbbr2": "50-Php",
+        "name": "Philippians",
+        "longName": "Paul's Letter to the Philippians"
+    },
+    {
+        "abbr1": "Col",
+        "abbr2": "Col",
+        "numPlusAbbr2": "51-Col",
+        "name": "Colossians",
+        "longName": "Paul's Letter to the Colossians"
+    },
+    {
+        "abbr1": "1Th",
+        "abbr2": "1Th",
+        "numPlusAbbr2": "52-1Th",
+        "name": "1 Thessalonians",
+        "longName": "Paul's First Letter to the Thessalonians"
+    },
+    {
+        "abbr1": "2Th",
+        "abbr2": "2Th",
+        "numPlusAbbr2": "53-2Th",
+        "name": "2 Thessalonians",
+        "longName": "Paul's Second Letter to the Thessalonians"
+    },
+    {
+        "abbr1": "1Ti",
+        "abbr2": "1Ti",
+        "numPlusAbbr2": "54-1Ti",
+        "name": "1 Timothy",
+        "longName": "Paul's First Letter to Timothy"
+    },
+    {
+        "abbr1": "2Ti",
+        "abbr2": "2Ti",
+        "numPlusAbbr2": "55-2Ti",
+        "name": "2 Timothy",
+        "longName": "Paul's Second Letter to Timothy"
+    },
+    {
+        "abbr1": "Titus",
+        "abbr2": "Tit",
+        "numPlusAbbr2": "56-Tit",
+        "name": "Titus",
+        "longName": "Paul's Letter to Titus"
+    },
+    {
+        "abbr1": "Phm",
+        "abbr2": "Phm",
+        "numPlusAbbr2": "57-Phm",
+        "name": "Philemon",
+        "longName": "Paul's Letter to Philemon"
+    },
+    {
+        "abbr1": "He",
+        "abbr2": "Heb",
+        "numPlusAbbr2": "58-Heb",
+        "name": "Hebrews",
+        "longName": "The Letter to the Hebrews"
+    },
+    {
+        "abbr1": "Jas",
+        "abbr2": "Jas",
+        "numPlusAbbr2": "59-Jas",
+        "name": "James",
+        "longName": "The Letter from James"
+    },
+    {
+        "abbr1": "1P",
+        "abbr2": "1Pe",
+        "numPlusAbbr2": "60-1Pe",
+        "name": "1 Peter",
+        "longName": "The First Letter from Peter"
+    },
+    {
+        "abbr1": "2P",
+        "abbr2": "2Pe",
+        "numPlusAbbr2": "61-2Pe",
+        "name": "2 Peter",
+        "longName": "The Second Letter from Peter"
+    },
+    {
+        "abbr1": "1Jn",
+        "abbr2": "1Jn",
+        "numPlusAbbr2": "62-1Jn",
+        "name": "1 John",
+        "longName": "The First Letter of John"
+    },
+    {
+        "abbr1": "2Jn",
+        "abbr2": "2Jn",
+        "numPlusAbbr2": "63-2Jn",
+        "name": "2 John",
+        "longName": "The Second Letter of John"
+    },
+    {
+        "abbr1": "3Jn",
+        "abbr2": "3Jn",
+        "numPlusAbbr2": "64-3Jn",
+        "name": "3 John",
+        "longName": "The Third Letter of John"
+    },
+    {
+        "abbr1": "Jd",
+        "abbr2": "Jud",
+        "numPlusAbbr2": "65-Jud",
+        "name": "Jude",
+        "longName": "The Letter from Jude"
+    },
+    {
+        "abbr1": "Rev",
+        "abbr2": "Rev",
+        "numPlusAbbr2": "66-Rev",
+        "name": "Revelation",
+        "longName": "The Revelation to John"
+    },
+    {
+        "abbr1": "Tb",
+        "abbr2": "Tob",
+        "numPlusAbbr2": "67-Tob",
+        "name": "Tobit",
+        "longName": "The Book of Tobit"
+    },
+    {
+        "abbr1": "Jdt",
+        "abbr2": "Jdt",
+        "numPlusAbbr2": "68-Jdt",
+        "name": "Judith",
+        "longName": "The Book of Judith"
+    },
+    {
+        "abbr1": "GkEst",
+        "abbr2": "Esg",
+        "numPlusAbbr2": "69-Esg",
+        "name": "Esther (Greek)",
+        "longName": "The Book of Esther"
+    },
+    {
+        "abbr1": "Ws",
+        "abbr2": "Wis",
+        "numPlusAbbr2": "70-Wis",
+        "name": "The Wisdom of Solomon",
+        "longName": "The Wisdom of Solomon"
+    },
+    {
+        "abbr1": "Si",
+        "abbr2": "Sir",
+        "numPlusAbbr2": "71-Sir",
+        "name": "Sirach",
+        "longName": "Sirach the Wisdom of Jesus, Son of Sirach"
+    },
+    {
+        "abbr1": "Ba",
+        "abbr2": "Bar",
+        "numPlusAbbr2": "72-Bar",
+        "name": "Baruch",
+        "longName": "The Book of Baruch"
+    },
+    {
+        "abbr1": "LetJer",
+        "abbr2": "Lje",
+        "numPlusAbbr2": "73-Lje",
+        "name": "Letter of Jeremiah",
+        "longName": "Letter of Jeremiah"
+    },
+    {
+        "abbr1": "Sof 3 Y",
+        "abbr2": "S3y",
+        "numPlusAbbr2": "74-S3y",
+        "name": "Song of Three Young Men",
+        "longName": "The Prayer of Azariah and The Song of Three Young Men"
+    },
+    {
+        "abbr1": "Su",
+        "abbr2": "Sus",
+        "numPlusAbbr2": "75-Sus",
+        "name": "Susanna",
+        "longName": "The Book of Susanna"
+    },
+    {
+        "abbr1": "Bel",
+        "abbr2": "Bel",
+        "numPlusAbbr2": "76-Bel",
+        "name": "Bel and the Dragon",
+        "longName": "Bel and the Dragon"
+    },
+    {
+        "abbr1": "1Macc",
+        "abbr2": "1Ma",
+        "numPlusAbbr2": "77-1Ma",
+        "name": "1 Maccabees",
+        "longName": "The First Book of the Maccabees"
+    },
+    {
+        "abbr1": "2Macc",
+        "abbr2": "2Ma",
+        "numPlusAbbr2": "78-2Ma",
+        "name": "2 Maccabees",
+        "longName": "The Second Book of the Maccabees"
+    },
+    {
+        "abbr1": "1Esd",
+        "abbr2": "1Es",
+        "numPlusAbbr2": "79-1Es",
+        "name": "1 Esdras",
+        "longName": "The First Book of Esdras"
+    },
+    {
+        "abbr1": "2Esd",
+        "abbr2": "2Es",
+        "numPlusAbbr2": "80-2Es",
+        "name": "2 Esdras",
+        "longName": "The Second Book of Esdras"
+    },
+    {
+        "abbr1": "Man",
+        "abbr2": "Man",
+        "numPlusAbbr2": "81-Man",
+        "name": "The Prayer of Manasseh",
+        "longName": "The Prayer of Manasseh"
+    }
+]

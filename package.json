@@ -8,10 +8,11 @@
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
-		"p1-2": "tsx src/phasingScripts/phase1to2.ts"
+		"p1a-2": "tsx src/phasingScripts/phase1aTo2.ts"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"@types/node": "^25.5.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.0",
