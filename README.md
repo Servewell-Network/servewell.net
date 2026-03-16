@@ -28,16 +28,12 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
          - npm run p1a-2
     
 ## Next steps
- - fix: I mixed up roots and lexemes somewhat
-    - =God»LORD@Gen.1.1-Heb
-    - =: call_by»to call:2_call_by;_name
  - create init pages with literal
  - add a navigation system
     - dropdown-like carat on document name, chap and verse, skip taps if possible for chap and verse
- - how does explanations complicate snippet numbering? 
-    - they're currently numbers
-    - perhaps (first) explanation on v17 is like 17.1
  - how does traditional bible fit in json?
+    - can add suggested english ordinal, but that's supplemental/inadequate
+    - should be a separate list of words, separate from morphemes
  - perhaps use BSB or LSV or similar
    - to get English order
    - to get alternate renderings (English morphemes)

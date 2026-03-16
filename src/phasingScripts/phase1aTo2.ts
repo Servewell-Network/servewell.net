@@ -30,6 +30,7 @@ enum Verse {
 
 interface Morpheme { // unit of meaning = word or part of word
   "SimpleMorphemeId"?: string; // e.g., "Gen1:1.1"
+  "WordNumber": number; // because morphemes are often grouped
   "OriginalMorphemeScript": string; // unicode of aramaic/greek chars
   "OriginalMorphemeTransliteration"?: string; // sounds for English readers
   "OriginalMorphemeVerbalAspect"?: 'Whole Action' | 'Progressing Action'; // whole is traditionally called perfect; is there a repeated also?
@@ -57,10 +58,11 @@ interface Morpheme { // unit of meaning = word or part of word
   "OriginalMorphemeOrdinal": number; // orig position, redundant in array
   "EnglishMorphemeOrdinal"?: number; // where it's needed for English
   "Indentations"?: number; // -1 means no new line
+  "Source"?: string; // e.g., L for Leningrad Codex
 }
 interface Snippet {
-  "SnippetNumber": number; // verse like 12 or partial verse like 12.1
   "SimpleSnippetId"?: string; // e.g., "Gen1:1" for verse, "Gen1:1a" for partial verse
+  "SnippetNumber": number; // verse like 12 or partial verse like 12.1 
   "CommentLinkTextsAndUrls"?: string[],
   "PreceedingComment"?: string;
   "Morphemes": Morpheme[]
@@ -160,8 +162,8 @@ async function processStepHebrewFile(fileName: string) {
     }
     if (!currentSnippet) {
       currentSnippet = {
-        SnippetNumber: Number(verseStr),
         SimpleSnippetId: `${currentChapter.SimpleChapterId}:${verseStr}`,
+        SnippetNumber: Number(verseStr), // explanation can be like v17.1
         Morphemes: []
       };
     }
@@ -173,7 +175,7 @@ async function processStepHebrewFile(fileName: string) {
       if (!morphemeFields[Verse.OrigScript].trim()) {
         continue; // step data records blanks before paragraph end or section end markers
       }
-      const morpheme = createMorphemeFromStepVerse(morphemeFields, currentSnippet.Morphemes.length + 1, currentSnippet.SimpleSnippetId || '');
+      const morpheme = createMorphemeFromStepVerse(morphemeFields, currentSnippet.Morphemes.length + 1, currentSnippet.SimpleSnippetId || '', Number(word), source);
       currentSnippet.Morphemes.push(morpheme);
     }
 
@@ -181,7 +183,7 @@ async function processStepHebrewFile(fileName: string) {
   console.log('Finished processing file:', fileName.split(' - ')[0]);
 }
 
-function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number, snippetId: string): Morpheme {
+function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number, snippetId: string, wordNumber: number, source: string): Morpheme {
   const strongs = fields[Verse.dStrongs].replace('{', '').replace('}', '');
   const engMorpheme = fields[Verse.Translation].trim();
   const engInfo = fields[Verse.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
@@ -192,10 +194,12 @@ function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number, snippet
   const engSenseInfo = engInfo.startsWith(':') ? postArrowSplitByColon[1].trim() : '';
   const returnable: Morpheme = {
     SimpleMorphemeId: `${snippetId}.${origOrd}`,
+    WordNumber: wordNumber,
     OriginalMorphemeScript: fields[Verse.OrigScript],
     EnglishMorphemeWithPunctuationInOriginalOrder: engMorpheme,
     OriginalRootStrongsID: strongs,
     OriginalMorphemeOrdinal: origOrd,
+    Source: getSourceName(source)
   };
   const isPunctuation = !fields[Verse.Transliteration]; // if no transliteration, it's likely punctuation
   if (isPunctuation) {
@@ -251,6 +255,32 @@ function detectNewAncientDoc(chars1To3: string, char4: string, char5: string): s
 function getNumberedDocAbbr(chars1To3: string): string | undefined {
   const doc = ancientDocNames.find(doc => doc.abbr2 === chars1To3);
   return doc ? doc.numPlusAbbr2 : undefined;
+}
+
+function getSourceName(code: string): string {
+  const base = code.replace(/[\[\]\(\)]/g, ''); // strip bracket chars
+  const bracket = (code.match(/[\[\(].*[\]\)]/) || [''])[0];
+
+  const names: Record<string, string> = {
+    L: 'Leningrad manuscript',
+    R: 'restored text based on Leningrad parallels',
+    X: 'based on Greek sources (LXX)',
+    Q: 'Scribal qere corrections',
+    K: 'uncorrected text (ketiv)',
+    A: 'Aleppo manuscript variant',
+    B: 'Biblia Hebraica Stuttgartensia variant',
+    C: 'Cairensis manuscript variant',
+    D: 'Dead Sea / Judean Desert manuscript variant',
+    E: 'scholarly emendation of ancient sources',
+    F: 'formatting variant (pointing/word division)',
+    H: 'Ben Chaim edition variant',
+    P: 'alternate punctuation variant',
+    S: 'Scribal tradition variant',
+    V: 'variant in some manuscripts'
+  };
+
+  const name = names[base] ?? base;
+  return bracket ? `${name} ${bracket}` : name;
 }
 
 main();
