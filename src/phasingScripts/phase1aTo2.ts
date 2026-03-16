@@ -123,6 +123,8 @@ async function processStepHebrewFile(fileName: string) {
     if (currentChapter?.ChapterNumber !== Number(chapStr)) {
       // Save the previous chapter, if any, to its docDir before starting a new one
       if (currentChapter && currentChapter.DocOrBookAbbreviation) {
+        currentChapter.SnippetsAndExplanations?.push(structuredClone(currentSnippet) as Snippet);
+        currentSnippet = null;
         const chapFileName = `${currentChapter.PaddedChapterNumber}.json`;
         const doc = currentChapter.DocOrBookAbbreviation;
         const saveDir = path.join(pathToPhase2, 'docs', getNumberedDocAbbr(doc) || doc);
