@@ -28,8 +28,13 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
          - npm run p1a-2
     
 ## Next steps
- - add ids like Gen1:1.1 to improve json readability and perhaps make it easier to link literal words with traditional words
  - create init pages with literal
+ - add a navigation system
+    - dropdown-like carat on document name, chap and verse, skip taps if possible for chap and verse
+ - how does explanations complicate snippet numbering? 
+    - they're currently numbers
+    - perhaps (first) explanation on v17 is like 17.1
+ - how does traditional bible fit in json?
  - perhaps use BSB or LSV or similar
    - to get English order
    - to get alternate renderings (English morphemes)

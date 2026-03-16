@@ -51,7 +51,7 @@ interface Morpheme { // unit of meaning = word or part of word
   "ConstituentRootIds"?: string[];
   "OriginalRootDetail"?: string;
   "EnglishRootTranslation"?: string;
-  "OriginalLanguage": "Hebrew" | "Aramaic" | "Greek";
+  "OriginalLanguage"?: "Hebrew" | "Aramaic" | "Greek";
   "OriginalMorphemeOrdinal": number; // orig position, redundant in array
   "EnglishMorphemeOrdinal"?: number; // where it's needed for English
   "Indentations"?: number; // -1 means no new line
@@ -181,14 +181,6 @@ async function processStepHebrewFile(fileName: string) {
 
 function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number, snippetId: string): Morpheme {
   const strongs = fields[Verse.dStrongs].replace('{', '').replace('}', '');
-  let lang: 'Hebrew' | 'Aramaic' | 'Greek';
-  if (strongs.startsWith('H')) {
-    lang = 'Hebrew';
-  } else if (fields[Verse.dStrongs].startsWith('G')) {
-    lang = 'Greek';
-  } else {
-    lang = 'Aramaic';
-  }
   const engMorpheme = fields[Verse.Translation].trim();
   const engInfo = fields[Verse.ExpandedStrongTags].split('=').pop()?.trim() || '';
   const engInfoSansBrace = engInfo.replace('}', ''); // surrounds primary morpheme in word
@@ -203,7 +195,6 @@ function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number, snippet
     EnglishRootTranslation: engMain,
     IsPunctuation: !fields[Verse.Transliteration], // if no transliteration, it's likely punctuation
     OriginalRootStrongsID: strongs,
-    OriginalLanguage: lang,
     OriginalMorphemeOrdinal: origOrd,
   };
 }
