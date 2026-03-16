@@ -28,7 +28,15 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
          - npm run p1a-2
     
 ## Next steps
- - get orig root script from expanded strongs (or from lexicon to get translit)
+ - add ids like Gen1:1.1 to improve json readability and perhaps make it easier to link literal words with traditional words
  - create init pages with literal
- - add BSB
+ - perhaps use BSB or LSV or similar
+   - to get English order
+   - to get alternate renderings (English morphemes)
+   - BSB could be the foundational traditional translation
+ - perhaps build concordance json (words parallel to docs)
+   - to see how consistent English lemmas and renderings are, and see if the can be made more consistent or somehow show when words are same or different in togglable ruby text. Like if there's just one or two Eng lemmas for each Hebrew, could combine with number? Or should ruby be used for alternate morphemes? Not as exact-looking but nicer to read and clear in most cases? Perhaps if two passages are compared, clicking one highlights in the other, one color for full match and another for root match and another for subroot match?
+   - to reduce what's in docs json so as to change once, change everywhere? I don't want docs json to become any more unreadable than it already is, 
+   - to see what lemmas overlap creating ambiguity, and see if one alternate will solve that or if a number is needed?
+ - get orig root script from expanded strongs (or from lexicon to get translit)
 
