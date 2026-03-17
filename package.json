@@ -2,12 +2,14 @@
 	"name": "servewellnet",
 	"version": "0.0.0",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
+		"phasing": "tsx src/phasingScripts/phasing.ts",
 		"p1a-2": "tsx src/phasingScripts/phase1aTo2.ts"
 	},
 	"devDependencies": {

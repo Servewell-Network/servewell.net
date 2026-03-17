@@ -26,8 +26,10 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
      - For now, no changes, so to update simply copy from parallel repo copy:
          - cp -r ../STEPBible-Data/Translators\ Amalgamated\ OT+NT src/step-Phase1a
          - npm run p1a-2
+   - Adding BSB https://berean.bible/downloads.htm > https://bereanbible.com/bsb_tables.tsv after they released it (thankful!)
     
 ## Next steps
+ - add STEP's Grammar, MeaningVariants, etc. (simply add as optional, then look at diff to see what they are and where they're used; also decode, probably reading in their decoder)
  - create init pages with literal
     - <button popovertarget="my-tooltip">Help</button>
       <div id="my-tooltip" popover>
@@ -54,9 +56,11 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
    - to get English order
    - to get alternate renderings (English morphemes)
    - BSB could be the foundational traditional translation
+   - Its bsb_tables.tsv also shows what's Hebrew vs Aramaic
  - perhaps build concordance json (words parallel to docs)
+   - to help with search
    - to see how consistent English lemmas and renderings are, and see if the can be made more consistent or somehow show when words are same or different in togglable ruby text. Like if there's just one or two Eng lemmas for each Hebrew, could combine with number? Or should ruby be used for alternate morphemes? Not as exact-looking but nicer to read and clear in most cases? Perhaps if two passages are compared, clicking one highlights in the other, one color for full match and another for root match and another for subroot match?
-   - to reduce what's in docs json so as to change once, change everywhere? I don't want docs json to become any more unreadable than it already is, 
+   - to reduce what's in docs json so as to change once, change everywhere? But I don't want docs json to become any more unreadable than it already is, so possibly a tool for direction in processing/changing json files?
    - to see what lemmas overlap creating ambiguity, and see if one alternate will solve that or if a number is needed?
- - get orig root script from expanded strongs (or from lexicon to get translit)
+ - get orig root translit, probably in new lexical/concordance json (and if so then remove from docs json)
 

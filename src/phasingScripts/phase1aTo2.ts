@@ -1,19 +1,25 @@
-/// <reference types="node" />
+console.info('phase1aTo2: Reading in STEP Bible data and creating json-Phase2 files');
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-import * as ancientDocNames from './phase1To2/ancientDocNames.json';
+import ancientDocNames from './phase1To2/ancientDocNames.json' with { type: 'json' };
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 
-const pathToPhase1 = path.join(__dirname, '../step-Phase1a/');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const pathToPhase1a = path.join(__dirname, '../step-Phase1a/');
 const pathToPhase2 = path.join(__dirname, '../json-Phase2/');
 const file1 = 'TAHOT Gen-Deu - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 const file2 = 'TAHOT Jos-Est - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 const file3 = 'TAHOT Job-Sng - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 const file4 = 'TAHOT Isa-Mal - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 
-type StepVerse = string[];
+type StepWord = string[];
 // This is how the STEPBible.org amalgamated data is structured
-enum Verse {
+enum Word {
   Ref = 0,
   OrigScript = 1,
   Transliteration = 2,
@@ -29,7 +35,7 @@ enum Verse {
 }
 
 interface Morpheme { // unit of meaning = word or part of word
-  "StandardMorphemeId"?: string; // e.g., "Gen1:1.1"
+  "MorphemeId"?: string; // e.g., "Gen1:1.1"
   "WordNumber": number; // because morphemes are often grouped
   "OriginalMorphemeScript": string; // unicode of aramaic/greek chars
   "OriginalMorphemeTransliteration"?: string; // sounds for English readers
@@ -60,12 +66,12 @@ interface Morpheme { // unit of meaning = word or part of word
   "Indentations"?: number; // -1 means no new line
   "Source"?: string; // e.g., L for Leningrad Codex
 }
-interface Snippet {
-  "StandardSnippetId"?: string; // e.g., "Gen1:1" for verse, "Gen1:1a" for partial verse
+interface Snippet { // allows partial verses, plus 'verse' is misleading
+  "SnippetId"?: string; // e.g., "Gen1:1" for verse, "Gen1:1a" for partial verse
   "SnippetNumber": number; // verse like 12 or partial verse like 12.1 
   "CommentLinkTextsAndUrls"?: string[],
   "PreceedingComment"?: string;
-  "Morphemes": Morpheme[]
+  "OriginalMorphemes": Morpheme[]
 }
 interface Chapter {
   "DocumentOrBook": string; // e.g., "Genesis"
@@ -73,7 +79,7 @@ interface Chapter {
   "PaddedNumWithDocAbbr": string; // e.g., "01-Gen"
   "ChapterNumber": number; // e.g., 3
   "PaddedChapterNumber": string; // e.g., "003"
-  "StandardChapterId": string; // e.g., "Gen3"
+  "ChapterId": string; // e.g., "Gen3"
   "NumPrecedingVersesToInclude": number; // link text for prev chapter
   "SnippetsAndExplanations": Snippet[]; // verses for now
   "NumFollowingVersesToInclude": number; // link text for next chapter
@@ -96,7 +102,7 @@ async function main() {
 type DocNameAbbr = string; // e.g., "Gen" for Genesis
 
 async function processStepHebrewFile(fileName: string) {
-  const filePath = path.join(pathToPhase1, fileName);
+  const filePath = path.join(pathToPhase1a, fileName);
 
   const fileStream = fs.createReadStream(filePath);
   const rl = readline.createInterface({
@@ -124,9 +130,9 @@ async function processStepHebrewFile(fileName: string) {
     if (currentDocNameAbbr !== chars1To3 || char4 !== '.' || !Number.isInteger(Number(char5))) {
       continue; // skip commented lines
     }
-    const fields: StepVerse = line.split('\t');
+    const fields: StepWord = line.split('\t');
     // to do: record source (e.g., L = Leningrad Codex) in json
-    const [docAbbr, chapStr, verseStr, word, source] = fields[Verse.Ref].split(/\W/); // (e.g., "Gen.1.1#01=L")
+    const [docAbbr, chapStr, verseStr, word, source] = fields[Word.Ref].split(/\W/); // (e.g., "Gen.1.1#01=L")
     if (currentChapter?.ChapterNumber !== Number(chapStr)) {
       // Save the previous chapter, if any, to its docDir before starting a new one
       if (currentChapter && currentChapter.DocOrBookAbbreviation) {
@@ -145,7 +151,7 @@ async function processStepHebrewFile(fileName: string) {
         DocOrBookAbbreviation: chars1To3,
         PaddedNumWithDocAbbr: getNumberedDocAbbr(chars1To3),
         PaddedChapterNumber: `${chars1To3}${chapStr.toString().padStart(3, '0')}`,
-        StandardChapterId: `${chars1To3}${chapStr}`,
+        ChapterId: `${chars1To3}${chapStr}`,
         ChapterNumber: Number(chapStr),
         NumPrecedingVersesToInclude: 1,
         NumFollowingVersesToInclude: 1,
@@ -162,51 +168,51 @@ async function processStepHebrewFile(fileName: string) {
     }
     if (!currentSnippet) {
       currentSnippet = {
-        StandardSnippetId: `${currentChapter.StandardChapterId}:${verseStr}`,
+        SnippetId: `${currentChapter.ChapterId}:${verseStr}`,
         SnippetNumber: Number(verseStr), // explanation can be like v17.1
-        Morphemes: []
+        OriginalMorphemes: []
       };
     }
-    // find number of morphemes per row (per word) and add to snippet.Morphemes
+    // find number of morphemes per row (per word) and add to snippet.OriginalMorphemes
     const forwardOrBackwardSlash = /[\/\\]/; // forward is normal, back is punctuation
-    const numMorphemes = fields[Verse.OrigScript].split(forwardOrBackwardSlash).length;
+    const numMorphemes = fields[Word.OrigScript].split(forwardOrBackwardSlash).length;
     for (let i = 0; i < numMorphemes; i++) {
-      const morphemeFields: StepVerse = fields.map(field => field.split(forwardOrBackwardSlash)[i] || '');
-      if (!morphemeFields[Verse.OrigScript].trim()) {
+      const morphemeFields: StepWord = fields.map(field => field.split(forwardOrBackwardSlash)[i] || '');
+      if (!morphemeFields[Word.OrigScript].trim()) {
         continue; // step data records blanks before paragraph end or section end markers
       }
-      const morpheme = createMorphemeFromStepVerse(morphemeFields, currentSnippet.Morphemes.length + 1, currentSnippet.StandardSnippetId || '', Number(word), source);
-      currentSnippet.Morphemes.push(morpheme);
+      const morpheme = createMorphemeFromStepWord(morphemeFields, currentSnippet.OriginalMorphemes.length + 1, currentSnippet.SnippetId || '', Number(word), source);
+      currentSnippet.OriginalMorphemes.push(morpheme);
     }
 
   }
   console.log('Finished processing file:', fileName.split(' - ')[0]);
 }
 
-function createMorphemeFromStepVerse(fields: StepVerse, origOrd: number, snippetId: string, wordNumber: number, source: string): Morpheme {
-  const strongs = fields[Verse.dStrongs].replace('{', '').replace('}', '');
-  const engMorpheme = fields[Verse.Translation].trim();
-  const engInfo = fields[Verse.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
+function createMorphemeFromStepWord(fields: StepWord, origOrd: number, snippetId: string, wordNumber: number, source: string): Morpheme {
+  const strongs = fields[Word.dStrongs].replace('{', '').replace('}', '');
+  const engMorpheme = fields[Word.Translation].trim();
+  const engInfo = fields[Word.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
   const preAndPostArrows = engInfo.split('»');
   const substitutionInfo = preAndPostArrows[1]?.includes('@') ? preAndPostArrows[1] : '';
   const postArrowSplitByColon = preAndPostArrows[1]?.split(':') || ['', ''];
   const engRoot = engInfo.startsWith(':') ? postArrowSplitByColon[0].trim() : preAndPostArrows[0].trim();
   const engSenseInfo = engInfo.startsWith(':') ? postArrowSplitByColon[1].trim() : '';
   const returnable: Morpheme = {
-    StandardMorphemeId: `${snippetId}.${origOrd}`,
+    MorphemeId: `${snippetId}.${origOrd}`,
     WordNumber: wordNumber,
-    OriginalMorphemeScript: fields[Verse.OrigScript],
+    OriginalMorphemeScript: fields[Word.OrigScript],
     EnglishMorphemeWithPunctuationInOriginalOrder: engMorpheme,
     OriginalRootStrongsID: strongs,
     OriginalMorphemeOrdinal: origOrd,
     Source: getSourceName(source)
   };
-  const isPunctuation = !fields[Verse.Transliteration]; // if no transliteration, it's likely punctuation
+  const isPunctuation = !fields[Word.Transliteration]; // if no transliteration, it's likely punctuation
   if (isPunctuation) {
     returnable.IsPunctuation = isPunctuation;
   }
-  if (fields[Verse.Transliteration]) {
-    returnable.OriginalMorphemeTransliteration = fields[Verse.Transliteration];
+  if (fields[Word.Transliteration]) {
+    returnable.OriginalMorphemeTransliteration = fields[Word.Transliteration];
   }
   if (engRoot) {
     returnable.EnglishRootTranslation = engRoot;
@@ -283,5 +289,5 @@ function getSourceName(code: string): string {
   return bracket ? `${name} ${bracket}` : name;
 }
 
-main();
+await main();
 
