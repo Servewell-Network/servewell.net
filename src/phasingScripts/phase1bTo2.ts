@@ -59,7 +59,6 @@ let currentVerseId: string = '';
 let currentVerse = '';
 let currentVerseData: Snippet | undefined;
 let currentLanguage: 'Hebrew' | 'Aramaic' | 'Greek' = 'Hebrew';
-let languageChanged = false;
 
 async function processBSBFile(fileName: string) {
     const fileStream = fs.createReadStream(pathToPhase1b);
@@ -67,7 +66,7 @@ async function processBSBFile(fileName: string) {
         input: fileStream,
         crlfDelay: Infinity
     });
-    
+
     for await (const line of rl) {
         const fields = line.split('\t');
         if (fields[BsbWord.VerseId]) {
@@ -85,6 +84,7 @@ async function processBSBFile(fileName: string) {
         }
         const [chapter, verse] = chapterVerse.split(':');
         if (ancientDoc !== currentAncientDoc) {
+            process.stdout.write('.');
             currentAncientDoc = ancientDoc;
             ancientDocInfo = ancientDocNames.find(doc => doc.name === ancientDoc);
             if (!ancientDocInfo) {
@@ -116,13 +116,19 @@ async function processBSBFile(fileName: string) {
             });
         }
         if (verse && verse !== currentVerse) {
-            if (!languageChanged) {
+            if (currentVerseId !== 'Daniel 2:5') {
                 currentVerseData?.OriginalMorphemes.forEach(morpheme => {
                     morpheme.OriginalLanguage = currentLanguage;
                 });
             } else {
-                console.warn(`Language changed during ${currentVerseData?.SnippetId}`);
-                languageChanged = false;
+                // in Dan 2:4
+                currentVerseData?.OriginalMorphemes.forEach((morpheme, idx) => {
+                    if (idx < 7) {
+                        morpheme.OriginalLanguage = 'Hebrew';
+                    } else {
+                        morpheme.OriginalLanguage = 'Aramaic';
+                    }
+                });
             }
             currentVerse = verse;
             currentVerseData = currentChapterData.SnippetsAndExplanations.find(snippet => snippet.SnippetNumber === parseFloat(verse));
@@ -130,7 +136,6 @@ async function processBSBFile(fileName: string) {
 
         if (fields[BsbWord.Language] !== currentLanguage) {
             currentLanguage = fields[BsbWord.Language] as "Hebrew" | "Aramaic" | "Greek";
-            languageChanged = true;
         }
         const heading = fields[BsbWord.Hdg].split('>')[1];
         if (heading) {
@@ -152,9 +157,6 @@ async function processBSBFile(fileName: string) {
             }${fields[BsbWord.endQ].trim()
             }`;
         const words = wordString.split(/\s+/).filter(Boolean);
-        if (currentVerseId === 'Genesis 1:1') {
-            console.log({wordString, words});
-        }
         words.forEach(word => {
             currentVerseData?.EnglishHeadingsAndWords.push({ EnglishWord: word });
         });
