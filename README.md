@@ -29,7 +29,6 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
    - Adding BSB https://berean.bible/downloads.htm > https://bereanbible.com/bsb_tables.tsv after they released it (thankful!)
     
 ## Next steps
- - add STEP's Grammar, MeaningVariants, etc. (simply add as optional, then look at diff to see what they are and where they're used; also decode, probably reading in their decoder)
  - create init pages with literal
     - <button popovertarget="my-tooltip">Help</button>
       <div id="my-tooltip" popover>
@@ -63,4 +62,5 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
    - to reduce what's in docs json so as to change once, change everywhere? But I don't want docs json to become any more unreadable than it already is, so possibly a tool for direction in processing/changing json files?
    - to see what lemmas overlap creating ambiguity, and see if one alternate will solve that or if a number is needed?
  - get orig root translit, probably in new lexical/concordance json (and if so then remove from docs json)
+ - add STEP's Grammar?
 

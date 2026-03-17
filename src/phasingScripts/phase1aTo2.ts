@@ -6,6 +6,7 @@ import * as readline from 'readline';
 import ancientDocNames from './phase1To2/ancientDocNames.json' with { type: 'json' };
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
+import { Chapter, Morpheme, Snippet } from './phase1To2/phase2Types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,57 +35,6 @@ enum Word {
   ExpandedStrongTags = 11
 }
 
-interface Morpheme { // unit of meaning = word or part of word
-  "MorphemeId"?: string; // e.g., "Gen1:1.1"
-  "WordNumber": number; // because morphemes are often grouped
-  "OriginalMorphemeScript": string; // unicode of aramaic/greek chars
-  "OriginalMorphemeTransliteration"?: string; // sounds for English readers
-  "OriginalMorphemeVerbalAspect"?: 'Whole Action' | 'Progressing Action'; // whole is traditionally called perfect; is there a repeated also?
-  "OriginalMorphemeVerbalTenseOrTime"?: 'Past' | 'Present' | 'Future';
-  "OriginalMorphemeVerbalPerson"?: 'First Person' | 'Second Person' | 'Third Person';
-  "OriginalMorphemeVerbalNumber"?: 'Singular' | 'Plural';
-  "EnglishMorphemeWithPunctuationInOriginalOrder": string;
-  "IsPunctuation"?: boolean; // probably lighter gray
-  "EnglishMorphemeWithPunctuationInEnglishOrder"?: string; // require later
-  "AlternateEnglishInOriginalOrder"?: string[];
-  "AlternateEnglishInEnglishOrder"?: string[];
-  "OriginalLexemeScript"?: string; // example binyan like Hiphil or Piel, sometimes ambiguous
-  "OriginalLexemeTransliteration"?: string;
-  "OriginalLexemeDetail"?: string;
-  "EnglishLexemeTranslation"?: string;
-  "OriginalRootScript"?: string;
-  "OriginalRootTransliteration"?: string;
-  "OriginalRootStrongsID": string;
-  "ConstituentRootIds"?: string[];
-  "OriginalRootDetail"?: string;
-  "EnglishRootTranslation"?: string;
-  "EnglishSenseInformation"?: string; // e.g., definition 1 with example gloss(es)
-  "EnglishSubstitutionInfo"?: string; // reliably used as substitute for X in Y context
-  "OriginalLanguage"?: "Hebrew" | "Aramaic" | "Greek";
-  "OriginalMorphemeOrdinal": number; // orig position, redundant in array
-  "EnglishMorphemeOrdinal"?: number; // where it's needed for English
-  "Indentations"?: number; // -1 means no new line
-  "Source"?: string; // e.g., L for Leningrad Codex
-  "MeaningVariants"?: string[]; // e.g., "meaning1; meaning2"
-}
-interface Snippet { // allows partial verses, plus 'verse' is misleading
-  "SnippetId"?: string; // e.g., "Gen1:1" for verse, "Gen1:1a" for partial verse
-  "SnippetNumber": number; // verse like 12 or partial verse like 12.1 
-  "CommentLinkTextsAndUrls"?: string[],
-  "PreceedingComment"?: string;
-  "OriginalMorphemes": Morpheme[]
-}
-interface Chapter {
-  "DocumentOrBook": string; // e.g., "Genesis"
-  "DocOrBookAbbreviation": string; // e.g., "Gen"
-  "PaddedNumWithDocAbbr": string; // e.g., "01-Gen"
-  "ChapterNumber": number; // e.g., 3
-  "PaddedChapterNumber": string; // e.g., "003"
-  "ChapterId": string; // e.g., "Gen3"
-  "NumPrecedingVersesToInclude": number; // link text for prev chapter
-  "SnippetsAndExplanations": Snippet[]; // verses for now
-  "NumFollowingVersesToInclude": number; // link text for next chapter
-}
 interface ChapterToSave {
   "chapter"?: Chapter;
   docDir: string;
@@ -139,19 +89,13 @@ async function processStepHebrewFile(fileName: string) {
       if (currentChapter && currentChapter.DocOrBookAbbreviation) {
         currentChapter.SnippetsAndExplanations?.push(structuredClone(currentSnippet) as Snippet);
         currentSnippet = null;
-        const chapFileName = `${currentChapter.PaddedChapterNumber}.json`;
-        const doc = currentChapter.DocOrBookAbbreviation;
-        const saveDir = path.join(pathToPhase2, 'docs', getNumberedDocAbbr(doc) || doc);
-        const chapterFilePath = path.join(saveDir, chapFileName);
-        await fs.promises.writeFile(chapterFilePath, JSON.stringify(currentChapter, null, 2)).catch((err) => {
-          console.error(`Error writing chapter file for ${currentDocNameAbbr} ${chapFileName}:`, err);
-        });
+        await writeChapter(currentChapter as Chapter, currentDocNameAbbr);
       }
       currentChapter = {
         DocumentOrBook: getAncientDocName(chars1To3),
         DocOrBookAbbreviation: chars1To3,
         PaddedNumWithDocAbbr: getNumberedDocAbbr(chars1To3),
-        PaddedChapterNumber: `${chars1To3}${chapStr.toString().padStart(3, '0')}`,
+        PaddedChapterNumber: `${chars1To3}${chapStr.padStart(3, '0')}`,
         ChapterId: `${chars1To3}${chapStr}`,
         ChapterNumber: Number(chapStr),
         NumPrecedingVersesToInclude: 1,
@@ -171,7 +115,8 @@ async function processStepHebrewFile(fileName: string) {
       currentSnippet = {
         SnippetId: `${currentChapter.ChapterId}:${verseStr}`,
         SnippetNumber: Number(verseStr), // explanation can be like v17.1
-        OriginalMorphemes: []
+        OriginalMorphemes: [],
+        EnglishHeadingsAndWords: []
       };
     }
     // find number of morphemes per row (per word) and add to snippet.OriginalMorphemes
@@ -199,6 +144,9 @@ async function processStepHebrewFile(fileName: string) {
     }
 
   }
+  // save last stuff (no next verse to trigger save)
+  currentChapter?.SnippetsAndExplanations?.push(structuredClone(currentSnippet) as Snippet);
+  await writeChapter(currentChapter as Chapter, currentDocNameAbbr);
   console.log('Finished processing file:', fileName.split(' - ')[0]);
 }
 
@@ -303,6 +251,16 @@ function getSourceName(code: string): string {
 
   const name = names[base] ?? base;
   return bracket ? `${name} ${bracket}` : name;
+}
+
+async function writeChapter(currentChapter: Chapter, currentDocNameAbbr: string) {
+  const chapFileName = `${currentChapter.PaddedChapterNumber}.json`;
+  const doc = currentChapter.DocOrBookAbbreviation;
+  const saveDir = path.join(pathToPhase2, 'docs', getNumberedDocAbbr(doc) || doc);
+  const chapterFilePath = path.join(saveDir, chapFileName);
+  await fs.promises.writeFile(chapterFilePath, JSON.stringify(currentChapter, null, 2)).catch((err) => {
+    console.error(`Error writing chapter file for ${currentDocNameAbbr} ${chapFileName}:`, err);
+  });
 }
 
 await main();
