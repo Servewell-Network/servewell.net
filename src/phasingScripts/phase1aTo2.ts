@@ -65,6 +65,7 @@ interface Morpheme { // unit of meaning = word or part of word
   "EnglishMorphemeOrdinal"?: number; // where it's needed for English
   "Indentations"?: number; // -1 means no new line
   "Source"?: string; // e.g., L for Leningrad Codex
+  "MeaningVariants"?: string[]; // e.g., "meaning1; meaning2"
 }
 interface Snippet { // allows partial verses, plus 'verse' is misleading
   "SnippetId"?: string; // e.g., "Gen1:1" for verse, "Gen1:1a" for partial verse
@@ -177,11 +178,23 @@ async function processStepHebrewFile(fileName: string) {
     const forwardOrBackwardSlash = /[\/\\]/; // forward is normal, back is punctuation
     const numMorphemes = fields[Word.OrigScript].split(forwardOrBackwardSlash).length;
     for (let i = 0; i < numMorphemes; i++) {
+      // This works for most fields, but not for Meaning Variants
       const morphemeFields: StepWord = fields.map(field => field.split(forwardOrBackwardSlash)[i] || '');
       if (!morphemeFields[Word.OrigScript].trim()) {
         continue; // step data records blanks before paragraph end or section end markers
       }
-      const morpheme = createMorphemeFromStepWord(morphemeFields, currentSnippet.OriginalMorphemes.length + 1, currentSnippet.SnippetId || '', Number(word), source);
+      // examples of meaning variants (more significant variants, as opposed to spelling variants)
+      // from Gen 43:28: K= va/i.yish.ta.chu (וַ/יִּשְׁתַּחוּ\׃) "and/ he bowed down" (H9001/H7812\H9016=Hc/Vvw3ms)	L= וַ/יִּֽשְׁתַּחֲוֻּֽ\׃ ¦ ;
+      // from Exo 2:2: B= עֲבָדִֽ֑ים\׃ ¦ P= עֲבָדִ֑ים\׃	
+      const meaningVariants = fields[Word.MeaningVariants]?.replace(';', '')
+        .split('¦ ').map((v: string) => v?.trim()).filter(Boolean).map((v: string) => {
+          const [src, ...rest] = v.split('=');
+          const fullSrc = getSourceName(src.trim()) || src.trim();
+          return `${fullSrc}: ${rest.join('=').trim()}`;
+        });
+      const origOrd = currentSnippet.OriginalMorphemes.length + 1;
+      const sId = currentSnippet.SnippetId || '';
+      const morpheme = createMorphemeFromStepWord(morphemeFields, origOrd, sId, Number(word), source, meaningVariants);
       currentSnippet.OriginalMorphemes.push(morpheme);
     }
 
@@ -189,7 +202,7 @@ async function processStepHebrewFile(fileName: string) {
   console.log('Finished processing file:', fileName.split(' - ')[0]);
 }
 
-function createMorphemeFromStepWord(fields: StepWord, origOrd: number, snippetId: string, wordNumber: number, source: string): Morpheme {
+function createMorphemeFromStepWord(fields: StepWord, origOrd: number, snippetId: string, wordNumber: number, source: string, mVar: string[]): Morpheme {
   const strongs = fields[Word.dStrongs].replace('{', '').replace('}', '');
   const engMorpheme = fields[Word.Translation].trim();
   const engInfo = fields[Word.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
@@ -222,6 +235,9 @@ function createMorphemeFromStepWord(fields: StepWord, origOrd: number, snippetId
   }
   if (engSenseInfo) {
     returnable.EnglishSenseInformation = engSenseInfo;
+  }
+  if (mVar.length) {
+    returnable.MeaningVariants = mVar;
   }
   return returnable;
 }
