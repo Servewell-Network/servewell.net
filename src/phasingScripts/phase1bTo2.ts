@@ -55,6 +55,7 @@ let ancientDocDirectory = '';
 let currentChapter = '';
 let currentChapterData: Chapter;
 let currentChapterPath: string;
+let currentVerseId: string = '';
 let currentVerse = '';
 let currentVerseData: Snippet | undefined;
 let currentLanguage: 'Hebrew' | 'Aramaic' | 'Greek' = 'Hebrew';
@@ -66,14 +67,16 @@ async function processBSBFile(fileName: string) {
         input: fileStream,
         crlfDelay: Infinity
     });
-    let done = false;
+    
     for await (const line of rl) {
         const fields = line.split('\t');
-        const id = fields[BsbWord.VerseId];
-        if (!id || id === 'VerseId') {
-            continue; // skip lines without a verse ID (blank lines or header)
+        if (fields[BsbWord.VerseId]) {
+            currentVerseId = fields[BsbWord.VerseId];
         }
-        const idParts = id.split(' ');
+        if (!fields[BsbWord.BsbVersion] || currentVerseId === 'VerseId') {
+            continue; // skip lines without a verse (blank lines or header)
+        }
+        const idParts = currentVerseId.split(' ');
         const chapterVerse = idParts.pop();
         const ancientDoc = idParts.join(' ');
         if (!chapterVerse) {
@@ -101,19 +104,18 @@ async function processBSBFile(fileName: string) {
             if (currentChapter) {
                 await writeChapter(currentChapterData, currentChapterPath);
             }
-            currentChapter = chapter;
-            const fileName = `${ancientDocInfo?.abbr2}${chapter.padStart(3, '0')}.json`;
-            currentChapterPath = `../json-Phase2/docs/${ancientDocDirectory}/${fileName}`;
             if (ancientDoc === 'Matthew') {
                 console.warn('Exiting for now until have processed STEP New Testament');
                 process.exit(0);
             }
+            currentChapter = chapter;
+            const fileName = `${ancientDocInfo?.abbr2}${chapter.padStart(3, '0')}.json`;
+            currentChapterPath = `../json-Phase2/docs/${ancientDocDirectory}/${fileName}`;
             currentChapterData = await import(currentChapterPath, {
                 with: { type: 'json' }
             });
-            console.log(`   Processing new chapter: ${currentChapter} aka ${currentChapterData.ChapterId || 'unknown chapter ID in JSON'}`);
         }
-        if (verse !== currentVerse) {
+        if (verse && verse !== currentVerse) {
             if (!languageChanged) {
                 currentVerseData?.OriginalMorphemes.forEach(morpheme => {
                     morpheme.OriginalLanguage = currentLanguage;
@@ -144,12 +146,15 @@ async function processBSBFile(fileName: string) {
         if (fields[BsbWord.Space]) {
             currentVerseData?.EnglishHeadingsAndWords.push({ InsertionType: 'Space', Text: fields[BsbWord.Space] });
         }
-        const wordString = `${fields[BsbWord.begQ]
-            }${fields[BsbWord.BsbVersion]
-            }${fields[BsbWord.pnc]
-            }${fields[BsbWord.endQ]
+        const wordString = `${fields[BsbWord.begQ].trim()
+            }${fields[BsbWord.BsbVersion].trim()
+            }${fields[BsbWord.pnc].trim()
+            }${fields[BsbWord.endQ].trim()
             }`;
-        const words = wordString.split('\s+');
+        const words = wordString.split(/\s+/).filter(Boolean);
+        if (currentVerseId === 'Genesis 1:1') {
+            console.log({wordString, words});
+        }
         words.forEach(word => {
             currentVerseData?.EnglishHeadingsAndWords.push({ EnglishWord: word });
         });
@@ -165,11 +170,9 @@ async function processBSBFile(fileName: string) {
         // console.log('   BSB parsing info:', fields[BsbWord.Parsing1], fields[BsbWord.Parsing2]);
         // console.log('   BSB language:', fields[BsbWord.Language]);
         // console.log('   BSB Hebrew sort:', fields[BsbWord.HebSort]);
-        if (fields[BsbWord.GreekSort] !== '0') {
-            break;
-        }
     }
 
+    await writeChapter(currentChapterData, currentChapterPath);
     console.info('Finished processing BSB file');
 }
 await processBSBFile(pathToPhase1b).catch(err => {
@@ -177,7 +180,8 @@ await processBSBFile(pathToPhase1b).catch(err => {
 });
 
 async function writeChapter(currentChapterData: Chapter, currentChapterPath: string) {
-    // await fs.promises.writeFile(currentChapterPath, JSON.stringify(currentChapterData, null, 2)).catch((err) => {
-    //     console.error(`Error writing chapter file for ${currentChapterPath}:`, err);
-    // });
+    const absolutePath = path.resolve(__dirname, currentChapterPath);
+    await fs.promises.writeFile(absolutePath, JSON.stringify(currentChapterData, null, 2)).catch((err) => {
+        console.error(`Error writing chapter file for ${currentChapterPath}:`, err);
+    });
 }
