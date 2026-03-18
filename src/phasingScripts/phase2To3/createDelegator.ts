@@ -2,7 +2,7 @@ export type Sublistener = {
   eventName: string;
   tagName: string;
   selector: string;
-  handle: (matched: Element, event: Event) => void;
+  handle: (matched: HTMLElement, event: Event) => void;
 };
 
 export type Delegator = {
@@ -16,13 +16,13 @@ export function createDelegator(): Delegator {
   function ensureDispatcher(eventName: string) {
     if (dispatchersByEvent[eventName]) return;
 
-    const dispatcher: EventListener = function (event: Event) {
-      const target = event.target instanceof Element ? event.target : null;
+    const dispatcher: EventListener = (event: Event) => {
+      const target = event.target instanceof HTMLElement ? event.target : null;
       if (!target) return;
 
       const sublisteners = (sublistenersByEvent[eventName] || []).slice();
       for (const sublistener of sublisteners) {
-        const matched = target.closest(sublistener.selector);
+        const matched = target.closest<HTMLElement>(sublistener.selector);
         if (!matched) continue;
         if (matched.tagName.toUpperCase() !== sublistener.tagName.toUpperCase()) continue;
         sublistener.handle(matched, event);

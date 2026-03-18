@@ -6,8 +6,8 @@
     const dispatchersByEvent = {};
     function ensureDispatcher(eventName) {
       if (dispatchersByEvent[eventName]) return;
-      const dispatcher = function(event) {
-        const target = event.target instanceof Element ? event.target : null;
+      const dispatcher = (event) => {
+        const target = event.target instanceof HTMLElement ? event.target : null;
         if (!target) return;
         const sublisteners = (sublistenersByEvent[eventName] || []).slice();
         for (const sublistener of sublisteners) {
@@ -40,7 +40,7 @@
     return { registerSublistener };
   }
 
-  // src/phasingScripts/phase2To3/jsDomFramework.ts
+  // src/phasingScripts/phase2To3/createShell.ts
   function qs(selector) {
     return document.querySelector(selector);
   }
@@ -289,11 +289,11 @@ body.app-panel-open #app-shell-root .app-overlay {
       });
     }
     function appendDemoLine(text) {
-      const output = document.querySelector("#demoOutput");
+      const output = qs("#demoOutput");
       if (!output) return;
       const line = document.createElement("div");
       line.textContent = text;
-      output.prepend(line);
+      output.insertBefore(line, output.firstChild);
     }
     function syncModuleInputs(moduleId, active) {
       qsa(`input[data-module-id="${moduleId}"]`).forEach((input) => {
@@ -332,6 +332,8 @@ body.app-panel-open #app-shell-root .app-overlay {
       renderModuleList
     };
   }
+
+  // src/phasingScripts/phase2To3/createTheme.ts
   function createTheme(shell) {
     const themeStorageKey = "servewell-theme";
     function set(theme) {
@@ -351,6 +353,11 @@ body.app-panel-open #app-shell-root .app-overlay {
       set(savedTheme === "dark" ? "dark" : "light");
     }
     return { set, restore };
+  }
+
+  // src/phasingScripts/phase2To3/createModuleRegistry.ts
+  function qs2(selector) {
+    return document.querySelector(selector);
   }
   function createModuleRegistry(delegator, shell) {
     const modules = {};
@@ -400,7 +407,7 @@ body.app-panel-open #app-shell-root .app-overlay {
           tagName: "BUTTON",
           selector: 'button[data-action="demo-clear"]',
           handle() {
-            const output = qs("#demoOutput");
+            const output = qs2("#demoOutput");
             if (!output) return;
             output.innerHTML = "";
             shell.appendDemoLine("Demo log cleared");
@@ -420,13 +427,10 @@ body.app-panel-open #app-shell-root .app-overlay {
     function isActive(id) {
       return !!modules[id]?.active;
     }
-    return {
-      render,
-      activate,
-      deactivate,
-      isActive
-    };
+    return { render, activate, deactivate, isActive };
   }
+
+  // src/phasingScripts/phase2To3/registerShellListeners.ts
   function registerShellListeners(delegator, shell, theme, modules) {
     delegator.registerSublistener({
       eventName: "click",
@@ -477,14 +481,13 @@ body.app-panel-open #app-shell-root .app-overlay {
         const input = matched;
         const moduleId = input.getAttribute("data-module-id");
         if (!moduleId) return;
-        if (input.checked) {
-          modules.activate(moduleId);
-        } else {
-          modules.deactivate(moduleId);
-        }
+        if (input.checked) modules.activate(moduleId);
+        else modules.deactivate(moduleId);
       }
     });
   }
+
+  // src/phasingScripts/phase2To3/jsDomFramework.ts
   function jsDomFramework() {
     if (typeof document === "undefined") return;
     if (!document.body) {
