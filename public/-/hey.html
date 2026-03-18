@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+<title>hey</title>
+<meta name="description" content="This is a description of the hey page">
+<style>
+body {
+   font-family: sans-serif;
+	font-size: large;
+}
+details :not(summary) {
+   padding-left: 0.5rem;
+}
+</style>
+</head>
+<body>
+<h1>hey</h1>
+<a href="/">Back to Home</a>
+<div id="app"></div>
+<script>
+const __name = (fn, name) => {
+  try { Object.defineProperty(fn, "name", { value: name, configurable: true }); } catch {}
+  return fn;
+};
+
+function jsDomFramework(){console.info("A custom JS framework is running...");if(document.documentElement.dataset.appBootstrapped==="1")return;document.documentElement.dataset.appBootstrapped="1";class Delegator{static{__name(this,"Delegator")}sublisteners=[];register(sublistener){this.sublisteners.push(sublistener);return()=>{this.sublisteners=this.sublisteners.filter(s=>s!==sublistener)}}dispatch=__name(ev=>{const target=ev.target instanceof Element?ev.target:null;if(!target)return;for(const s of this.sublisteners){const matched=target.closest(s.selector);if(!matched)continue;if(matched.tagName!==s.tagName.toUpperCase())continue;s.handle(matched,ev)}},"dispatch")}class ModuleX{static{__name(this,"ModuleX")}disposers=[];activate(bus2){this.disposers.push(bus2.register({event:"click",tagName:"BUTTON",selector:'button[data-action="demo"]',handle:__name(()=>console.log("demo"),"handle")}))}deactivate(){for(const dispose of this.disposers)dispose();this.disposers=[]}}const css=`
+:root {
+  --bg: #ffffff;
+  --fg: #111111;
+  --bar: #f3f3f3;
+  --panel: #ffffff;
+  --border: #d8d8d8;
+}
+:root[data-theme="dark"] {
+  --bg: #101215;
+  --fg: #e8e8e8;
+  --bar: #171a1f;
+  --panel: #161a1f;
+  --border: #2a2f37;
+}
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body.with-shell {
+  padding-top: 52px;
+  padding-bottom: 56px;
+}
+#app-shell-root .topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .5rem .75rem;
+  background: var(--bar);
+  border-bottom: 1px solid var(--border);
+  z-index: 30;
+}
+#app-shell-root .spacer { flex: 1; }
+
+#app-shell-root .panel {
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  width: min(84vw, 320px);
+  transform: translateX(-105%);
+  transition: transform .18s ease;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  padding: 1rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+body.panel-open #app-shell-root .panel { transform: translateX(0); }
+
+#app-shell-root .overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 35;
+}
+body.panel-open #app-shell-root .overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#app-shell-root .bottombar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .5rem;
+  padding: .5rem;
+  background: var(--bar);
+  border-top: 1px solid var(--border);
+  z-index: 30;
+}
+
+#app-shell-root button {
+  cursor: pointer;
+  padding: .4rem .6rem;
+}
+
+@media (min-width: 900px) {
+  body.with-shell { padding-bottom: 0; }
+  #app-shell-root .bottombar { display: none; }
+}
+`;if(!document.getElementById("app-shell-style")){const style=document.createElement("style");style.id="app-shell-style";style.textContent=css;document.head.appendChild(style)}if(!document.getElementById("app-shell-root")){document.body.insertAdjacentHTML("afterbegin",`
+<div id="app-shell-root">
+  <header class="topbar">
+    <button data-action="menu-open">\u2630</button>
+    <strong>Servewell</strong>
+    <span class="spacer"></span>
+    <label data-action="toggle-dark">
+      <input type="checkbox" data-role="dark-toggle" />
+      Dark mode
+    </label>
+  </header>
+
+  <aside class="panel" id="overflowPanel">
+    <button data-action="menu-close">Close</button>
+    <button data-action="home">Home</button>
+    <button data-action="demo">Demo action</button>
+    <label data-action="toggle-dark">
+      <input type="checkbox" data-role="dark-toggle" />
+      Dark mode
+    </label>
+  </aside>
+
+  <div class="overlay" data-action="menu-close"></div>
+
+  <nav class="bottombar">
+    <button data-action="home">Home</button>
+    <button data-action="menu-open">Menu</button>
+    <button data-action="scroll-top">Top</button>
+  </nav>
+</div>
+      `)}document.body.classList.add("with-shell");const setTheme=__name(mode=>{document.documentElement.dataset.theme=mode;try{localStorage.setItem("theme",mode)}catch{}document.querySelectorAll('input[data-role="dark-toggle"]').forEach(el=>{el.checked=mode==="dark"})},"setTheme");const savedTheme=(()=>{try{return localStorage.getItem("theme")}catch{return null}})();setTheme(savedTheme==="dark"?"dark":"light");const bus=new Delegator;const layoutModule=__name(()=>{bus.register({event:"click",tagName:"BUTTON",selector:'button[data-action="menu-open"]',handle:__name(()=>document.body.classList.add("panel-open"),"handle")});bus.register({event:"click",tagName:"BUTTON",selector:'button[data-action="menu-close"]',handle:__name(()=>document.body.classList.remove("panel-open"),"handle")});bus.register({event:"click",tagName:"DIV",selector:'div[data-action="menu-close"]',handle:__name(()=>document.body.classList.remove("panel-open"),"handle")});bus.register({event:"click",tagName:"BUTTON",selector:'button[data-action="home"]',handle:__name(()=>{window.location.href="/"},"handle")});bus.register({event:"click",tagName:"BUTTON",selector:'button[data-action="scroll-top"]',handle:__name(()=>window.scrollTo({top:0,behavior:"smooth"}),"handle")})},"layoutModule");const themeModule=__name(()=>{bus.register({event:"click",tagName:"LABEL",selector:'label[data-action="toggle-dark"]',handle:__name(()=>{const current=document.documentElement.dataset.theme==="dark"?"dark":"light";setTheme(current==="dark"?"light":"dark")},"handle")})},"themeModule");const demoModule=__name(()=>{bus.register({event:"click",tagName:"BUTTON",selector:'button[data-action="demo"]',handle:__name(()=>{console.log("[demo-module] handled via delegated click sublistener")},"handle")})},"demoModule");layoutModule();themeModule();demoModule()}
+jsDomFramework();</script>
+</body>
+</html>

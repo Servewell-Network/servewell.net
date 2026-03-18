@@ -1,23 +1,48 @@
 console.info('Generate HTML pages from the untracked Phase2 JSON files');
 
-import { helper } from './phase2To3/helper';
+import fs from 'node:fs';
+import { makeHtmlBase } from './phase2To3/makeHtmlBase';
+import { jsDomFramework } from './phase2To3/jsDomFramework';
 
-helper('hey');
+const jsDomFnSource = jsDomFramework
+  .toString()
+  .replace(/<\/script>/gi, '<\\/script>'); // avoid accidental script-close
+const jsRuntimeShim = `
+const __name = (fn, name) => {
+  try { Object.defineProperty(fn, "name", { value: name, configurable: true }); } catch {}
+  return fn;
+};
+`;
 
-import { readFileSync, readdirSync } from 'node:fs';
+const inlineScript = `<script>${jsRuntimeShim}\n${jsDomFnSource}\njsDomFramework();</script>`;
 
-// Start with index.html to preserve best practice meta lines in one place
-const indexHtml = readFileSync('public/index.html', { encoding: 'utf8' });
-const initialHtml = indexHtml?.split('<title>')[0];
-if (!initialHtml) {
-    console.error(`No html`);
-    process.exit(1);
-}
-const baseDir = 'src/json-Phase2/docs';
-const docList = readdirSync(baseDir);
+const baseDistDir = 'public/-/';
+await resetDir(baseDistDir);
+const html =makeHtmlBase('hey', 'This is a description of the hey page');
+const heyHtml = [
+  ...html.topOfHead,
+  ...html.headToBody,
+  `<div id="app"></div>`,
+  inlineScript,
+  ...html.bottom
+].join('\n');
+// write the html to a new file in baseDistDir
+fs.writeFileSync(`${baseDistDir}/hey.html`, heyHtml, { encoding: 'utf8' });
+
+const baseSrcDir = 'src/json-Phase2/docs';
+const docList = fs.readdirSync(baseSrcDir);
 docList?.forEach(async (docName) => {
-    const docPath = `${baseDir}/${docName}`;
-    const jsonChapList = readdirSync(docPath);
-console.log(docName, jsonChapList.length);
+    const docPath = `${baseSrcDir}/${docName}`;
+    const jsonChapList = fs.readdirSync(docPath);
+// console.log(docName, jsonChapList.length);
 });
 
+async function resetDir(dir: string) {
+  await fs.promises.rm(dir, { recursive: true, force: true }).catch((err) => {
+    console.error(`Error deleting directory ${dir}:`, err);
+  });
+  await fs.promises.mkdir(dir, { recursive: true }).catch((err) => {
+    console.error(`Error recreating directory ${dir}:`, err);
+  });
+  console.log(`Directory ${dir} has been reset`);
+}
