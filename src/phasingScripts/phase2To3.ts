@@ -2,19 +2,20 @@ console.info('Generate HTML pages from the untracked Phase2 JSON files');
 
 import fs from 'node:fs';
 import { makeHtmlBase } from './phase2To3/makeHtmlBase';
-import { jsDomFramework } from './phase2To3/jsDomFramework';
+// import { jsDomFramework } from './phase2To3/jsDomFramework';
 
-const jsDomFnSource = jsDomFramework
-  .toString()
-  .replace(/<\/script>/gi, '<\\/script>'); // avoid accidental script-close
-const jsRuntimeShim = `
-const __name = (fn, name) => {
-  try { Object.defineProperty(fn, "name", { value: name, configurable: true }); } catch {}
-  return fn;
-};
-`;
+// const jsDomFnSource = jsDomFramework
+//   .toString()
+//   .replace(/<\/script>/gi, '<\\/script>'); // avoid accidental script-close
+// const jsRuntimeShim = `
+// const __name = (fn, name) => {
+//   try { Object.defineProperty(fn, "name", { value: name, configurable: true }); } catch {}
+//   return fn;
+// };
+// `;
 
-const inlineScript = `<script>${jsRuntimeShim}\n${jsDomFnSource}\njsDomFramework();</script>`;
+// const inlineScript = `<script>${jsRuntimeShim}\n${jsDomFnSource}\njsDomFramework();</script>`;
+const scriptTag = `<script src="/-/phase2to3-client.js"></script>`;
 
 const baseDistDir = 'public/-/';
 await resetDir(baseDistDir);
@@ -23,7 +24,7 @@ const heyHtml = [
   ...html.topOfHead,
   ...html.headToBody,
   `<div id="app"></div>`,
-  inlineScript,
+  scriptTag,
   ...html.bottom
 ].join('\n');
 // write the html to a new file in baseDistDir
