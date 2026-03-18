@@ -29,45 +29,60 @@ Maybe. A hint. For first time users that says. Tap anything to see. More info ab
 
 
 */
+type Sublistener = {
+  eventName: string;
+  tagName: string;
+  selector: string;
+  handle: (matched: Element, event: Event) => void;
+};
 
-export function jsDomFramework() {
-  if (typeof document === 'undefined') return;
+type AppModule = {
+  id: string;
+  label: string;
+  active: boolean;
+  activate: () => void;
+  deactivate: () => void;
+};
 
-  if (!document.body) {
-    document.addEventListener('DOMContentLoaded', jsDomFramework, { once: true });
-    return;
-  }
+type Delegator = {
+  registerSublistener: (sublistener: Sublistener) => () => void;
+};
 
-  if (document.documentElement.dataset.appBootstrapped === '1') return;
-  document.documentElement.dataset.appBootstrapped = '1';
+type ThemeName = 'light' | 'dark';
 
-  type Sublistener = {
-    eventName: string;
-    tagName: string;
-    selector: string;
-    handle: (matched: Element, event: Event) => void;
-  };
+type ShellApi = {
+  openPanel: () => void;
+  closePanel: () => void;
+  syncThemeInputs: (theme: ThemeName) => void;
+  appendDemoLine: (text: string) => void;
+  syncModuleInputs: (moduleId: string, active: boolean) => void;
+  syncDemoButtons: (active: boolean) => void;
+  renderModuleList: (modules: AppModule[]) => void;
+};
 
-  type AppModule = {
-    id: string;
-    label: string;
-    active: boolean;
-    activate: () => void;
-    deactivate: () => void;
-  };
+type ThemeApi = {
+  set: (theme: ThemeName) => void;
+  restore: () => void;
+};
 
+type ModuleRegistry = {
+  render: () => void;
+  activate: (id: string) => void;
+  deactivate: (id: string) => void;
+  isActive: (id: string) => boolean;
+};
+
+function qs<T extends Element>(selector: string): T | null {
+  return document.querySelector(selector) as T | null;
+}
+
+function qsa<T extends Element>(selector: string): T[] {
+  return Array.from(document.querySelectorAll(selector)) as T[];
+}
+
+function createDelegator(): Delegator {
   const sublistenersByEvent: Record<string, Sublistener[]> = {};
   const dispatchersByEvent: Record<string, EventListener> = {};
-  const modules: Record<string, AppModule> = {};
-  const themeStorageKey = 'servewell-theme';
-
-  function qs<T extends Element>(selector: string): T | null {
-    return document.querySelector(selector) as T | null;
-  }
-
-  function qsa<T extends Element>(selector: string): T[] {
-    return Array.from(document.querySelectorAll(selector)) as T[];
-  }
 
   function ensureDispatcher(eventName: string) {
     if (dispatchersByEvent[eventName]) return;
@@ -111,111 +126,10 @@ export function jsDomFramework() {
     };
   }
 
-  function openPanel() {
-    document.body.classList.add('app-panel-open');
-  }
+  return { registerSublistener };
+}
 
-  function closePanel() {
-    document.body.classList.remove('app-panel-open');
-  }
-
-  function syncThemeInputs() {
-    const isDark = document.documentElement.dataset.theme === 'dark';
-    qsa<HTMLInputElement>('input[data-setting="dark-mode"]').forEach((input) => {
-      input.checked = isDark;
-    });
-  }
-
-  function setTheme(theme: 'light' | 'dark') {
-    document.documentElement.dataset.theme = theme;
-    try {
-      localStorage.setItem(themeStorageKey, theme);
-    } catch {}
-    syncThemeInputs();
-  }
-
-  function restoreTheme() {
-    let savedTheme = '';
-    try {
-      savedTheme = localStorage.getItem(themeStorageKey) || '';
-    } catch {}
-    setTheme(savedTheme === 'dark' ? 'dark' : 'light');
-  }
-
-  function appendDemoLine(text: string) {
-    const output = qs<HTMLDivElement>('#demoOutput');
-    if (!output) return;
-
-    const line = document.createElement('div');
-    line.textContent = text;
-    output.prepend(line);
-  }
-
-  function syncModuleInputs(moduleId: string, active: boolean) {
-    qsa<HTMLInputElement>(`input[data-module-id="${moduleId}"]`).forEach((input) => {
-      input.checked = active;
-    });
-  }
-
-  function syncDemoButtons() {
-    const demoActive = !!modules.demo?.active;
-    qsa<HTMLElement>('[data-module-target="demo"]').forEach((el) => {
-      el.classList.toggle('is-inactive', !demoActive);
-      el.setAttribute('aria-disabled', demoActive ? 'false' : 'true');
-    });
-  }
-
-  function renderModuleList() {
-    const container = qs<HTMLDivElement>('#app-module-list');
-    if (!container) return;
-
-    container.innerHTML = Object.values(modules)
-      .map((module) => {
-        const checked = module.active ? 'checked' : '';
-        return `
-<label class="app-checkrow">
-  <input type="checkbox" data-module-id="${module.id}" ${checked}>
-  <span>${module.label}</span>
-</label>`;
-      })
-      .join('\n');
-  }
-
-  function createModule(
-    id: string,
-    label: string,
-    wireUp: () => Array<() => void>
-  ): AppModule {
-    let disposers: Array<() => void> = [];
-
-    const module: AppModule = {
-      id,
-      label,
-      active: false,
-      activate() {
-        if (module.active) return;
-        disposers = wireUp();
-        module.active = true;
-        syncModuleInputs(id, true);
-        syncDemoButtons();
-        appendDemoLine(`${label} activated`);
-      },
-      deactivate() {
-        if (!module.active) return;
-        while (disposers.length > 0) {
-          const dispose = disposers.pop();
-          if (dispose) dispose();
-        }
-        module.active = false;
-        syncModuleInputs(id, false);
-        syncDemoButtons();
-        appendDemoLine(`${label} deactivated`);
-      }
-    };
-
-    return module;
-  }
-
+function createShell(): ShellApi {
   const css = `
 :root {
   --bg: #ffffff;
@@ -449,17 +363,155 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   document.body.classList.add('with-app-shell');
 
+  function openPanel() {
+    document.body.classList.add('app-panel-open');
+  }
+
+  function closePanel() {
+    document.body.classList.remove('app-panel-open');
+  }
+
+  function syncThemeInputs(theme: ThemeName) {
+    const isDark = theme === 'dark';
+    qsa<HTMLInputElement>('input[data-setting="dark-mode"]').forEach((input) => {
+      input.checked = isDark;
+    });
+  }
+
+  function appendDemoLine(text: string) {
+    const output = qs<HTMLDivElement>('#demoOutput');
+    if (!output) return;
+
+    const line = document.createElement('div');
+    line.textContent = text;
+    output.prepend(line);
+  }
+
+  function syncModuleInputs(moduleId: string, active: boolean) {
+    qsa<HTMLInputElement>(`input[data-module-id="${moduleId}"]`).forEach((input) => {
+      input.checked = active;
+    });
+  }
+
+  function syncDemoButtons(active: boolean) {
+    qsa<HTMLElement>('[data-module-target="demo"]').forEach((el) => {
+      const inactive = !active;
+      el.classList.toggle('is-inactive', inactive);
+      el.setAttribute('aria-disabled', inactive ? 'true' : 'false');
+
+      if (el instanceof HTMLButtonElement) {
+        el.disabled = inactive;
+      }
+    });
+  }
+
+  function renderModuleList(modules: AppModule[]) {
+    const container = qs<HTMLDivElement>('#app-module-list');
+    if (!container) return;
+
+    container.innerHTML = modules
+      .map((module) => {
+        const checked = module.active ? ' checked' : '';
+        return `
+<label class="app-checkrow">
+  <input type="checkbox" data-module-id="${module.id}"${checked}>
+  <span>${module.label}</span>
+</label>`;
+      })
+      .join('\n');
+  }
+
+  return {
+    openPanel,
+    closePanel,
+    syncThemeInputs,
+    appendDemoLine,
+    syncModuleInputs,
+    syncDemoButtons,
+    renderModuleList
+  };
+}
+
+function createTheme(shell: ShellApi): ThemeApi {
+  const themeStorageKey = 'servewell-theme';
+
+  function set(theme: ThemeName) {
+    document.documentElement.dataset.theme = theme;
+    shell.syncThemeInputs(theme);
+
+    try {
+      localStorage.setItem(themeStorageKey, theme);
+    } catch {}
+  }
+
+  function restore() {
+    let savedTheme = '';
+    try {
+      savedTheme = localStorage.getItem(themeStorageKey) || '';
+    } catch {}
+
+    set(savedTheme === 'dark' ? 'dark' : 'light');
+  }
+
+  return { set, restore };
+}
+
+function createModuleRegistry(delegator: Delegator, shell: ShellApi): ModuleRegistry {
+  const modules: Record<string, AppModule> = {};
+
+  function refreshUi() {
+    shell.syncDemoButtons(!!modules.demo?.active);
+  }
+
+  function createModule(
+    id: string,
+    label: string,
+    wireUp: () => Array<() => void>
+  ): AppModule {
+    let disposers: Array<() => void> = [];
+
+    const module: AppModule = {
+      id,
+      label,
+      active: false,
+      activate() {
+        if (module.active) return;
+
+        disposers = wireUp();
+        module.active = true;
+        shell.syncModuleInputs(id, true);
+        refreshUi();
+        shell.appendDemoLine(`${label} activated`);
+      },
+      deactivate() {
+        if (!module.active) return;
+
+        while (disposers.length > 0) {
+          const dispose = disposers.pop();
+          if (dispose) dispose();
+        }
+
+        module.active = false;
+        shell.syncModuleInputs(id, false);
+        refreshUi();
+        shell.appendDemoLine(`${label} deactivated`);
+      }
+    };
+
+    return module;
+  }
+
   modules.demo = createModule('demo', 'Demo module', function () {
     return [
-      registerSublistener({
+      delegator.registerSublistener({
         eventName: 'click',
         tagName: 'BUTTON',
         selector: 'button[data-action="demo-ping"]',
         handle() {
-          appendDemoLine(`Demo handled at ${new Date().toLocaleTimeString()}`);
+          shell.appendDemoLine(`Demo handled at ${new Date().toLocaleTimeString()}`);
         }
       }),
-      registerSublistener({
+      delegator.registerSublistener({
         eventName: 'click',
         tagName: 'BUTTON',
         selector: 'button[data-action="demo-clear"]',
@@ -467,42 +519,70 @@ body.app-panel-open #app-shell-root .app-overlay {
           const output = qs<HTMLDivElement>('#demoOutput');
           if (!output) return;
           output.innerHTML = '';
-          appendDemoLine('Demo log cleared');
+          shell.appendDemoLine('Demo log cleared');
         }
       })
     ];
   });
 
-  renderModuleList();
+  function render() {
+    shell.renderModuleList(Object.values(modules));
+  }
 
-  registerSublistener({
+  function activate(id: string) {
+    modules[id]?.activate();
+  }
+
+  function deactivate(id: string) {
+    modules[id]?.deactivate();
+  }
+
+  function isActive(id: string): boolean {
+    return !!modules[id]?.active;
+  }
+
+  return {
+    render,
+    activate,
+    deactivate,
+    isActive
+  };
+}
+
+function registerShellListeners(
+  delegator: Delegator,
+  shell: ShellApi,
+  theme: ThemeApi,
+  modules: ModuleRegistry
+) {
+  delegator.registerSublistener({
     eventName: 'click',
     tagName: 'BUTTON',
     selector: 'button[data-action="menu-open"]',
     handle() {
-      openPanel();
+      shell.openPanel();
     }
   });
 
-  registerSublistener({
+  delegator.registerSublistener({
     eventName: 'click',
     tagName: 'BUTTON',
     selector: 'button[data-action="menu-close"]',
     handle() {
-      closePanel();
+      shell.closePanel();
     }
   });
 
-  registerSublistener({
+  delegator.registerSublistener({
     eventName: 'click',
     tagName: 'DIV',
     selector: 'div[data-action="menu-close"]',
     handle() {
-      closePanel();
+      shell.closePanel();
     }
   });
 
-  registerSublistener({
+  delegator.registerSublistener({
     eventName: 'click',
     tagName: 'BUTTON',
     selector: 'button[data-action="scroll-top"]',
@@ -511,18 +591,18 @@ body.app-panel-open #app-shell-root .app-overlay {
     }
   });
 
-  registerSublistener({
-    eventName: 'click',
+  delegator.registerSublistener({
+    eventName: 'change',
     tagName: 'INPUT',
     selector: 'input[data-setting="dark-mode"]',
     handle(matched) {
       const input = matched as HTMLInputElement;
-      setTheme(input.checked ? 'dark' : 'light');
+      theme.set(input.checked ? 'dark' : 'light');
     }
   });
 
-  registerSublistener({
-    eventName: 'click',
+  delegator.registerSublistener({
+    eventName: 'change',
     tagName: 'INPUT',
     selector: 'input[data-module-id]',
     handle(matched) {
@@ -530,16 +610,39 @@ body.app-panel-open #app-shell-root .app-overlay {
       const moduleId = input.getAttribute('data-module-id');
       if (!moduleId) return;
 
-      const module = modules[moduleId];
-      if (!module) return;
-
-      if (input.checked) module.activate();
-      else module.deactivate();
+      if (input.checked) {
+        modules.activate(moduleId);
+      } else {
+        modules.deactivate(moduleId);
+      }
     }
   });
+}
 
-  restoreTheme();
-  modules.demo.activate();
-  syncDemoButtons();
-  appendDemoLine('Framework booted');
+export function jsDomFramework() {
+  if (typeof document === 'undefined') return;
+
+  if (!document.body) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => jsDomFramework(), { once: true });
+    }
+    return;
+  }
+
+  if (document.documentElement.dataset.appBootstrapped === '1') return;
+  document.documentElement.dataset.appBootstrapped = '1';
+
+  const delegator = createDelegator();
+  const shell = createShell();
+  const theme = createTheme(shell);
+  const modules = createModuleRegistry(delegator, shell);
+
+  registerShellListeners(delegator, shell, theme, modules);
+
+  theme.restore();
+  modules.render();
+  modules.activate('demo');
+
+  shell.syncDemoButtons(modules.isActive('demo'));
+  shell.appendDemoLine('Framework booted');
 }
