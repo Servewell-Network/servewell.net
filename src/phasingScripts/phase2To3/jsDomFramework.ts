@@ -31,269 +31,515 @@ Maybe. A hint. For first time users that says. Tap anything to see. More info ab
 */
 
 export function jsDomFramework() {
-    console.info('A custom JS framework is running...');
+  if (typeof document === 'undefined') return;
 
-    // Prevent duplicate bootstrap
-    if (document.documentElement.dataset.appBootstrapped === '1') return;
-    document.documentElement.dataset.appBootstrapped = '1';
+  if (!document.body) {
+    document.addEventListener('DOMContentLoaded', jsDomFramework, { once: true });
+    return;
+  }
 
-    type Sublistener = {
-        event: 'click';
-        tagName: string;
-        selector: string;
-        handle: (matched: Element, event: Event) => void;
+  if (document.documentElement.dataset.appBootstrapped === '1') return;
+  document.documentElement.dataset.appBootstrapped = '1';
+
+  type Sublistener = {
+    eventName: string;
+    tagName: string;
+    selector: string;
+    handle: (matched: Element, event: Event) => void;
+  };
+
+  type AppModule = {
+    id: string;
+    label: string;
+    active: boolean;
+    activate: () => void;
+    deactivate: () => void;
+  };
+
+  const sublistenersByEvent: Record<string, Sublistener[]> = {};
+  const dispatchersByEvent: Record<string, EventListener> = {};
+  const modules: Record<string, AppModule> = {};
+  const themeStorageKey = 'servewell-theme';
+
+  function qs<T extends Element>(selector: string): T | null {
+    return document.querySelector(selector) as T | null;
+  }
+
+  function qsa<T extends Element>(selector: string): T[] {
+    return Array.from(document.querySelectorAll(selector)) as T[];
+  }
+
+  function ensureDispatcher(eventName: string) {
+    if (dispatchersByEvent[eventName]) return;
+
+    const dispatcher: EventListener = function (event: Event) {
+      const target = event.target instanceof Element ? event.target : null;
+      if (!target) return;
+
+      const sublisteners = (sublistenersByEvent[eventName] || []).slice();
+      for (const sublistener of sublisteners) {
+        const matched = target.closest(sublistener.selector);
+        if (!matched) continue;
+        if (matched.tagName.toUpperCase() !== sublistener.tagName.toUpperCase()) continue;
+        sublistener.handle(matched, event);
+      }
     };
 
-    class Delegator {
-        private sublisteners: Sublistener[] = [];
-        private listening = false;
+    dispatchersByEvent[eventName] = dispatcher;
+    document.addEventListener(eventName, dispatcher);
+  }
 
-        register(sublistener: Sublistener) {
-            this.sublisteners.push(sublistener);
-
-            // Exactly one event sublistener on document
-            if (!this.listening) {
-                document.addEventListener('click', this.dispatch);
-                this.listening = true;
-            }
-        }
-
-        private dispatch = (event: Event) => {
-            const target = event.target instanceof Element ? event.target : null;
-            if (!target) return;
-
-            for (const sublistener of this.sublisteners) {
-                const matched = target.closest(sublistener.selector);
-                if (!matched) continue;
-                if (matched.tagName.toUpperCase() !== sublistener.tagName.toUpperCase()) continue;
-                sublistener.handle(matched, event);
-            }
-        };
+  function registerSublistener(sublistener: Sublistener): () => void {
+    if (!sublistenersByEvent[sublistener.eventName]) {
+      sublistenersByEvent[sublistener.eventName] = [];
     }
 
-    const css = `
+    sublistenersByEvent[sublistener.eventName].push(sublistener);
+    ensureDispatcher(sublistener.eventName);
+
+    return function deregister() {
+      const bucket = sublistenersByEvent[sublistener.eventName];
+      if (!bucket) return;
+
+      const index = bucket.indexOf(sublistener);
+      if (index !== -1) bucket.splice(index, 1);
+
+      if (bucket.length === 0 && dispatchersByEvent[sublistener.eventName]) {
+        document.removeEventListener(sublistener.eventName, dispatchersByEvent[sublistener.eventName]);
+        delete dispatchersByEvent[sublistener.eventName];
+      }
+    };
+  }
+
+  function openPanel() {
+    document.body.classList.add('app-panel-open');
+  }
+
+  function closePanel() {
+    document.body.classList.remove('app-panel-open');
+  }
+
+  function syncThemeInputs() {
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    qsa<HTMLInputElement>('input[data-setting="dark-mode"]').forEach((input) => {
+      input.checked = isDark;
+    });
+  }
+
+  function setTheme(theme: 'light' | 'dark') {
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem(themeStorageKey, theme);
+    } catch {}
+    syncThemeInputs();
+  }
+
+  function restoreTheme() {
+    let savedTheme = '';
+    try {
+      savedTheme = localStorage.getItem(themeStorageKey) || '';
+    } catch {}
+    setTheme(savedTheme === 'dark' ? 'dark' : 'light');
+  }
+
+  function appendDemoLine(text: string) {
+    const output = qs<HTMLDivElement>('#demoOutput');
+    if (!output) return;
+
+    const line = document.createElement('div');
+    line.textContent = text;
+    output.prepend(line);
+  }
+
+  function syncModuleInputs(moduleId: string, active: boolean) {
+    qsa<HTMLInputElement>(`input[data-module-id="${moduleId}"]`).forEach((input) => {
+      input.checked = active;
+    });
+  }
+
+  function syncDemoButtons() {
+    const demoActive = !!modules.demo?.active;
+    qsa<HTMLElement>('[data-module-target="demo"]').forEach((el) => {
+      el.classList.toggle('is-inactive', !demoActive);
+      el.setAttribute('aria-disabled', demoActive ? 'false' : 'true');
+    });
+  }
+
+  function renderModuleList() {
+    const container = qs<HTMLDivElement>('#app-module-list');
+    if (!container) return;
+
+    container.innerHTML = Object.values(modules)
+      .map((module) => {
+        const checked = module.active ? 'checked' : '';
+        return `
+<label class="app-checkrow">
+  <input type="checkbox" data-module-id="${module.id}" ${checked}>
+  <span>${module.label}</span>
+</label>`;
+      })
+      .join('\n');
+  }
+
+  function createModule(
+    id: string,
+    label: string,
+    wireUp: () => Array<() => void>
+  ): AppModule {
+    let disposers: Array<() => void> = [];
+
+    const module: AppModule = {
+      id,
+      label,
+      active: false,
+      activate() {
+        if (module.active) return;
+        disposers = wireUp();
+        module.active = true;
+        syncModuleInputs(id, true);
+        syncDemoButtons();
+        appendDemoLine(`${label} activated`);
+      },
+      deactivate() {
+        if (!module.active) return;
+        while (disposers.length > 0) {
+          const dispose = disposers.pop();
+          if (dispose) dispose();
+        }
+        module.active = false;
+        syncModuleInputs(id, false);
+        syncDemoButtons();
+        appendDemoLine(`${label} deactivated`);
+      }
+    };
+
+    return module;
+  }
+
+  const css = `
 :root {
   --bg: #ffffff;
-  --fg: #111111;
-  --bar: #f3f3f3;
+  --fg: #171717;
+  --muted: #666666;
+  --bar: #f4f4f5;
+  --border: #d9d9de;
   --panel: #ffffff;
-  --border: #d8d8d8;
 }
+
 :root[data-theme="dark"] {
-  --bg: #101215;
-  --fg: #e8e8e8;
-  --bar: #171a1f;
-  --panel: #161a1f;
-  --border: #2a2f37;
+  --bg: #111317;
+  --fg: #f1f3f5;
+  --muted: #a6aebb;
+  --bar: #1a1d23;
+  --border: #2c323c;
+  --panel: #171a20;
 }
+
 html, body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
 }
-body.with-shell {
-  padding-top: 52px;
-  padding-bottom: 56px;
+
+body.with-app-shell {
+  padding-top: 56px;
+  padding-bottom: 60px;
 }
-#app-shell-root .topbar {
+
+#app-shell-root button,
+#app-shell-root input,
+#framework-demo-root button {
+  font: inherit;
+}
+
+#app-shell-root .app-topbar {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
   display: flex;
   align-items: center;
-  gap: .75rem;
-  padding: .5rem .75rem;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
   background: var(--bar);
   border-bottom: 1px solid var(--border);
-  z-index: 30;
+  z-index: 50;
 }
-#app-shell-root .spacer { flex: 1; }
 
-#app-shell-root .panel {
+#app-shell-root .app-spacer {
+  flex: 1;
+}
+
+#app-shell-root .app-checkrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#app-shell-root .app-sidepanel {
   position: fixed;
-  top: 0; bottom: 0; left: 0;
-  width: min(84vw, 320px);
-  transform: translateX(-105%);
-  transition: transform .18s ease;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(86vw, 320px);
+  transform: translateX(-102%);
+  transition: transform 0.18s ease;
   background: var(--panel);
   border-right: 1px solid var(--border);
+  z-index: 60;
   padding: 1rem;
-  z-index: 40;
-  display: flex;
-  flex-direction: column;
-  gap: .75rem;
+  overflow: auto;
 }
-body.panel-open #app-shell-root .panel { transform: translateX(0); }
 
-#app-shell-root .overlay {
+body.app-panel-open #app-shell-root .app-sidepanel {
+  transform: translateX(0);
+}
+
+#app-shell-root .app-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.35);
+  background: rgba(0, 0, 0, 0.28);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .18s ease;
-  z-index: 35;
+  transition: opacity 0.18s ease;
+  z-index: 55;
 }
-body.panel-open #app-shell-root .overlay {
+
+body.app-panel-open #app-shell-root .app-overlay {
   opacity: 1;
   pointer-events: auto;
 }
 
-#app-shell-root .bottombar {
-  position: fixed;
-  left: 0; right: 0; bottom: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: .5rem;
-  padding: .5rem;
-  background: var(--bar);
-  border-top: 1px solid var(--border);
-  z-index: 30;
+#app-shell-root .app-sidepanel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
-#app-shell-root button {
-  cursor: pointer;
-  padding: .4rem .6rem;
+#app-shell-root .app-sidepanel section {
+  margin-bottom: 1.25rem;
+}
+
+#app-shell-root .app-sidepanel h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+#app-shell-root .app-bottombar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bar);
+  border-top: 1px solid var(--border);
+  z-index: 50;
+}
+
+#framework-demo-root {
+  margin: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+#framework-demo-root .demo-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+#demoOutput {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  min-height: 3rem;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+
+.is-inactive {
+  opacity: 0.45;
 }
 
 @media (min-width: 900px) {
-  body.with-shell { padding-bottom: 0; }
-  #app-shell-root .bottombar { display: none; }
+  body.with-app-shell {
+    padding-bottom: 0;
+  }
+
+  #app-shell-root .app-bottombar {
+    display: none;
+  }
 }
 `;
 
-    if (!document.getElementById('app-shell-style')) {
-        const style = document.createElement('style');
-        style.id = 'app-shell-style';
-        style.textContent = css;
-        document.head.appendChild(style);
-    }
+  if (!qs('#app-shell-style')) {
+    const style = document.createElement('style');
+    style.id = 'app-shell-style';
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
 
-    if (!document.getElementById('app-shell-root')) {
-        document.body.insertAdjacentHTML(
-            'afterbegin',
-            `
+  if (!qs('#app-shell-root')) {
+    document.body.insertAdjacentHTML(
+      'afterbegin',
+      `
 <div id="app-shell-root">
-  <header class="topbar">
-    <button data-action="menu-open">☰</button>
+  <header class="app-topbar">
+    <button type="button" data-action="menu-open" aria-label="Open menu">☰</button>
     <strong>Servewell</strong>
-    <span class="spacer"></span>
-    <label data-action="toggle-dark">
-      <input type="checkbox" data-role="dark-toggle" />
-      Dark mode
+    <span class="app-spacer"></span>
+    <button type="button" data-action="demo-ping" data-module-target="demo">Demo</button>
+    <label class="app-checkrow">
+      <input type="checkbox" data-setting="dark-mode">
+      <span>Dark</span>
     </label>
   </header>
 
-  <aside class="panel" id="overflowPanel">
-    <button data-action="menu-close">Close</button>
-    <button data-action="home">Home</button>
-    <button data-action="demo">Demo action</button>
-    <label data-action="toggle-dark">
-      <input type="checkbox" data-role="dark-toggle" />
-      Dark mode
-    </label>
+  <aside class="app-sidepanel">
+    <div class="app-sidepanel-header">
+      <strong>Menu</strong>
+      <button type="button" data-action="menu-close">✕</button>
+    </div>
+
+    <section>
+      <h3>Settings</h3>
+      <label class="app-checkrow">
+        <input type="checkbox" data-setting="dark-mode">
+        <span>Dark mode</span>
+      </label>
+    </section>
+
+    <section>
+      <h3>Modules</h3>
+      <div id="app-module-list"></div>
+    </section>
   </aside>
 
-  <div class="overlay" data-action="menu-close"></div>
+  <div class="app-overlay" data-action="menu-close"></div>
 
-  <nav class="bottombar">
-    <button data-action="home">Home</button>
-    <button data-action="menu-open">Menu</button>
-    <button data-action="scroll-top">Top</button>
+  <nav class="app-bottombar">
+    <button type="button" data-action="menu-open">Menu</button>
+    <button type="button" data-action="demo-ping" data-module-target="demo">Demo</button>
+    <button type="button" data-action="scroll-top">Top</button>
   </nav>
-</div>
+</div>`
+    );
+  }
+
+  if (!qs('#framework-demo-root')) {
+    document.body.insertAdjacentHTML(
+      'beforeend',
       `
-        );
-    }
+<section id="framework-demo-root">
+  <h2>Framework demo</h2>
+  <p>Turn the Demo module off in the side panel, then tap Demo again.</p>
+  <div class="demo-buttons">
+    <button type="button" data-action="demo-ping" data-module-target="demo">Demo button</button>
+    <button type="button" data-action="demo-clear" data-module-target="demo">Clear demo log</button>
+  </div>
+  <div id="demoOutput"></div>
+</section>`
+    );
+  }
 
-    document.body.classList.add('with-shell');
+  document.body.classList.add('with-app-shell');
 
-    const setTheme = (mode: 'light' | 'dark') => {
-        document.documentElement.dataset.theme = mode;
-        try {
-            localStorage.setItem('theme', mode);
-        } catch { }
-        document.querySelectorAll('input[data-role="dark-toggle"]').forEach((el) => {
-            (el as HTMLInputElement).checked = mode === 'dark';
-        });
-    };
-
-    const savedTheme = (() => {
-        try {
-            return localStorage.getItem('theme');
-        } catch {
-            return null;
+  modules.demo = createModule('demo', 'Demo module', function () {
+    return [
+      registerSublistener({
+        eventName: 'click',
+        tagName: 'BUTTON',
+        selector: 'button[data-action="demo-ping"]',
+        handle() {
+          appendDemoLine(`Demo handled at ${new Date().toLocaleTimeString()}`);
         }
-    })();
-    setTheme(savedTheme === 'dark' ? 'dark' : 'light');
+      }),
+      registerSublistener({
+        eventName: 'click',
+        tagName: 'BUTTON',
+        selector: 'button[data-action="demo-clear"]',
+        handle() {
+          const output = qs<HTMLDivElement>('#demoOutput');
+          if (!output) return;
+          output.innerHTML = '';
+          appendDemoLine('Demo log cleared');
+        }
+      })
+    ];
+  });
 
-    const bus = new Delegator();
+  renderModuleList();
 
-    // Module 1: layout/nav
-    const layoutModule = () => {
-        bus.register({
-            event: 'click',
-            tagName: 'BUTTON',
-            selector: 'button[data-action="menu-open"]',
-            handle: () => document.body.classList.add('panel-open')
-        });
+  registerSublistener({
+    eventName: 'click',
+    tagName: 'BUTTON',
+    selector: 'button[data-action="menu-open"]',
+    handle() {
+      openPanel();
+    }
+  });
 
-        bus.register({
-            event: 'click',
-            tagName: 'BUTTON',
-            selector: 'button[data-action="menu-close"]',
-            handle: () => document.body.classList.remove('panel-open')
-        });
+  registerSublistener({
+    eventName: 'click',
+    tagName: 'BUTTON',
+    selector: 'button[data-action="menu-close"]',
+    handle() {
+      closePanel();
+    }
+  });
 
-        bus.register({
-            event: 'click',
-            tagName: 'DIV',
-            selector: 'div[data-action="menu-close"]',
-            handle: () => document.body.classList.remove('panel-open')
-        });
+  registerSublistener({
+    eventName: 'click',
+    tagName: 'DIV',
+    selector: 'div[data-action="menu-close"]',
+    handle() {
+      closePanel();
+    }
+  });
 
-        bus.register({
-            event: 'click',
-            tagName: 'BUTTON',
-            selector: 'button[data-action="home"]',
-            handle: () => {
-                window.location.href = '/';
-            }
-        });
+  registerSublistener({
+    eventName: 'click',
+    tagName: 'BUTTON',
+    selector: 'button[data-action="scroll-top"]',
+    handle() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
 
-        bus.register({
-            event: 'click',
-            tagName: 'BUTTON',
-            selector: 'button[data-action="scroll-top"]',
-            handle: () => window.scrollTo({ top: 0, behavior: 'smooth' })
-        });
-    };
+  registerSublistener({
+    eventName: 'click',
+    tagName: 'INPUT',
+    selector: 'input[data-setting="dark-mode"]',
+    handle(matched) {
+      const input = matched as HTMLInputElement;
+      setTheme(input.checked ? 'dark' : 'light');
+    }
+  });
 
-    // Module 2: theme
-    const themeModule = () => {
-        bus.register({
-            event: 'click',
-            tagName: 'LABEL',
-            selector: 'label[data-action="toggle-dark"]',
-            handle: () => {
-                const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-                setTheme(current === 'dark' ? 'light' : 'dark');
-            }
-        });
-    };
+  registerSublistener({
+    eventName: 'click',
+    tagName: 'INPUT',
+    selector: 'input[data-module-id]',
+    handle(matched) {
+      const input = matched as HTMLInputElement;
+      const moduleId = input.getAttribute('data-module-id');
+      if (!moduleId) return;
 
-    // Module 3: demo
-    const demoModule = () => {
-        bus.register({
-            event: 'click',
-            tagName: 'BUTTON',
-            selector: 'button[data-action="demo"]',
-            handle: () => {
-                console.log('[demo-module] handled via delegated click sublistener');
-            }
-        });
-    };
+      const module = modules[moduleId];
+      if (!module) return;
 
-    layoutModule();
-    themeModule();
-    demoModule();
+      if (input.checked) module.activate();
+      else module.deactivate();
+    }
+  });
+
+  restoreTheme();
+  modules.demo.activate();
+  syncDemoButtons();
+  appendDemoLine('Framework booted');
 }
