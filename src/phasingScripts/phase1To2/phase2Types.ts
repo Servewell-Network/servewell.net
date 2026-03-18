@@ -1,7 +1,7 @@
 export interface Morpheme { // unit of meaning = word or part of word
   "MorphemeId"?: string; // e.g., "Gen1:1.1"
-  "WordNumber": number; // because morphemes are often grouped
-  "OriginalMorphemeScript": string; // unicode of aramaic/greek chars
+  "WordNumber"?: number; // because morphemes are often grouped in Semitic (Hebrew/Aramaic)
+  "OriginalMorphemeScript": string; // unicode of Aramaic/Greek characters
   "OriginalMorphemeTransliteration"?: string; // sounds for English readers
   "OriginalMorphemeVerbalAspect"?: 'Whole Action' | 'Progressing Action'; // whole is traditionally called perfect; is there a repeated also?
   "OriginalMorphemeVerbalTenseOrTime"?: 'Past' | 'Present' | 'Future';

@@ -104,10 +104,6 @@ async function processBSBFile(fileName: string) {
             if (currentChapter) {
                 await writeChapter(currentChapterData, currentChapterPath);
             }
-            if (ancientDoc === 'Matthew') {
-                console.warn('Exiting for now until have processed STEP New Testament');
-                process.exit(0);
-            }
             currentChapter = chapter;
             const fileName = `${ancientDocInfo?.abbr2}${chapter.padStart(3, '0')}.json`;
             currentChapterPath = `../json-Phase2/docs/${ancientDocDirectory}/${fileName}`;

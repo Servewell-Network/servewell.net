@@ -17,10 +17,12 @@ const file1 = 'TAHOT Gen-Deu - Translators Amalgamated Hebrew OT - STEPBible.org
 const file2 = 'TAHOT Jos-Est - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 const file3 = 'TAHOT Job-Sng - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 const file4 = 'TAHOT Isa-Mal - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
+const file5 = 'TAGNT Mat-Jhn - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt';
+const file6 = 'TAGNT Act-Rev - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt';
 
 type StepWord = string[];
-// This is how the STEPBible.org amalgamated data is structured
-enum Word {
+// This is how the STEPBible.org "Hebrew" amalgamated data is structured
+enum SemiticWord {
   Ref = 0,
   OrigScript = 1,
   Transliteration = 2,
@@ -35,6 +37,23 @@ enum Word {
   ExpandedStrongTags = 11
 }
 
+// This is how the STEPBible.org Greek amalgamated data is structured
+enum GreekWord {
+  WordAndType = 0,
+  Greek = 1,
+  EnglishTranslation = 2,
+  dStrongsAndGrammar = 3,
+  DictionaryFormAndGloss = 4,
+  editions = 5,
+  MeaningVariants = 6,
+  SpellingVariants = 7,
+  SpanishTranslation = 8,
+  Submeaning = 9,
+  ConjoinWord = 10,
+  sStrongPlusInstance = 11,
+  AltStrongs = 12
+}
+
 interface ChapterToSave {
   "chapter"?: Chapter;
   docDir: string;
@@ -44,15 +63,15 @@ async function main() {
   await fs.promises.mkdir(path.join(pathToPhase2, 'docs'), { recursive: true }).catch((err) => {
     console.error(`Error creating docs directory in ${pathToPhase2}:`, err);
   });
-  await processStepHebrewFile(file1);
-  await processStepHebrewFile(file2);
-  await processStepHebrewFile(file3);
-  await processStepHebrewFile(file4);
+  await processStepFile(file1);
+  await processStepFile(file2);
+  await processStepFile(file3);
+  await processStepFile(file4);
+  await processStepFile(file5, 'NT');
+  await processStepFile(file6, 'NT');
 }
 
-type DocNameAbbr = string; // e.g., "Gen" for Genesis
-
-async function processStepHebrewFile(fileName: string) {
+async function processStepFile(fileName: string, isNt?: string) {
   const filePath = path.join(pathToPhase1a, fileName);
 
   const fileStream = fs.createReadStream(filePath);
@@ -82,8 +101,8 @@ async function processStepHebrewFile(fileName: string) {
       continue; // skip commented lines
     }
     const fields: StepWord = line.split('\t');
-    // to do: record source (e.g., L = Leningrad Codex) in json
-    const [docAbbr, chapStr, verseStr, word, source] = fields[Word.Ref].split(/\W/); // (e.g., "Gen.1.1#01=L")
+    const refIdx = isNt ? GreekWord.WordAndType : SemiticWord.Ref;
+    const [docAbbr, chapStr, verseStr, wordIdx, source] = fields[refIdx].split(/\W/); // e.g., "Gen.1.1#01=L" or "Mat.1.1#01=NKO"
     if (currentChapter?.ChapterNumber !== Number(chapStr)) {
       // Save the previous chapter, if any, to its docDir before starting a new one
       if (currentChapter && currentChapter.DocOrBookAbbreviation) {
@@ -119,30 +138,11 @@ async function processStepHebrewFile(fileName: string) {
         EnglishHeadingsAndWords: []
       };
     }
-    // find number of morphemes per row (per word) and add to snippet.OriginalMorphemes
-    const forwardOrBackwardSlash = /[\/\\]/; // forward is normal, back is punctuation
-    const numMorphemes = fields[Word.OrigScript].split(forwardOrBackwardSlash).length;
-    for (let i = 0; i < numMorphemes; i++) {
-      // This works for most fields, but not for Meaning Variants
-      const morphemeFields: StepWord = fields.map(field => field.split(forwardOrBackwardSlash)[i] || '');
-      if (!morphemeFields[Word.OrigScript].trim()) {
-        continue; // step data records blanks before paragraph end or section end markers
-      }
-      // examples of meaning variants (more significant variants, as opposed to spelling variants)
-      // from Gen 43:28: K= va/i.yish.ta.chu (וַ/יִּשְׁתַּחוּ\׃) "and/ he bowed down" (H9001/H7812\H9016=Hc/Vvw3ms)	L= וַ/יִּֽשְׁתַּחֲוֻּֽ\׃ ¦ ;
-      // from Exo 2:2: B= עֲבָדִֽ֑ים\׃ ¦ P= עֲבָדִ֑ים\׃	
-      const meaningVariants = fields[Word.MeaningVariants]?.replace(';', '')
-        .split('¦ ').map((v: string) => v?.trim()).filter(Boolean).map((v: string) => {
-          const [src, ...rest] = v.split('=');
-          const fullSrc = getSourceName(src.trim()) || src.trim();
-          return `${fullSrc}: ${rest.join('=').trim()}`;
-        });
-      const origOrd = currentSnippet.OriginalMorphemes.length + 1;
-      const sId = currentSnippet.SnippetId || '';
-      const morpheme = createMorphemeFromStepWord(morphemeFields, origOrd, sId, Number(word), source, meaningVariants);
-      currentSnippet.OriginalMorphemes.push(morpheme);
+    if (isNt) {
+      processGreekWord(currentChapter, currentSnippet, fields, wordIdx, source);
+    } else {
+      processSemiticWord(currentChapter, currentSnippet, fields, wordIdx, source);
     }
-
   }
   // save last stuff (no next verse to trigger save)
   currentChapter?.SnippetsAndExplanations?.push(structuredClone(currentSnippet) as Snippet);
@@ -150,10 +150,68 @@ async function processStepHebrewFile(fileName: string) {
   console.log('Finished processing file:', fileName.split(' - ')[0]);
 }
 
-function createMorphemeFromStepWord(fields: StepWord, origOrd: number, snippetId: string, wordNumber: number, source: string, mVar: string[]): Morpheme {
-  const strongs = fields[Word.dStrongs].replace('{', '').replace('}', '');
-  const engMorpheme = fields[Word.Translation].trim();
-  const engInfo = fields[Word.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
+
+function processGreekWord(currentChapter: Partial<Chapter>, currentSnippet: Snippet, fields: StepWord, wordIdx: string, source: string) {
+// Word & Type	Greek	English translation	dStrongs = Grammar	Dictionary form =  Gloss	editions	Meaning variants	Spelling variants	Spanish translation	Sub-meaning	Conjoin word	sStrong+Instance
+// Mat.1.1#01=NKO	Βίβλος (Biblos)	[The] book	G0976=N-NSF	βίβλος=book	NA28+NA27+Tyn+SBL+WH+Treg+TR+Byz			Libro	book	#01	G0976
+
+    const [strongs, grammar] = fields[GreekWord.dStrongsAndGrammar].split('=');
+  const engMorpheme = fields[GreekWord.EnglishTranslation].trim();
+  const [origRoot, engRoot] = fields[GreekWord.DictionaryFormAndGloss].split('=');
+  const [origScript, translit] = fields[GreekWord.Greek].replace(')', '').split(' (');
+  const morpheme: Morpheme = {
+    MorphemeId: `${currentSnippet.SnippetId}.${wordIdx}`,
+    OriginalMorphemeScript: origScript,
+    EnglishMorphemeWithPunctuationInOriginalOrder: engMorpheme,
+    OriginalRootStrongsID: strongs,
+    OriginalMorphemeOrdinal: Number(wordIdx),
+    Source: getGreekSourceName(source),
+    OriginalMorphemeTransliteration: translit,
+    OriginalRootScript: origRoot,
+    EnglishRootTranslation: engRoot,
+  };
+
+  const [senseInfo, substitution] = fields[GreekWord.Submeaning].split('|');
+  if (substitution) {
+    morpheme.EnglishSubstitutionInfo = substitution;
+  }
+  // if (fields[GreekWord.MeaningVariants]) {
+  //   morpheme.MeaningVariants = fields[GreekWord.MeaningVariants];
+  // }
+    currentSnippet.OriginalMorphemes.push(morpheme);
+}
+
+function processSemiticWord(currentChapter: Partial<Chapter>, currentSnippet: Snippet, fields: StepWord, wordIdx: string, source: string) {
+  // find number of morphemes per row (per word) and add to snippet.OriginalMorphemes
+  const forwardOrBackwardSlash = /[\/\\]/; // forward is normal, back is punctuation
+  const numMorphemes = fields[SemiticWord.OrigScript].split(forwardOrBackwardSlash).length;
+
+  for (let i = 0; i < numMorphemes; i++) {
+    // This works for most fields, but not for Meaning Variants
+    const morphemeFields: StepWord = fields.map(field => field.split(forwardOrBackwardSlash)[i] || '');
+    if (!morphemeFields[SemiticWord.OrigScript].trim()) {
+      continue; // step data records blanks before paragraph end or section end markers
+    }
+    // examples of meaning variants (more significant variants, as opposed to spelling variants)
+    // from Gen 43:28: K= va/i.yish.ta.chu (וַ/יִּשְׁתַּחוּ\׃) "and/ he bowed down" (H9001/H7812\H9016=Hc/Vvw3ms)	L= וַ/יִּֽשְׁתַּחֲוֻּֽ\׃ ¦ ;
+    // from Exo 2:2: B= עֲבָדִֽ֑ים\׃ ¦ P= עֲבָדִ֑ים\׃	
+    const meaningVariants = fields[SemiticWord.MeaningVariants]?.replace(';', '')
+      .split('¦ ').map((v: string) => v?.trim()).filter(Boolean).map((v: string) => {
+        const [src, ...rest] = v.split('=');
+        const fullSrc = getSemiticSourceName(src.trim()) || src.trim();
+        return `${fullSrc}: ${rest.join('=').trim()}`;
+      });
+    const origOrd = currentSnippet.OriginalMorphemes.length + 1;
+    const sId = currentSnippet.SnippetId || '';
+    const morpheme = createMorphemeFromSemiticWord(morphemeFields, origOrd, sId, Number(wordIdx), source, meaningVariants);
+    currentSnippet.OriginalMorphemes.push(morpheme);
+  }
+}
+
+function createMorphemeFromSemiticWord(fields: StepWord, origOrd: number, snippetId: string, wordNumber: number, source: string, mVar: string[]): Morpheme {
+  const strongs = fields[SemiticWord.dStrongs].replace('{', '').replace('}', '');
+  const engMorpheme = fields[SemiticWord.Translation].trim();
+  const engInfo = fields[SemiticWord.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
   const preAndPostArrows = engInfo.split('»');
   const substitutionInfo = preAndPostArrows[1]?.includes('@') ? preAndPostArrows[1] : '';
   const postArrowSplitByColon = preAndPostArrows[1]?.split(':') || ['', ''];
@@ -162,18 +220,18 @@ function createMorphemeFromStepWord(fields: StepWord, origOrd: number, snippetId
   const returnable: Morpheme = {
     MorphemeId: `${snippetId}.${origOrd}`,
     WordNumber: wordNumber,
-    OriginalMorphemeScript: fields[Word.OrigScript],
+    OriginalMorphemeScript: fields[SemiticWord.OrigScript],
     EnglishMorphemeWithPunctuationInOriginalOrder: engMorpheme,
     OriginalRootStrongsID: strongs,
     OriginalMorphemeOrdinal: origOrd,
-    Source: getSourceName(source)
+    Source: getSemiticSourceName(source)
   };
-  const isPunctuation = !fields[Word.Transliteration]; // if no transliteration, it's likely punctuation
+  const isPunctuation = !fields[SemiticWord.Transliteration]; // if no transliteration, it's likely punctuation
   if (isPunctuation) {
     returnable.IsPunctuation = isPunctuation;
   }
-  if (fields[Word.Transliteration]) {
-    returnable.OriginalMorphemeTransliteration = fields[Word.Transliteration];
+  if (fields[SemiticWord.Transliteration]) {
+    returnable.OriginalMorphemeTransliteration = fields[SemiticWord.Transliteration];
   }
   if (engRoot) {
     returnable.EnglishRootTranslation = engRoot;
@@ -227,7 +285,7 @@ function getNumberedDocAbbr(chars1To3: string): string | undefined {
   return doc ? doc.numPlusAbbr2 : undefined;
 }
 
-function getSourceName(code: string): string {
+function getSemiticSourceName(code: string): string {
   const base = code.replace(/[\[\]\(\)]/g, ''); // strip bracket chars
   const bracket = (code.match(/[\[\(].*[\]\)]/) || [''])[0];
 
@@ -251,6 +309,24 @@ function getSourceName(code: string): string {
 
   const name = names[base] ?? base;
   return bracket ? `${name} ${bracket}` : name;
+}
+
+function getGreekSourceName(source: string): string {
+  const names: Record<string, string> = {
+    'NKO': 'identical in virtually all manuscripts',
+    'NK(O)': 'identical in Ancient and Traditional manuscripts, different in Other manuscripts',
+    'NK(o)': 'identical in Ancient and Traditional manuscripts, barely different in Other manuscripts',
+    'N(K)(O)': 'found in Ancient manuscripts, different in Traditional and Other manuscripts',
+    'N(k)(o)': 'found in Ancient manuscripts, barely different in Traditional and Other manuscripts',
+    'K(O)': 'found in Traditional but not Ancient manuscripts and different in Other manuscripts',
+    'K(o)': 'found in Traditional but not Ancient manuscripts and barely different in Other manuscripts',
+    'N(O)': 'found in Ancient but not Traditional manuscripts and different in Other manuscripts',
+    'N(o)': 'found in Ancient but not Traditional manuscripts and barely different in Other manuscripts',
+    'O': 'not found in Ancient or Traditional manuscripts, only in Other manuscripts',
+    'o': 'not found in Ancient or Traditional manuscripts, only in Other manuscripts, and does not change the meaning',
+  };
+  const name = names[source] ?? source;
+  return name;
 }
 
 async function writeChapter(currentChapter: Chapter, currentDocNameAbbr: string) {
