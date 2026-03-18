@@ -79,8 +79,7 @@ body.with-app-shell {
 }
 
 #app-shell-root button,
-#app-shell-root input,
-#framework-demo-root button {
+#app-shell-root input {
   font: inherit;
 }
 
@@ -173,27 +172,6 @@ body.app-panel-open #app-shell-root .app-overlay {
   z-index: 50;
 }
 
-#framework-demo-root {
-  margin: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-}
-
-#framework-demo-root .demo-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-#demoOutput {
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  min-height: 3rem;
-  border: 1px dashed var(--border);
-  color: var(--muted);
-}
-
 .is-inactive {
   opacity: 0.45;
 }
@@ -223,7 +201,6 @@ body.app-panel-open #app-shell-root .app-overlay {
     <button type="button" data-action="menu-open" aria-label="Open menu">\u2630</button>
     <strong>Servewell</strong>
     <span class="app-spacer"></span>
-    <button type="button" data-action="demo-ping" data-module-target="demo">Demo</button>
     <label class="app-checkrow">
       <input type="checkbox" data-setting="dark-mode">
       <span>Dark</span>
@@ -254,25 +231,9 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   <nav class="app-bottombar">
     <button type="button" data-action="menu-open">Menu</button>
-    <button type="button" data-action="demo-ping" data-module-target="demo">Demo</button>
     <button type="button" data-action="scroll-top">Top</button>
   </nav>
 </div>`
-      );
-    }
-    if (!qs("#framework-demo-root")) {
-      document.body.insertAdjacentHTML(
-        "beforeend",
-        `
-<section id="framework-demo-root">
-  <h2>Framework demo</h2>
-  <p>Turn the Demo module off in the side panel, then tap Demo again.</p>
-  <div class="demo-buttons">
-    <button type="button" data-action="demo-ping" data-module-target="demo">Demo button</button>
-    <button type="button" data-action="demo-clear" data-module-target="demo">Clear demo log</button>
-  </div>
-  <div id="demoOutput"></div>
-</section>`
       );
     }
     document.body.classList.add("with-app-shell");
@@ -356,65 +317,11 @@ body.app-panel-open #app-shell-root .app-overlay {
   }
 
   // src/phasingScripts/phase2To3/createModuleRegistry.ts
-  function qs2(selector) {
-    return document.querySelector(selector);
-  }
-  function createModuleRegistry(delegator, shell) {
+  function createModuleRegistry(shell) {
     const modules = {};
-    function refreshUi() {
-      shell.syncDemoButtons(!!modules.demo?.active);
+    function register(module) {
+      modules[module.id] = module;
     }
-    function createModule(id, label, wireUp) {
-      let disposers = [];
-      const module = {
-        id,
-        label,
-        active: false,
-        activate() {
-          if (module.active) return;
-          disposers = wireUp();
-          module.active = true;
-          shell.syncModuleInputs(id, true);
-          refreshUi();
-          shell.appendDemoLine(`${label} activated`);
-        },
-        deactivate() {
-          if (!module.active) return;
-          while (disposers.length > 0) {
-            const dispose = disposers.pop();
-            if (dispose) dispose();
-          }
-          module.active = false;
-          shell.syncModuleInputs(id, false);
-          refreshUi();
-          shell.appendDemoLine(`${label} deactivated`);
-        }
-      };
-      return module;
-    }
-    modules.demo = createModule("demo", "Demo module", function() {
-      return [
-        delegator.registerSublistener({
-          eventName: "click",
-          tagName: "BUTTON",
-          selector: 'button[data-action="demo-ping"]',
-          handle() {
-            shell.appendDemoLine(`Demo handled at ${(/* @__PURE__ */ new Date()).toLocaleTimeString()}`);
-          }
-        }),
-        delegator.registerSublistener({
-          eventName: "click",
-          tagName: "BUTTON",
-          selector: 'button[data-action="demo-clear"]',
-          handle() {
-            const output = qs2("#demoOutput");
-            if (!output) return;
-            output.innerHTML = "";
-            shell.appendDemoLine("Demo log cleared");
-          }
-        })
-      ];
-    });
     function render() {
       shell.renderModuleList(Object.values(modules));
     }
@@ -427,7 +334,10 @@ body.app-panel-open #app-shell-root .app-overlay {
     function isActive(id) {
       return !!modules[id]?.active;
     }
-    return { render, activate, deactivate, isActive };
+    function getAll() {
+      return Object.values(modules);
+    }
+    return { register, render, activate, deactivate, isActive, getAll };
   }
 
   // src/phasingScripts/phase2To3/registerShellListeners.ts
@@ -487,6 +397,109 @@ body.app-panel-open #app-shell-root .app-overlay {
     });
   }
 
+  // src/phasingScripts/phase2To3/createDemoModule.ts
+  function qs2(selector) {
+    return document.querySelector(selector);
+  }
+  function createDemoModule(delegator, shell) {
+    if (!qs2("#framework-demo-root")) {
+      document.body.insertAdjacentHTML(
+        "beforeend",
+        `
+<section id="framework-demo-root">
+  <h2>Framework demo</h2>
+  <p>Turn the Demo module off in the side panel, then tap Demo again.</p>
+  <div class="demo-buttons">
+    <button type="button" data-action="demo-ping" data-module-target="demo">Demo button</button>
+    <button type="button" data-action="demo-clear" data-module-target="demo">Clear demo log</button>
+  </div>
+  <div id="demoOutput"></div>
+</section>`
+      );
+    }
+    if (!qs2("#demo-style")) {
+      const style = document.createElement("style");
+      style.id = "demo-style";
+      style.textContent = `
+#framework-demo-root {
+  margin: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+#framework-demo-root .demo-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+#demoOutput {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  min-height: 3rem;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+`;
+      document.head.appendChild(style);
+    }
+    function appendDemoLine(text) {
+      const output = qs2("#demoOutput");
+      if (!output) return;
+      const line = document.createElement("div");
+      line.textContent = text;
+      output.insertBefore(line, output.firstChild);
+    }
+    const module = {
+      id: "demo",
+      label: "Demo module",
+      active: false,
+      activate() {
+        if (module.active) return;
+        const disposers = [
+          delegator.registerSublistener({
+            eventName: "click",
+            tagName: "BUTTON",
+            selector: 'button[data-action="demo-ping"]',
+            handle() {
+              appendDemoLine(`Demo handled at ${(/* @__PURE__ */ new Date()).toLocaleTimeString()}`);
+            }
+          }),
+          delegator.registerSublistener({
+            eventName: "click",
+            tagName: "BUTTON",
+            selector: 'button[data-action="demo-clear"]',
+            handle() {
+              const output = qs2("#demoOutput");
+              if (!output) return;
+              output.innerHTML = "";
+              appendDemoLine("Demo log cleared");
+            }
+          })
+        ];
+        module.active = true;
+        shell.syncModuleInputs("demo", true);
+        shell.syncDemoButtons(true);
+        appendDemoLine("Demo module activated");
+        module._disposers = disposers;
+      },
+      deactivate() {
+        if (!module.active) return;
+        const disposers = module._disposers || [];
+        while (disposers.length > 0) {
+          const dispose = disposers.pop();
+          if (dispose) dispose();
+        }
+        module.active = false;
+        shell.syncModuleInputs("demo", false);
+        shell.syncDemoButtons(false);
+        appendDemoLine("Demo module deactivated");
+      }
+    };
+    return module;
+  }
+
   // src/phasingScripts/phase2To3/jsDomFramework.ts
   function jsDomFramework() {
     if (typeof document === "undefined") return;
@@ -501,12 +514,12 @@ body.app-panel-open #app-shell-root .app-overlay {
     const delegator = createDelegator();
     const shell = createShell();
     const theme = createTheme(shell);
-    const modules = createModuleRegistry(delegator, shell);
+    const modules = createModuleRegistry(shell);
+    modules.register(createDemoModule(delegator, shell));
     registerShellListeners(delegator, shell, theme, modules);
     theme.restore();
     modules.render();
     modules.activate("demo");
-    shell.syncDemoButtons(modules.isActive("demo"));
     shell.appendDemoLine("Framework booted");
   }
 

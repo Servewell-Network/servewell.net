@@ -29,11 +29,13 @@ Maybe. A hint. For first time users that says. Tap anything to see. More info ab
 
 
 */
+
 import { createDelegator } from './createDelegator';
 import { createShell } from './createShell';
 import { createTheme } from './createTheme';
 import { createModuleRegistry } from './createModuleRegistry';
 import { registerShellListeners } from './registerShellListeners';
+import { createDemoModule } from './createDemoModule';
 
 export function jsDomFramework() {
   if (typeof document === 'undefined') return;
@@ -51,7 +53,10 @@ export function jsDomFramework() {
   const delegator = createDelegator();
   const shell = createShell();
   const theme = createTheme(shell);
-  const modules = createModuleRegistry(delegator, shell);
+  const modules = createModuleRegistry(shell);
+
+  // Register modules
+  modules.register(createDemoModule(delegator, shell));
 
   registerShellListeners(delegator, shell, theme, modules);
 
@@ -59,6 +64,5 @@ export function jsDomFramework() {
   modules.render();
   modules.activate('demo');
 
-  shell.syncDemoButtons(modules.isActive('demo'));
   shell.appendDemoLine('Framework booted');
 }

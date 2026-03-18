@@ -54,8 +54,7 @@ body.with-app-shell {
 }
 
 #app-shell-root button,
-#app-shell-root input,
-#framework-demo-root button {
+#app-shell-root input {
   font: inherit;
 }
 
@@ -148,27 +147,6 @@ body.app-panel-open #app-shell-root .app-overlay {
   z-index: 50;
 }
 
-#framework-demo-root {
-  margin: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-}
-
-#framework-demo-root .demo-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-#demoOutput {
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  min-height: 3rem;
-  border: 1px dashed var(--border);
-  color: var(--muted);
-}
-
 .is-inactive {
   opacity: 0.45;
 }
@@ -200,7 +178,6 @@ body.app-panel-open #app-shell-root .app-overlay {
     <button type="button" data-action="menu-open" aria-label="Open menu">☰</button>
     <strong>Servewell</strong>
     <span class="app-spacer"></span>
-    <button type="button" data-action="demo-ping" data-module-target="demo">Demo</button>
     <label class="app-checkrow">
       <input type="checkbox" data-setting="dark-mode">
       <span>Dark</span>
@@ -231,26 +208,9 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   <nav class="app-bottombar">
     <button type="button" data-action="menu-open">Menu</button>
-    <button type="button" data-action="demo-ping" data-module-target="demo">Demo</button>
     <button type="button" data-action="scroll-top">Top</button>
   </nav>
 </div>`
-    );
-  }
-
-  if (!qs('#framework-demo-root')) {
-    document.body.insertAdjacentHTML(
-      'beforeend',
-      `
-<section id="framework-demo-root">
-  <h2>Framework demo</h2>
-  <p>Turn the Demo module off in the side panel, then tap Demo again.</p>
-  <div class="demo-buttons">
-    <button type="button" data-action="demo-ping" data-module-target="demo">Demo button</button>
-    <button type="button" data-action="demo-clear" data-module-target="demo">Clear demo log</button>
-  </div>
-  <div id="demoOutput"></div>
-</section>`
     );
   }
 
