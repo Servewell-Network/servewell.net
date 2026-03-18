@@ -103,7 +103,7 @@ async function processStepFile(fileName: string, isNt?: string) {
     const fields: StepWord = line.split('\t');
     const refIdx = isNt ? GreekWord.WordAndType : SemiticWord.Ref;
     const [docAbbr, chapStr, verseStr, wordIdx, source] = fields[refIdx].split(/\W/); // e.g., "Gen.1.1#01=L" or "Mat.1.1#01=NKO"
-    if (currentChapter?.ChapterNumber !== Number(chapStr)) {
+    if (currentChapter?.ChapterNumber !== Number(chapStr) || newAncientDocDirName) {
       // Save the previous chapter, if any, to its docDir before starting a new one
       if (currentChapter && currentChapter.DocOrBookAbbreviation) {
         currentChapter.SnippetsAndExplanations?.push(structuredClone(currentSnippet) as Snippet);
