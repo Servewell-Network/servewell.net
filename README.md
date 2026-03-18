@@ -29,6 +29,7 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
    - Adding BSB https://berean.bible/downloads.htm > https://bereanbible.com/bsb_tables.tsv after they released it (thankful!)
     
 ## Next steps
+ - Why are 3Jo, Jde and Rev1 not written?
  - create init pages with literal
     - <button popovertarget="my-tooltip">Help</button>
       <div id="my-tooltip" popover>

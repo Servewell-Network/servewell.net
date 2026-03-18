@@ -11,7 +11,8 @@
 		"cf-typegen": "wrangler types",
 		"phasing": "tsx src/phasingScripts/phasing.ts",
 		"p1a-2": "tsx src/phasingScripts/phase1aTo2.ts",
-		"p1b-2": "tsx src/phasingScripts/phase1bTo2.ts"
+		"p1b-2": "tsx src/phasingScripts/phase1bTo2.ts",
+		"p2-3": "tsx src/phasingScripts/phase2To3.ts"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",

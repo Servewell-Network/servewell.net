@@ -8,9 +8,11 @@ import path from 'path';
 async function runNeighborScripts() {
   const phase1aTo2 = path.resolve(path.dirname(fileURLToPath(import.meta.url)), './phase1aTo2.ts');
   const phase1bTo2 = path.resolve(path.dirname(fileURLToPath(import.meta.url)), './phase1bTo2.ts');
+  const phase2To3 = path.resolve(path.dirname(fileURLToPath(import.meta.url)), './phase2To3.ts');
   try {
     await tsImport(phase1aTo2, import.meta.url);
     await tsImport(phase1bTo2, import.meta.url);
+    await tsImport(phase2To3, import.meta.url);
   } catch (err) {
     console.error('Neighbor script failed:', err);
   }
