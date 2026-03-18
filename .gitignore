@@ -173,3 +173,7 @@ dist
 
 # other
 .DS_Store
+
+
+# specific to this project
+src/json-Phase2/**/*
