@@ -13,7 +13,8 @@
 		"p1a-2": "tsx src/phasingScripts/phase1aTo2.ts",
 		"p1b-2": "tsx src/phasingScripts/phase1bTo2.ts",
 		"p2-3": "tsx src/phasingScripts/phase2To3.ts",
-		"build:phase2to3-client": "esbuild src/phasingScripts/phase2To3/browserEntry.ts --bundle --platform=browser --format=iife --target=es2020 --outfile=public/-/phase2to3-client.js"
+		"build:servewell-app-shell": "esbuild src/phasingScripts/phase2To3/browserEntry.ts --bundle --platform=browser --format=iife --target=es2020 --outfile=public/js/servewell-app-shell.js",
+		"build:phase2to3-client": "npm run build:servewell-app-shell"
 
 	},
 	"devDependencies": {

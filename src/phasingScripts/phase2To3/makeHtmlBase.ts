@@ -1,6 +1,5 @@
 
 import fs from 'node:fs';
-import path from 'node:path';
 
 
 export function makeHtmlBase(title: string, description = '') {
@@ -9,8 +8,6 @@ export function makeHtmlBase(title: string, description = '') {
         console.error(`No html`);
         process.exit(1);
     }
-
-    temporarySideEffect(indexHtml, title); // add link to index.html
 
     const initialHtml = indexHtml.split('<title>')[0];
     return {
@@ -39,12 +36,4 @@ export function makeHtmlBase(title: string, description = '') {
             `</html>`
         ]
     }
-}
-
-function temporarySideEffect(indexHtml: string, title: string) {
-    const newIndexHtml = indexHtml.replace(
-        `<li></li>`,
-        `<li></li>\n<li><a href="/-/${title.replaceAll(' ', '-')}">${title}</a></li>`
-    );
-    fs.writeFileSync(`public/index.html`, newIndexHtml, { encoding: 'utf8' });
 }

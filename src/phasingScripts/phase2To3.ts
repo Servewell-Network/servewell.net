@@ -15,7 +15,7 @@ import { makeHtmlBase } from './phase2To3/makeHtmlBase';
 // `;
 
 // const inlineScript = `<script>${jsRuntimeShim}\n${jsDomFnSource}\njsDomFramework();</script>`;
-const scriptTag = `<script src="/-/phase2to3-client.js"></script>`;
+const scriptTag = `<script src="/js/servewell-app-shell.js"></script>`;
 
 const baseDistDir = 'public/-/';
 await resetDir(baseDistDir);
