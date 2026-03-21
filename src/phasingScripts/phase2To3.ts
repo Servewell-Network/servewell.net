@@ -1,42 +1,82 @@
 console.info('Generate HTML pages from the untracked Phase2 JSON files');
 
 import fs from 'node:fs';
+import path from 'node:path';
+import type { Chapter, EnglishInsertion, EnglishWordInfo, Snippet } from './phase1To2/phase2Types';
 import { makeHtmlBase } from './phase2To3/makeHtmlBase';
-// import { jsDomFramework } from './phase2To3/jsDomFramework';
 
-// const jsDomFnSource = jsDomFramework
-//   .toString()
-//   .replace(/<\/script>/gi, '<\\/script>'); // avoid accidental script-close
-// const jsRuntimeShim = `
-// const __name = (fn, name) => {
-//   try { Object.defineProperty(fn, "name", { value: name, configurable: true }); } catch {}
-//   return fn;
-// };
-// `;
-
-// const inlineScript = `<script>${jsRuntimeShim}\n${jsDomFnSource}\njsDomFramework();</script>`;
 const scriptTag = `<script src="/js/servewell-app-shell.js"></script>`;
+const USE_SHARED_WORD_POPOVER = true;
+const SHARED_WORD_POPOVER_ID = 'word-popover-shared';
 
 const baseDistDir = 'public/-/';
-await resetDir(baseDistDir);
-const html =makeHtmlBase('hey', 'This is a description of the hey page');
-const heyHtml = [
-  ...html.topOfHead,
-  ...html.headToBody,
-  `<div id="app"></div>`,
-  scriptTag,
-  ...html.bottom
-].join('\n');
-// write the html to a new file in baseDistDir
-fs.writeFileSync(`${baseDistDir}/hey.html`, heyHtml, { encoding: 'utf8' });
-
 const baseSrcDir = 'src/json-Phase2/docs';
-const docList = fs.readdirSync(baseSrcDir);
-docList?.forEach(async (docName) => {
-    const docPath = `${baseSrcDir}/${docName}`;
-    const jsonChapList = fs.readdirSync(docPath);
-// console.log(docName, jsonChapList.length);
-});
+
+type MetadataValue = string | number | undefined;
+
+interface MetadataEntry {
+  label: string;
+  value: MetadataValue;
+}
+
+interface RenderableTokenPart {
+  text: string;
+  html: string;
+}
+
+type TraditionalParagraphToken =
+  | {
+      kind: 'word';
+      text: string;
+      wordOrdinal: number;
+      strongsId?: string;
+      originalMorphemeId?: string;
+      originalToken?: string;
+      tokenSegmentOrdinal?: number;
+      tokenSegmentCount?: number;
+    }
+  | {
+      kind: 'text';
+      text: string;
+    };
+
+await resetDir(baseDistDir);
+await writeLegacyHeyPage();
+
+const chapterFilePaths = listChapterFilePaths(baseSrcDir);
+let renderedChapters = 0;
+
+for (const chapterFilePath of chapterFilePaths) {
+  const chapter = readChapterPayload(chapterFilePath);
+  if (!chapter) continue;
+
+  const bookDirName = safePathPart(chapter.DocumentOrBook || chapter.DocOrBookAbbreviation || 'Unknown');
+  const chapterNumber = Number.isFinite(chapter.ChapterNumber)
+    ? chapter.ChapterNumber.toString()
+    : extractChapterNumberFromPath(chapterFilePath);
+
+  const outputDir = path.join(baseDistDir, bookDirName);
+  await fs.promises.mkdir(outputDir, { recursive: true });
+
+  const outputPath = path.join(outputDir, `${chapterNumber}.html`);
+  await fs.promises.writeFile(outputPath, renderChapterPage(chapter), { encoding: 'utf8' });
+  renderedChapters += 1;
+}
+
+console.info(`Rendered ${renderedChapters} chapter pages from ${chapterFilePaths.length} source files`);
+
+async function writeLegacyHeyPage() {
+  const html = makeHtmlBase('hey', 'This is a description of the hey page');
+  const heyHtml = [
+    ...html.topOfHead,
+    ...html.headToBody,
+    `<div id="app"></div>`,
+    scriptTag,
+    ...html.bottom
+  ].join('\n');
+
+  await fs.promises.writeFile(path.join(baseDistDir, 'hey.html'), heyHtml, { encoding: 'utf8' });
+}
 
 async function resetDir(dir: string) {
   await fs.promises.rm(dir, { recursive: true, force: true }).catch((err) => {
@@ -46,4 +86,804 @@ async function resetDir(dir: string) {
     console.error(`Error recreating directory ${dir}:`, err);
   });
   console.log(`Directory ${dir} has been reset`);
+}
+
+function listChapterFilePaths(rootDir: string): string[] {
+  const docDirs = fs
+    .readdirSync(rootDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const chapterPaths: string[] = [];
+  for (const docDir of docDirs) {
+    const absoluteDocDir = path.join(rootDir, docDir);
+    const chapterFiles = fs
+      .readdirSync(absoluteDocDir, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
+      .map((entry) => entry.name)
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+    for (const chapterFile of chapterFiles) {
+      chapterPaths.push(path.join(absoluteDocDir, chapterFile));
+    }
+  }
+
+  return chapterPaths;
+}
+
+function readChapterPayload(chapterFilePath: string): Chapter | null {
+  try {
+    const rawFile = fs.readFileSync(chapterFilePath, { encoding: 'utf8' });
+    const parsed = JSON.parse(rawFile) as unknown;
+    const resolved = resolveChapterPayload(parsed);
+    if (resolved) return resolved;
+
+    console.warn(`Skipping ${chapterFilePath}: file does not match expected chapter schema`);
+    return null;
+  } catch (error) {
+    console.warn(`Skipping ${chapterFilePath}: ${(error as Error).message}`);
+    return null;
+  }
+}
+
+function resolveChapterPayload(rawPayload: unknown): Chapter | null {
+  if (!isRecord(rawPayload)) return null;
+
+  const nestedDefault = rawPayload.default;
+  const candidate = isRecord(nestedDefault) ? nestedDefault : rawPayload;
+  if (!isRecord(candidate)) return null;
+
+  const chapterNumberRaw = candidate.ChapterNumber;
+  const chapterNumber =
+    typeof chapterNumberRaw === 'number'
+      ? chapterNumberRaw
+      : typeof chapterNumberRaw === 'string'
+        ? Number.parseInt(chapterNumberRaw, 10)
+        : Number.NaN;
+
+  if (!Number.isFinite(chapterNumber)) return null;
+  const snippets = candidate.SnippetsAndExplanations;
+  if (!Array.isArray(snippets)) return null;
+
+  return {
+    DocumentOrBook: asString(candidate.DocumentOrBook, 'Unknown'),
+    DocOrBookAbbreviation: asString(candidate.DocOrBookAbbreviation, 'UNK'),
+    PaddedNumWithDocAbbr: asString(candidate.PaddedNumWithDocAbbr, '00-UNK'),
+    ChapterNumber: chapterNumber,
+    PaddedChapterNumber: asString(candidate.PaddedChapterNumber, `UNK${chapterNumber.toString().padStart(3, '0')}`),
+    ChapterId: asString(candidate.ChapterId, `UNK${chapterNumber}`),
+    NumPrecedingVersesToInclude: asNumber(candidate.NumPrecedingVersesToInclude, 0),
+    SnippetsAndExplanations: snippets as Snippet[],
+    NumFollowingVersesToInclude: asNumber(candidate.NumFollowingVersesToInclude, 0)
+  };
+}
+
+function renderChapterPage(chapter: Chapter): string {
+  const title = `${chapter.DocumentOrBook} ${chapter.ChapterNumber}`;
+  const description = `First-pass literal and traditional view for ${title}`;
+  const baseHtml = makeHtmlBase(title, description);
+
+  const snippetRows = chapter.SnippetsAndExplanations.map((snippet) => renderSnippetRow(snippet)).join('\n');
+
+  return [
+    ...baseHtml.topOfHead,
+    ...getChapterPageCss(),
+    ...baseHtml.headToBody,
+    `<main class="chapter-page" data-book="${escapeHtml(chapter.DocOrBookAbbreviation)}" data-chapter="${chapter.ChapterNumber}">`,
+    `<p class="chapter-note">Shared snippet label with side-by-side literal and traditional panes. Click any word to view metadata.</p>`,
+    `<section class="snippet-grid">`,
+    snippetRows,
+    `</section>`,
+    USE_SHARED_WORD_POPOVER ? renderSharedWordPopover() : '',
+    `</main>`,
+    USE_SHARED_WORD_POPOVER ? renderSharedWordPopoverScript() : '',
+    scriptTag,
+    ...baseHtml.bottom
+  ].join('\n');
+}
+
+function renderSnippetRow(snippet: Snippet): string {
+  const snippetLabel = getSnippetLabel(snippet);
+  const snippetId = `snippet-${toSafeDomId(snippet.SnippetId || snippetLabel)}`;
+
+  return [
+    `<article class="snippet-row" id="${snippetId}">`,
+    `<div class="snippet-label" aria-label="Snippet ${escapeHtml(snippetLabel)}">${escapeHtml(snippetLabel)}</div>`,
+    `<div class="snippet-pane literal-pane">`,
+    `<div class="pane-title">Literal</div>`,
+    renderLiteralPane(snippet),
+    `</div>`,
+    `<div class="snippet-pane traditional-pane">`,
+    `<div class="pane-title">Traditional</div>`,
+    renderTraditionalPane(snippet),
+    `</div>`,
+    `</article>`
+  ].join('\n');
+}
+
+function renderLiteralPane(snippet: Snippet): string {
+  const snippetLabel = getSnippetLabel(snippet);
+  const snippetKey = snippet.SnippetId || snippetLabel;
+  const renderParts: RenderableTokenPart[] = [];
+  let tokenOrdinal = 0;
+
+  for (const morpheme of snippet.OriginalMorphemes) {
+    const tokenText = normalizeTokenText(morpheme.EnglishMorphemeWithPunctuationInOriginalOrder || '');
+    if (!tokenText) continue;
+
+    const wordSegments = splitTokenIntoWords(tokenText);
+
+    for (const [segmentIndex, segmentText] of wordSegments.entries()) {
+      tokenOrdinal += 1;
+      const popoverSeed = morpheme.MorphemeId
+        ? `${morpheme.MorphemeId}-${segmentIndex + 1}`
+        : `${snippetKey}-literal-${tokenOrdinal}`;
+      const popoverId = `popover-${toSafeDomId(popoverSeed)}`;
+      const metadataEntries: MetadataEntry[] = [
+        { label: 'Pane', value: 'Literal' },
+        { label: 'Snippet', value: snippetLabel },
+        { label: 'Word Position', value: tokenOrdinal },
+        { label: 'Morpheme Gloss', value: tokenText },
+        {
+          label: 'Segment In Morpheme',
+          value: wordSegments.length > 1 ? `${segmentIndex + 1}` : undefined
+        },
+        {
+          label: 'Segments In Morpheme',
+          value: wordSegments.length > 1 ? wordSegments.length : undefined
+        },
+        { label: 'Morpheme ID', value: morpheme.MorphemeId },
+        { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
+        { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+        { label: 'Language', value: morpheme.OriginalLanguage },
+        { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
+        { label: 'Root Script', value: morpheme.OriginalRootScript },
+        { label: 'Root Translation', value: morpheme.EnglishRootTranslation },
+        { label: 'Source', value: morpheme.Source }
+      ];
+
+      renderParts.push({
+        text: segmentText,
+        html: renderWordToken(segmentText, popoverId, metadataEntries)
+      });
+    }
+  }
+
+  if (renderParts.length === 0) {
+    return `<p class="pane-empty">[no literal text]</p>`;
+  }
+
+  return `<div class="pane-text word-line">${renderTokenParts(renderParts)}</div>`;
+}
+
+function renderTraditionalPane(snippet: Snippet): string {
+  const snippetLabel = getSnippetLabel(snippet);
+  const snippetKey = snippet.SnippetId || snippetLabel;
+  const headings: string[] = [];
+  const crossRefs: string[] = [];
+  const paragraphs: string[] = [];
+  const footnotes: string[] = [];
+  const currentParagraphTokens: TraditionalParagraphToken[] = [];
+  let traditionalWordOrdinal = 0;
+
+  const flushParagraph = () => {
+    const paragraph = renderTraditionalParagraphTokens(currentParagraphTokens, snippetLabel, snippetKey);
+    currentParagraphTokens.length = 0;
+    if (paragraph) {
+      paragraphs.push(`<div class="traditional-paragraph word-line">${paragraph}</div>`);
+    }
+  };
+
+  for (const item of snippet.EnglishHeadingsAndWords) {
+    if (isEnglishWord(item)) {
+      const token = normalizeTokenText(item.EnglishWord);
+      if (token) {
+        const wordSegments = splitTokenIntoWords(token);
+
+        for (const [segmentIndex, segmentText] of wordSegments.entries()) {
+          traditionalWordOrdinal += 1;
+          currentParagraphTokens.push({
+            kind: 'word',
+            text: segmentText,
+            wordOrdinal: traditionalWordOrdinal,
+            strongsId: item.StrongsId,
+            originalMorphemeId: item.OriginalMorphemeId,
+            originalToken: wordSegments.length > 1 ? token : undefined,
+            tokenSegmentOrdinal: wordSegments.length > 1 ? segmentIndex + 1 : undefined,
+            tokenSegmentCount: wordSegments.length > 1 ? wordSegments.length : undefined
+          });
+        }
+      }
+      continue;
+    }
+
+    if (!isInsertion(item)) continue;
+    const text = item.Text || '';
+
+    switch (item.InsertionType) {
+      case 'Heading':
+        flushParagraph();
+        if (text.trim()) {
+          headings.push(`<p class="traditional-heading">${escapeHtml(text.trim())}</p>`);
+        }
+        break;
+      case 'Cross Ref.':
+        flushParagraph();
+        if (text.trim()) {
+          crossRefs.push(`<p class="traditional-crossref">${sanitizeRichHtml(text, true)}</p>`);
+        }
+        break;
+      case 'Paragraph Start':
+        flushParagraph();
+        break;
+      case 'Space':
+      case 'End Text':
+        if (text) {
+          currentParagraphTokens.push({ kind: 'text', text });
+        }
+        break;
+      case 'Footnotes':
+        flushParagraph();
+        if (text.trim()) {
+          footnotes.push(`<p class="traditional-footnote">${sanitizeRichHtml(text, false)}</p>`);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  flushParagraph();
+
+  const paneLines = [...headings, ...crossRefs, ...paragraphs, ...footnotes];
+  if (paneLines.length === 0) {
+    return `<p class="pane-empty">[no traditional text]</p>`;
+  }
+
+  return paneLines.join('\n');
+}
+
+function renderTraditionalParagraphTokens(
+  tokens: TraditionalParagraphToken[],
+  snippetLabel: string,
+  snippetKey: string
+): string {
+  const renderParts: RenderableTokenPart[] = [];
+
+  for (const token of tokens) {
+    if (token.kind === 'text') {
+      const plainText = normalizeTokenText(token.text);
+      if (!plainText) continue;
+
+      renderParts.push({
+        text: plainText,
+        html: escapeHtml(plainText)
+      });
+      continue;
+    }
+
+    const popoverId = `popover-${toSafeDomId(`${snippetKey}-traditional-${token.wordOrdinal}`)}`;
+    const metadataEntries: MetadataEntry[] = [
+      { label: 'Pane', value: 'Traditional' },
+      { label: 'Snippet', value: snippetLabel },
+      { label: 'Word Position', value: token.wordOrdinal },
+      { label: 'Source Token', value: token.originalToken },
+      {
+        label: 'Token Segment',
+        value:
+          token.tokenSegmentOrdinal && token.tokenSegmentCount
+            ? `${token.tokenSegmentOrdinal} of ${token.tokenSegmentCount}`
+            : undefined
+      },
+      { label: "Strong's ID", value: token.strongsId },
+      { label: 'Original Morpheme ID', value: token.originalMorphemeId }
+    ];
+
+    renderParts.push({
+      text: token.text,
+      html: renderWordToken(token.text, popoverId, metadataEntries)
+    });
+  }
+
+  return renderTokenParts(renderParts);
+}
+
+function renderTokenParts(parts: RenderableTokenPart[]): string {
+  let html = '';
+  let plainText = '';
+
+  for (const part of parts) {
+    const tokenText = normalizeTokenText(part.text);
+    if (!tokenText) continue;
+
+    if (plainText && shouldInsertSpaceBeforeToken(tokenText, plainText)) {
+      html += ' ';
+      plainText += ' ';
+    }
+
+    html += part.html;
+    plainText += tokenText;
+  }
+
+  return html;
+}
+
+function shouldInsertSpaceBeforeToken(token: string, existingText: string): boolean {
+  if (/^[,.;:!?%\]\)]/.test(token)) {
+    return false;
+  }
+
+  if (/[\[(]$/.test(existingText)) {
+    return false;
+  }
+
+  return true;
+}
+
+function normalizeTokenText(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function splitTokenIntoWords(tokenText: string): string[] {
+  const normalized = normalizeTokenText(tokenText);
+  if (!normalized) return [];
+  return normalized.split(' ').filter((segment) => segment.length > 0);
+}
+
+function renderWordToken(displayText: string, popoverId: string, metadataEntries: MetadataEntry[]): string {
+  const escapedDisplayText = escapeHtml(displayText);
+  const escapedDisplayTextAttribute = escapeHtmlAttribute(displayText);
+
+  if (USE_SHARED_WORD_POPOVER) {
+    const escapedSharedPopoverId = escapeHtmlAttribute(SHARED_WORD_POPOVER_ID);
+    const encodedMetadata = escapeHtmlAttribute(serializeMetadataEntries(metadataEntries));
+
+    return [
+      `<span class="word-wrap">`,
+      `<button type="button" class="word-token word-token-metadata" popovertarget="${escapedSharedPopoverId}" data-word="${escapedDisplayTextAttribute}" data-meta="${encodedMetadata}" aria-label="Show metadata for ${escapedDisplayTextAttribute}">${escapedDisplayText}</button>`,
+      `</span>`
+    ].join('');
+  }
+
+  const escapedPopoverId = escapeHtmlAttribute(popoverId);
+
+  return [
+    `<span class="word-wrap">`,
+    `<button type="button" class="word-token" popovertarget="${escapedPopoverId}" aria-label="Show metadata for ${escapedDisplayTextAttribute}">${escapedDisplayText}</button>`,
+    `<span id="${escapedPopoverId}" class="word-popover" popover="auto">`,
+    `<span class="word-popover-header">`,
+    `<strong class="word-popover-title">${escapedDisplayText}</strong>`,
+    `<button type="button" class="popover-close" popovertarget="${escapedPopoverId}" popovertargetaction="hide">Close</button>`,
+    `</span>`,
+    renderWordMetadata(metadataEntries),
+    `</span>`,
+    `</span>`
+  ].join('');
+}
+
+function renderWordMetadata(metadataEntries: MetadataEntry[]): string {
+  const rows = metadataEntries
+    .map(({ label, value }) => ({ label, value: value === undefined ? '' : String(value).trim() }))
+    .filter(({ value }) => value.length > 0)
+    .map(
+      ({ label, value }) =>
+        `<span class="word-meta-row"><span class="word-meta-label">${escapeHtml(label)}</span><span class="word-meta-value">${escapeHtml(value)}</span></span>`
+    )
+    .join('');
+
+  if (!rows) {
+    return `<span class="word-meta-empty">No metadata available for this word.</span>`;
+  }
+
+  return `<span class="word-meta-list">${rows}</span>`;
+}
+
+function serializeMetadataEntries(metadataEntries: MetadataEntry[]): string {
+  return metadataEntries
+    .map(({ label, value }) => ({ label: label.trim(), value: value === undefined ? '' : String(value).trim() }))
+    .filter(({ label, value }) => label.length > 0 && value.length > 0)
+    .map(({ label, value }) => `${encodeURIComponent(label)}=${encodeURIComponent(value)}`)
+    .join('&');
+}
+
+function renderSharedWordPopover(): string {
+  const escapedPopoverId = escapeHtmlAttribute(SHARED_WORD_POPOVER_ID);
+
+  return [
+    `<span id="${escapedPopoverId}" class="word-popover shared-word-popover" popover="auto">`,
+    `<span class="word-popover-header">`,
+    `<strong class="word-popover-title"></strong>`,
+    `<button type="button" class="popover-close" popovertarget="${escapedPopoverId}" popovertargetaction="hide">Close</button>`,
+    `</span>`,
+    `<span class="word-meta-list" data-shared-word-meta></span>`,
+    `<span class="word-meta-empty" data-shared-word-empty>No metadata available for this word.</span>`,
+    `</span>`
+  ].join('');
+}
+
+function renderSharedWordPopoverScript(): string {
+  const escapedPopoverId = escapeHtmlAttribute(SHARED_WORD_POPOVER_ID);
+
+  return [
+    '<script>',
+    '(function () {',
+    `  const popover = document.getElementById('${escapedPopoverId}');`,
+    '  if (!(popover instanceof HTMLElement)) return;',
+    '  const title = popover.querySelector(".word-popover-title");',
+    '  const metaList = popover.querySelector("[data-shared-word-meta]");',
+    '  const emptyState = popover.querySelector("[data-shared-word-empty]");',
+    '  if (!(title instanceof HTMLElement) || !(metaList instanceof HTMLElement) || !(emptyState instanceof HTMLElement)) return;',
+    '',
+    '  function decodePart(value) {',
+    '    try {',
+    '      return decodeURIComponent(value);',
+    '    } catch (_error) {',
+    '      return value;',
+    '    }',
+    '  }',
+    '',
+    '  function parseMetadata(raw) {',
+    '    if (!raw) return [];',
+    '    return raw',
+    '      .split("&")',
+    '      .map((pair) => {',
+    '        if (!pair) return null;',
+    '        const separatorIndex = pair.indexOf("=");',
+    '        if (separatorIndex < 0) return null;',
+    '        const label = decodePart(pair.slice(0, separatorIndex));',
+    '        const value = decodePart(pair.slice(separatorIndex + 1));',
+    '        if (!label || !value) return null;',
+    '        return { label, value };',
+    '      })',
+    '      .filter((entry) => entry !== null);',
+    '  }',
+    '',
+    '  function renderMetadata(entries) {',
+    '    metaList.textContent = "";',
+    '    for (const entry of entries) {',
+    '      const row = document.createElement("span");',
+    '      row.className = "word-meta-row";',
+    '      const label = document.createElement("span");',
+    '      label.className = "word-meta-label";',
+    '      label.textContent = entry.label;',
+    '      const value = document.createElement("span");',
+    '      value.className = "word-meta-value";',
+    '      value.textContent = entry.value;',
+    '      row.append(label, value);',
+    '      metaList.appendChild(row);',
+    '    }',
+    '    emptyState.hidden = entries.length > 0;',
+    '  }',
+    '',
+    '  document.addEventListener("click", (event) => {',
+    '    const eventTarget = event.target;',
+    '    if (!(eventTarget instanceof Element)) return;',
+    '    const button = eventTarget.closest("button.word-token-metadata[data-meta]");',
+    '    if (!(button instanceof HTMLButtonElement)) return;',
+    '',
+    '    const displayWord = button.dataset.word || button.textContent || "";',
+    '    title.textContent = displayWord;',
+    '    const metadataEntries = parseMetadata(button.dataset.meta || "");',
+    '    renderMetadata(metadataEntries);',
+    '  }, { capture: true });',
+    '})();',
+    '</script>'
+  ].join('\n');
+}
+
+function sanitizeRichHtml(rawHtml: string, normalizePipes: boolean): string {
+  const normalized = normalizePipes ? rawHtml.replace(/\|/g, '"') : rawHtml;
+  let escaped = escapeHtml(normalized);
+
+  escaped = escaped
+    .replace(/&lt;br\s*\/?&gt;/gi, '<br />')
+    .replace(/&lt;(i|em|strong|b|sup|sub)&gt;/gi, '<$1>')
+    .replace(/&lt;\/(i|em|strong|b|sup|sub)&gt;/gi, '</$1>')
+    .replace(/&lt;span class=&quot;cross&quot;&gt;/gi, '<span class="cross">')
+    .replace(/&lt;\/span&gt;/gi, '</span>');
+
+  escaped = escaped.replace(/&lt;a\s+href\s*=\s*&quot;([^&]*)&quot;&gt;/gi, (_fullMatch, hrefText) => {
+    const safeHref = sanitizeHref(decodeHtmlEntities(hrefText));
+    if (!safeHref) return '';
+    return `<a href="${escapeHtmlAttribute(safeHref)}">`;
+  });
+
+  return escaped.replace(/&lt;\/a&gt;/gi, '</a>');
+}
+
+function sanitizeHref(rawHref: string): string {
+  const href = rawHref.trim();
+  if (!href) return '';
+  if (/^\s*javascript:/i.test(href)) return '';
+  if (/^(https?:\/\/|\/|\.\.\/|\.\/|#)/i.test(href)) return href;
+  return '';
+}
+
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function getSnippetLabel(snippet: Snippet): string {
+  if (snippet.SnippetId?.includes(':')) {
+    const label = snippet.SnippetId.split(':').pop();
+    if (label) return label;
+  }
+  return String(snippet.SnippetNumber);
+}
+
+function toSafeDomId(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_-]/g, '-');
+}
+
+function safePathPart(value: string): string {
+  const cleaned = value
+    .replace(/[\\/:*?"<>|]/g, '-')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return cleaned || 'Unknown';
+}
+
+function extractChapterNumberFromPath(chapterPath: string): string {
+  const fileName = path.basename(chapterPath, '.json');
+  const numericPart = fileName.replace(/^\D+/, '');
+  return numericPart ? Number.parseInt(numericPart, 10).toString() : '1';
+}
+
+function asString(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
+
+function asNumber(value: unknown, fallback: number): number {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+        ? Number.parseInt(value, 10)
+        : Number.NaN;
+
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeHtmlAttribute(value: string): string {
+  return escapeHtml(value).replace(/`/g, '&#96;');
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isEnglishWord(entry: EnglishWordInfo | EnglishInsertion): entry is EnglishWordInfo {
+  return 'EnglishWord' in entry;
+}
+
+function isInsertion(entry: EnglishWordInfo | EnglishInsertion): entry is EnglishInsertion {
+  return 'InsertionType' in entry;
+}
+
+function getChapterPageCss(): string[] {
+  return [
+    '',
+    ':root {',
+    '  color-scheme: light dark;',
+    '  --page-bg: #f4f6f9;',
+    '  --page-fg: #0f172a;',
+    '  --muted: #475467;',
+    '  --label-bg: #f8fafc;',
+    '  --label-fg: #2f4f4f;',
+    '  --pane-bg: #ffffff;',
+    '  --pane-fg: #0f172a;',
+    '  --pane-border: #dbe3ea;',
+    '  --link: #1d4ed8;',
+    '  --hover-bg: #eaf2ff;',
+    '  --hover-fg: #0f3b93;',
+    '  --popover-bg: #ffffff;',
+    '  --popover-fg: #0f172a;',
+    '  --popover-border: #c7d2df;',
+    '}',
+    '@media (prefers-color-scheme: dark) {',
+    '  :root {',
+    '    --page-bg: #0b1220;',
+    '    --page-fg: #e5edf7;',
+    '    --muted: #a6b3c5;',
+    '    --label-bg: #172235;',
+    '    --label-fg: #d6e2f3;',
+    '    --pane-bg: #101a2a;',
+    '    --pane-fg: #e5edf7;',
+    '    --pane-border: #2a3b52;',
+    '    --link: #8ab4ff;',
+    '    --hover-bg: #1b2a40;',
+    '    --hover-fg: #d9e8ff;',
+    '    --popover-bg: #0f1a2b;',
+    '    --popover-fg: #e5edf7;',
+    '    --popover-border: #3a4d68;',
+    '  }',
+    '}',
+    'body {',
+    '  background: var(--page-bg);',
+    '  color: var(--page-fg);',
+    '}',
+    'a {',
+    '  color: var(--link);',
+    '}',
+    '.chapter-page {',
+    '  margin-top: 1rem;',
+    '}',
+    '.chapter-note {',
+    '  color: var(--muted);',
+    '  margin-bottom: 1rem;',
+    '}',
+    '.snippet-grid {',
+    '  display: flex;',
+    '  flex-direction: column;',
+    '  gap: 0.85rem;',
+    '}',
+    '.snippet-row {',
+    '  display: grid;',
+    '  grid-template-columns: minmax(2.75rem, 3.5rem) minmax(0, 1fr) minmax(0, 1fr);',
+    '  gap: 0.65rem;',
+    '  align-items: start;',
+    '}',
+    '.snippet-row > * {',
+    '  min-width: 0;',
+    '}',
+    '.snippet-label {',
+    '  font-weight: 700;',
+    '  font-size: 1rem;',
+    '  line-height: 1.2;',
+    '  color: var(--label-fg);',
+    '  border: 1px solid var(--pane-border);',
+    '  border-radius: 0.45rem;',
+    '  text-align: center;',
+    '  padding: 0.4rem 0.25rem;',
+    '  background: var(--label-bg);',
+    '  position: sticky;',
+    '  top: 0.5rem;',
+    '}',
+    '.snippet-pane {',
+    '  border: 1px solid var(--pane-border);',
+    '  border-radius: 0.5rem;',
+    '  background: var(--pane-bg);',
+    '  color: var(--pane-fg);',
+    '  padding: 0.55rem 0.65rem 0.65rem;',
+    '}',
+    '.pane-title {',
+    '  font-size: 0.78rem;',
+    '  text-transform: uppercase;',
+    '  letter-spacing: 0.06em;',
+    '  color: var(--muted);',
+    '  margin-bottom: 0.4rem;',
+    '}',
+    '.pane-text, .traditional-paragraph, .traditional-heading, .traditional-crossref, .traditional-footnote {',
+    '  margin: 0.25rem 0;',
+    '}',
+    '.word-line {',
+    '  line-height: 1.7;',
+    '}',
+    '.word-token {',
+    '  display: inline;',
+    '  background: transparent;',
+    '  border: 0;',
+    '  color: inherit;',
+    '  cursor: pointer;',
+    '  font: inherit;',
+    '  margin: 0;',
+    '  padding: 0.04rem 0.08rem;',
+    '  border-radius: 0.25rem;',
+    '  line-height: inherit;',
+    '}',
+    '.word-token:hover {',
+    '  background: var(--hover-bg);',
+    '  color: var(--hover-fg);',
+    '}',
+    '.word-token:focus-visible {',
+    '  outline: 2px solid #1d4ed8;',
+    '  outline-offset: 1px;',
+    '}',
+    '.word-popover {',
+    '  max-width: min(92vw, 26rem);',
+    '  border: 1px solid var(--popover-border);',
+    '  border-radius: 0.6rem;',
+    '  padding: 0.6rem 0.75rem;',
+    '  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.22);',
+    '  background: var(--popover-bg);',
+    '  color: var(--popover-fg);',
+    '}',
+    '.word-popover:not(:popover-open) {',
+    '  display: none;',
+    '}',
+    '.word-popover:popover-open {',
+    '  display: block;',
+    '}',
+    '.word-popover::backdrop {',
+    '  background: rgba(15, 23, 42, 0.25);',
+    '}',
+    '.word-popover-header {',
+    '  display: flex;',
+    '  align-items: center;',
+    '  justify-content: space-between;',
+    '  gap: 0.75rem;',
+    '  margin-bottom: 0.5rem;',
+    '}',
+    '.word-popover-title {',
+    '  font-size: 1rem;',
+    '}',
+    '.popover-close {',
+    '  border: 1px solid var(--pane-border);',
+    '  border-radius: 0.35rem;',
+    '  background: var(--label-bg);',
+    '  color: var(--pane-fg);',
+    '  cursor: pointer;',
+    '  font: inherit;',
+    '  font-size: 0.86rem;',
+    '  padding: 0.1rem 0.5rem;',
+    '}',
+    '.word-meta-list {',
+    '  display: block;',
+    '}',
+    '.word-meta-row {',
+    '  display: grid;',
+    '  grid-template-columns: 8rem minmax(0, 1fr);',
+    '  gap: 0.3rem 0.65rem;',
+    '  margin: 0.2rem 0;',
+    '}',
+    '.word-meta-label {',
+    '  color: var(--muted);',
+    '  font-weight: 600;',
+    '}',
+    '.word-meta-value {',
+    '  color: var(--pane-fg);',
+    '  overflow-wrap: anywhere;',
+    '}',
+    '.word-meta-empty {',
+    '  color: var(--muted);',
+    '  font-style: italic;',
+    '}',
+    '.traditional-heading {',
+    '  font-weight: 700;',
+    '}',
+    '.traditional-crossref, .traditional-footnote {',
+    '  font-size: 0.95em;',
+    '  color: var(--muted);',
+    '}',
+    '.pane-empty {',
+    '  margin: 0.25rem 0;',
+    '  color: var(--muted);',
+    '  font-style: italic;',
+    '}',
+    '.traditional-crossref .cross {',
+    '  color: var(--muted);',
+    '}',
+    '.traditional-crossref a {',
+    '  color: var(--link);',
+    '  text-decoration: underline;',
+    '}',
+    '@media (max-width: 760px) {',
+    '  .snippet-row {',
+    '    grid-template-columns: 1fr;',
+    '  }',
+    '  .snippet-label {',
+    '    position: static;',
+    '    width: fit-content;',
+    '    min-width: 2.5rem;',
+    '  }',
+    '}'
+  ];
 }

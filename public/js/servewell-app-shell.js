@@ -501,6 +501,10 @@ body.app-panel-open #app-shell-root .app-overlay {
   }
 
   // src/phasingScripts/phase2To3/jsDomFramework.ts
+  function isDemoRoute(pathname) {
+    const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+    return normalizedPath === "/-/hey" || normalizedPath === "/-/hey.html";
+  }
   function jsDomFramework() {
     if (typeof document === "undefined") return;
     if (!document.body) {
@@ -515,12 +519,17 @@ body.app-panel-open #app-shell-root .app-overlay {
     const shell = createShell();
     const theme = createTheme(shell);
     const modules = createModuleRegistry(shell);
-    modules.register(createDemoModule(delegator, shell));
+    const onDemoPage = typeof window !== "undefined" && isDemoRoute(window.location.pathname);
+    if (onDemoPage) {
+      modules.register(createDemoModule(delegator, shell));
+    }
     registerShellListeners(delegator, shell, theme, modules);
     theme.restore();
     modules.render();
-    modules.activate("demo");
-    shell.appendDemoLine("Framework booted");
+    if (onDemoPage) {
+      modules.activate("demo");
+      shell.appendDemoLine("Framework booted");
+    }
   }
 
   // src/phasingScripts/phase2To3/browserEntry.ts

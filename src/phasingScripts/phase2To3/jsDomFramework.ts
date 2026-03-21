@@ -37,6 +37,11 @@ import { createModuleRegistry } from './createModuleRegistry';
 import { registerShellListeners } from './registerShellListeners';
 import { createDemoModule } from './createDemoModule';
 
+function isDemoRoute(pathname: string): boolean {
+  const normalizedPath = pathname.replace(/\/+$/, '') || '/';
+  return normalizedPath === '/-/hey' || normalizedPath === '/-/hey.html';
+}
+
 export function jsDomFramework() {
   if (typeof document === 'undefined') return;
 
@@ -54,15 +59,19 @@ export function jsDomFramework() {
   const shell = createShell();
   const theme = createTheme(shell);
   const modules = createModuleRegistry(shell);
+  const onDemoPage = typeof window !== 'undefined' && isDemoRoute(window.location.pathname);
 
   // Register modules
-  modules.register(createDemoModule(delegator, shell));
+  if (onDemoPage) {
+    modules.register(createDemoModule(delegator, shell));
+  }
 
   registerShellListeners(delegator, shell, theme, modules);
 
   theme.restore();
   modules.render();
-  modules.activate('demo');
-
-  shell.appendDemoLine('Framework booted');
+  if (onDemoPage) {
+    modules.activate('demo');
+    shell.appendDemoLine('Framework booted');
+  }
 }
