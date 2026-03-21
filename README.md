@@ -25,6 +25,7 @@ It starts with a Step Bible via Wrangler (for Cloudflare hosting).
           - But perhaps since I'm not actually altering the data, but making derivative data, they might not consider it to be changes.
      - For now, no changes, so to update simply copy from parallel repo copy:
          - cp -r ../STEPBible-Data/Translators\ Amalgamated\ OT+NT src/step-Phase1a
+         - cp ../STEPBible-Data/TE* src/step-Phase1a/
          - npm run p1a-2
    - Adding BSB https://berean.bible/downloads.htm > https://bereanbible.com/bsb_tables.tsv after they released it (thankful!)
     
