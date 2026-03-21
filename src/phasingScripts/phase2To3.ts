@@ -9,6 +9,31 @@ const scriptTag = `<script src="/js/servewell-app-shell.js"></script>`;
 const USE_SHARED_WORD_POPOVER = true;
 const SHARED_WORD_POPOVER_ID = 'word-popover-shared';
 
+const METADATA_LABEL_TO_KEY: Record<string, string> = {
+  Pane: 'p',
+  Snippet: 'sn',
+  'Word Position': 'wp',
+  'Morpheme Gloss': 'mg',
+  'Segment In Morpheme': 'sim',
+  'Segments In Morpheme': 'smc',
+  'Morpheme ID': 'mid',
+  'Original Script': 'os',
+  Transliteration: 'tr',
+  Language: 'lg',
+  "Strong's Root": 'sr',
+  'Root Script': 'rs',
+  'Root Translation': 'rt',
+  Source: 'src',
+  'Source Token': 'stok',
+  'Token Segment': 'tseg',
+  "Strong's ID": 'sid',
+  'Original Morpheme ID': 'omid'
+};
+
+const METADATA_KEY_TO_LABEL = Object.fromEntries(
+  Object.entries(METADATA_LABEL_TO_KEY).map(([label, key]) => [key, label])
+) as Record<string, string>;
+
 const baseDistDir = 'public/-/';
 const baseSrcDir = 'src/json-Phase2/docs';
 
@@ -441,7 +466,7 @@ function renderWordToken(displayText: string, popoverId: string, metadataEntries
 
     return [
       `<span class="word-wrap">`,
-      `<button type="button" class="word-token word-token-metadata" popovertarget="${escapedSharedPopoverId}" data-word="${escapedDisplayTextAttribute}" data-meta="${encodedMetadata}" aria-label="Show metadata for ${escapedDisplayTextAttribute}">${escapedDisplayText}</button>`,
+      `<button type="button" class="word-token" popovertarget="${escapedSharedPopoverId}" data-m="${encodedMetadata}" aria-label="Show metadata for ${escapedDisplayTextAttribute}">${escapedDisplayText}</button>`,
       `</span>`
     ].join('');
   }
@@ -483,7 +508,10 @@ function serializeMetadataEntries(metadataEntries: MetadataEntry[]): string {
   return metadataEntries
     .map(({ label, value }) => ({ label: label.trim(), value: value === undefined ? '' : String(value).trim() }))
     .filter(({ label, value }) => label.length > 0 && value.length > 0)
-    .map(({ label, value }) => `${encodeURIComponent(label)}=${encodeURIComponent(value)}`)
+    .map(({ label, value }) => {
+      const compactLabel = METADATA_LABEL_TO_KEY[label] || label;
+      return `${encodeURIComponent(compactLabel)}=${encodeURIComponent(value)}`;
+    })
     .join('&');
 }
 
@@ -504,11 +532,13 @@ function renderSharedWordPopover(): string {
 
 function renderSharedWordPopoverScript(): string {
   const escapedPopoverId = escapeHtmlAttribute(SHARED_WORD_POPOVER_ID);
+  const compactLabelMapJson = JSON.stringify(METADATA_KEY_TO_LABEL);
 
   return [
     '<script>',
     '(function () {',
     `  const popover = document.getElementById('${escapedPopoverId}');`,
+    `  const labelMap = ${compactLabelMapJson};`,
     '  if (!(popover instanceof HTMLElement)) return;',
     '  const title = popover.querySelector(".word-popover-title");',
     '  const metaList = popover.querySelector("[data-shared-word-meta]");',
@@ -531,7 +561,8 @@ function renderSharedWordPopoverScript(): string {
     '        if (!pair) return null;',
     '        const separatorIndex = pair.indexOf("=");',
     '        if (separatorIndex < 0) return null;',
-    '        const label = decodePart(pair.slice(0, separatorIndex));',
+    '        const compactLabel = decodePart(pair.slice(0, separatorIndex));',
+    '        const label = labelMap[compactLabel] || compactLabel;',
     '        const value = decodePart(pair.slice(separatorIndex + 1));',
     '        if (!label || !value) return null;',
     '        return { label, value };',
@@ -559,12 +590,12 @@ function renderSharedWordPopoverScript(): string {
     '  document.addEventListener("click", (event) => {',
     '    const eventTarget = event.target;',
     '    if (!(eventTarget instanceof Element)) return;',
-    '    const button = eventTarget.closest("button.word-token-metadata[data-meta]");',
+    '    const button = eventTarget.closest("button.word-token[data-m]");',
     '    if (!(button instanceof HTMLButtonElement)) return;',
     '',
-    '    const displayWord = button.dataset.word || button.textContent || "";',
+    '    const displayWord = button.textContent || "";',
     '    title.textContent = displayWord;',
-    '    const metadataEntries = parseMetadata(button.dataset.meta || "");',
+    '    const metadataEntries = parseMetadata(button.dataset.m || "");',
     '    renderMetadata(metadataEntries);',
     '  }, { capture: true });',
     '})();',
@@ -682,7 +713,7 @@ function getChapterPageCss(): string[] {
   return [
     '',
     ':root {',
-    '  color-scheme: light dark;',
+    '  color-scheme: light;',
     '  --page-bg: #f4f6f9;',
     '  --page-fg: #0f172a;',
     '  --muted: #475467;',
@@ -698,23 +729,22 @@ function getChapterPageCss(): string[] {
     '  --popover-fg: #0f172a;',
     '  --popover-border: #c7d2df;',
     '}',
-    '@media (prefers-color-scheme: dark) {',
-    '  :root {',
-    '    --page-bg: #0b1220;',
-    '    --page-fg: #e5edf7;',
-    '    --muted: #a6b3c5;',
-    '    --label-bg: #172235;',
-    '    --label-fg: #d6e2f3;',
-    '    --pane-bg: #101a2a;',
-    '    --pane-fg: #e5edf7;',
-    '    --pane-border: #2a3b52;',
-    '    --link: #8ab4ff;',
-    '    --hover-bg: #1b2a40;',
-    '    --hover-fg: #d9e8ff;',
-    '    --popover-bg: #0f1a2b;',
-    '    --popover-fg: #e5edf7;',
-    '    --popover-border: #3a4d68;',
-    '  }',
+    ':root[data-theme="dark"] {',
+    '  color-scheme: dark;',
+    '  --page-bg: #0b1220;',
+    '  --page-fg: #e5edf7;',
+    '  --muted: #a6b3c5;',
+    '  --label-bg: #172235;',
+    '  --label-fg: #d6e2f3;',
+    '  --pane-bg: #101a2a;',
+    '  --pane-fg: #e5edf7;',
+    '  --pane-border: #2a3b52;',
+    '  --link: #8ab4ff;',
+    '  --hover-bg: #1b2a40;',
+    '  --hover-fg: #d9e8ff;',
+    '  --popover-bg: #0f1a2b;',
+    '  --popover-fg: #e5edf7;',
+    '  --popover-border: #3a4d68;',
     '}',
     'body {',
     '  background: var(--page-bg);',
