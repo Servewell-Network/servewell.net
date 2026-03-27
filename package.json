@@ -12,6 +12,9 @@
 		"phasing": "tsx src/phasingScripts/phasing.ts",
 		"p1a-2": "tsx src/phasingScripts/phase1aTo2.ts",
 		"p1b-2": "tsx src/phasingScripts/phase1bTo2.ts",
+		"p1b-review": "tsx src/phasingScripts/generateAlignmentDoubleCheck.ts",
+		"p1b-apply-review": "tsx src/phasingScripts/applyAlignmentReviewSelections.ts",
+		"p1b-apply-review-copy": "tsx src/phasingScripts/applyAlignmentReviewSelections.ts --review-path src/phasingScripts/phase1To2/traditional-word-alignment-double-check.txt --skip-no-row --include-unchanged-main-as-guess",
 		"p2-3": "tsx src/phasingScripts/phase2To3.ts",
 		"build:servewell-app-shell": "esbuild src/phasingScripts/phase2To3/browserEntry.ts --bundle --platform=browser --format=iife --target=es2020 --outfile=public/js/servewell-app-shell.js",
 		"build:phase2to3-client": "npm run build:servewell-app-shell"

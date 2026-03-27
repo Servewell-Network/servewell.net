@@ -19,6 +19,9 @@ const METADATA_LABEL_TO_KEY: Record<string, string> = {
   'Morpheme ID': 'mid',
   'Original Script': 'os',
   Transliteration: 'tr',
+  'Grammar Code': 'gc',
+  Grammar: 'gr',
+  'Grammar Function': 'gf',
   Language: 'lg',
   "Strong's Root": 'sr',
   'Root Script': 'rs',
@@ -56,6 +59,7 @@ type TraditionalParagraphToken =
       wordOrdinal: number;
       strongsId?: string;
       originalMorphemeId?: string;
+      resolvedOriginalMorphemeIds?: string[];
       originalToken?: string;
       tokenSegmentOrdinal?: number;
       tokenSegmentCount?: number;
@@ -261,6 +265,9 @@ function renderLiteralPane(snippet: Snippet): string {
         { label: 'Morpheme ID', value: morpheme.MorphemeId },
         { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
         { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+        { label: 'Grammar Code', value: morpheme.OriginalMorphemeGrammarCode },
+        { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
+        { label: 'Grammar Function', value: morpheme.OriginalMorphemeGrammarFunction },
         { label: 'Language', value: morpheme.OriginalLanguage },
         { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
         { label: 'Root Script', value: morpheme.OriginalRootScript },
@@ -314,6 +321,7 @@ function renderTraditionalPane(snippet: Snippet): string {
             wordOrdinal: traditionalWordOrdinal,
             strongsId: item.StrongsId,
             originalMorphemeId: item.OriginalMorphemeId,
+            resolvedOriginalMorphemeIds: item.ResolvedOriginalMorphemeIds,
             originalToken: wordSegments.length > 1 ? token : undefined,
             tokenSegmentOrdinal: wordSegments.length > 1 ? segmentIndex + 1 : undefined,
             tokenSegmentCount: wordSegments.length > 1 ? wordSegments.length : undefined
@@ -389,6 +397,9 @@ function renderTraditionalParagraphTokens(
     }
 
     const popoverId = `popover-${toSafeDomId(`${snippetKey}-traditional-${token.wordOrdinal}`)}`;
+    const originalMorphemeDisplay = token.resolvedOriginalMorphemeIds && token.resolvedOriginalMorphemeIds.length > 0
+      ? token.resolvedOriginalMorphemeIds.join(', ')
+      : token.originalMorphemeId;
     const metadataEntries: MetadataEntry[] = [
       { label: 'Pane', value: 'Traditional' },
       { label: 'Snippet', value: snippetLabel },
@@ -402,7 +413,7 @@ function renderTraditionalParagraphTokens(
             : undefined
       },
       { label: "Strong's ID", value: token.strongsId },
-      { label: 'Original Morpheme ID', value: token.originalMorphemeId }
+      { label: 'Original Morpheme ID', value: originalMorphemeDisplay }
     ];
 
     renderParts.push({

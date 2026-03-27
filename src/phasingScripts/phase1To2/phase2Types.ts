@@ -3,6 +3,9 @@ export interface Morpheme { // unit of meaning = word or part of word
   "WordNumber"?: number; // because morphemes are often grouped in Semitic (Hebrew/Aramaic)
   "OriginalMorphemeScript": string; // unicode of Aramaic/Greek characters
   "OriginalMorphemeTransliteration"?: string; // sounds for English readers
+  "OriginalMorphemeGrammarCode"?: string; // e.g., HR, Ncfsa, N-NSF
+  "OriginalMorphemeGrammar"?: string; // readable grammar label from TEHMC/TEGMC
+  "OriginalMorphemeGrammarFunction"?: string; // e.g., Preposition, Noun, Verb
   "OriginalMorphemeVerbalAspect"?: 'Whole Action' | 'Progressing Action'; // whole is traditionally called perfect; is there a repeated also?
   "OriginalMorphemeVerbalTenseOrTime"?: 'Past' | 'Present' | 'Future';
   "OriginalMorphemeVerbalPerson"?: 'First Person' | 'Second Person' | 'Third Person';
@@ -35,6 +38,8 @@ export interface EnglishWordInfo {
     "EnglishWord": string;
     "StrongsId"?: string; // once we know enough morpheme IDs, can remove this field
     "OriginalMorphemeId"?: string;
+  "ResolvedOriginalMorphemeIds"?: string[]; // explicit resolved mappings when one traditional word maps to multiple literal morphemes
+    "OriginalMorphemeIds"?: string[]; // candidate literal morphemes when one-to-one alignment is ambiguous
 }
 export interface EnglishInsertion {
     "InsertionType": 'Heading' | 'Cross Ref.' | 'Paragraph Start' | 'Space' | 'Footnotes' | 'End Text';

@@ -1,0 +1,148 @@
+# Traditional Alignment Double-Check
+generatedAt: 2026-03-27T03:21:24.568Z
+entries: 34
+confidence.low: 32
+confidence.medium: 0
+confidence.high: 2
+
+Each block includes a best guess and full literal/traditional verse text with significant words marked by a leading __ marker.
+Review workflow: edit literal-line markers only. Add or move __ before one or more literal morphemes to map this traditional word.
+If you want NONE, leave no literal morpheme marked with __; p1b-apply-review stores that as an empty array.
+Traditional-line edits are ignored by p1b-apply-review.
+
+Jos11:2#21 | confidence: low | guess: Jos11:2.21 | key:  | candidates: Jos11:2.19, Jos11:2.20, Jos11:2.21
+literal: and to the kings who [were] from [the] north in the hill country and in the arabah south of kinnereth and in the shephelah and on [the] __heights __of __dor from [the] west
+traditional: to the kings of the north in the mountains, in the arabah south of chinnereth, in the foothills, and in __naphoth-dor to the west;
+
+Psa9:18#15 | confidence: low | guess: Psa9:18.2 | key: Psa9:18#15-oppressed | candidates: Psa9:18.1, Psa9:18.2, Psa9:18.3, Psa9:18.4, Psa9:18.5, Psa9:18.6, Psa9:18.7, Psa9:18.8, Psa9:18.9, Psa9:18.10, Psa9:18.11, Psa9:18.12
+literal: for not to perpetuity he will be forgotten [the] needy [the] hope of __afflicted [people] it will be lost for ever
+traditional: for the needy {will} not always be forgotten; nor the hope of the __oppressed forever dashed.
+
+Psa16:3#19 | confidence: low | guess: Psa16:3.15 | key: Psa16:3#19-resides | candidates: Psa16:3.15, Psa16:3.16, Psa16:3.17
+literal: to [the] holy [ones] who [are] in the land they and [the] majestic [ones] <of> [whom] all delight my [is] in them
+traditional: as for the saints in the land, they are the excellence in whom all my delight __resides.
+
+Psa17:14#28 | confidence: low | guess: Psa17:14.20 | key: Psa17:14#28-of | candidates: Psa17:14.19, Psa17:14.20
+literal: from men hand your o yahweh from men from [the] world [whom] portion their [is] in the life and treasured [thing] your you fill belly __their they are satisfied sons and they leave abundance their to children their
+traditional: from such men, o lord, by your hand— from men of the world whose portion is in this life. may you fill the bellies __of your treasured [ones] and satisfy their sons, so they leave their abundance to their children.
+
+Psa24:1#18 | confidence: low | guess: Psa24:1.9 | key: Psa24:1#18-therein | candidates: Psa24:1.9, Psa24:1.10
+literal: [belongs] to yahweh the earth and what fills it [the] world and [those who] dwell __in __it
+traditional: the earth [is] the lord’s, and the fullness thereof, the world and all who dwell __therein.
+
+Psa25:2#23 | confidence: low | guess: Psa25:2.12 | key: Psa25:2#23-over | candidates: Psa25:2.12, Psa25:2.13
+literal: o god my in you i trust may not i be ashamed may not they exult enemies my __to me
+traditional: in you, my god, i trust. do not let me be put to shame; do not let my enemies exult __over me.
+
+Psa50:10#7 | confidence: low | guess: Psa50:10.3 | key: Psa50:10#7-is | candidates: Psa50:10.3, Psa50:10.4
+literal: for __[belong] to me every living creature of [the] forest [the] animals on hills of a thousand
+traditional: for every beast of the forest __is mine— the cattle on a thousand hills.
+
+Psa50:12#14 | confidence: low | guess: Psa50:12.11 | key: Psa50:12#14-is | candidates: Psa50:12.11, Psa50:12.12
+literal: if i will be hungry not i will tell to you for __[belong] to me [the] world and what fills it
+traditional: if i were hungry, i would not tell you, for the world __is mine, and the fullness thereof.
+
+Psa71:6#21 | confidence: low | guess: Psa71:6.12 | key: Psa71:6#21-for | candidates: Psa71:6.12, Psa71:6.13
+literal: on you i have supported myself from [the] womb from [the] inward parts of mother my you [were [the] one who] cut off me [is] __in you praise my continually
+traditional: i have leaned on you since birth; you pulled me from my mother’s womb. my praise is always __for you.
+
+Psa71:12#9 | confidence: low | guess: Psa71:12.9 | key: Psa71:12#9-hurry | candidates: Psa71:12.9, Psa71:12.10, Psa71:12.11
+literal: o god may not you be far from me o god my to help my __make __haste
+traditional: be not far from me, o god. __hurry, o my god, to help me.
+
+Psa90:1#5 | confidence: high | guess: Psa90:1.6 | key: Psa90:1#5-our | candidates: Psa90:1.5, Psa90:1.6
+literal: o lord a dwelling place you you have been __of __us in a generation and a generation
+traditional: lord, you have been __our dwelling place through all generations.
+
+Psa91:11#7 | confidence: low | guess: Psa91:11.6 | key: Psa91:11#7-concerning | candidates: Psa91:11.6, Psa91:11.7
+literal: for angels his he will command __to you to guard you in all ways your
+traditional: for he will command his angels __concerning you to guard you in all your ways.
+
+Psa106:26#7 | confidence: low | guess: Psa106:26.5 | key: Psa106:26#7-swore | candidates: Psa106:26.5, Psa106:26.6
+literal: and he raised hand his to them to make fall <obj.> them in the wilderness
+traditional: so he raised his hand {and __swore} to cast them down in the wilderness,
+
+Psa118:6#6 | confidence: low | guess: Psa118:6.2 | key: Psa118:6#6-side | candidates: Psa118:6.2, Psa118:6.3
+literal: yahweh [is] for me not i will be afraid what? will he do to me anyone
+traditional: the lord [is] on my __side; i will not be afraid. what can man do to me?
+
+Psa118:7#6 | confidence: low | guess: Psa118:7.2 | key: Psa118:7#6-side | candidates: Psa118:7.2, Psa118:7.3
+literal: yahweh [is] for me <in> helper<s> my and i i will look on [those who] hate me
+traditional: the lord [is] on my __side; he is my helper. therefore i will look in triumph on those who hate me.
+
+Psa118:27#13 | confidence: low | guess: Psa118:27.4 | key: Psa118:27#13-upon | candidates: Psa118:27.4, Psa118:27.5
+literal: [is] god yahweh and he has given light __to us bind a festival sacrifice with ropes to [the] horns of the altar
+traditional: the lord is god; he has made his light to shine __upon us. bind the festal sacrifice with cords to the horns of the altar.
+
+Psa119:35#11 | confidence: low | guess: Psa119:35.9 | key: Psa119:35#11-there | candidates: Psa119:35.9, Psa119:35.10
+literal: lead me in [the] path of commandments your for __in __it i delight
+traditional: direct me in the path of your commandments, for __there i find delight.
+
+Psa123:4#12 | confidence: low | guess: Psa123:4.8 | key: Psa123:4#12-from | candidates: Psa123:4.8, Psa123:4.9
+literal: much it has been surfeited <for> itself self our the mockery of <the> self-confident [people] the contempt __of arrogant opressors
+traditional: we have endured much scorn from the arrogant, much contempt __from the proud.
+
+Psa123:4#14 | confidence: low | guess: Psa123:4.9 | key: Psa123:4#14-proud | candidates: Psa123:4.8, Psa123:4.9
+literal: much it has been surfeited <for> itself self our the mockery of <the> self-confident [people] the contempt of __arrogant __opressors
+traditional: we have endured much scorn from the arrogant, much contempt from the __proud.
+
+Psa124:1#9 | confidence: low | guess: Psa124:1.6 | key: Psa124:1#9-side | candidates: Psa124:1.5, Psa124:1.6
+literal: if not yahweh who <he> was for us let it say please israel
+traditional: if the lord had not been on our __side— let israel now declare—
+
+Psa124:1#8 | confidence: high | guess: Psa124:1.6 | key: Psa124:1#8-our | candidates: Psa124:1.5, Psa124:1.6
+literal: if not yahweh who <he> was for __us let it say please israel
+traditional: if the lord had not been on __our side— let israel now declare—
+
+Psa124:2#8 | confidence: low | guess: Psa124:2.3 | key: Psa124:2#8-our | candidates: Psa124:2.3, Psa124:2.4
+literal: if not yahweh who <he> was for __us when rose up on us anyone
+traditional: if the lord had not been on __our side when men attacked us,
+
+Psa124:2#9 | confidence: low | guess: Psa124:2.3 | key: Psa124:2#9-side | candidates: Psa124:2.3, Psa124:2.4
+literal: if not yahweh who <he> was for us when rose up on us anyone
+traditional: if the lord had not been on our __side when men attacked us,
+
+Rut1:11#23 | confidence: low | guess: Rut1:11.21 | key: Rut1:11#23-your | candidates: Rut1:11.21, Rut1:11.22
+literal: and she said naomi go back o daughters my <to> why? will you go with me still [belong] to <the> me [do] sons in inward parts my and they will become __of __you <into> husbands
+traditional: but naomi replied, “return home, my daughters. why would you go with me? [are] there still sons in my womb to become __your husbands?
+
+Rut4:13#9 | confidence: low | guess: Rut4:13.7 | key: Rut4:13#9-his | candidates: Rut4:13.7, Rut4:13.8, Rut4:13.9
+literal: and he took boaz <obj.> ruth and she became __of __him <into> a wife and he went into her and he gave yahweh to <the> her conception and she bore a son
+traditional: so boaz took ruth, and she became __his wife. and when he had relations with her, the lord enabled her to conceive, and she gave birth to a son.
+
+Rut4:16#15 | confidence: low | guess: Rut4:16.14 | key: Rut4:16#15-to | candidates: Rut4:16.14, Rut4:16.15, Rut4:16.16
+literal: and she took naomi <obj.> the child and she placed him on bosom her and she became __of __him <into> a nurse
+traditional: and naomi took the child, placed him on her lap, and became a nurse __to him.
+
+Sng1:7#4 | confidence: low | guess: Sng1:7.3 | key: Sng1:7#4-one | candidates: Sng1:7.3, Sng1:7.4
+literal: tell to me [o] __whom it loves self my where? will you graze where? will you make [them] lie down at <the> noon<s> which to why? will i be like a veiled [woman] with [the] flocks of companions your
+traditional: tell me, o __one i love, where do you pasture your sheep? where do you rest them at midday? why should i be like a veiled woman beside the flocks of your companions?
+
+Sng2:10#13 | confidence: low | guess: Sng2:10.15 | key: Sng2:10#13-with | candidates: Sng2:10.15, Sng2:10.16, Sng2:10.17
+literal: he answered lover my and he said to me arise <for> yourself o friend my beautiful [one] my and come <for> yourself
+traditional: my beloved calls to me, “arise my darling. come away __with me, my beautiful one.
+
+Sng6:13#17 | confidence: low | guess: Sng6:13.10 | key: Sng6:13#17-upon | candidates: Sng6:13.1, Sng6:13.2, Sng6:13.3, Sng6:13.4, Sng6:13.5, Sng6:13.6, Sng6:13.7, Sng6:13.8, Sng6:13.9, Sng6:13.10, Sng6:13.11, Sng6:13.12, Sng6:13.13, Sng6:13.14, Sng6:13.15, Sng6:13.16, Sng6:13.17, Sng6:13.18, Sng6:13.19, Sng6:13.20, Sng6:13.21
+literal: return return o shulammite [woman] return return so we may look __on you why? will you look on the shulammite [woman] like [the] dance of the two groups
+traditional: come back, come back, o shulammite! come back, come back, that we may gaze __upon you. why do you look at the shulammite, as on the dance of mahanaim
+
+Sng8:12#13 | confidence: low | guess: Sng8:12.11 | key: Sng8:12#13-are | candidates: Sng8:12.11, Sng8:12.12
+literal: vineyard my which [belongs] to me [is] <to> before me the thousand [shekels] __[belong] to you o solomon and two hundred [shekels] [belong] to [those who] keep <obj.> fruit its
+traditional: [but] my own vineyard is mine to give; the thousand [shekels] __are for you, o solomon, and two hundred are for those who tend its fruit.
+
+Zec14:11#3 | confidence: low | guess: Zec14:11.3 | key: Zec14:11#3-there | candidates: Zec14:11.3, Zec14:11.4
+literal: and people will dwell __in __it and total destruction not it will be again and it will remain jerusalem to security
+traditional: people will live __there, and never again will there be an [utter] destruction. so jerusalem will dwell securely.
+
+Zep2:10#4 | confidence: low | guess: Zep2:10.2 | key: Zep2:10#4-have | candidates: Zep2:10.2, Zep2:10.3
+literal: this [will belong] __to them in place of pride their for they reproached and they magnified themselves on [the] people of yahweh of hosts
+traditional: this they shall __have in return for their pride, for taunting and mocking the people of the lord of hosts.
+
+Zep2:10#3 | confidence: low | guess: Zep2:10.2 | key: Zep2:10#3-shall | candidates: Zep2:10.2, Zep2:10.3
+literal: this __[will belong] to them in place of pride their for they reproached and they magnified themselves on [the] people of yahweh of hosts
+traditional: this they __shall have in return for their pride, for taunting and mocking the people of the lord of hosts.
+
+Zep3:8#17 | confidence: low | guess: Zep3:8.15 | key: Zep3:8#17-testify | candidates: Zep3:8.14, Zep3:8.15
+literal: <to> therefore wait for me [the] utterance of yahweh for [the] day to arise i for __booty for judgment my [is] to gather nations to assemble i kingdoms to pour out on them indignation my all [the] burning of anger my for in [the] fire of jealousy my it will be consumed all the earth
+traditional: therefore wait for me,” declares the lord, “until the day i rise to __testify. for my decision is to gather nations, to assemble kingdoms, to pour out upon them my indignation— all my burning anger. for all the earth will be consumed by the fire of my jealousy.
+

@@ -19,6 +19,21 @@ const file3 = 'TAHOT Job-Sng - Translators Amalgamated Hebrew OT - STEPBible.org
 const file4 = 'TAHOT Isa-Mal - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 const file5 = 'TAGNT Mat-Jhn - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt';
 const file6 = 'TAGNT Act-Rev - Translators Amalgamated Greek NT - STEPBible.org CC-BY.txt';
+const hebrewMorphologyExpansionFile = 'TEHMC - Translators Expansion of Hebrew Morphology Codes - STEPBible.org CC BY.txt';
+const greekMorphologyExpansionFile = 'TEGMC - Translators Expansion of Greek Morphhology Codes - STEPBible.org CC BY.txt';
+
+interface MorphologyDefinition {
+  code: string;
+  rawAttributes: string;
+  attributes: Record<string, string>;
+  functionName?: string;
+  label?: string;
+  description?: string;
+  example?: string;
+}
+
+let hebrewMorphologyDefinitions: Record<string, MorphologyDefinition> = {};
+let greekMorphologyDefinitions: Record<string, MorphologyDefinition> = {};
 
 type StepWord = string[];
 // This is how the STEPBible.org "Hebrew" amalgamated data is structured
@@ -60,6 +75,11 @@ interface ChapterToSave {
 }
 async function main() {
   await resetDir(pathToPhase2)
+  hebrewMorphologyDefinitions = loadMorphologyDefinitions(path.join(pathToPhase1a, hebrewMorphologyExpansionFile));
+  greekMorphologyDefinitions = loadMorphologyDefinitions(path.join(pathToPhase1a, greekMorphologyExpansionFile));
+  console.info(
+    `Loaded morphology definitions: Semitic=${Object.keys(hebrewMorphologyDefinitions).length}, Greek=${Object.keys(greekMorphologyDefinitions).length}`
+  );
   await fs.promises.mkdir(path.join(pathToPhase2, 'docs'), { recursive: true }).catch((err) => {
     console.error(`Error creating docs directory in ${pathToPhase2}:`, err);
   });
@@ -155,7 +175,9 @@ function processGreekWord(currentChapter: Partial<Chapter>, currentSnippet: Snip
 // Word & Type	Greek	English translation	dStrongs = Grammar	Dictionary form =  Gloss	editions	Meaning variants	Spelling variants	Spanish translation	Sub-meaning	Conjoin word	sStrong+Instance
 // Mat.1.1#01=NKO	Βίβλος (Biblos)	[The] book	G0976=N-NSF	βίβλος=book	NA28+NA27+Tyn+SBL+WH+Treg+TR+Byz			Libro	book	#01	G0976
 
-    const [strongs, grammar] = fields[GreekWord.dStrongsAndGrammar].split('=');
+  const [strongsRaw, grammarRaw] = fields[GreekWord.dStrongsAndGrammar].split('=');
+  const strongs = strongsRaw.trim();
+  const grammarCode = (grammarRaw || '').trim();
   const engMorpheme = fields[GreekWord.EnglishTranslation].trim();
   const [origRoot, engRoot] = fields[GreekWord.DictionaryFormAndGloss].split('=');
   const [origScript, translit] = fields[GreekWord.Greek].replace(')', '').split(' (');
@@ -170,6 +192,7 @@ function processGreekWord(currentChapter: Partial<Chapter>, currentSnippet: Snip
     OriginalRootScript: origRoot,
     EnglishRootTranslation: engRoot,
   };
+  applyMorphologyDefinition(morpheme, grammarCode, greekMorphologyDefinitions, 'Greek');
 
   const [senseInfo, substitution] = fields[GreekWord.Submeaning].split('|');
   if (substitution) {
@@ -203,12 +226,21 @@ function processSemiticWord(currentChapter: Partial<Chapter>, currentSnippet: Sn
       });
     const origOrd = currentSnippet.OriginalMorphemes.length + 1;
     const sId = currentSnippet.SnippetId || '';
-    const morpheme = createMorphemeFromSemiticWord(morphemeFields, origOrd, sId, Number(wordIdx), source, meaningVariants);
+    const grammarCode = (morphemeFields[SemiticWord.Grammar] || '').trim();
+    const morpheme = createMorphemeFromSemiticWord(morphemeFields, origOrd, sId, Number(wordIdx), source, meaningVariants, grammarCode);
     currentSnippet.OriginalMorphemes.push(morpheme);
   }
 }
 
-function createMorphemeFromSemiticWord(fields: StepWord, origOrd: number, snippetId: string, wordNumber: number, source: string, mVar: string[]): Morpheme {
+function createMorphemeFromSemiticWord(
+  fields: StepWord,
+  origOrd: number,
+  snippetId: string,
+  wordNumber: number,
+  source: string,
+  mVar: string[],
+  grammarCode: string
+): Morpheme {
   const strongs = fields[SemiticWord.dStrongs].replace('{', '').replace('}', '');
   const engMorpheme = fields[SemiticWord.Translation].trim();
   const engInfo = fields[SemiticWord.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
@@ -226,6 +258,7 @@ function createMorphemeFromSemiticWord(fields: StepWord, origOrd: number, snippe
     OriginalMorphemeOrdinal: origOrd,
     Source: getSemiticSourceName(source)
   };
+  applyMorphologyDefinition(returnable, grammarCode, hebrewMorphologyDefinitions, 'Semitic');
   const isPunctuation = !fields[SemiticWord.Transliteration]; // if no transliteration, it's likely punctuation
   if (isPunctuation) {
     returnable.IsPunctuation = isPunctuation;
@@ -246,6 +279,147 @@ function createMorphemeFromSemiticWord(fields: StepWord, origOrd: number, snippe
     returnable.MeaningVariants = mVar;
   }
   return returnable;
+}
+
+function applyMorphologyDefinition(
+  morpheme: Morpheme,
+  grammarCode: string,
+  definitionsByCode: Record<string, MorphologyDefinition>,
+  languageFamily: 'Semitic' | 'Greek'
+) {
+  const normalizedGrammarCode = grammarCode.trim();
+  if (!normalizedGrammarCode) {
+    return;
+  }
+
+  morpheme.OriginalMorphemeGrammarCode = normalizedGrammarCode;
+  const definition = resolveMorphologyDefinition(normalizedGrammarCode, definitionsByCode, languageFamily);
+  if (!definition) {
+    return;
+  }
+
+  if (definition.label) {
+    morpheme.OriginalMorphemeGrammar = definition.label;
+  }
+  if (definition.functionName) {
+    morpheme.OriginalMorphemeGrammarFunction = definition.functionName;
+  }
+}
+
+function resolveMorphologyDefinition(
+  grammarCode: string,
+  definitionsByCode: Record<string, MorphologyDefinition>,
+  languageFamily: 'Semitic' | 'Greek'
+): MorphologyDefinition | undefined {
+  if (definitionsByCode[grammarCode]) {
+    return definitionsByCode[grammarCode];
+  }
+  if (languageFamily === 'Semitic' && !/^[HA]/.test(grammarCode)) {
+    return definitionsByCode[`H${grammarCode}`] || definitionsByCode[`A${grammarCode}`];
+  }
+  return undefined;
+}
+
+function loadMorphologyDefinitions(filePath: string): Record<string, MorphologyDefinition> {
+  const lines = fs.readFileSync(filePath, 'utf8').split(/\r?\n/);
+  const definitions: Record<string, MorphologyDefinition> = {};
+  let parsingBlocks = false;
+  let blockLines: string[] = [];
+
+  const flushBlock = () => {
+    if (!blockLines.length) {
+      return;
+    }
+    const parsed = parseMorphologyBlock(blockLines);
+    if (parsed) {
+      definitions[parsed.code] = parsed;
+    }
+    blockLines = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === '$') {
+      if (parsingBlocks) {
+        flushBlock();
+      }
+      parsingBlocks = true;
+      continue;
+    }
+    if (!parsingBlocks || !trimmed) {
+      continue;
+    }
+    blockLines.push(trimmed);
+  }
+
+  flushBlock();
+  return definitions;
+}
+
+function parseMorphologyBlock(blockLines: string[]): MorphologyDefinition | undefined {
+  const header = blockLines[0] || '';
+  const headerMatch = header.match(/^(\S+)\s*(.*)$/);
+  if (!headerMatch) {
+    return undefined;
+  }
+
+  const code = headerMatch[1].trim();
+  const rawAttributes = headerMatch[2].trim();
+  if (!code) {
+    return undefined;
+  }
+
+  const attributes = parseMorphologyAttributes(rawAttributes);
+  const label = normalizeMorphologyText(blockLines[1] || '');
+  const description = normalizeMorphologyText(blockLines[2] || '');
+  const example = normalizeMorphologyText(blockLines[3] || '').replace(/^Example:\s*/i, '');
+
+  return {
+    code,
+    rawAttributes,
+    attributes,
+    functionName: attributes.Function,
+    label: label || undefined,
+    description: description || undefined,
+    example: example || undefined
+  };
+}
+
+function parseMorphologyAttributes(rawAttributes: string): Record<string, string> {
+  const attributes: Record<string, string> = {};
+  if (!rawAttributes) {
+    return attributes;
+  }
+
+  for (const segment of rawAttributes.split(';')) {
+    const trimmed = segment.trim();
+    if (!trimmed) {
+      continue;
+    }
+    const separatorIndex = trimmed.indexOf('=');
+    if (separatorIndex < 0) {
+      continue;
+    }
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const value = trimmed.slice(separatorIndex + 1).trim();
+    if (!key || !value) {
+      continue;
+    }
+    attributes[key] = value;
+  }
+
+  return attributes;
+}
+
+function normalizeMorphologyText(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+  if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
 }
 
 
