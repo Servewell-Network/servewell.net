@@ -4,6 +4,10 @@ This should be an app for streamlining the in-person work of caring for and empo
 
 It starts with a Step Bible via Wrangler (for Cloudflare hosting).
 
+## Project Guidance
+
+- For architecture/modularity principles and coding guardrails, see [AGENTS.md](AGENTS.md).
+
 ## Technical Overview
    - Cloudflare/Wrangler uses Node.js. I'm using v22, should move to v24 (LTS).
    - Cloudflare/Wrangler structures the base folder (ref needed)
