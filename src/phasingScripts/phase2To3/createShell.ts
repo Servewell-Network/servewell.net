@@ -124,6 +124,18 @@ body.app-panel-open #app-shell-root .app-overlay {
   margin-bottom: 1rem;
 }
 
+#app-shell-root .app-sidepanel-home {
+  color: var(--fg);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+#app-shell-root .app-sidepanel-home:hover {
+  color: var(--muted);
+}
+
 #app-shell-root .app-sidepanel section {
   margin-bottom: 1.25rem;
 }
@@ -186,7 +198,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   <aside class="app-sidepanel">
     <div class="app-sidepanel-header">
-      <strong>Menu</strong>
+      <a class="app-sidepanel-home" href="/">Servewell.net</a>
       <button type="button" data-action="menu-close">✕</button>
     </div>
 
