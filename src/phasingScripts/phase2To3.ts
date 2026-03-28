@@ -311,23 +311,10 @@ function renderLiteralPane(snippet: Snippet): string {
       const popoverId = `popover-${toSafeDomId(popoverSeed)}`;
       const metadataEntries: MetadataEntry[] = [
         { label: 'Pane', value: 'Literal' },
-        { label: 'Snippet', value: snippetLabel },
-        { label: 'Word Position', value: tokenOrdinal },
-        { label: 'Morpheme Gloss', value: tokenText },
-        {
-          label: 'Segment In Morpheme',
-          value: wordSegments.length > 1 ? `${segmentIndex + 1}` : undefined
-        },
-        {
-          label: 'Segments In Morpheme',
-          value: wordSegments.length > 1 ? wordSegments.length : undefined
-        },
         { label: 'Morpheme ID', value: morpheme.MorphemeId },
         { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
         { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
-        { label: 'Grammar Code', value: morpheme.OriginalMorphemeGrammarCode },
         { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
-        { label: 'Grammar Function', value: morpheme.OriginalMorphemeGrammarFunction },
         { label: 'Language', value: morpheme.OriginalLanguage },
         { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
         { label: 'Root Script', value: morpheme.OriginalRootScript },
@@ -462,8 +449,6 @@ function renderTraditionalParagraphTokens(
       : token.originalMorphemeId;
     const metadataEntries: MetadataEntry[] = [
       { label: 'Pane', value: 'Traditional' },
-      { label: 'Snippet', value: snippetLabel },
-      { label: 'Word Position', value: token.wordOrdinal },
       { label: 'Source Token', value: token.originalToken },
       {
         label: 'Token Segment',

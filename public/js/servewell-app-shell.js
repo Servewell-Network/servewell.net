@@ -285,6 +285,25 @@ body.app-panel-open #app-shell-root .app-overlay {
     if (legacyChapterNote?.textContent?.trim() === oldChapterNoteText) {
       legacyChapterNote.textContent = "Click any word to see more.";
     }
+    const sharedWordPopover = document.querySelector(".shared-word-popover");
+    if (sharedWordPopover) {
+      const hiddenLabels = /* @__PURE__ */ new Set([
+        "Snippet",
+        "Word Position",
+        "Morpheme Gloss",
+        "Segment In Morpheme",
+        "Segments In Morpheme",
+        "Grammar Code",
+        "Grammar Function"
+      ]);
+      sharedWordPopover.addEventListener("toggle", (event) => {
+        if (event.newState !== "open") return;
+        sharedWordPopover.querySelectorAll(".word-meta-row").forEach((row) => {
+          const label = row.querySelector(".word-meta-label");
+          if (label && hiddenLabels.has(label.textContent || "")) row.remove();
+        });
+      });
+    }
     function openPanel() {
       document.body.classList.add("app-panel-open");
     }

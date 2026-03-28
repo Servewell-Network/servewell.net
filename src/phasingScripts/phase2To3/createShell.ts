@@ -268,6 +268,23 @@ body.app-panel-open #app-shell-root .app-overlay {
     legacyChapterNote.textContent = 'Click any word to see more.';
   }
 
+  // Filter removed metadata fields from word popovers on already-generated pages.
+  const sharedWordPopover = document.querySelector<HTMLElement>('.shared-word-popover');
+  if (sharedWordPopover) {
+    const hiddenLabels = new Set([
+      'Snippet', 'Word Position', 'Morpheme Gloss',
+      'Segment In Morpheme', 'Segments In Morpheme',
+      'Grammar Code', 'Grammar Function'
+    ]);
+    sharedWordPopover.addEventListener('toggle', (event) => {
+      if ((event as ToggleEvent).newState !== 'open') return;
+      sharedWordPopover.querySelectorAll<HTMLElement>('.word-meta-row').forEach((row) => {
+        const label = row.querySelector('.word-meta-label');
+        if (label && hiddenLabels.has(label.textContent || '')) row.remove();
+      });
+    });
+  }
+
   function openPanel() {
     document.body.classList.add('app-panel-open');
   }
