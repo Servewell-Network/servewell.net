@@ -280,6 +280,11 @@ body.app-panel-open #app-shell-root .app-overlay {
     if (legacyHomeLink?.textContent?.trim() === "Back to Home") {
       legacyHomeLink.remove();
     }
+    const legacyChapterNote = document.querySelector("main.chapter-page > p.chapter-note");
+    const oldChapterNoteText = "Shared snippet label with side-by-side literal and traditional panes. Click any word to view metadata.";
+    if (legacyChapterNote?.textContent?.trim() === oldChapterNoteText) {
+      legacyChapterNote.textContent = "Click any word to see more.";
+    }
     function openPanel() {
       document.body.classList.add("app-panel-open");
     }

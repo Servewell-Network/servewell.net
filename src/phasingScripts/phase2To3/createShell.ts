@@ -261,6 +261,13 @@ body.app-panel-open #app-shell-root .app-overlay {
     legacyHomeLink.remove();
   }
 
+  // Update legacy chapter-note text on previously generated pages.
+  const legacyChapterNote = document.querySelector<HTMLParagraphElement>('main.chapter-page > p.chapter-note');
+  const oldChapterNoteText = 'Shared snippet label with side-by-side literal and traditional panes. Click any word to view metadata.';
+  if (legacyChapterNote?.textContent?.trim() === oldChapterNoteText) {
+    legacyChapterNote.textContent = 'Click any word to see more.';
+  }
+
   function openPanel() {
     document.body.classList.add('app-panel-open');
   }

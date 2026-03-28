@@ -260,7 +260,7 @@ function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
     ...baseHtml.headToBody,
     `<script id="bible-nav-data" type="application/json">${bibleNavDataJson}</script>`,
     `<main class="chapter-page" data-book="${escapeHtml(chapter.DocOrBookAbbreviation)}" data-chapter="${chapter.ChapterNumber}">`,
-    `<p class="chapter-note">Shared snippet label with side-by-side literal and traditional panes. Click any word to view metadata.</p>`,
+    `<p class="chapter-note">Click any word to see more.</p>`,
     `<section class="snippet-grid">`,
     snippetRows,
     `</section>`,
