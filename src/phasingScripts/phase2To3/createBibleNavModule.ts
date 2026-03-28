@@ -474,6 +474,7 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
     id: 'bible-nav',
     label: 'Bible Navigation',
     active: false,
+    includeInMenu: false,
 
     activate() {
       if (module.active) return;

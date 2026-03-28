@@ -335,7 +335,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       modules[module.id] = module;
     }
     function render() {
-      shell.renderModuleList(Object.values(modules));
+      shell.renderModuleList(Object.values(modules).filter((module) => module.includeInMenu !== false));
     }
     function activate(id) {
       modules[id]?.activate();
@@ -921,6 +921,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       id: "bible-nav",
       label: "Bible Navigation",
       active: false,
+      includeInMenu: false,
       activate() {
         if (module.active) return;
         module.active = true;

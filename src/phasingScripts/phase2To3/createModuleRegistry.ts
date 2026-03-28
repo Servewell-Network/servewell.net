@@ -4,6 +4,7 @@ export type AppModule = {
   id: string;
   label: string;
   active: boolean;
+  includeInMenu?: boolean;
   activate: () => void;
   deactivate: () => void;
 };
@@ -29,7 +30,7 @@ export function createModuleRegistry(shell: ShellApi): ModuleRegistry {
   }
 
   function render() {
-    shell.renderModuleList(Object.values(modules));
+    shell.renderModuleList(Object.values(modules).filter((module) => module.includeInMenu !== false));
   }
 
   function activate(id: string) {
