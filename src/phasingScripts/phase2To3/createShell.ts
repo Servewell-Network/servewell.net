@@ -73,6 +73,18 @@ body.with-app-shell {
   z-index: 50;
 }
 
+#app-shell-root .app-topbar-home {
+  color: var(--fg);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+#app-shell-root .app-topbar-home:hover {
+  color: var(--muted);
+}
+
 #app-shell-root .app-spacer {
   flex: 1;
 }
@@ -122,18 +134,6 @@ body.app-panel-open #app-shell-root .app-overlay {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
-}
-
-#app-shell-root .app-sidepanel-home {
-  color: var(--fg);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-decoration: none;
-}
-
-#app-shell-root .app-sidepanel-home:hover {
-  color: var(--muted);
 }
 
 #app-shell-root .app-sidepanel section {
@@ -188,7 +188,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 <div id="app-shell-root">
   <header class="app-topbar">
     <button type="button" data-action="menu-open" aria-label="Open menu">☰</button>
-    <strong>Servewell</strong>
+    <a class="app-topbar-home" href="/">Servewell.net</a>
     <span class="app-spacer"></span>
     <label class="app-checkrow">
       <input type="checkbox" data-setting="dark-mode">
@@ -198,7 +198,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   <aside class="app-sidepanel">
     <div class="app-sidepanel-header">
-      <a class="app-sidepanel-home" href="/">Servewell.net</a>
+      <strong>Menu</strong>
       <button type="button" data-action="menu-close">✕</button>
     </div>
 

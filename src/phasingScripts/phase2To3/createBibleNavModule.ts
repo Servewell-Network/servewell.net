@@ -336,14 +336,14 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
       document.head.appendChild(style);
     }
 
-    // inject button row into topbar, right after <strong>Servewell</strong>
+    // inject button row into topbar, right after the home link label
     const topbar = qs<HTMLElement>('#app-shell-root .app-topbar');
     if (!topbar) return;
-    const strong = topbar.querySelector('strong');
+    const titleLink = topbar.querySelector('.app-topbar-home');
     const btns = document.createElement('div');
     btns.id = 'bible-nav-btns';
-    if (strong?.nextSibling) {
-      topbar.insertBefore(btns, strong.nextSibling);
+    if (titleLink?.nextSibling) {
+      topbar.insertBefore(btns, titleLink.nextSibling);
     } else {
       topbar.appendChild(btns);
     }
