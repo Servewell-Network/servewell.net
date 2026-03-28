@@ -276,6 +276,10 @@ body.app-panel-open #app-shell-root .app-overlay {
       );
     }
     document.body.classList.add("with-app-shell");
+    const legacyHomeLink = document.querySelector('body > a[href="/"]');
+    if (legacyHomeLink?.textContent?.trim() === "Back to Home") {
+      legacyHomeLink.remove();
+    }
     function openPanel() {
       document.body.classList.add("app-panel-open");
     }

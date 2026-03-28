@@ -255,6 +255,12 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   document.body.classList.add('with-app-shell');
 
+  // Remove legacy static link emitted by older generated pages.
+  const legacyHomeLink = document.querySelector<HTMLAnchorElement>('body > a[href="/"]');
+  if (legacyHomeLink?.textContent?.trim() === 'Back to Home') {
+    legacyHomeLink.remove();
+  }
+
   function openPanel() {
     document.body.classList.add('app-panel-open');
   }

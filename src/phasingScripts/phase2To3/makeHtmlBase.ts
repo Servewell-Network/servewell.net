@@ -29,7 +29,6 @@ export function makeHtmlBase(title: string, description = '') {
             `</head>`,
             `<body>`,
             `<h1>${title}</h1>`,
-            `<a href="/">Back to Home</a>`,
         ],
         bottom: [
             `</body>`,
