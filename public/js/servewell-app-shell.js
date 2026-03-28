@@ -500,6 +500,513 @@ body.app-panel-open #app-shell-root .app-overlay {
     return module;
   }
 
+  // src/phasingScripts/phase2To3/createBibleNavModule.ts
+  var navData = null;
+  function loadNavData() {
+    if (navData) return navData;
+    try {
+      const el = document.getElementById("bible-nav-data");
+      if (el) navData = JSON.parse(el.textContent ?? "{}");
+    } catch {
+    }
+    if (!navData) navData = { books: [], sections: [] };
+    return navData;
+  }
+  var STORAGE_KEY_BOOKMARKS = "servewell-nav-bookmarks";
+  var STORAGE_KEY_ALPHABETICAL = "servewell-nav-alphabetical";
+  function qs3(selector) {
+    return document.querySelector(selector);
+  }
+  function escHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  var CSS = `
+#bible-nav-btns {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+.nav-ref-chip {
+  display: inline-flex;
+  align-items: stretch;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.nav-ref-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bar);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.nav-ref-btn:hover { background: var(--bg); }
+
+.nav-ref-btn--with-remove {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.nav-ref-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.55rem;
+  padding: 0 0.32rem;
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 0.375rem 0.375rem 0;
+  background: var(--bar);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nav-ref-chip-remove:hover {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.nav-radio {
+  font-size: 0.65em;
+  line-height: 1;
+  color: var(--muted);
+  opacity: 0.45;
+}
+
+.nav-radio--enabled         { opacity: 1; color: var(--muted); }
+.nav-radio--enabled-selected { opacity: 1; color: var(--fg); }
+
+#bible-nav-popover {
+  position: fixed;
+  top: 62px;
+  left: 0.75rem;
+  width: min(96vw, 400px);
+  max-height: calc(100dvh - 130px);
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--panel);
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+}
+
+#bible-nav-popover:not(:popover-open) { display: none; }
+
+.nav-pop-inner  { padding: 0.65rem 0.75rem; }
+
+.nav-pop-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.nav-pop-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.55rem;
+}
+
+.nav-check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.nav-goto-btn {
+  display: inline-block;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bar);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-goto-btn:hover { background: var(--bg); }
+
+.nav-remove-btn {
+  align-self: flex-start;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--bar);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.nav-remove-btn:hover { background: var(--bg); }
+
+.nav-book-grid  { display: flex; flex-direction: column; gap: 0.2rem; }
+
+.nav-book-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+.nav-book-btn {
+  padding: 0.18rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.22rem;
+  background: var(--bar);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav-book-btn:hover { background: var(--bg); }
+
+.nav-ch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+.nav-ch-btn {
+  display: inline-block;
+  padding: 0.18rem 0.3rem;
+  min-width: 1.8rem;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 0.22rem;
+  background: var(--bar);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.78rem;
+  text-decoration: none;
+}
+
+.nav-ch-btn:hover { background: var(--bg); }
+
+.nav-back-btn {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0 0.15rem;
+  line-height: 1;
+}
+
+.nav-back-btn:hover { color: var(--fg); }
+`;
+  function createBibleNavModule(delegator) {
+    let bookmarks = [];
+    let alphabetical = false;
+    let activeSlot = "current";
+    let navView = "books";
+    let navSelectedBook = null;
+    const disposers = [];
+    function getCurrentRef() {
+      const main = qs3("main.chapter-page");
+      if (!main) return null;
+      const book = main.dataset.book ?? "";
+      const chapter = parseInt(main.dataset.chapter ?? "0", 10);
+      return book && chapter ? { book, chapter } : null;
+    }
+    function loadStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_BOOKMARKS);
+        bookmarks = raw ? JSON.parse(raw) : [];
+      } catch {
+        bookmarks = [];
+      }
+      try {
+        alphabetical = localStorage.getItem(STORAGE_KEY_ALPHABETICAL) === "true";
+      } catch {
+        alphabetical = false;
+      }
+    }
+    function saveBookmarks() {
+      try {
+        localStorage.setItem(STORAGE_KEY_BOOKMARKS, JSON.stringify(bookmarks));
+      } catch {
+      }
+    }
+    function saveAlphabetical() {
+      try {
+        localStorage.setItem(STORAGE_KEY_ALPHABETICAL, String(alphabetical));
+      } catch {
+      }
+    }
+    function refsEqual(a, b) {
+      return a.book === b.book && a.chapter === b.chapter;
+    }
+    function isCurrentBookmarked() {
+      const cur = getCurrentRef();
+      return !!cur && bookmarks.some((b) => refsEqual(b, cur));
+    }
+    function addCurrentBookmark() {
+      const cur = getCurrentRef();
+      if (cur && !isCurrentBookmarked()) {
+        bookmarks.push(cur);
+        saveBookmarks();
+      }
+    }
+    function removeCurrentBookmark() {
+      const cur = getCurrentRef();
+      if (cur) {
+        bookmarks = bookmarks.filter((b) => !refsEqual(b, cur));
+        saveBookmarks();
+      }
+    }
+    function removeBookmarkAt(idx) {
+      bookmarks.splice(idx, 1);
+      saveBookmarks();
+    }
+    function getBook(abbr) {
+      return loadNavData().books.find((b) => b.abbr === abbr);
+    }
+    function refLabel(ref) {
+      const book = getBook(ref.book);
+      return `${book?.displayAbbr ?? ref.book}\xA0${ref.chapter}`;
+    }
+    function refHref(ref) {
+      const book = getBook(ref.book);
+      return book ? `/-/${book.url}/${ref.chapter}` : "#";
+    }
+    function injectOnce() {
+      if (qs3("#bible-nav-btns")) return;
+      if (!qs3("#bible-nav-style")) {
+        const style = document.createElement("style");
+        style.id = "bible-nav-style";
+        style.textContent = CSS;
+        document.head.appendChild(style);
+      }
+      const topbar = qs3("#app-shell-root .app-topbar");
+      if (!topbar) return;
+      const strong = topbar.querySelector("strong");
+      const btns = document.createElement("div");
+      btns.id = "bible-nav-btns";
+      if (strong?.nextSibling) {
+        topbar.insertBefore(btns, strong.nextSibling);
+      } else {
+        topbar.appendChild(btns);
+      }
+      const popover = document.createElement("div");
+      popover.id = "bible-nav-popover";
+      popover.setAttribute("popover", "");
+      document.body.appendChild(popover);
+    }
+    function renderTopbar() {
+      const container = qs3("#bible-nav-btns");
+      if (!container) return;
+      const cur = getCurrentRef();
+      if (!cur) {
+        container.innerHTML = "";
+        return;
+      }
+      const slots = [
+        { ref: cur, isCurrent: true, bmIdx: -1 },
+        ...bookmarks.map((b, i) => ({ ref: b, isCurrent: false, bmIdx: i })).filter((s) => !refsEqual(s.ref, cur))
+      ];
+      const hasMultiple = slots.length > 1;
+      container.innerHTML = slots.map(({ ref, isCurrent, bmIdx }) => {
+        let radioClass;
+        let radioSymbol;
+        if (!hasMultiple) {
+          radioClass = "nav-radio";
+          radioSymbol = "\u25CF";
+        } else if (isCurrent) {
+          radioClass = "nav-radio nav-radio--enabled-selected";
+          radioSymbol = "\u25CF";
+        } else {
+          radioClass = "nav-radio nav-radio--enabled";
+          radioSymbol = "\u25CB";
+        }
+        const labelHtml = `<span class="${radioClass}" aria-hidden="true">${radioSymbol}</span>${escHtml(refLabel(ref))}`;
+        if (!isCurrent) {
+          return `<span class="nav-ref-chip"><a class="nav-ref-btn nav-ref-btn--with-remove" href="${escHtml(refHref(ref))}">${labelHtml}</a><button type="button" class="nav-ref-chip-remove" aria-label="Remove bookmark ${escHtml(refLabel(ref))}" data-nav-remove-top-bookmark="${bmIdx}">&times;</button></span>`;
+        }
+        const slotData = isCurrent ? "current" : String(bmIdx);
+        return `<button type="button" class="nav-ref-btn" popovertarget="bible-nav-popover" data-nav-book="${escHtml(ref.book)}" data-nav-chapter="${ref.chapter}" data-nav-slot="${slotData}">${labelHtml}</button>`;
+      }).join("");
+    }
+    function renderPopover() {
+      const popover = qs3("#bible-nav-popover");
+      if (!popover) return;
+      popover.innerHTML = navView === "chapters" && navSelectedBook ? renderChaptersView(navSelectedBook) : renderBooksView();
+    }
+    function renderBooksView() {
+      const isCurrentSlot = activeSlot === "current";
+      const bmIdx = typeof activeSlot === "number" ? activeSlot : -1;
+      const slotRef = isCurrentSlot ? getCurrentRef() : bookmarks[bmIdx] ?? null;
+      let topControls = "";
+      if (isCurrentSlot) {
+        const checked = isCurrentBookmarked() ? " checked" : "";
+        topControls = `<label class="nav-check-row"><input type="checkbox" id="nav-bookmark-chk"${checked}><span>Bookmark This Reference</span></label>`;
+      } else if (slotRef) {
+        const book = getBook(slotRef.book);
+        const href = book ? `/-/${escHtml(book.url)}/${slotRef.chapter}` : "#";
+        topControls = `<a class="nav-goto-btn" href="${href}">Go\xA0to ${escHtml(refLabel(slotRef))}</a><button type="button" class="nav-remove-btn" id="nav-remove-bookmark">Remove This Bookmark</button>`;
+      }
+      const alphaChecked = alphabetical ? " checked" : "";
+      const alphaControl = `<label class="nav-check-row"><input type="checkbox" id="nav-alpha-chk"${alphaChecked}><span>Alphabetical</span></label>`;
+      let booksHtml;
+      if (alphabetical) {
+        const sorted = [...loadNavData().books].sort((a, b) => a.displayAbbr.localeCompare(b.displayAbbr));
+        const btns = sorted.map((b) => `<button type="button" class="nav-book-btn" data-nav-pick-book="${escHtml(b.abbr)}">${escHtml(b.displayAbbr)}</button>`).join("");
+        booksHtml = `<div class="nav-book-group">${btns}</div>`;
+      } else {
+        const bookMap = new Map(loadNavData().books.map((b) => [b.abbr, b]));
+        booksHtml = loadNavData().sections.map((section) => {
+          const btns = section.map((abbr) => {
+            const b = bookMap.get(abbr);
+            if (!b) return "";
+            return `<button type="button" class="nav-book-btn" data-nav-pick-book="${escHtml(b.abbr)}">${escHtml(b.displayAbbr)}</button>`;
+          }).join("");
+          return `<div class="nav-book-group">${btns}</div>`;
+        }).join("");
+      }
+      return `<div class="nav-pop-inner">
+<div class="nav-pop-header"><strong>Select A Document</strong></div>
+<div class="nav-pop-controls">${topControls}${alphaControl}</div>
+<div class="nav-book-grid">${booksHtml}</div>
+</div>`;
+    }
+    function renderChaptersView(abbr) {
+      const book = getBook(abbr);
+      if (!book) return "";
+      const links = Array.from({ length: book.chapters }, (_, i) => i + 1).map((n) => `<a class="nav-ch-btn" href="/-/${escHtml(book.url)}/${n}">${n}</a>`).join("");
+      return `<div class="nav-pop-inner">
+<div class="nav-pop-header"><button type="button" class="nav-back-btn" id="nav-back" aria-label="Back to book list">&#8249;</button><strong>${escHtml(book.name)}</strong></div>
+<div class="nav-ch-grid">${links}</div>
+</div>`;
+    }
+    const module = {
+      id: "bible-nav",
+      label: "Bible Navigation",
+      active: false,
+      activate() {
+        if (module.active) return;
+        module.active = true;
+        loadStorage();
+        injectOnce();
+        renderTopbar();
+        disposers.push(delegator.registerSublistener({
+          eventName: "click",
+          tagName: "BUTTON",
+          selector: "button.nav-ref-btn",
+          handle(el) {
+            const slot = el.dataset.navSlot ?? "current";
+            activeSlot = slot === "current" ? "current" : parseInt(slot, 10);
+            navView = "books";
+            navSelectedBook = null;
+            renderPopover();
+          }
+        }));
+        disposers.push(delegator.registerSublistener({
+          eventName: "click",
+          tagName: "BUTTON",
+          selector: "button[data-nav-remove-top-bookmark]",
+          handle(el, event) {
+            event.preventDefault();
+            const idx = parseInt(el.dataset.navRemoveTopBookmark ?? "-1", 10);
+            if (idx < 0) return;
+            removeBookmarkAt(idx);
+            renderTopbar();
+          }
+        }));
+        disposers.push(delegator.registerSublistener({
+          eventName: "click",
+          tagName: "BUTTON",
+          selector: "button[data-nav-pick-book]",
+          handle(el) {
+            navSelectedBook = el.dataset.navPickBook ?? null;
+            if (navSelectedBook) {
+              navView = "chapters";
+              renderPopover();
+            }
+          }
+        }));
+        disposers.push(delegator.registerSublistener({
+          eventName: "click",
+          tagName: "BUTTON",
+          selector: "button#nav-back",
+          handle() {
+            navView = "books";
+            navSelectedBook = null;
+            renderPopover();
+          }
+        }));
+        disposers.push(delegator.registerSublistener({
+          eventName: "change",
+          tagName: "INPUT",
+          selector: "input#nav-bookmark-chk",
+          handle(el) {
+            const input = el;
+            if (input.checked) {
+              addCurrentBookmark();
+            } else {
+              removeCurrentBookmark();
+            }
+            renderTopbar();
+            renderPopover();
+          }
+        }));
+        disposers.push(delegator.registerSublistener({
+          eventName: "click",
+          tagName: "BUTTON",
+          selector: "button#nav-remove-bookmark",
+          handle() {
+            if (typeof activeSlot === "number") removeBookmarkAt(activeSlot);
+            qs3("#bible-nav-popover")?.hidePopover();
+            activeSlot = "current";
+            renderTopbar();
+          }
+        }));
+        disposers.push(delegator.registerSublistener({
+          eventName: "change",
+          tagName: "INPUT",
+          selector: "input#nav-alpha-chk",
+          handle(el) {
+            alphabetical = el.checked;
+            saveAlphabetical();
+            renderPopover();
+          }
+        }));
+      },
+      deactivate() {
+        if (!module.active) return;
+        module.active = false;
+        while (disposers.length) disposers.pop()?.();
+      }
+    };
+    return module;
+  }
+
   // src/phasingScripts/phase2To3/jsDomFramework.ts
   function isDemoRoute(pathname) {
     const normalizedPath = pathname.replace(/\/+$/, "") || "/";
@@ -523,12 +1030,16 @@ body.app-panel-open #app-shell-root .app-overlay {
     if (onDemoPage) {
       modules.register(createDemoModule(delegator, shell));
     }
+    modules.register(createBibleNavModule(delegator));
     registerShellListeners(delegator, shell, theme, modules);
     theme.restore();
     modules.render();
     if (onDemoPage) {
       modules.activate("demo");
       shell.appendDemoLine("Framework booted");
+    }
+    if (document.querySelector("main.chapter-page")) {
+      modules.activate("bible-nav");
     }
   }
 

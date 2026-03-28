@@ -36,6 +36,7 @@ import { createTheme } from './createTheme';
 import { createModuleRegistry } from './createModuleRegistry';
 import { registerShellListeners } from './registerShellListeners';
 import { createDemoModule } from './createDemoModule';
+import { createBibleNavModule } from './createBibleNavModule';
 
 function isDemoRoute(pathname: string): boolean {
   const normalizedPath = pathname.replace(/\/+$/, '') || '/';
@@ -65,6 +66,7 @@ export function jsDomFramework() {
   if (onDemoPage) {
     modules.register(createDemoModule(delegator, shell));
   }
+  modules.register(createBibleNavModule(delegator));
 
   registerShellListeners(delegator, shell, theme, modules);
 
@@ -73,5 +75,8 @@ export function jsDomFramework() {
   if (onDemoPage) {
     modules.activate('demo');
     shell.appendDemoLine('Framework booted');
+  }
+  if (document.querySelector('main.chapter-page')) {
+    modules.activate('bible-nav');
   }
 }

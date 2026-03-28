@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Chapter, EnglishInsertion, EnglishWordInfo, Snippet } from './phase1To2/phase2Types';
 import { makeHtmlBase } from './phase2To3/makeHtmlBase';
+import ancientDocNames from './phase1To2/ancientDocNames.json';
 
 const scriptTag = `<script src="/js/servewell-app-shell.js"></script>`;
 const USE_SHARED_WORD_POPOVER = true;
@@ -70,25 +71,82 @@ type TraditionalParagraphToken =
     };
 
 await resetDir(baseDistDir);
+
+// ---- bible-nav data --------------------------------------------------------
+
+// Sections: each inner array is one visual group (no visible label). Defined here at build time.
+const BIBLE_NAV_SECTIONS: string[][] = [
+  ['Gen','Exo','Lev','Num','Deu'],
+  ['Jos','Jdg','Rut','1Sa','2Sa','1Ki','2Ki','1Ch','2Ch','Ezr','Neh','Est'],
+  ['Job','Psa','Pro','Ecc','Sng'],
+  ['Isa','Jer','Lam','Ezk','Dan'],
+  ['Hos','Jol','Amo','Oba','Jon','Mic','Nam','Hab','Zep','Hag','Zec','Mal'],
+  ['Mat','Mrk','Luk','Jhn','Act'],
+  ['Rom','1Co','2Co','Gal','Eph','Php','Col','1Th','2Th'],
+  ['1Ti','2Ti','Tit','Phm'],
+  ['Heb','Jas','1Pe','2Pe','1Jn','2Jn','3Jn','Jud','Rev'],
+];
+
+// Display abbreviation overrides: abbr2 → user-facing display abbreviation.
+const DISPLAY_ABBR_OVERRIDES: Record<string, string> = {
+  'Jud': 'Jde', // Jude — 'Jud' too easily confused with Judges
+};
+
+type BibleNavBook = { abbr: string; displayAbbr: string; name: string; url: string; chapters: number };
+type BibleNavData = { books: BibleNavBook[]; sections: string[][] };
+
+function buildBibleNavDataJson(
+  chapterCounts: Map<string, number>,
+  urlPaths: Map<string, string>
+): string {
+  const canonicalBooks = ancientDocNames.filter(d => {
+    const num = parseInt(d.numPlusAbbr2.split('-')[0], 10);
+    return num >= 1 && num <= 66;
+  });
+  const books: BibleNavBook[] = canonicalBooks
+    .map(d => ({
+      abbr: d.abbr2,
+      displayAbbr: DISPLAY_ABBR_OVERRIDES[d.abbr2] ?? d.abbr2,
+      name: d.name,
+      url: urlPaths.get(d.abbr2) ?? safePathPart(d.name),
+      chapters: chapterCounts.get(d.abbr2) ?? 0,
+    }))
+    .filter(b => b.chapters > 0);
+  const data: BibleNavData = { books, sections: BIBLE_NAV_SECTIONS };
+  return JSON.stringify(data);
+}
+
+// ---- end bible-nav data ----------------------------------------------------
 await writeLegacyHeyPage();
 
 const chapterFilePaths = listChapterFilePaths(baseSrcDir);
-let renderedChapters = 0;
 
+// First pass: collect chapter counts and URL paths per book abbreviation.
+const bookChapterCounts = new Map<string, number>();
+const bookUrlPaths = new Map<string, string>();
+const chapterPayloads: Array<{ chapter: Chapter; bookDirName: string; chapterNumber: string }> = [];
 for (const chapterFilePath of chapterFilePaths) {
   const chapter = readChapterPayload(chapterFilePath);
   if (!chapter) continue;
-
-  const bookDirName = safePathPart(chapter.DocumentOrBook || chapter.DocOrBookAbbreviation || 'Unknown');
+  const abbr = chapter.DocOrBookAbbreviation;
+  const bookDirName = safePathPart(chapter.DocumentOrBook || abbr || 'Unknown');
   const chapterNumber = Number.isFinite(chapter.ChapterNumber)
     ? chapter.ChapterNumber.toString()
     : extractChapterNumberFromPath(chapterFilePath);
+  const n = typeof chapter.ChapterNumber === 'number' ? chapter.ChapterNumber : parseInt(chapterNumber, 10);
+  if ((bookChapterCounts.get(abbr) ?? 0) < n) bookChapterCounts.set(abbr, n);
+  if (!bookUrlPaths.has(abbr)) bookUrlPaths.set(abbr, bookDirName);
+  chapterPayloads.push({ chapter, bookDirName, chapterNumber });
+}
 
+const bibleNavDataJson = buildBibleNavDataJson(bookChapterCounts, bookUrlPaths);
+
+let renderedChapters = 0;
+for (const { chapter, bookDirName, chapterNumber } of chapterPayloads) {
   const outputDir = path.join(baseDistDir, bookDirName);
   await fs.promises.mkdir(outputDir, { recursive: true });
-
   const outputPath = path.join(outputDir, `${chapterNumber}.html`);
-  await fs.promises.writeFile(outputPath, renderChapterPage(chapter), { encoding: 'utf8' });
+  await fs.promises.writeFile(outputPath, renderChapterPage(chapter, bibleNavDataJson), { encoding: 'utf8' });
   renderedChapters += 1;
 }
 
@@ -188,7 +246,8 @@ function resolveChapterPayload(rawPayload: unknown): Chapter | null {
   };
 }
 
-function renderChapterPage(chapter: Chapter): string {
+// Sections: each inner array is one visual group (no visible label). Defined here at build time.
+function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
   const title = `${chapter.DocumentOrBook} ${chapter.ChapterNumber}`;
   const description = `First-pass literal and traditional view for ${title}`;
   const baseHtml = makeHtmlBase(title, description);
@@ -199,6 +258,7 @@ function renderChapterPage(chapter: Chapter): string {
     ...baseHtml.topOfHead,
     ...getChapterPageCss(),
     ...baseHtml.headToBody,
+    `<script id="bible-nav-data" type="application/json">${bibleNavDataJson}</script>`,
     `<main class="chapter-page" data-book="${escapeHtml(chapter.DocOrBookAbbreviation)}" data-chapter="${chapter.ChapterNumber}">`,
     `<p class="chapter-note">Shared snippet label with side-by-side literal and traditional panes. Click any word to view metadata.</p>`,
     `<section class="snippet-grid">`,
