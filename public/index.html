@@ -7,22 +7,28 @@
 		<meta name="description" content="ServeWell.Net is starting with a Bible and Bible articles">
 		<style>
 			body {
-				margin: 3rem;
+				margin: 2.25rem;
 				font-family: sans-serif;
 				font-size: large;
 			}
 			details :not(summary) {
 				padding-left: 0.5rem;
 			}
+			.chapter-page {
+				margin-top: 1rem;
+			}
+			.chapter-note {
+				color: var(--muted, #475467);
+				margin-bottom: 1rem;
+				line-height: 1.55;
+			}
 		</style>
 	</head>
 	<body>
-		<div>Temporary home page for ServeWell.Net</div>
-
-		<ul>
-			<li></li>
-		</ul>
-		<!-- <img src="/images/servewell-logo.png" alt="ServeWell.Net Logo" style="max-width: 100%; height: auto;" /> -->
-		<img src="/images/fir.jpg" alt="Fir" style="max-width: 100%; height: auto;" />
+		<h1>Servewell.net</h1>
+		<main class="chapter-page" data-book="Gen" data-chapter="1">
+			<p class="chapter-note">Currently the main thing in Servewell.net is Scripture. Start with the button in the top bar.</p>
+		</main>
+		<script src="/js/servewell-app-shell.js"></script>
 	</body>
 </html>

@@ -14,6 +14,7 @@ type BookInfo = {
 type NavData = { books: BookInfo[]; sections: string[][] };
 
 let navData: NavData | null = null;
+let navDataLoading = false;
 
 function loadNavData(): NavData {
   if (navData) return navData;
@@ -23,6 +24,28 @@ function loadNavData(): NavData {
   } catch {}
   if (!navData) navData = { books: [], sections: [] };
   return navData;
+}
+
+function parseNavData(raw: string): NavData | null {
+  try {
+    const parsed = JSON.parse(raw) as Partial<NavData>;
+    const books = Array.isArray(parsed.books) ? parsed.books : [];
+    const sections = Array.isArray(parsed.sections) ? parsed.sections : [];
+    if (books.length === 0) return null;
+    return {
+      books: books as BookInfo[],
+      sections: sections as string[][],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function loadNavDataFromHtml(html: string): NavData | null {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const el = doc.getElementById('bible-nav-data');
+  if (!el?.textContent) return null;
+  return parseNavData(el.textContent);
 }
 
 // ---- storage keys -----------------------------------------------------------
@@ -258,6 +281,30 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
   let navSelectedBook: string | null = null;
   const disposers: Array<() => void> = [];
 
+  function ensureNavDataLoaded() {
+    if (loadNavData().books.length > 0) return;
+    if (navDataLoading) return;
+    navDataLoading = true;
+
+    // Home page may not have inline nav data. Borrow the canonical payload from one generated chapter page.
+    fetch('/-/Genesis/1')
+      .then((res) => (res.ok ? res.text() : Promise.reject(new Error(`HTTP ${res.status}`))))
+      .then((html) => {
+        const loaded = loadNavDataFromHtml(html);
+        if (loaded) {
+          navData = loaded;
+          renderTopbar();
+          renderPopover();
+        }
+      })
+      .catch(() => {
+        // Keep silent fallback: nav button still works for direct current-ref navigation.
+      })
+      .finally(() => {
+        navDataLoading = false;
+      });
+  }
+
   // ---- state helpers --------------------------------------------------------
 
   function getCurrentRef(): NavRef | null {
@@ -411,6 +458,7 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
   }
 
   function renderBooksView(): string {
+    ensureNavDataLoaded();
     const isCurrentSlot = activeSlot === 'current';
     const bmIdx = typeof activeSlot === 'number' ? activeSlot : -1;
     const slotRef: NavRef | null = isCurrentSlot
@@ -432,14 +480,23 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
     const alphaControl = `<label class="nav-check-row"><input type="checkbox" id="nav-alpha-chk"${alphaChecked}><span>Alphabetical</span></label>`;
 
     // book buttons
+    const data = loadNavData();
+    if (data.books.length === 0) {
+      return `<div class="nav-pop-inner">
+<div class="nav-pop-header"><strong>Select A Document</strong></div>
+<div class="nav-pop-controls">${topControls}${alphaControl}</div>
+<div class="nav-book-grid"><div class="nav-check-row">Loading references...</div></div>
+</div>`;
+    }
+
     let booksHtml: string;
     if (alphabetical) {
-      const sorted = [...loadNavData().books].sort((a, b) => a.displayAbbr.localeCompare(b.displayAbbr));
+      const sorted = [...data.books].sort((a, b) => a.displayAbbr.localeCompare(b.displayAbbr));
       const btns = sorted.map(b => `<button type="button" class="nav-book-btn" data-nav-pick-book="${escHtml(b.abbr)}">${escHtml(b.displayAbbr)}</button>`).join('');
       booksHtml = `<div class="nav-book-group">${btns}</div>`;
     } else {
-      const bookMap = new Map(loadNavData().books.map(b => [b.abbr, b]));
-      booksHtml = loadNavData().sections.map(section => {
+      const bookMap = new Map(data.books.map(b => [b.abbr, b]));
+      booksHtml = data.sections.map(section => {
         const btns = section.map(abbr => {
           const b = bookMap.get(abbr);
           if (!b) return '';
@@ -481,6 +538,7 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
       module.active = true;
 
       loadStorage();
+      ensureNavDataLoaded();
       injectOnce();
       renderTopbar();
 

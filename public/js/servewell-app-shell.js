@@ -545,6 +545,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   // src/phasingScripts/phase2To3/createBibleNavModule.ts
   var navData = null;
+  var navDataLoading = false;
   function loadNavData() {
     if (navData) return navData;
     try {
@@ -554,6 +555,26 @@ body.app-panel-open #app-shell-root .app-overlay {
     }
     if (!navData) navData = { books: [], sections: [] };
     return navData;
+  }
+  function parseNavData(raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      const books = Array.isArray(parsed.books) ? parsed.books : [];
+      const sections = Array.isArray(parsed.sections) ? parsed.sections : [];
+      if (books.length === 0) return null;
+      return {
+        books,
+        sections
+      };
+    } catch {
+      return null;
+    }
+  }
+  function loadNavDataFromHtml(html) {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const el = doc.getElementById("bible-nav-data");
+    if (!el?.textContent) return null;
+    return parseNavData(el.textContent);
   }
   var STORAGE_KEY_BOOKMARKS = "servewell-nav-bookmarks";
   var STORAGE_KEY_ALPHABETICAL = "servewell-nav-alphabetical";
@@ -772,6 +793,22 @@ body.app-panel-open #app-shell-root .app-overlay {
     let navView = "books";
     let navSelectedBook = null;
     const disposers = [];
+    function ensureNavDataLoaded() {
+      if (loadNavData().books.length > 0) return;
+      if (navDataLoading) return;
+      navDataLoading = true;
+      fetch("/-/Genesis/1").then((res) => res.ok ? res.text() : Promise.reject(new Error(`HTTP ${res.status}`))).then((html) => {
+        const loaded = loadNavDataFromHtml(html);
+        if (loaded) {
+          navData = loaded;
+          renderTopbar();
+          renderPopover();
+        }
+      }).catch(() => {
+      }).finally(() => {
+        navDataLoading = false;
+      });
+    }
     function getCurrentRef() {
       const main = qs3("main.chapter-page");
       if (!main) return null;
@@ -903,6 +940,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       popover.innerHTML = navView === "chapters" && navSelectedBook ? renderChaptersView(navSelectedBook) : renderBooksView();
     }
     function renderBooksView() {
+      ensureNavDataLoaded();
       const isCurrentSlot = activeSlot === "current";
       const bmIdx = typeof activeSlot === "number" ? activeSlot : -1;
       const slotRef = isCurrentSlot ? getCurrentRef() : bookmarks[bmIdx] ?? null;
@@ -917,14 +955,22 @@ body.app-panel-open #app-shell-root .app-overlay {
       }
       const alphaChecked = alphabetical ? " checked" : "";
       const alphaControl = `<label class="nav-check-row"><input type="checkbox" id="nav-alpha-chk"${alphaChecked}><span>Alphabetical</span></label>`;
+      const data = loadNavData();
+      if (data.books.length === 0) {
+        return `<div class="nav-pop-inner">
+<div class="nav-pop-header"><strong>Select A Document</strong></div>
+<div class="nav-pop-controls">${topControls}${alphaControl}</div>
+<div class="nav-book-grid"><div class="nav-check-row">Loading references...</div></div>
+</div>`;
+      }
       let booksHtml;
       if (alphabetical) {
-        const sorted = [...loadNavData().books].sort((a, b) => a.displayAbbr.localeCompare(b.displayAbbr));
+        const sorted = [...data.books].sort((a, b) => a.displayAbbr.localeCompare(b.displayAbbr));
         const btns = sorted.map((b) => `<button type="button" class="nav-book-btn" data-nav-pick-book="${escHtml(b.abbr)}">${escHtml(b.displayAbbr)}</button>`).join("");
         booksHtml = `<div class="nav-book-group">${btns}</div>`;
       } else {
-        const bookMap = new Map(loadNavData().books.map((b) => [b.abbr, b]));
-        booksHtml = loadNavData().sections.map((section) => {
+        const bookMap = new Map(data.books.map((b) => [b.abbr, b]));
+        booksHtml = data.sections.map((section) => {
           const btns = section.map((abbr) => {
             const b = bookMap.get(abbr);
             if (!b) return "";
@@ -957,6 +1003,7 @@ body.app-panel-open #app-shell-root .app-overlay {
         if (module.active) return;
         module.active = true;
         loadStorage();
+        ensureNavDataLoaded();
         injectOnce();
         renderTopbar();
         disposers.push(delegator.registerSublistener({
