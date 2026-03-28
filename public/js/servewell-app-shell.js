@@ -188,6 +188,14 @@ body.app-panel-open #app-shell-root .app-overlay {
   opacity: 0.45;
 }
 
+/* Runtime override: ensure long word metadata popovers remain fully readable. */
+.word-popover {
+  max-height: min(72dvh, 34rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media (max-width: 640px) {
   #app-shell-root .app-topbar > .app-topbar-home,
   #app-shell-root .app-topbar > .app-checkrow {
