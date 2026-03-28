@@ -545,37 +545,35 @@ function resolveWordAlignment(
     }
 
     if (isEnglishArticle(normalizedWord)) {
-        const articleCandidates = uniqueStrings(
-            context.candidates.filter(isArticleCandidate).map((candidate) => candidate.morphemeId)
-        );
+        // Row-local sort windows are not reliable for articles in BSB. Resolve
+        // against all article morphemes in the snippet and assign by occurrence order.
+        const snippetArticleCandidates = context.snippetCandidates
+            .filter(isArticleCandidate)
+            .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
 
-        if (articleCandidates.length === 1) {
-            return {
-                originalMorphemeId: articleCandidates[0]
-            };
-        }
-
-        if (articleCandidates.length === 0) {
+        if (snippetArticleCandidates.length === 0) {
             return {
                 originalMorphemeId: NO_MORPHEME_ID,
                 issueReason: 'article-without-source-morpheme'
             };
         }
 
-        const orderedArticleCandidates = context.candidates
-            .filter(isArticleCandidate)
-            .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
-        const priorOccurrenceCount = getPriorWordOccurrenceCount(normalizedWord, context.rowStrongsBase);
-        const positionalArticleCandidate = orderedArticleCandidates[Math.min(priorOccurrenceCount, orderedArticleCandidates.length - 1)];
+        const unclaimedArticleCandidates = getUnclaimedStrongCandidates(snippetArticleCandidates);
+        const selectedArticleCandidate = unclaimedArticleCandidates.length > 0
+            ? unclaimedArticleCandidates[0]
+            : snippetArticleCandidates[Math.min(
+                getPriorWordOccurrenceCount(normalizedWord),
+                snippetArticleCandidates.length - 1
+            )];
 
-        if (positionalArticleCandidate) {
+        if (selectedArticleCandidate) {
             return {
-                originalMorphemeId: positionalArticleCandidate.morphemeId
+                originalMorphemeId: selectedArticleCandidate.morphemeId
             };
         }
 
         return {
-            candidateMorphemeIds: articleCandidates,
+            candidateMorphemeIds: uniqueStrings(snippetArticleCandidates.map((candidate) => candidate.morphemeId)),
             issueReason: 'article-match-not-unique'
         };
     }
@@ -902,6 +900,18 @@ function resolveWithSnippetCandidates(
         return undefined;
     }
 
+    // If recent morpheme matches Strongs, prefer it to keep compound phrases together
+    const recentId = getMostRecentAssignedMorphemeId();
+    if (recentId && context.rowStrongsBase) {
+        const recentMorpheme = context.snippetCandidates.find(c => c.morphemeId === recentId);
+        if (recentMorpheme && recentMorpheme.strongsBase === context.rowStrongsBase) {
+            return {
+                originalMorphemeId: recentId,
+                issueReason: 'recent-morpheme-strongs-match'
+            };
+        }
+    }
+
     // Exact phrase match at snippet level (same priority boost as in row-level logic).
     const snippetExactMatches = context.snippetCandidates.filter(
         (candidate) => candidate.normalizedGlossPhrase === normalizedWord
@@ -1070,14 +1080,27 @@ function resolveWithProximityScoringToRecentMorpheme(
     }
 
     if (closeMatches.length > 1) {
-        // If still tied, pick the closest forward candidate
-        const closestForward = closeMatches
-            .filter(c => c.originalMorphemeOrdinal > recentCandidate.OriginalMorphemeOrdinal)
-            .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal)[0]
-            || closeMatches.sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal)[0];
-        if (closestForward) {
+        // Prefer staying with the most recent morpheme to keep phrases cohesive
+        const recentMatch = closeMatches.find(c => c.morphemeId === recentId);
+        if (recentMatch) {
             return {
-                originalMorphemeId: closestForward.morphemeId,
+                originalMorphemeId: recentMatch.morphemeId,
+                issueReason: 'proximity-to-recent-morpheme-same'
+            };
+        }
+
+        // Then prefer backward candidates (closer to phrase start), then forward
+        const backwardMatches = closeMatches
+            .filter(c => c.originalMorphemeOrdinal <= recentCandidate.OriginalMorphemeOrdinal)
+            .sort((a, b) => b.originalMorphemeOrdinal - a.originalMorphemeOrdinal); // closest backward
+        const forwardMatches = closeMatches
+            .filter(c => c.originalMorphemeOrdinal > recentCandidate.OriginalMorphemeOrdinal)
+            .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal); // closest forward
+        
+        const selectedCandidate = backwardMatches[0] || forwardMatches[0];
+        if (selectedCandidate) {
+            return {
+                originalMorphemeId: selectedCandidate.morphemeId,
                 issueReason: 'proximity-to-recent-morpheme-final'
             };
         }
@@ -1445,10 +1468,12 @@ function isArticleCandidate(candidate: MorphemeAlignmentCandidate): boolean {
     const label = (candidate.grammarLabel || '').toLowerCase();
     const grammarCode = (candidate.grammarCode || '').toLowerCase();
 
-    if (functionName.includes('article')) {
+    const hasArticleWord = (value: string) => /\barticle\b/.test(value);
+
+    if (hasArticleWord(functionName)) {
         return true;
     }
-    if (label.includes('article')) {
+    if (hasArticleWord(label)) {
         return true;
     }
     return grammarCode.includes('td') && label.includes('definite');
