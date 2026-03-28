@@ -580,6 +580,27 @@ function resolveWordAlignment(
         };
     }
 
+    // High-priority: if the entire normalized morpheme gloss exactly equals the
+    // normalized traditional word, prefer that over Strongs matching.  This
+    // handles cases where BSB Strongs points to the root word while the
+    // traditional token matches a prefix morpheme (e.g. "in" / "and" Gen 1:1).
+    if (normalizedWord) {
+        const exactGlossMatches = context.candidates.filter(
+            (candidate) => candidate.normalizedGlossPhrase === normalizedWord
+        );
+        if (exactGlossMatches.length === 1) {
+            return { originalMorphemeId: exactGlossMatches[0].morphemeId };
+        }
+        if (exactGlossMatches.length > 1) {
+            const unclaimed = getUnclaimedStrongCandidates(exactGlossMatches);
+            const ordered = (unclaimed.length > 0 ? [...unclaimed] : [...exactGlossMatches])
+                .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
+            const priorCount = getPriorWordOccurrenceCount(normalizedWord, context.rowStrongsBase);
+            const selected = ordered[Math.min(priorCount, ordered.length - 1)];
+            if (selected) return { originalMorphemeId: selected.morphemeId };
+        }
+    }
+
     let matchingCandidates = context.candidates;
     if (context.rowStrongsBase) {
         const strongMatches = context.candidates.filter(
@@ -869,6 +890,22 @@ function resolveWithSnippetCandidates(
 ): WordAlignmentResolution | undefined {
     if (!normalizedWord || context.snippetCandidates.length === 0) {
         return undefined;
+    }
+
+    // Exact phrase match at snippet level (same priority boost as in row-level logic).
+    const snippetExactMatches = context.snippetCandidates.filter(
+        (candidate) => candidate.normalizedGlossPhrase === normalizedWord
+    );
+    if (snippetExactMatches.length === 1) {
+        return { originalMorphemeId: snippetExactMatches[0].morphemeId };
+    }
+    if (snippetExactMatches.length > 1 && context.rowStrongsBase) {
+        const strongExact = snippetExactMatches.filter(
+            (candidate) => candidate.strongsBase === context.rowStrongsBase
+        );
+        if (strongExact.length === 1) {
+            return { originalMorphemeId: strongExact[0].morphemeId };
+        }
     }
 
     const lexicalCandidates = context.snippetCandidates
