@@ -346,8 +346,24 @@ function renderTraditionalPane(snippet: Snippet): string {
   const currentParagraphTokens: TraditionalParagraphToken[] = [];
   let traditionalWordOrdinal = 0;
 
+  const literalMetaByMorphemeId = new Map<string, MetadataEntry[]>();
+  for (const morpheme of snippet.OriginalMorphemes) {
+    if (!morpheme.MorphemeId) continue;
+    literalMetaByMorphemeId.set(morpheme.MorphemeId, [
+      { label: 'Morpheme ID', value: morpheme.MorphemeId },
+      { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
+      { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+      { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
+      { label: 'Language', value: morpheme.OriginalLanguage },
+      { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
+      { label: 'Root Script', value: morpheme.OriginalRootScript },
+      { label: 'Root Translation', value: morpheme.EnglishRootTranslation },
+      { label: 'Source', value: morpheme.Source }
+    ]);
+  }
+
   const flushParagraph = () => {
-    const paragraph = renderTraditionalParagraphTokens(currentParagraphTokens, snippetLabel, snippetKey);
+    const paragraph = renderTraditionalParagraphTokens(currentParagraphTokens, snippetLabel, snippetKey, literalMetaByMorphemeId);
     currentParagraphTokens.length = 0;
     if (paragraph) {
       paragraphs.push(`<div class="traditional-paragraph word-line">${paragraph}</div>`);
@@ -427,7 +443,8 @@ function renderTraditionalPane(snippet: Snippet): string {
 function renderTraditionalParagraphTokens(
   tokens: TraditionalParagraphToken[],
   snippetLabel: string,
-  snippetKey: string
+  snippetKey: string,
+  literalMetaByMorphemeId: Map<string, MetadataEntry[]>
 ): string {
   const renderParts: RenderableTokenPart[] = [];
 
@@ -444,22 +461,17 @@ function renderTraditionalParagraphTokens(
     }
 
     const popoverId = `popover-${toSafeDomId(`${snippetKey}-traditional-${token.wordOrdinal}`)}`;
-    const originalMorphemeDisplay = token.resolvedOriginalMorphemeIds && token.resolvedOriginalMorphemeIds.length > 0
-      ? token.resolvedOriginalMorphemeIds.join(', ')
-      : token.originalMorphemeId;
-    const metadataEntries: MetadataEntry[] = [
-      { label: 'Pane', value: 'Traditional' },
-      { label: 'Source Token', value: token.originalToken },
-      {
-        label: 'Token Segment',
-        value:
-          token.tokenSegmentOrdinal && token.tokenSegmentCount
-            ? `${token.tokenSegmentOrdinal} of ${token.tokenSegmentCount}`
-            : undefined
-      },
-      { label: "Strong's ID", value: token.strongsId },
-      { label: 'Original Morpheme ID', value: originalMorphemeDisplay }
-    ];
+    const matchMorphemeId =
+      token.resolvedOriginalMorphemeIds && token.resolvedOriginalMorphemeIds.length > 0
+        ? token.resolvedOriginalMorphemeIds[0]
+        : token.originalMorphemeId;
+    const literalEntries = matchMorphemeId ? literalMetaByMorphemeId.get(matchMorphemeId) : undefined;
+    const metadataEntries: MetadataEntry[] = literalEntries
+      ? [{ label: 'Pane', value: 'Traditional' }, ...literalEntries]
+      : [
+          { label: 'Pane', value: 'Traditional' },
+          { label: '—', value: "There's no direct match for this word in the original." }
+        ];
 
     renderParts.push({
       text: token.text,
