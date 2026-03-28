@@ -200,8 +200,8 @@ body.app-panel-open #app-shell-root .app-overlay {
   opacity: 0.45;
 }
 
-/* Literal pane: small-caps for fidelity to original text. */
-.literal-pane .pane-text {
+/* Literal pane: apply small-caps only to literal English word tokens. */
+.literal-pane .word-token {
   font-variant: all-small-caps;
 }
 
