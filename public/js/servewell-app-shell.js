@@ -200,6 +200,11 @@ body.app-panel-open #app-shell-root .app-overlay {
   opacity: 0.45;
 }
 
+/* Literal pane: small-caps for fidelity to original text. */
+.literal-pane .pane-text {
+  font-variant: all-small-caps;
+}
+
 /* Runtime override: ensure long word metadata popovers remain fully readable. */
 .word-popover {
   max-height: min(72dvh, 34rem);
