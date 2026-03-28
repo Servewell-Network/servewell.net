@@ -701,8 +701,18 @@ function resolveWordAlignment(
     if (normalizedWord) {
         const nonPunctuationMatches = matchingCandidates.filter((candidate) => !candidate.isPunctuation);
         if (nonPunctuationMatches.length === 1) {
+            const onlyMatch = nonPunctuationMatches[0];
+            const strongsAgree = !context.rowStrongsBase || onlyMatch.strongsBase === context.rowStrongsBase;
+            const hasLexicalSignal = candidateHasLexicalSignal(onlyMatch, normalizedWord);
+            if (!strongsAgree && !hasLexicalSignal) {
+                const snippetFallback = resolveWithSnippetCandidates(normalizedWord, context, rowWordIndex, normalizedRowWords);
+                if (snippetFallback) {
+                    return snippetFallback;
+                }
+            }
+
             return {
-                originalMorphemeId: nonPunctuationMatches[0].morphemeId
+                originalMorphemeId: onlyMatch.morphemeId
             };
         }
     }
@@ -915,111 +925,83 @@ function resolveWithSnippetCandidates(
         lexicalCandidates.map((candidate) => candidate.morphemeId)
     );
 
-    if (context.rowStrongsBase) {
-        const strongLexicalCandidates = context.snippetCandidates
-            .filter((candidate) => candidate.strongsBase === context.rowStrongsBase)
-            .filter((candidate) => candidateHasLexicalSignal(candidate, normalizedWord));
-
-        const strongLexicalMatches = uniqueStrings(
-            strongLexicalCandidates.map((candidate) => candidate.morphemeId)
-        );
-
-        if (strongLexicalMatches.length === 1) {
-            return {
-                originalMorphemeId: strongLexicalMatches[0]
-            };
-        }
-
-        if (strongLexicalMatches.length > 1) {
-            const orderedStrongLexicalCandidates = [...strongLexicalCandidates]
-                .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
-            const priorOccurrenceCount = getPriorWordOccurrenceCount(normalizedWord, context.rowStrongsBase);
-            const positionalCandidate = orderedStrongLexicalCandidates[Math.min(priorOccurrenceCount, orderedStrongLexicalCandidates.length - 1)];
-
-            if (positionalCandidate) {
-                return {
-                    originalMorphemeId: positionalCandidate.morphemeId
-                };
-            }
-
-            return {
-                candidateMorphemeIds: strongLexicalMatches,
-                issueReason: 'snippet-lexical-strong-match-not-unique'
-            };
-        }
-
-        // If strongs-filtered lexical matches are absent, fall back to lexical-only
-        // snippet matches to handle data mismatches between row strongs and morpheme strongs.
-
-        const strongCandidates = context.snippetCandidates
-            .filter((candidate) => candidate.strongsBase === context.rowStrongsBase);
-        const strongMatches = uniqueStrings(
-            strongCandidates.map((candidate) => candidate.morphemeId)
-        );
-
-        if (strongMatches.length === 1) {
-            return {
-                originalMorphemeId: strongMatches[0]
-            };
-        }
-
-        if (strongMatches.length > 1) {
-            const unclaimedStrongCandidates = getUnclaimedStrongCandidates(strongCandidates);
-            const orderedStrongCandidates = (unclaimedStrongCandidates.length > 0
-                ? [...unclaimedStrongCandidates]
-                : [...strongCandidates])
-                .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
-
-            const priorOccurrenceCount = getPriorWordOccurrenceCount(normalizedWord, context.rowStrongsBase);
-            const positionalCandidate = orderedStrongCandidates[Math.min(priorOccurrenceCount, orderedStrongCandidates.length - 1)];
-
-            if (positionalCandidate) {
-                return {
-                    originalMorphemeId: positionalCandidate.morphemeId
-                };
-            }
-        }
-    }
-
-    if (lexicalMatches.length === 0) {
-        return undefined;
-    }
-
     if (lexicalMatches.length === 1) {
         return {
             originalMorphemeId: lexicalMatches[0]
         };
     }
 
-    const neighborContextResolution = resolveWithNeighborMorphemeContext(
-        context,
-        lexicalCandidates,
-        rowWordIndex,
-        normalizedRowWords
+    if (lexicalMatches.length > 1) {
+        const neighborContextResolution = resolveWithNeighborMorphemeContext(
+            context,
+            lexicalCandidates,
+            rowWordIndex,
+            normalizedRowWords
+        );
+        if (neighborContextResolution) {
+            return neighborContextResolution;
+        }
+
+        const forwardContinuityResolution = resolveWithForwardContinuityContext(context, lexicalCandidates);
+        if (forwardContinuityResolution) {
+            return forwardContinuityResolution;
+        }
+
+        const rowSourceContextResolution = resolveBracketedRowSourceAmbiguity(normalizedWord, context, lexicalCandidates);
+        if (rowSourceContextResolution) {
+            return rowSourceContextResolution;
+        }
+
+        const proximityResolution = resolveWithProximityScoringToRecentMorpheme(lexicalCandidates);
+        if (proximityResolution) {
+            return proximityResolution;
+        }
+
+        const positionalResolution = resolveWithPositionalTieBreaker(normalizedWord, lexicalCandidates);
+        if (positionalResolution) {
+            return positionalResolution;
+        }
+
+        return {
+            candidateMorphemeIds: lexicalMatches,
+            issueReason: 'snippet-lexical-match-not-unique'
+        };
+    }
+
+    if (!context.rowStrongsBase) {
+        return undefined;
+    }
+
+    const strongCandidates = context.snippetCandidates
+        .filter((candidate) => candidate.strongsBase === context.rowStrongsBase);
+    const strongMatches = uniqueStrings(
+        strongCandidates.map((candidate) => candidate.morphemeId)
     );
-    if (neighborContextResolution) {
-        return neighborContextResolution;
+
+    if (strongMatches.length === 1) {
+        return {
+            originalMorphemeId: strongMatches[0]
+        };
     }
 
-    const forwardContinuityResolution = resolveWithForwardContinuityContext(context, lexicalCandidates);
-    if (forwardContinuityResolution) {
-        return forwardContinuityResolution;
+    if (strongMatches.length > 1) {
+        const unclaimedStrongCandidates = getUnclaimedStrongCandidates(strongCandidates);
+        const orderedStrongCandidates = (unclaimedStrongCandidates.length > 0
+            ? [...unclaimedStrongCandidates]
+            : [...strongCandidates])
+            .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
+
+        const priorOccurrenceCount = getPriorWordOccurrenceCount(normalizedWord, context.rowStrongsBase);
+        const positionalCandidate = orderedStrongCandidates[Math.min(priorOccurrenceCount, orderedStrongCandidates.length - 1)];
+
+        if (positionalCandidate) {
+            return {
+                originalMorphemeId: positionalCandidate.morphemeId
+            };
+        }
     }
 
-    const rowSourceContextResolution = resolveBracketedRowSourceAmbiguity(normalizedWord, context, lexicalCandidates);
-    if (rowSourceContextResolution) {
-        return rowSourceContextResolution;
-    }
-
-    const positionalResolution = resolveWithPositionalTieBreaker(normalizedWord, lexicalCandidates);
-    if (positionalResolution) {
-        return positionalResolution;
-    }
-
-    return {
-        candidateMorphemeIds: lexicalMatches,
-        issueReason: 'snippet-lexical-match-not-unique'
-    };
+    return undefined;
 }
 
 function resolveBracketedRowSourceAmbiguity(
@@ -1051,6 +1033,54 @@ function resolveBracketedRowSourceAmbiguity(
         return {
             originalMorphemeId: phraseMatchedCandidate.morphemeId
         };
+    }
+
+    return undefined;
+}
+
+function resolveWithProximityScoringToRecentMorpheme(
+    lexicalCandidates: MorphemeAlignmentCandidate[]
+): WordAlignmentResolution | undefined {
+    if (lexicalCandidates.length < 2) {
+        return undefined;
+    }
+
+    const recentId = getMostRecentAssignedMorphemeId();
+    if (!recentId || !currentVerseData) {
+        return undefined;
+    }
+
+    const recentCandidate = currentVerseData.OriginalMorphemes
+        .find(m => m.MorphemeId === recentId);
+    if (!recentCandidate) {
+        return undefined;
+    }
+
+    // Prefer candidates within ~3 ordinals of the recent morpheme to keep phrases cohesive
+    const proximityThreshold = 3;
+    const closeMatches = lexicalCandidates.filter(
+        c => Math.abs(c.originalMorphemeOrdinal - recentCandidate.OriginalMorphemeOrdinal) <= proximityThreshold
+    );
+
+    if (closeMatches.length === 1) {
+        return {
+            originalMorphemeId: closeMatches[0].morphemeId,
+            issueReason: 'proximity-to-recent-morpheme'
+        };
+    }
+
+    if (closeMatches.length > 1) {
+        // If still tied, pick the closest forward candidate
+        const closestForward = closeMatches
+            .filter(c => c.originalMorphemeOrdinal > recentCandidate.OriginalMorphemeOrdinal)
+            .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal)[0]
+            || closeMatches.sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal)[0];
+        if (closestForward) {
+            return {
+                originalMorphemeId: closestForward.morphemeId,
+                issueReason: 'proximity-to-recent-morpheme-final'
+            };
+        }
     }
 
     return undefined;
