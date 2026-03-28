@@ -1122,6 +1122,121 @@ body.app-panel-open #app-shell-root .app-overlay {
     return module;
   }
 
+  // src/phasingScripts/phase2To3/createTransliterationModule.ts
+  var TRANSLIT_COLORS = [
+    "rgba(220,  60,  60, 0.28)",
+    // red
+    "rgba(225, 140,  30, 0.30)",
+    // orange
+    "rgba(195, 175,  10, 0.38)",
+    // yellow
+    "rgba( 40, 170,  70, 0.28)",
+    // green
+    "rgba( 20, 180, 165, 0.28)",
+    // teal
+    "rgba( 55, 130, 240, 0.30)",
+    // blue
+    "rgba(145,  65, 240, 0.28)",
+    // purple
+    "rgba(225,  50, 175, 0.28)",
+    // pink
+    "rgba(155,  95,  35, 0.32)",
+    // brown
+    "rgba(120, 185,  20, 0.32)"
+    // lime
+  ];
+  var STYLE_ID = "translit-module-style";
+  function decodePart(s) {
+    try {
+      return decodeURIComponent(s);
+    } catch {
+      return s;
+    }
+  }
+  function parseDataM(raw) {
+    const result = {};
+    for (const pair of raw.split("&")) {
+      if (!pair) continue;
+      const sep = pair.indexOf("=");
+      if (sep < 0) continue;
+      result[decodePart(pair.slice(0, sep))] = decodePart(pair.slice(sep + 1));
+    }
+    return result;
+  }
+  function applyTransliterations() {
+    document.querySelectorAll(".snippet-row").forEach((snippetRow) => {
+      const colorMap = /* @__PURE__ */ new Map();
+      let colorCounter = 0;
+      snippetRow.querySelectorAll(".literal-pane .word-token").forEach((btn) => {
+        const mid = parseDataM(btn.dataset.m ?? "")["mid"];
+        if (mid && !colorMap.has(mid)) {
+          colorMap.set(mid, TRANSLIT_COLORS[colorCounter % TRANSLIT_COLORS.length]);
+          colorCounter++;
+        }
+      });
+      snippetRow.querySelectorAll(".word-token").forEach((btn) => {
+        const wrap = btn.parentElement;
+        if (!wrap) return;
+        const meta = parseDataM(btn.dataset.m ?? "");
+        const translit = meta["tr"];
+        if (!translit) return;
+        const mid = meta["mid"];
+        const color = mid ? colorMap.get(mid) ?? "" : "";
+        const span = document.createElement("span");
+        span.className = "word-translit";
+        if (color) span.style.background = color;
+        span.textContent = translit;
+        wrap.appendChild(span);
+      });
+    });
+  }
+  function removeTransliterations() {
+    document.querySelectorAll(".word-translit").forEach((el) => el.remove());
+  }
+  function ensureStyle() {
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = `
+/* Transliteration module */
+.show-translit .word-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: top;
+  gap: 2px;
+}
+.word-translit {
+  font-size: 0.65em;
+  color: var(--muted);
+  border-radius: 3px;
+  padding: 0 4px 1px;
+  line-height: 1.4;
+  white-space: nowrap;
+  display: block;
+}
+`;
+    document.head.appendChild(style);
+  }
+  function createTransliterationModule() {
+    return {
+      id: "transliteration",
+      label: "Show transliteration beneath each word",
+      active: false,
+      activate() {
+        this.active = true;
+        ensureStyle();
+        applyTransliterations();
+        document.documentElement.classList.add("show-translit");
+      },
+      deactivate() {
+        this.active = false;
+        document.documentElement.classList.remove("show-translit");
+        removeTransliterations();
+      }
+    };
+  }
+
   // src/phasingScripts/phase2To3/jsDomFramework.ts
   function isDemoRoute(pathname) {
     const normalizedPath = pathname.replace(/\/+$/, "") || "/";
@@ -1146,6 +1261,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       modules.register(createDemoModule(delegator, shell));
     }
     modules.register(createBibleNavModule(delegator));
+    modules.register(createTransliterationModule());
     registerShellListeners(delegator, shell, theme, modules);
     theme.restore();
     modules.render();

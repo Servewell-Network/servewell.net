@@ -37,6 +37,7 @@ import { createModuleRegistry } from './createModuleRegistry';
 import { registerShellListeners } from './registerShellListeners';
 import { createDemoModule } from './createDemoModule';
 import { createBibleNavModule } from './createBibleNavModule';
+import { createTransliterationModule } from './createTransliterationModule';
 
 function isDemoRoute(pathname: string): boolean {
   const normalizedPath = pathname.replace(/\/+$/, '') || '/';
@@ -67,6 +68,7 @@ export function jsDomFramework() {
     modules.register(createDemoModule(delegator, shell));
   }
   modules.register(createBibleNavModule(delegator));
+  modules.register(createTransliterationModule());
 
   registerShellListeners(delegator, shell, theme, modules);
 
