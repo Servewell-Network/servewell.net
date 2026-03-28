@@ -235,7 +235,6 @@ body.app-panel-open #app-shell-root .app-overlay {
     </div>
 
     <section>
-      <h3>Settings</h3>
       <label class="app-checkrow">
         <input type="checkbox" data-setting="dark-mode">
         <span>Dark mode</span>
@@ -243,7 +242,6 @@ body.app-panel-open #app-shell-root .app-overlay {
     </section>
 
     <section>
-      <h3>Modules</h3>
       <div id="app-module-list"></div>
     </section>
   </aside>
