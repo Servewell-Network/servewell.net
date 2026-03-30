@@ -67,16 +67,41 @@ a {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.65rem;
-  align-items: end;
-  margin-bottom: 0.45rem;
+  align-items: stretch;
+  margin-bottom: 0.35rem;
 }
-.snippet-grid-header-label {
+.snippet-grid-header-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  border: 1px solid var(--pane-border);
+  border-radius: 0.45rem;
+  background: var(--pane-bg);
+  color: var(--label-fg);
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+.snippet-grid-header-card:hover {
+  background: var(--hover-bg);
+}
+.snippet-grid-header-card input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--link);
+}
+.snippet-grid-header-text {
   min-width: 0;
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
   font-weight: 700;
+}
+.snippet-grid-empty-message {
+  margin: 0.25rem 0 0.55rem;
+  color: var(--muted);
+  font-style: italic;
 }
 .snippet-grid {
   display: flex;
@@ -92,6 +117,19 @@ a {
 }
 .snippet-row > * {
   min-width: 0;
+}
+.chapter-page.mode-literal-only .snippet-row,
+.chapter-page.mode-traditional-only .snippet-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+.chapter-page.mode-literal-only .traditional-pane {
+  display: none;
+}
+.chapter-page.mode-traditional-only .literal-pane {
+  display: none;
+}
+.chapter-page.mode-none .snippet-grid {
+  display: none;
 }
 .verse-num {
   display: inline-block;
@@ -115,8 +153,72 @@ a {
   color: var(--pane-fg);
   padding: 0;
 }
-.pane-text, .traditional-paragraph, .traditional-heading, .traditional-crossref, .traditional-footnote {
+.pane-text, .traditional-paragraph, .traditional-heading, .traditional-crossref {
   margin: 0.25rem 0;
+}
+.footnote-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95em;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.2rem;
+  vertical-align: middle;
+  user-select: none;
+}
+.footnote-marker:hover {
+  color: var(--hover-fg);
+}
+.fn-anchor {
+  display: inline;
+  white-space: nowrap;
+}
+.footnote-popover {
+  max-width: min(92vw, 26rem);
+  border: 1px solid var(--popover-border);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.22);
+  background: var(--popover-bg);
+  color: var(--popover-fg);
+}
+.footnote-popover:not(:popover-open) {
+  display: none;
+}
+.footnote-popover:popover-open {
+  display: block;
+}
+.footnote-popover::backdrop {
+  background: rgba(15, 23, 42, 0.25);
+}
+.footnote-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.footnote-popover-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.footnote-popover-body {
+  font-size: 0.95em;
+  line-height: 1.5;
+  color: var(--pane-fg);
+}
+.footnote-popover-body a {
+  color: var(--link);
+  text-decoration: underline;
 }
 .word-line {
   line-height: 1.7;
@@ -203,7 +305,7 @@ a {
 .traditional-heading {
   font-weight: 700;
 }
-.traditional-crossref, .traditional-footnote {
+.traditional-crossref {
   font-size: 0.95em;
   color: var(--muted);
 }
@@ -226,10 +328,17 @@ a {
 <script id="bible-nav-data" type="application/json">{"books":[{"abbr":"Gen","displayAbbr":"Gen","name":"Genesis","url":"Genesis","chapters":50},{"abbr":"Exo","displayAbbr":"Exo","name":"Exodus","url":"Exodus","chapters":40},{"abbr":"Lev","displayAbbr":"Lev","name":"Leviticus","url":"Leviticus","chapters":27},{"abbr":"Num","displayAbbr":"Num","name":"Numbers","url":"Numbers","chapters":36},{"abbr":"Deu","displayAbbr":"Deu","name":"Deuteronomy","url":"Deuteronomy","chapters":34},{"abbr":"Jos","displayAbbr":"Jos","name":"Joshua","url":"Joshua","chapters":24},{"abbr":"Jdg","displayAbbr":"Jdg","name":"Judges","url":"Judges","chapters":21},{"abbr":"Rut","displayAbbr":"Rut","name":"Ruth","url":"Ruth","chapters":4},{"abbr":"1Sa","displayAbbr":"1Sa","name":"1 Samuel","url":"1-Samuel","chapters":31},{"abbr":"2Sa","displayAbbr":"2Sa","name":"2 Samuel","url":"2-Samuel","chapters":24},{"abbr":"1Ki","displayAbbr":"1Ki","name":"1 Kings","url":"1-Kings","chapters":22},{"abbr":"2Ki","displayAbbr":"2Ki","name":"2 Kings","url":"2-Kings","chapters":25},{"abbr":"1Ch","displayAbbr":"1Ch","name":"1 Chronicles","url":"1-Chronicles","chapters":29},{"abbr":"2Ch","displayAbbr":"2Ch","name":"2 Chronicles","url":"2-Chronicles","chapters":36},{"abbr":"Ezr","displayAbbr":"Ezr","name":"Ezra","url":"Ezra","chapters":10},{"abbr":"Neh","displayAbbr":"Neh","name":"Nehemiah","url":"Nehemiah","chapters":13},{"abbr":"Est","displayAbbr":"Est","name":"Esther","url":"Esther","chapters":10},{"abbr":"Job","displayAbbr":"Job","name":"Job","url":"Job","chapters":42},{"abbr":"Psa","displayAbbr":"Psa","name":"Psalms","url":"Psalms","chapters":150},{"abbr":"Pro","displayAbbr":"Pro","name":"Proverbs","url":"Proverbs","chapters":31},{"abbr":"Ecc","displayAbbr":"Ecc","name":"Ecclesiastes","url":"Ecclesiastes","chapters":12},{"abbr":"Sng","displayAbbr":"Sng","name":"Song of Songs","url":"Song-of-Songs","chapters":8},{"abbr":"Isa","displayAbbr":"Isa","name":"Isaiah","url":"Isaiah","chapters":66},{"abbr":"Jer","displayAbbr":"Jer","name":"Jeremiah","url":"Jeremiah","chapters":52},{"abbr":"Lam","displayAbbr":"Lam","name":"Lamentations","url":"Lamentations","chapters":5},{"abbr":"Ezk","displayAbbr":"Ezk","name":"Ezekiel","url":"Ezekiel","chapters":48},{"abbr":"Dan","displayAbbr":"Dan","name":"Daniel","url":"Daniel","chapters":12},{"abbr":"Hos","displayAbbr":"Hos","name":"Hosea","url":"Hosea","chapters":14},{"abbr":"Jol","displayAbbr":"Jol","name":"Joel","url":"Joel","chapters":3},{"abbr":"Amo","displayAbbr":"Amo","name":"Amos","url":"Amos","chapters":9},{"abbr":"Oba","displayAbbr":"Oba","name":"Obadiah","url":"Obadiah","chapters":1},{"abbr":"Jon","displayAbbr":"Jon","name":"Jonah","url":"Jonah","chapters":4},{"abbr":"Mic","displayAbbr":"Mic","name":"Micah","url":"Micah","chapters":7},{"abbr":"Nam","displayAbbr":"Nam","name":"Nahum","url":"Nahum","chapters":3},{"abbr":"Hab","displayAbbr":"Hab","name":"Habakkuk","url":"Habakkuk","chapters":3},{"abbr":"Zep","displayAbbr":"Zep","name":"Zephaniah","url":"Zephaniah","chapters":3},{"abbr":"Hag","displayAbbr":"Hag","name":"Haggai","url":"Haggai","chapters":2},{"abbr":"Zec","displayAbbr":"Zec","name":"Zechariah","url":"Zechariah","chapters":14},{"abbr":"Mal","displayAbbr":"Mal","name":"Malachi","url":"Malachi","chapters":4},{"abbr":"Mat","displayAbbr":"Mat","name":"Matthew","url":"Matthew","chapters":28},{"abbr":"Mrk","displayAbbr":"Mrk","name":"Mark","url":"Mark","chapters":16},{"abbr":"Luk","displayAbbr":"Luk","name":"Luke","url":"Luke","chapters":24},{"abbr":"Jhn","displayAbbr":"Jhn","name":"John","url":"John","chapters":21},{"abbr":"Act","displayAbbr":"Act","name":"Acts","url":"Acts","chapters":28},{"abbr":"Rom","displayAbbr":"Rom","name":"Romans","url":"Romans","chapters":16},{"abbr":"1Co","displayAbbr":"1Co","name":"1 Corinthians","url":"1-Corinthians","chapters":16},{"abbr":"2Co","displayAbbr":"2Co","name":"2 Corinthians","url":"2-Corinthians","chapters":13},{"abbr":"Gal","displayAbbr":"Gal","name":"Galatians","url":"Galatians","chapters":6},{"abbr":"Eph","displayAbbr":"Eph","name":"Ephesians","url":"Ephesians","chapters":6},{"abbr":"Php","displayAbbr":"Php","name":"Philippians","url":"Philippians","chapters":4},{"abbr":"Col","displayAbbr":"Col","name":"Colossians","url":"Colossians","chapters":4},{"abbr":"1Th","displayAbbr":"1Th","name":"1 Thessalonians","url":"1-Thessalonians","chapters":5},{"abbr":"2Th","displayAbbr":"2Th","name":"2 Thessalonians","url":"2-Thessalonians","chapters":3},{"abbr":"1Ti","displayAbbr":"1Ti","name":"1 Timothy","url":"1-Timothy","chapters":6},{"abbr":"2Ti","displayAbbr":"2Ti","name":"2 Timothy","url":"2-Timothy","chapters":4},{"abbr":"Tit","displayAbbr":"Tit","name":"Titus","url":"Titus","chapters":3},{"abbr":"Phm","displayAbbr":"Phm","name":"Philemon","url":"Philemon","chapters":1},{"abbr":"Heb","displayAbbr":"Heb","name":"Hebrews","url":"Hebrews","chapters":13},{"abbr":"Jas","displayAbbr":"Jas","name":"James","url":"James","chapters":5},{"abbr":"1Pe","displayAbbr":"1Pe","name":"1 Peter","url":"1-Peter","chapters":5},{"abbr":"2Pe","displayAbbr":"2Pe","name":"2 Peter","url":"2-Peter","chapters":3},{"abbr":"1Jn","displayAbbr":"1Jn","name":"1 John","url":"1-John","chapters":5},{"abbr":"2Jn","displayAbbr":"2Jn","name":"2 John","url":"2-John","chapters":1},{"abbr":"3Jn","displayAbbr":"3Jn","name":"3 John","url":"3-John","chapters":1},{"abbr":"Jud","displayAbbr":"Jde","name":"Jude","url":"Jude","chapters":1},{"abbr":"Rev","displayAbbr":"Rev","name":"Revelation","url":"Revelation","chapters":22}],"sections":[["Gen","Exo","Lev","Num","Deu"],["Jos","Jdg","Rut","1Sa","2Sa","1Ki","2Ki","1Ch","2Ch","Ezr","Neh","Est"],["Job","Psa","Pro","Ecc","Sng"],["Isa","Jer","Lam","Ezk","Dan"],["Hos","Jol","Amo","Oba","Jon","Mic","Nam","Hab","Zep","Hag","Zec","Mal"],["Mat","Mrk","Luk","Jhn","Act"],["Rom","1Co","2Co","Gal","Eph","Php","Col","1Th","2Th"],["1Ti","2Ti","Tit","Phm"],["Heb","Jas","1Pe","2Pe","1Jn","2Jn","3Jn","Jud","Rev"]]}</script>
 <main class="chapter-page" data-book="Isa" data-chapter="44">
 <p class="chapter-note">Click any word to see more.</p>
-<div class="snippet-grid-header">
-<div class="snippet-grid-header-label">LITERAL</div>
-<div class="snippet-grid-header-label">TRADITIONAL</div>
+<div class="snippet-grid-header" role="group" aria-label="Column visibility">
+<label class="snippet-grid-header-card" for="column-toggle-literal">
+<input type="checkbox" id="column-toggle-literal" data-column-toggle="literal" />
+<span class="snippet-grid-header-text">LITERAL</span>
+</label>
+<label class="snippet-grid-header-card" for="column-toggle-traditional">
+<input type="checkbox" id="column-toggle-traditional" data-column-toggle="traditional" />
+<span class="snippet-grid-header-text">TRADITIONAL</span>
+</label>
 </div>
+<p class="snippet-grid-empty-message" data-column-empty-message hidden>Select a column header to see its column.</p>
 <section class="snippet-grid">
 <article class="snippet-row" id="snippet-Isa44-1">
 <div class="snippet-pane literal-pane" aria-label="Literal">
@@ -249,9 +358,7 @@ a {
 <div class="traditional-paragraph word-line"><button type="button" class="verse-num" aria-label="Verse 2">2</button><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.1&amp;os=%D7%9B%D6%BC%D6%B9%D7%94&amp;tr=koh-&amp;gr=Adverb&amp;lg=Hebrew&amp;sr=H3541&amp;rt=thus&amp;src=Leningrad%20manuscript" aria-label="Show metadata for This">This</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.3&amp;os=%D7%90%D6%B8%D7%9E%D6%B7%D6%A8%D7%A8&amp;tr=&#39;a.Mar&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H0559&amp;rt=to%20say&amp;src=Leningrad%20manuscript" aria-label="Show metadata for is">is</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for the">the</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.3&amp;os=%D7%90%D6%B8%D7%9E%D6%B7%D6%A8%D7%A8&amp;tr=&#39;a.Mar&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H0559&amp;rt=to%20say&amp;src=Leningrad%20manuscript" aria-label="Show metadata for word">word</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.4&amp;os=%D7%99%D6%B0%D7%94%D7%95%D6%B8%D6%A5%D7%94&amp;tr=Yah.weh&amp;gr=Proper%20Noun%20(Title)&amp;lg=Hebrew&amp;sr=H3068G&amp;rt=LORD&amp;src=Leningrad%20manuscript" aria-label="Show metadata for of">of</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for the">the</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.4&amp;os=%D7%99%D6%B0%D7%94%D7%95%D6%B8%D6%A5%D7%94&amp;tr=Yah.weh&amp;gr=Proper%20Noun%20(Title)&amp;lg=Hebrew&amp;sr=H3068G&amp;rt=LORD&amp;src=Leningrad%20manuscript" aria-label="Show metadata for LORD,">LORD,</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.5&amp;os=%D7%A2%D6%B9%D7%A9%D7%82%D6%B6%D6%9B&amp;tr=&#39;o.Se.&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Participle%20(Singular%20Masculine%2C%20Construct)&amp;lg=Hebrew&amp;sr=H6213H&amp;rt=to%20make&amp;src=Leningrad%20manuscript" aria-label="Show metadata for your">your</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.5&amp;os=%D7%A2%D6%B9%D7%A9%D7%82%D6%B6%D6%9B&amp;tr=&#39;o.Se.&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Participle%20(Singular%20Masculine%2C%20Construct)&amp;lg=Hebrew&amp;sr=H6213H&amp;rt=to%20make&amp;src=Leningrad%20manuscript" aria-label="Show metadata for Maker,">Maker,</button></span></div>
 <div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.8&amp;os=%D7%99%D6%B9%D7%A6%D6%B6%D7%A8%D6%B0&amp;tr=yo.tzer.&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Participle%20(Singular%20Masculine%2C%20Construct)&amp;lg=Hebrew&amp;sr=H3335G&amp;rt=to%20form&amp;src=Leningrad%20manuscript" aria-label="Show metadata for who">who</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.8&amp;os=%D7%99%D6%B9%D7%A6%D6%B6%D7%A8%D6%B0&amp;tr=yo.tzer.&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Participle%20(Singular%20Masculine%2C%20Construct)&amp;lg=Hebrew&amp;sr=H3335G&amp;rt=to%20form&amp;src=Leningrad%20manuscript" aria-label="Show metadata for formed">formed</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.9&amp;os=%D7%9A%D6%B8%D6%A5&amp;tr=Kha&amp;gr=Suffix%20(Second%20Singular%20Masculine)&amp;lg=Hebrew&amp;sr=H9031&amp;rt=you&amp;src=Leningrad%20manuscript" aria-label="Show metadata for you">you</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.10&amp;os=%D7%9E%D6%B4&amp;tr=mi.&amp;gr=Preposition&amp;lg=Hebrew&amp;sr=H9006&amp;rt=from&amp;src=Leningrad%20manuscript" aria-label="Show metadata for from">from</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for the">the</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.11&amp;os=%D7%91%D6%BC%D6%B6%D6%96%D7%98%D6%B6%D7%9F&amp;tr=Be.ten&amp;gr=Noun%20(Singular%20Feminine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H0990H&amp;rt=belly&amp;src=Leningrad%20manuscript" aria-label="Show metadata for womb">womb</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for and">and</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.12&amp;os=%D7%99%D6%B7%D7%A2%D6%B0%D7%96%D6%B0%D7%A8%D6%B6%D6%91&amp;tr=ya&#39;.ze.Re.&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Imperfect%20(Future%2Fpresent%20Indicative%2Fjussive)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H5826&amp;rt=to%20help&amp;src=Leningrad%20manuscript" aria-label="Show metadata for who">who</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.12&amp;os=%D7%99%D6%B7%D7%A2%D6%B0%D7%96%D6%B0%D7%A8%D6%B6%D6%91&amp;tr=ya&#39;.ze.Re.&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Imperfect%20(Future%2Fpresent%20Indicative%2Fjussive)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H5826&amp;rt=to%20help&amp;src=Leningrad%20manuscript" aria-label="Show metadata for will">will</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.12&amp;os=%D7%99%D6%B7%D7%A2%D6%B0%D7%96%D6%B0%D7%A8%D6%B6%D6%91&amp;tr=ya&#39;.ze.Re.&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Imperfect%20(Future%2Fpresent%20Indicative%2Fjussive)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H5826&amp;rt=to%20help&amp;src=Leningrad%20manuscript" aria-label="Show metadata for help">help</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.13&amp;os=%D7%9A%D6%BC%D6%B8&amp;tr=ka&amp;gr=Suffix%20(Second%20Singular%20Masculine)&amp;lg=Hebrew&amp;sr=H9031&amp;rt=you&amp;src=Leningrad%20manuscript" aria-label="Show metadata for you:">you:</button></span></div>
 <div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.14&amp;os=%D7%90%D6%B7%D7%9C&amp;tr=&#39;al-&amp;gr=Negative%20Particle&amp;lg=Hebrew&amp;sr=H0408&amp;rt=not&amp;src=Leningrad%20manuscript" aria-label="Show metadata for “Do">“Do</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.14&amp;os=%D7%90%D6%B7%D7%9C&amp;tr=&#39;al-&amp;gr=Negative%20Particle&amp;lg=Hebrew&amp;sr=H0408&amp;rt=not&amp;src=Leningrad%20manuscript" aria-label="Show metadata for not">not</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.16&amp;os=%D7%AA%D6%BC%D6%B4%D7%99%D7%A8%D6%B8%D7%90%D6%99&amp;tr=ti.Ra&#39;&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Imperfect%20(Future%2Fpresent%20Jussive)%20Second%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H3372G&amp;rt=to%20fear&amp;src=Leningrad%20manuscript" aria-label="Show metadata for be">be</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.16&amp;os=%D7%AA%D6%BC%D6%B4%D7%99%D7%A8%D6%B8%D7%90%D6%99&amp;tr=ti.Ra&#39;&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Imperfect%20(Future%2Fpresent%20Jussive)%20Second%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H3372G&amp;rt=to%20fear&amp;src=Leningrad%20manuscript" aria-label="Show metadata for afraid,">afraid,</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.19&amp;os=%D7%99%D6%B7%D6%BD%D7%A2%D6%B2%D7%A7%D6%B9%D6%94%D7%91&amp;tr=ya.&#39;a.Ko&amp;gr=Proper%20Noun%20(Masculine%20individual)&amp;lg=Hebrew&amp;sr=H3290&amp;rt=Jacob&amp;src=Leningrad%20manuscript" aria-label="Show metadata for O">O</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.19&amp;os=%D7%99%D6%B7%D6%BD%D7%A2%D6%B2%D7%A7%D6%B9%D6%94%D7%91&amp;tr=ya.&#39;a.Ko&amp;gr=Proper%20Noun%20(Masculine%20individual)&amp;lg=Hebrew&amp;sr=H3290&amp;rt=Jacob&amp;src=Leningrad%20manuscript" aria-label="Show metadata for Jacob">Jacob</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.18&amp;os=%D7%99&amp;tr=i&amp;gr=Suffix%20(First%20Singular%20Either%20gender)&amp;lg=Hebrew&amp;sr=H9020&amp;rt=my&amp;src=Leningrad%20manuscript" aria-label="Show metadata for My">My</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.17&amp;os=%D7%A2%D6%B7%D7%91%D6%B0%D7%93%D6%BC%D6%B4%D6%A3&amp;tr=&#39;av.D&amp;gr=Noun%20(Singular%20Masculine%2C%20Construct)&amp;lg=Hebrew&amp;sr=H5650&amp;rt=servant%3B_slave&amp;src=Leningrad%20manuscript" aria-label="Show metadata for servant,">servant,</button></span></div>
-<div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.21&amp;os=%D7%99%D7%A9%D7%81%D6%BB%D7%A8%D6%96%D7%95%D6%BC%D7%9F&amp;tr=shu.Run&amp;gr=Proper%20Noun%20(Masculine%20individual)&amp;lg=Hebrew&amp;sr=H3484&amp;rt=Jeshurun&amp;src=Leningrad%20manuscript" aria-label="Show metadata for Jeshurun,">Jeshurun,</button></span></div>
-<p class="traditional-footnote"><i>Jeshurun</i> means <i>the upright one</i>, a term of endearment for Israel.</p>
-<div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.22&amp;os=%D7%91%D6%BC%D6%B8%D7%97%D6%B7%D6%A5%D7%A8%D6%B0%D7%AA%D6%BC%D6%B4%D7%99&amp;tr=ba.Char.ti&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20First%20Singular%20Either%20gender&amp;lg=Hebrew&amp;sr=H0977&amp;rt=to%20choose&amp;src=Leningrad%20manuscript" aria-label="Show metadata for whom">whom</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.22&amp;os=%D7%91%D6%BC%D6%B8%D7%97%D6%B7%D6%A5%D7%A8%D6%B0%D7%AA%D6%BC%D6%B4%D7%99&amp;tr=ba.Char.ti&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20First%20Singular%20Either%20gender&amp;lg=Hebrew&amp;sr=H0977&amp;rt=to%20choose&amp;src=Leningrad%20manuscript" aria-label="Show metadata for I">I</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.22&amp;os=%D7%91%D6%BC%D6%B8%D7%97%D6%B7%D6%A5%D7%A8%D6%B0%D7%AA%D6%BC%D6%B4%D7%99&amp;tr=ba.Char.ti&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20First%20Singular%20Either%20gender&amp;lg=Hebrew&amp;sr=H0977&amp;rt=to%20choose&amp;src=Leningrad%20manuscript" aria-label="Show metadata for have">have</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.22&amp;os=%D7%91%D6%BC%D6%B8%D7%97%D6%B7%D6%A5%D7%A8%D6%B0%D7%AA%D6%BC%D6%B4%D7%99&amp;tr=ba.Char.ti&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20First%20Singular%20Either%20gender&amp;lg=Hebrew&amp;sr=H0977&amp;rt=to%20choose&amp;src=Leningrad%20manuscript" aria-label="Show metadata for chosen">chosen</button></span></div>
+<div class="traditional-paragraph word-line"><span class="fn-anchor"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.21&amp;os=%D7%99%D7%A9%D7%81%D6%BB%D7%A8%D6%96%D7%95%D6%BC%D7%9F&amp;tr=shu.Run&amp;gr=Proper%20Noun%20(Masculine%20individual)&amp;lg=Hebrew&amp;sr=H3484&amp;rt=Jeshurun&amp;src=Leningrad%20manuscript" aria-label="Show metadata for Jeshurun,">Jeshurun,</button></span><button type="button" class="footnote-marker" popovertarget="fn-Isa44-2-0" aria-label="Footnote">*</button><span id="fn-Isa44-2-0" class="footnote-popover" popover="auto"><span class="footnote-popover-header"><span class="footnote-popover-label">Note</span><button type="button" class="popover-close" popovertarget="fn-Isa44-2-0" popovertargetaction="hide">Close</button></span><span class="footnote-popover-body"><i>Jeshurun</i> means <i>the upright one</i>, a term of endearment for Israel.</span></span></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.22&amp;os=%D7%91%D6%BC%D6%B8%D7%97%D6%B7%D6%A5%D7%A8%D6%B0%D7%AA%D6%BC%D6%B4%D7%99&amp;tr=ba.Char.ti&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20First%20Singular%20Either%20gender&amp;lg=Hebrew&amp;sr=H0977&amp;rt=to%20choose&amp;src=Leningrad%20manuscript" aria-label="Show metadata for whom">whom</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.22&amp;os=%D7%91%D6%BC%D6%B8%D7%97%D6%B7%D6%A5%D7%A8%D6%B0%D7%AA%D6%BC%D6%B4%D7%99&amp;tr=ba.Char.ti&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20First%20Singular%20Either%20gender&amp;lg=Hebrew&amp;sr=H0977&amp;rt=to%20choose&amp;src=Leningrad%20manuscript" aria-label="Show metadata for I">I</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.22&amp;os=%D7%91%D6%BC%D6%B8%D7%97%D6%B7%D6%A5%D7%A8%D6%B0%D7%AA%D6%BC%D6%B4%D7%99&amp;tr=ba.Char.ti&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20First%20Singular%20Either%20gender&amp;lg=Hebrew&amp;sr=H0977&amp;rt=to%20choose&amp;src=Leningrad%20manuscript" aria-label="Show metadata for have">have</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A2.22&amp;os=%D7%91%D6%BC%D6%B8%D7%97%D6%B7%D6%A5%D7%A8%D6%B0%D7%AA%D6%BC%D6%B4%D7%99&amp;tr=ba.Char.ti&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20First%20Singular%20Either%20gender&amp;lg=Hebrew&amp;sr=H0977&amp;rt=to%20choose&amp;src=Leningrad%20manuscript" aria-label="Show metadata for chosen">chosen</button></span></div>
 </div>
 </article>
 <article class="snippet-row" id="snippet-Isa44-3">
@@ -271,9 +378,7 @@ a {
 </div>
 <div class="snippet-pane traditional-pane" aria-label="Traditional">
 <div class="traditional-paragraph word-line"><button type="button" class="verse-num" aria-label="Verse 4">4</button><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.2&amp;os=%D7%A6%D6%B8%D7%9E%D6%B0%D7%97%D6%96%D7%95%D6%BC&amp;tr=tza.me.Chu&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Consecutive%20Perfect%20(Future%2Fpresent%20Indicative)%20Third%20Plural%20Either%20gender&amp;lg=Hebrew&amp;sr=H6779&amp;rt=to%20spring&amp;src=Leningrad%20manuscript" aria-label="Show metadata for They">They</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.2&amp;os=%D7%A6%D6%B8%D7%9E%D6%B0%D7%97%D6%96%D7%95%D6%BC&amp;tr=tza.me.Chu&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Consecutive%20Perfect%20(Future%2Fpresent%20Indicative)%20Third%20Plural%20Either%20gender&amp;lg=Hebrew&amp;sr=H6779&amp;rt=to%20spring&amp;src=Leningrad%20manuscript" aria-label="Show metadata for will">will</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.2&amp;os=%D7%A6%D6%B8%D7%9E%D6%B0%D7%97%D6%96%D7%95%D6%BC&amp;tr=tza.me.Chu&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Consecutive%20Perfect%20(Future%2Fpresent%20Indicative)%20Third%20Plural%20Either%20gender&amp;lg=Hebrew&amp;sr=H6779&amp;rt=to%20spring&amp;src=Leningrad%20manuscript" aria-label="Show metadata for sprout">sprout</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.4&amp;os=%D7%91%D6%B5%D6%A3%D7%99%D7%9F&amp;tr=Vein&amp;lg=Hebrew&amp;sr=H0996H&amp;rt=between&amp;src=Leningrad%20manuscript" aria-label="Show metadata for among">among</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for the">the</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.5&amp;os=%D7%97%D6%B8%D7%A6%D6%B4%D6%91%D7%99%D7%A8&amp;tr=cha.Tzir&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H2682A&amp;rt=grass&amp;src=Leningrad%20manuscript" aria-label="Show metadata for grass">grass</button></span></div>
-<div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.6&amp;os=%D7%9B%D6%BC%D6%B7&amp;tr=ka.&amp;gr=Preposition&amp;lg=Hebrew&amp;sr=H9004&amp;rt=like&amp;src=Leningrad%20manuscript" aria-label="Show metadata for like">like</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.7&amp;os=%D7%A2%D6%B2%D7%A8%D6%B8%D7%91%D6%B4%D6%96%D7%99%D7%9D&amp;tr=&#39;a.ra.Vim&amp;gr=Noun%20(Plural%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H6155H&amp;rt=willow&amp;src=Leningrad%20manuscript" aria-label="Show metadata for willows">willows</button></span></div>
-<p class="traditional-footnote">Or <i>poplars</i></p>
-<div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.8&amp;os=%D7%A2%D6%B7%D7%9C&amp;tr=&#39;al-&amp;gr=Preposition&amp;lg=Hebrew&amp;sr=H5921A&amp;rt=upon&amp;src=Leningrad%20manuscript" aria-label="Show metadata for by">by</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.10&amp;os=%D7%99%D6%B4%D7%91%D6%B0%D7%9C%D6%B5%D7%99&amp;tr=yiv.lei-&amp;gr=Noun%20(Plural%20Masculine%2C%20Construct)&amp;lg=Hebrew&amp;sr=H2988&amp;rt=stream&amp;src=Leningrad%20manuscript" aria-label="Show metadata for flowing">flowing</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.12&amp;os=%D7%9E%D6%B8%D6%BD%D7%99%D6%B4%D7%9D&amp;tr=Ma.yim&amp;gr=Noun%20(Plural%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H4325G&amp;rt=water&amp;src=Leningrad%20manuscript" aria-label="Show metadata for streams.">streams.</button></span></div>
+<div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.6&amp;os=%D7%9B%D6%BC%D6%B7&amp;tr=ka.&amp;gr=Preposition&amp;lg=Hebrew&amp;sr=H9004&amp;rt=like&amp;src=Leningrad%20manuscript" aria-label="Show metadata for like">like</button></span> <span class="fn-anchor"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.7&amp;os=%D7%A2%D6%B2%D7%A8%D6%B8%D7%91%D6%B4%D6%96%D7%99%D7%9D&amp;tr=&#39;a.ra.Vim&amp;gr=Noun%20(Plural%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H6155H&amp;rt=willow&amp;src=Leningrad%20manuscript" aria-label="Show metadata for willows">willows</button></span><button type="button" class="footnote-marker" popovertarget="fn-Isa44-4-0" aria-label="Footnote">*</button><span id="fn-Isa44-4-0" class="footnote-popover" popover="auto"><span class="footnote-popover-header"><span class="footnote-popover-label">Note</span><button type="button" class="popover-close" popovertarget="fn-Isa44-4-0" popovertargetaction="hide">Close</button></span><span class="footnote-popover-body">Or <i>poplars</i></span></span></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.8&amp;os=%D7%A2%D6%B7%D7%9C&amp;tr=&#39;al-&amp;gr=Preposition&amp;lg=Hebrew&amp;sr=H5921A&amp;rt=upon&amp;src=Leningrad%20manuscript" aria-label="Show metadata for by">by</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.10&amp;os=%D7%99%D6%B4%D7%91%D6%B0%D7%9C%D6%B5%D7%99&amp;tr=yiv.lei-&amp;gr=Noun%20(Plural%20Masculine%2C%20Construct)&amp;lg=Hebrew&amp;sr=H2988&amp;rt=stream&amp;src=Leningrad%20manuscript" aria-label="Show metadata for flowing">flowing</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A4.12&amp;os=%D7%9E%D6%B8%D6%BD%D7%99%D6%B4%D7%9D&amp;tr=Ma.yim&amp;gr=Noun%20(Plural%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H4325G&amp;rt=water&amp;src=Leningrad%20manuscript" aria-label="Show metadata for streams.">streams.</button></span></div>
 </div>
 </article>
 <article class="snippet-row" id="snippet-Isa44-5">
@@ -388,9 +493,7 @@ a {
 </div>
 <div class="snippet-pane traditional-pane" aria-label="Traditional">
 <div class="traditional-paragraph word-line"><button type="button" class="verse-num" aria-label="Verse 14">14</button><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.2&amp;os=%D7%9B%D6%B0%D7%A8%D6%B8%D7%AA&amp;tr=kh.rot-&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Infinitive%20Construct&amp;lg=Hebrew&amp;sr=H3772G&amp;rt=to%20cut&amp;src=Leningrad%20manuscript" aria-label="Show metadata for He">He</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.2&amp;os=%D7%9B%D6%B0%D7%A8%D6%B8%D7%AA&amp;tr=kh.rot-&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Infinitive%20Construct&amp;lg=Hebrew&amp;sr=H3772G&amp;rt=to%20cut&amp;src=Leningrad%20manuscript" aria-label="Show metadata for cuts">cuts</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.2&amp;os=%D7%9B%D6%B0%D7%A8%D6%B8%D7%AA&amp;tr=kh.rot-&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Infinitive%20Construct&amp;lg=Hebrew&amp;sr=H3772G&amp;rt=to%20cut&amp;src=Leningrad%20manuscript" aria-label="Show metadata for down">down</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.6&amp;os=%D7%90%D6%B2%D7%A8%D6%B8%D7%96%D6%B4%D6%94%D7%99%D7%9D&amp;tr=&#39;a.ra.Zim&amp;gr=Noun%20(Plural%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H0730&amp;rt=cedar&amp;src=Leningrad%20manuscript" aria-label="Show metadata for cedars">cedars</button></span></div>
-<div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.8&amp;os=%D7%99%D6%BC%D6%B4%D7%A7%D6%BC%D6%B7%D6%A4%D7%97&amp;tr=i.yi.Kach&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H3947G&amp;rt=to%20take&amp;src=Leningrad%20manuscript" aria-label="Show metadata for or">or</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.8&amp;os=%D7%99%D6%BC%D6%B4%D7%A7%D6%BC%D6%B7%D6%A4%D7%97&amp;tr=i.yi.Kach&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H3947G&amp;rt=to%20take&amp;src=Leningrad%20manuscript" aria-label="Show metadata for retrieves">retrieves</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for a">a</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.9&amp;os=%D7%AA%D6%BC%D6%B4%D7%A8%D6%B0%D7%96%D6%B8%D7%94%D6%99&amp;tr=tir.Zah&amp;gr=Noun%20(Singular%20Feminine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H8645&amp;rt=cypress&amp;src=Leningrad%20manuscript" aria-label="Show metadata for cypress">cypress</button></span></div>
-<p class="traditional-footnote">Or <i>pine</i> or <i>juniper</i> or <i>fir</i></p>
-<div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.11&amp;os=%D7%90%D6%B7%D7%9C%D6%BC%D6%94%D7%95%D6%B9%D7%9F&amp;tr=&#39;a.Lon&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H0437&amp;rt=plain&amp;src=Leningrad%20manuscript" aria-label="Show metadata for or">or</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.11&amp;os=%D7%90%D6%B7%D7%9C%D6%BC%D6%94%D7%95%D6%B9%D7%9F&amp;tr=&#39;a.Lon&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H0437&amp;rt=plain&amp;src=Leningrad%20manuscript" aria-label="Show metadata for oak.">oak.</button></span></div>
+<div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.8&amp;os=%D7%99%D6%BC%D6%B4%D7%A7%D6%BC%D6%B7%D6%A4%D7%97&amp;tr=i.yi.Kach&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H3947G&amp;rt=to%20take&amp;src=Leningrad%20manuscript" aria-label="Show metadata for or">or</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.8&amp;os=%D7%99%D6%BC%D6%B4%D7%A7%D6%BC%D6%B7%D6%A4%D7%97&amp;tr=i.yi.Kach&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H3947G&amp;rt=to%20take&amp;src=Leningrad%20manuscript" aria-label="Show metadata for retrieves">retrieves</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for a">a</button></span> <span class="fn-anchor"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.9&amp;os=%D7%AA%D6%BC%D6%B4%D7%A8%D6%B0%D7%96%D6%B8%D7%94%D6%99&amp;tr=tir.Zah&amp;gr=Noun%20(Singular%20Feminine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H8645&amp;rt=cypress&amp;src=Leningrad%20manuscript" aria-label="Show metadata for cypress">cypress</button></span><button type="button" class="footnote-marker" popovertarget="fn-Isa44-14-0" aria-label="Footnote">*</button><span id="fn-Isa44-14-0" class="footnote-popover" popover="auto"><span class="footnote-popover-header"><span class="footnote-popover-label">Note</span><button type="button" class="popover-close" popovertarget="fn-Isa44-14-0" popovertargetaction="hide">Close</button></span><span class="footnote-popover-body">Or <i>pine</i> or <i>juniper</i> or <i>fir</i></span></span></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.11&amp;os=%D7%90%D6%B7%D7%9C%D6%BC%D6%94%D7%95%D6%B9%D7%9F&amp;tr=&#39;a.Lon&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H0437&amp;rt=plain&amp;src=Leningrad%20manuscript" aria-label="Show metadata for or">or</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.11&amp;os=%D7%90%D6%B7%D7%9C%D6%BC%D6%94%D7%95%D6%B9%D7%9F&amp;tr=&#39;a.Lon&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H0437&amp;rt=plain&amp;src=Leningrad%20manuscript" aria-label="Show metadata for oak.">oak.</button></span></div>
 <div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.13&amp;os=%D7%99%D6%B0%D7%90%D6%B7%D7%9E%D6%BC%D6%B6%D7%A5&amp;tr=y.&#39;a.metz-&amp;gr=Verb%20%3A%20Piel%20(Intensive%2Fresultive%2Ftranstive%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H0553&amp;rt=to%20strengthen&amp;src=Leningrad%20manuscript" aria-label="Show metadata for He">He</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.13&amp;os=%D7%99%D6%B0%D7%90%D6%B7%D7%9E%D6%BC%D6%B6%D7%A5&amp;tr=y.&#39;a.metz-&amp;gr=Verb%20%3A%20Piel%20(Intensive%2Fresultive%2Ftranstive%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H0553&amp;rt=to%20strengthen&amp;src=Leningrad%20manuscript" aria-label="Show metadata for lets">lets</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.13&amp;os=%D7%99%D6%B0%D7%90%D6%B7%D7%9E%D6%BC%D6%B6%D7%A5&amp;tr=y.&#39;a.metz-&amp;gr=Verb%20%3A%20Piel%20(Intensive%2Fresultive%2Ftranstive%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H0553&amp;rt=to%20strengthen&amp;src=Leningrad%20manuscript" aria-label="Show metadata for it">it</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.13&amp;os=%D7%99%D6%B0%D7%90%D6%B7%D7%9E%D6%BC%D6%B6%D7%A5&amp;tr=y.&#39;a.metz-&amp;gr=Verb%20%3A%20Piel%20(Intensive%2Fresultive%2Ftranstive%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H0553&amp;rt=to%20strengthen&amp;src=Leningrad%20manuscript" aria-label="Show metadata for grow">grow</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.13&amp;os=%D7%99%D6%B0%D7%90%D6%B7%D7%9E%D6%BC%D6%B6%D7%A5&amp;tr=y.&#39;a.metz-&amp;gr=Verb%20%3A%20Piel%20(Intensive%2Fresultive%2Ftranstive%2C%20Active)%20Consecutive%20Imperfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H0553&amp;rt=to%20strengthen&amp;src=Leningrad%20manuscript" aria-label="Show metadata for strong">strong</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.17&amp;os=%D7%91%D6%BC%D6%B7&amp;tr=ba.&amp;gr=Preposition&amp;lg=Hebrew&amp;sr=H9003&amp;rt=in&amp;src=Leningrad%20manuscript" aria-label="Show metadata for among">among</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for the">the</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.18&amp;os=%D7%A2%D6%B2%D7%A6%D6%B5%D7%99&amp;tr=&#39;a.tzei-&amp;gr=Noun%20(Plural%20Masculine%2C%20Construct)&amp;lg=Hebrew&amp;sr=H6086H&amp;rt=tree&amp;src=Leningrad%20manuscript" aria-label="Show metadata for trees">trees</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.20&amp;os=%D7%99%D6%B8%D6%91%D7%A2%D6%B7%D7%A8&amp;tr=Ya.&#39;ar&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H3293A&amp;rt=wood&amp;src=Leningrad%20manuscript" aria-label="Show metadata for of">of</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for the">the</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.20&amp;os=%D7%99%D6%B8%D6%91%D7%A2%D6%B7%D7%A8&amp;tr=Ya.&#39;ar&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H3293A&amp;rt=wood&amp;src=Leningrad%20manuscript" aria-label="Show metadata for forest.">forest.</button></span></div>
 <div class="traditional-paragraph word-line"><span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.21&amp;os=%D7%A0%D6%B8%D7%98%D6%B7%D6%A5%D7%A2&amp;tr=na.Ta&#39;&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H5193&amp;rt=to%20plant&amp;src=Leningrad%20manuscript" aria-label="Show metadata for He">He</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.21&amp;os=%D7%A0%D6%B8%D7%98%D6%B7%D6%A5%D7%A2&amp;tr=na.Ta&#39;&amp;gr=Verb%20%3A%20Qal%20(Simple%2C%20Active)%20Perfect%20(Past%2Fpresent%20Indicative)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H5193&amp;rt=to%20plant&amp;src=Leningrad%20manuscript" aria-label="Show metadata for plants">plants</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for a">a</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.22&amp;os=%D7%90%D6%B9%D6%96%D7%A8%D6%B6%D7%9F&amp;tr=&#39;O.ren&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H0766&amp;rt=fir&amp;src=Leningrad%20manuscript" aria-label="Show metadata for laurel,">laurel,</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.23&amp;os=%D7%95%D6%B0&amp;tr=ve.&amp;gr=Conjunction&amp;lg=Hebrew&amp;sr=H9002&amp;rt=and&amp;src=Leningrad%20manuscript" aria-label="Show metadata for and">and</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;%E2%80%94=There&#39;s%20no%20direct%20match%20for%20this%20word%20in%20the%20original." aria-label="Show metadata for the">the</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.24&amp;os=%D7%92%D6%B6%D6%A5%D7%A9%D7%81%D6%B6%D7%9D&amp;tr=Ge.shem&amp;gr=Noun%20(Singular%20Masculine%2C%20Absolute)&amp;lg=Hebrew&amp;sr=H1653&amp;rt=rain&amp;src=Leningrad%20manuscript" aria-label="Show metadata for rain">rain</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.25&amp;os=%D7%99%D6%B0%D7%92%D6%B7%D7%93%D6%BC%D6%B5%D6%BD%D7%9C&amp;tr=ye.ga.Del&amp;gr=Verb%20%3A%20Piel%20(Intensive%2Fresultive%2Ftranstive%2C%20Active)%20Imperfect%20(Future%2Fpresent%20Indicative%2Fjussive)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H1431&amp;rt=to%20magnify&amp;src=Leningrad%20manuscript" aria-label="Show metadata for makes">makes</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.25&amp;os=%D7%99%D6%B0%D7%92%D6%B7%D7%93%D6%BC%D6%B5%D6%BD%D7%9C&amp;tr=ye.ga.Del&amp;gr=Verb%20%3A%20Piel%20(Intensive%2Fresultive%2Ftranstive%2C%20Active)%20Imperfect%20(Future%2Fpresent%20Indicative%2Fjussive)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H1431&amp;rt=to%20magnify&amp;src=Leningrad%20manuscript" aria-label="Show metadata for it">it</button></span> <span class="word-wrap"><button type="button" class="word-token" popovertarget="word-popover-shared" data-m="p=Traditional&amp;mid=Isa44%3A14.25&amp;os=%D7%99%D6%B0%D7%92%D6%B7%D7%93%D6%BC%D6%B5%D6%BD%D7%9C&amp;tr=ye.ga.Del&amp;gr=Verb%20%3A%20Piel%20(Intensive%2Fresultive%2Ftranstive%2C%20Active)%20Imperfect%20(Future%2Fpresent%20Indicative%2Fjussive)%20Third%20Singular%20Masculine&amp;lg=Hebrew&amp;sr=H1431&amp;rt=to%20magnify&amp;src=Leningrad%20manuscript" aria-label="Show metadata for grow.">grow.</button></span></div>
 </div>
@@ -563,6 +666,67 @@ a {
 </section>
 <span id="word-popover-shared" class="word-popover shared-word-popover" popover="auto"><span class="word-popover-header"><strong class="word-popover-title"></strong><button type="button" class="popover-close" popovertarget="word-popover-shared" popovertargetaction="hide">Close</button></span><span class="word-meta-list" data-shared-word-meta></span><span class="word-meta-empty" data-shared-word-empty>No metadata available for this word.</span></span>
 </main>
+<script>
+(function () {
+  const page = document.querySelector(".chapter-page");
+  if (!(page instanceof HTMLElement)) return;
+  const literalToggle = page.querySelector('input[data-column-toggle="literal"]');
+  const traditionalToggle = page.querySelector('input[data-column-toggle="traditional"]');
+  const emptyMessage = page.querySelector("[data-column-empty-message]");
+  if (!(literalToggle instanceof HTMLInputElement) || !(traditionalToggle instanceof HTMLInputElement) || !(emptyMessage instanceof HTMLElement)) return;
+
+  function readState() {
+    const fallback = { literal: true, traditional: true };
+    try {
+      const raw = localStorage.getItem('servewell-visible-columns');
+      if (!raw) return fallback;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return fallback;
+      return {
+        literal: parsed.literal !== false,
+        traditional: parsed.traditional !== false
+      };
+    } catch (_error) {
+      return fallback;
+    }
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem('servewell-visible-columns', JSON.stringify(state));
+    } catch (_error) {
+      // Ignore storage errors (private mode, disabled storage).
+    }
+  }
+
+  function applyState(state) {
+    const showLiteral = !!state.literal;
+    const showTraditional = !!state.traditional;
+    literalToggle.checked = showLiteral;
+    traditionalToggle.checked = showTraditional;
+    page.classList.toggle("mode-both", showLiteral && showTraditional);
+    page.classList.toggle("mode-literal-only", showLiteral && !showTraditional);
+    page.classList.toggle("mode-traditional-only", !showLiteral && showTraditional);
+    page.classList.toggle("mode-none", !showLiteral && !showTraditional);
+    emptyMessage.hidden = showLiteral || showTraditional;
+  }
+
+  let state = readState();
+  applyState(state);
+
+  function updateFromToggles() {
+    state = {
+      literal: literalToggle.checked,
+      traditional: traditionalToggle.checked
+    };
+    saveState(state);
+    applyState(state);
+  }
+
+  literalToggle.addEventListener("change", updateFromToggles);
+  traditionalToggle.addEventListener("change", updateFromToggles);
+})();
+</script>
 <script>
 (function () {
   const popover = document.getElementById('word-popover-shared');

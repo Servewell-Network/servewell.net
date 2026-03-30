@@ -76,6 +76,8 @@ html, body {
 body.with-app-shell {
   padding-top: 56px;
   padding-bottom: 60px;
+  padding-left: 1%;
+  padding-right: 1%;
 }
 
 #app-shell-root button,
@@ -642,8 +644,20 @@ body.app-panel-open #app-shell-root .app-overlay {
   gap: 0.25rem;
   align-items: center;
   min-width: 0;
-  flex-shrink: 1;
-  overflow: hidden;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+#bible-nav-btns::-webkit-scrollbar {
+  display: none;
+}
+
+#bible-nav-btns ~ .app-spacer {
+  display: none;
 }
 
 .nav-ref-chip {
@@ -942,6 +956,12 @@ body.app-panel-open #app-shell-root .app-overlay {
       const titleLink = topbar.querySelector(".app-topbar-home");
       const btns = document.createElement("div");
       btns.id = "bible-nav-btns";
+      btns.addEventListener("wheel", (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          btns.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
       if (titleLink?.nextSibling) {
         topbar.insertBefore(btns, titleLink.nextSibling);
       } else {

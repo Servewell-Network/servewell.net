@@ -9,6 +9,7 @@ import ancientDocNames from './phase1To2/ancientDocNames.json';
 const scriptTag = `<script src="/js/servewell-app-shell.js"></script>`;
 const USE_SHARED_WORD_POPOVER = true;
 const SHARED_WORD_POPOVER_ID = 'word-popover-shared';
+const COLUMN_VISIBILITY_STORAGE_KEY = 'servewell-visible-columns';
 
 const METADATA_LABEL_TO_KEY: Record<string, string> = {
   Pane: 'p',
@@ -67,6 +68,10 @@ type TraditionalParagraphToken =
     }
   | {
       kind: 'text';
+      text: string;
+    }
+  | {
+      kind: 'footnote';
       text: string;
     };
 
@@ -261,15 +266,23 @@ function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
     `<script id="bible-nav-data" type="application/json">${bibleNavDataJson}</script>`,
     `<main class="chapter-page" data-book="${escapeHtml(chapter.DocOrBookAbbreviation)}" data-chapter="${chapter.ChapterNumber}">`,
     `<p class="chapter-note">Click any word to see more.</p>`,
-    `<div class="snippet-grid-header">`,
-    `<div class="snippet-grid-header-label">LITERAL</div>`,
-    `<div class="snippet-grid-header-label">TRADITIONAL</div>`,
+    `<div class="snippet-grid-header" role="group" aria-label="Column visibility">`,
+    `<label class="snippet-grid-header-card" for="column-toggle-literal">`,
+    `<input type="checkbox" id="column-toggle-literal" data-column-toggle="literal" />`,
+    `<span class="snippet-grid-header-text">LITERAL</span>`,
+    `</label>`,
+    `<label class="snippet-grid-header-card" for="column-toggle-traditional">`,
+    `<input type="checkbox" id="column-toggle-traditional" data-column-toggle="traditional" />`,
+    `<span class="snippet-grid-header-text">TRADITIONAL</span>`,
+    `</label>`,
     `</div>`,
+    `<p class="snippet-grid-empty-message" data-column-empty-message hidden>Select a column header to see its column.</p>`,
     `<section class="snippet-grid">`,
     snippetRows,
     `</section>`,
     USE_SHARED_WORD_POPOVER ? renderSharedWordPopover() : '',
     `</main>`,
+    renderColumnVisibilityScript(),
     USE_SHARED_WORD_POPOVER ? renderSharedWordPopoverScript() : '',
     scriptTag,
     ...baseHtml.bottom
@@ -431,9 +444,8 @@ function renderTraditionalPane(snippet: Snippet): string {
         }
         break;
       case 'Footnotes':
-        flushParagraph();
         if (text.trim()) {
-          paneLines.push(`<p class="traditional-footnote">${sanitizeRichHtml(text, false)}</p>`);
+          currentParagraphTokens.push({ kind: 'footnote', text });
         }
         break;
       default:
@@ -493,12 +505,28 @@ function renderTraditionalParagraphTokens(
     suppressSpacingBeforeNextToken = true;
   };
 
+  let footnoteIndex = 0;
   for (const token of tokens) {
     if (token.kind === 'text') {
       const plainText = normalizeTokenText(token.text);
       if (!plainText) continue;
 
       appendTokenHtml(plainText, escapeHtml(plainText));
+      continue;
+    }
+
+    if (token.kind === 'footnote') {
+      if (token.text.trim()) {
+        const footnoteId = `fn-${toSafeDomId(snippetKey)}-${footnoteIndex++}`;
+        const fnBtn = renderFootnoteMarker(token.text, footnoteId);
+        const lastWordWrapIdx = html.lastIndexOf('<span class="word-wrap">');
+        if (lastWordWrapIdx >= 0) {
+          html = html.slice(0, lastWordWrapIdx) + '<span class="fn-anchor">' + html.slice(lastWordWrapIdx) + fnBtn + '</span>';
+        } else {
+          html += fnBtn;
+        }
+        plainText += '*';
+      }
       continue;
     }
 
@@ -617,6 +645,21 @@ function renderWordMetadata(metadataEntries: MetadataEntry[]): string {
   return `<span class="word-meta-list">${rows}</span>`;
 }
 
+function renderFootnoteMarker(footnoteRichHtml: string, footnoteId: string): string {
+  const escapedId = escapeHtmlAttribute(footnoteId);
+  const sanitizedBody = sanitizeRichHtml(footnoteRichHtml, false);
+  return [
+    `<button type="button" class="footnote-marker" popovertarget="${escapedId}" aria-label="Footnote">*</button>`,
+    `<span id="${escapedId}" class="footnote-popover" popover="auto">`,
+    `<span class="footnote-popover-header">`,
+    `<span class="footnote-popover-label">Note</span>`,
+    `<button type="button" class="popover-close" popovertarget="${escapedId}" popovertargetaction="hide">Close</button>`,
+    `</span>`,
+    `<span class="footnote-popover-body">${sanitizedBody}</span>`,
+    `</span>`
+  ].join('');
+}
+
 function serializeMetadataEntries(metadataEntries: MetadataEntry[]): string {
   return metadataEntries
     .map(({ label, value }) => ({ label: label.trim(), value: value === undefined ? '' : String(value).trim() }))
@@ -716,6 +759,74 @@ function renderSharedWordPopoverScript(): string {
   ].join('\n');
 }
 
+function renderColumnVisibilityScript(): string {
+  const escapedStorageKey = escapeHtmlAttribute(COLUMN_VISIBILITY_STORAGE_KEY);
+
+  return [
+    '<script>',
+    '(function () {',
+    '  const page = document.querySelector(".chapter-page");',
+    '  if (!(page instanceof HTMLElement)) return;',
+    '  const literalToggle = page.querySelector(\'input[data-column-toggle="literal"]\');',
+    '  const traditionalToggle = page.querySelector(\'input[data-column-toggle="traditional"]\');',
+    '  const emptyMessage = page.querySelector("[data-column-empty-message]");',
+    '  if (!(literalToggle instanceof HTMLInputElement) || !(traditionalToggle instanceof HTMLInputElement) || !(emptyMessage instanceof HTMLElement)) return;',
+    '',
+    '  function readState() {',
+    '    const fallback = { literal: true, traditional: true };',
+    '    try {',
+    `      const raw = localStorage.getItem('${escapedStorageKey}');`,
+    '      if (!raw) return fallback;',
+    '      const parsed = JSON.parse(raw);',
+    '      if (!parsed || typeof parsed !== "object") return fallback;',
+    '      return {',
+    '        literal: parsed.literal !== false,',
+    '        traditional: parsed.traditional !== false',
+    '      };',
+    '    } catch (_error) {',
+    '      return fallback;',
+    '    }',
+    '  }',
+    '',
+    '  function saveState(state) {',
+    '    try {',
+    `      localStorage.setItem('${escapedStorageKey}', JSON.stringify(state));`,
+    '    } catch (_error) {',
+    '      // Ignore storage errors (private mode, disabled storage).',
+    '    }',
+    '  }',
+    '',
+    '  function applyState(state) {',
+    '    const showLiteral = !!state.literal;',
+    '    const showTraditional = !!state.traditional;',
+    '    literalToggle.checked = showLiteral;',
+    '    traditionalToggle.checked = showTraditional;',
+    '    page.classList.toggle("mode-both", showLiteral && showTraditional);',
+    '    page.classList.toggle("mode-literal-only", showLiteral && !showTraditional);',
+    '    page.classList.toggle("mode-traditional-only", !showLiteral && showTraditional);',
+    '    page.classList.toggle("mode-none", !showLiteral && !showTraditional);',
+    '    emptyMessage.hidden = showLiteral || showTraditional;',
+    '  }',
+    '',
+    '  let state = readState();',
+    '  applyState(state);',
+    '',
+    '  function updateFromToggles() {',
+    '    state = {',
+    '      literal: literalToggle.checked,',
+    '      traditional: traditionalToggle.checked',
+    '    };',
+    '    saveState(state);',
+    '    applyState(state);',
+    '  }',
+    '',
+    '  literalToggle.addEventListener("change", updateFromToggles);',
+    '  traditionalToggle.addEventListener("change", updateFromToggles);',
+    '})();',
+    '</script>'
+  ].join('\n');
+}
+
 function sanitizeRichHtml(rawHtml: string, normalizePipes: boolean): string {
   const normalized = normalizePipes ? rawHtml.replace(/\|/g, '"') : rawHtml;
   let escaped = escapeHtml(normalized);
@@ -740,8 +851,18 @@ function sanitizeHref(rawHref: string): string {
   const href = rawHref.trim();
   if (!href) return '';
   if (/^\s*javascript:/i.test(href)) return '';
-  if (/^(https?:\/\/|\/|\.\.\/|\.\/|#)/i.test(href)) return href;
+  if (/^https?:\/\//i.test(href)) return href;
+  if (/^(\/|\.\.\/|\.\/|#)/i.test(href)) return normalizeInternalHref(href);
   return '';
+}
+
+function normalizeInternalHref(href: string): string {
+  const hashIdx = href.indexOf('#');
+  const pathPart = hashIdx >= 0 ? href.slice(0, hashIdx) : href;
+  const fragment = hashIdx >= 0 ? href.slice(hashIdx) : '';
+  const cleanPath = pathPart.replace(/\.html?$/i, '');
+  const capitalizedPath = cleanPath.replace(/(^|\/|-)([a-z])/g, (_, prefix, letter) => prefix + (letter as string).toUpperCase());
+  return capitalizedPath + fragment;
 }
 
 function decodeHtmlEntities(value: string): string {
@@ -877,16 +998,41 @@ function getChapterPageCss(): string[] {
     '  display: grid;',
     '  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);',
     '  gap: 0.65rem;',
-    '  align-items: end;',
-    '  margin-bottom: 0.45rem;',
+    '  align-items: stretch;',
+    '  margin-bottom: 0.35rem;',
     '}',
-    '.snippet-grid-header-label {',
+    '.snippet-grid-header-card {',
+    '  display: inline-flex;',
+    '  align-items: center;',
+    '  gap: 0.45rem;',
+    '  min-width: 0;',
+    '  border: 1px solid var(--pane-border);',
+    '  border-radius: 0.45rem;',
+    '  background: var(--pane-bg);',
+    '  color: var(--label-fg);',
+    '  padding: 0.3rem 0.5rem;',
+    '  cursor: pointer;',
+    '  user-select: none;',
+    '}',
+    '.snippet-grid-header-card:hover {',
+    '  background: var(--hover-bg);',
+    '}',
+    '.snippet-grid-header-card input[type="checkbox"] {',
+    '  margin: 0;',
+    '  accent-color: var(--link);',
+    '}',
+    '.snippet-grid-header-text {',
     '  min-width: 0;',
     '  font-size: 0.78rem;',
     '  text-transform: uppercase;',
     '  letter-spacing: 0.08em;',
     '  color: var(--muted);',
     '  font-weight: 700;',
+    '}',
+    '.snippet-grid-empty-message {',
+    '  margin: 0.25rem 0 0.55rem;',
+    '  color: var(--muted);',
+    '  font-style: italic;',
     '}',
     '.snippet-grid {',
     '  display: flex;',
@@ -902,6 +1048,19 @@ function getChapterPageCss(): string[] {
     '}',
     '.snippet-row > * {',
     '  min-width: 0;',
+    '}',
+    '.chapter-page.mode-literal-only .snippet-row,',
+    '.chapter-page.mode-traditional-only .snippet-row {',
+    '  grid-template-columns: minmax(0, 1fr);',
+    '}',
+    '.chapter-page.mode-literal-only .traditional-pane {',
+    '  display: none;',
+    '}',
+    '.chapter-page.mode-traditional-only .literal-pane {',
+    '  display: none;',
+    '}',
+    '.chapter-page.mode-none .snippet-grid {',
+    '  display: none;',
     '}',
     '.verse-num {',
     '  display: inline-block;',
@@ -925,8 +1084,72 @@ function getChapterPageCss(): string[] {
     '  color: var(--pane-fg);',
     '  padding: 0;',
     '}',
-    '.pane-text, .traditional-paragraph, .traditional-heading, .traditional-crossref, .traditional-footnote {',
+    '.pane-text, .traditional-paragraph, .traditional-heading, .traditional-crossref {',
     '  margin: 0.25rem 0;',
+    '}',
+    '.footnote-marker {',
+    '  display: inline-flex;',
+    '  align-items: center;',
+    '  justify-content: center;',
+    '  background: transparent;',
+    '  border: 0;',
+    '  color: var(--muted);',
+    '  cursor: pointer;',
+    '  font: inherit;',
+    '  font-size: 0.95em;',
+    '  font-weight: 700;',
+    '  line-height: 1;',
+    '  min-width: 1.75rem;',
+    '  min-height: 1.75rem;',
+    '  padding: 0.25rem 0.2rem;',
+    '  vertical-align: middle;',
+    '  user-select: none;',
+    '}',
+    '.footnote-marker:hover {',
+    '  color: var(--hover-fg);',
+    '}',
+    '.fn-anchor {',
+    '  display: inline;',
+    '  white-space: nowrap;',
+    '}',
+    '.footnote-popover {',
+    '  max-width: min(92vw, 26rem);',
+    '  border: 1px solid var(--popover-border);',
+    '  border-radius: 0.6rem;',
+    '  padding: 0.6rem 0.75rem;',
+    '  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.22);',
+    '  background: var(--popover-bg);',
+    '  color: var(--popover-fg);',
+    '}',
+    '.footnote-popover:not(:popover-open) {',
+    '  display: none;',
+    '}',
+    '.footnote-popover:popover-open {',
+    '  display: block;',
+    '}',
+    '.footnote-popover::backdrop {',
+    '  background: rgba(15, 23, 42, 0.25);',
+    '}',
+    '.footnote-popover-header {',
+    '  display: flex;',
+    '  align-items: center;',
+    '  justify-content: space-between;',
+    '  gap: 0.75rem;',
+    '  margin-bottom: 0.5rem;',
+    '}',
+    '.footnote-popover-label {',
+    '  font-weight: 600;',
+    '  font-size: 0.9rem;',
+    '  color: var(--muted);',
+    '}',
+    '.footnote-popover-body {',
+    '  font-size: 0.95em;',
+    '  line-height: 1.5;',
+    '  color: var(--pane-fg);',
+    '}',
+    '.footnote-popover-body a {',
+    '  color: var(--link);',
+    '  text-decoration: underline;',
     '}',
     '.word-line {',
     '  line-height: 1.7;',
@@ -1013,7 +1236,7 @@ function getChapterPageCss(): string[] {
     '.traditional-heading {',
     '  font-weight: 700;',
     '}',
-    '.traditional-crossref, .traditional-footnote {',
+    '.traditional-crossref {',
     '  font-size: 0.95em;',
     '  color: var(--muted);',
     '}',

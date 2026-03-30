@@ -51,6 +51,8 @@ html, body {
 body.with-app-shell {
   padding-top: 56px;
   padding-bottom: 60px;
+  padding-left: 1%;
+  padding-right: 1%;
 }
 
 #app-shell-root button,
