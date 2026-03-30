@@ -73,8 +73,20 @@ const CSS = `
   gap: 0.25rem;
   align-items: center;
   min-width: 0;
-  flex-shrink: 1;
-  overflow: hidden;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+#bible-nav-btns::-webkit-scrollbar {
+  display: none;
+}
+
+#bible-nav-btns ~ .app-spacer {
+  display: none;
 }
 
 .nav-ref-chip {
@@ -389,6 +401,12 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
     const titleLink = topbar.querySelector('.app-topbar-home');
     const btns = document.createElement('div');
     btns.id = 'bible-nav-btns';
+    btns.addEventListener('wheel', (event) => {
+      if (event.deltaY !== 0) {
+        event.preventDefault();
+        btns.scrollLeft += event.deltaY;
+      }
+    }, { passive: false });
     if (titleLink?.nextSibling) {
       topbar.insertBefore(btns, titleLink.nextSibling);
     } else {

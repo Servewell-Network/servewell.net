@@ -38,6 +38,7 @@ import { registerShellListeners } from './registerShellListeners';
 import { createDemoModule } from './createDemoModule';
 import { createBibleNavModule } from './createBibleNavModule';
 import { createTransliterationModule } from './createTransliterationModule';
+import { createSelectionControlModule } from './createSelectionControlModule';
 
 function isDemoRoute(pathname: string): boolean {
   const normalizedPath = pathname.replace(/\/+$/, '') || '/';
@@ -69,6 +70,7 @@ export function jsDomFramework() {
   }
   modules.register(createBibleNavModule(delegator));
   modules.register(createTransliterationModule());
+  modules.register(createSelectionControlModule());
 
   registerShellListeners(delegator, shell, theme, modules);
 
@@ -81,5 +83,6 @@ export function jsDomFramework() {
   }
   if (document.querySelector('main.chapter-page')) {
     modules.activate('bible-nav');
+    modules.activate('selection-control');
   }
 }
