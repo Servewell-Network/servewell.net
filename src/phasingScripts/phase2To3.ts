@@ -261,6 +261,10 @@ function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
     `<script id="bible-nav-data" type="application/json">${bibleNavDataJson}</script>`,
     `<main class="chapter-page" data-book="${escapeHtml(chapter.DocOrBookAbbreviation)}" data-chapter="${chapter.ChapterNumber}">`,
     `<p class="chapter-note">Click any word to see more.</p>`,
+    `<div class="snippet-grid-header">`,
+    `<div class="snippet-grid-header-label">LITERAL</div>`,
+    `<div class="snippet-grid-header-label">TRADITIONAL</div>`,
+    `</div>`,
     `<section class="snippet-grid">`,
     snippetRows,
     `</section>`,
@@ -278,13 +282,10 @@ function renderSnippetRow(snippet: Snippet): string {
 
   return [
     `<article class="snippet-row" id="${snippetId}">`,
-    `<div class="snippet-label" aria-label="Snippet ${escapeHtml(snippetLabel)}">${escapeHtml(snippetLabel)}</div>`,
-    `<div class="snippet-pane literal-pane">`,
-    `<div class="pane-title">Literal</div>`,
+    `<div class="snippet-pane literal-pane" aria-label="Literal">`,
     renderLiteralPane(snippet),
     `</div>`,
-    `<div class="snippet-pane traditional-pane">`,
-    `<div class="pane-title">Traditional</div>`,
+    `<div class="snippet-pane traditional-pane" aria-label="Traditional">`,
     renderTraditionalPane(snippet),
     `</div>`,
     `</article>`
@@ -333,18 +334,18 @@ function renderLiteralPane(snippet: Snippet): string {
     return `<p class="pane-empty">[no literal text]</p>`;
   }
 
-  return `<div class="pane-text word-line">${renderTokenParts(renderParts)}</div>`;
+  const verseNumBtn = `<button type="button" class="verse-num" aria-label="Verse ${escapeHtml(snippetLabel)}">${escapeHtml(snippetLabel)}</button>`;
+  return `<div class="pane-text word-line">${verseNumBtn}${renderTokenParts(renderParts)}</div>`;
 }
 
 function renderTraditionalPane(snippet: Snippet): string {
   const snippetLabel = getSnippetLabel(snippet);
   const snippetKey = snippet.SnippetId || snippetLabel;
-  const headings: string[] = [];
-  const crossRefs: string[] = [];
-  const paragraphs: string[] = [];
-  const footnotes: string[] = [];
+  const paneLines: string[] = [];
   const currentParagraphTokens: TraditionalParagraphToken[] = [];
   let traditionalWordOrdinal = 0;
+  let didRenderVerseNum = false;
+  const verseNumBtn = `<button type="button" class="verse-num" aria-label="Verse ${escapeHtml(snippetLabel)}">${escapeHtml(snippetLabel)}</button>`;
 
   const literalMetaByMorphemeId = new Map<string, MetadataEntry[]>();
   for (const morpheme of snippet.OriginalMorphemes) {
@@ -363,10 +364,20 @@ function renderTraditionalPane(snippet: Snippet): string {
   }
 
   const flushParagraph = () => {
-    const paragraph = renderTraditionalParagraphTokens(currentParagraphTokens, snippetLabel, snippetKey, literalMetaByMorphemeId);
+    const paragraphHasWords = currentParagraphTokens.some((token) => token.kind === 'word');
+    const paragraph = renderTraditionalParagraphTokens(
+      currentParagraphTokens,
+      snippetLabel,
+      snippetKey,
+      literalMetaByMorphemeId,
+      didRenderVerseNum ? undefined : verseNumBtn
+    );
     currentParagraphTokens.length = 0;
     if (paragraph) {
-      paragraphs.push(`<div class="traditional-paragraph word-line">${paragraph}</div>`);
+      paneLines.push(`<div class="traditional-paragraph word-line">${paragraph}</div>`);
+      if (paragraphHasWords && !didRenderVerseNum) {
+        didRenderVerseNum = true;
+      }
     }
   };
 
@@ -401,13 +412,13 @@ function renderTraditionalPane(snippet: Snippet): string {
       case 'Heading':
         flushParagraph();
         if (text.trim()) {
-          headings.push(`<p class="traditional-heading">${escapeHtml(text.trim())}</p>`);
+          paneLines.push(`<p class="traditional-heading">${escapeHtml(text.trim())}</p>`);
         }
         break;
       case 'Cross Ref.':
         flushParagraph();
         if (text.trim()) {
-          crossRefs.push(`<p class="traditional-crossref">${sanitizeRichHtml(text, true)}</p>`);
+          paneLines.push(`<p class="traditional-crossref">${sanitizeRichHtml(text, true)}</p>`);
         }
         break;
       case 'Paragraph Start':
@@ -422,7 +433,7 @@ function renderTraditionalPane(snippet: Snippet): string {
       case 'Footnotes':
         flushParagraph();
         if (text.trim()) {
-          footnotes.push(`<p class="traditional-footnote">${sanitizeRichHtml(text, false)}</p>`);
+          paneLines.push(`<p class="traditional-footnote">${sanitizeRichHtml(text, false)}</p>`);
         }
         break;
       default:
@@ -432,9 +443,12 @@ function renderTraditionalPane(snippet: Snippet): string {
 
   flushParagraph();
 
-  const paneLines = [...headings, ...crossRefs, ...paragraphs, ...footnotes];
   if (paneLines.length === 0) {
     return `<p class="pane-empty">[no traditional text]</p>`;
+  }
+
+  if (!didRenderVerseNum) {
+    paneLines.push(`<div class="traditional-paragraph word-line">${verseNumBtn}</div>`);
   }
 
   return paneLines.join('\n');
@@ -444,21 +458,51 @@ function renderTraditionalParagraphTokens(
   tokens: TraditionalParagraphToken[],
   snippetLabel: string,
   snippetKey: string,
-  literalMetaByMorphemeId: Map<string, MetadataEntry[]>
+  literalMetaByMorphemeId: Map<string, MetadataEntry[]>,
+  leadingHtmlBeforeFirstWord?: string
 ): string {
-  const renderParts: RenderableTokenPart[] = [];
+  let html = '';
+  let plainText = '';
+  let didInsertLeadingHtml = false;
+  let suppressSpacingBeforeNextToken = false;
+
+  const appendTokenHtml = (tokenText: string, tokenHtml: string) => {
+    const normalizedText = normalizeTokenText(tokenText);
+    if (!normalizedText) return;
+
+    if (!suppressSpacingBeforeNextToken && plainText && shouldInsertSpaceBeforeToken(normalizedText, plainText)) {
+      html += ' ';
+      plainText += ' ';
+    }
+
+    html += tokenHtml;
+    plainText += normalizedText;
+    suppressSpacingBeforeNextToken = false;
+  };
+
+  const insertLeadingHtmlBeforeFirstWord = () => {
+    if (!leadingHtmlBeforeFirstWord || didInsertLeadingHtml) return;
+
+    if (plainText && shouldInsertSpaceBeforeToken(snippetLabel, plainText)) {
+      html += ' ';
+      plainText += ' ';
+    }
+
+    html += leadingHtmlBeforeFirstWord;
+    didInsertLeadingHtml = true;
+    suppressSpacingBeforeNextToken = true;
+  };
 
   for (const token of tokens) {
     if (token.kind === 'text') {
       const plainText = normalizeTokenText(token.text);
       if (!plainText) continue;
 
-      renderParts.push({
-        text: plainText,
-        html: escapeHtml(plainText)
-      });
+      appendTokenHtml(plainText, escapeHtml(plainText));
       continue;
     }
+
+    insertLeadingHtmlBeforeFirstWord();
 
     const popoverId = `popover-${toSafeDomId(`${snippetKey}-traditional-${token.wordOrdinal}`)}`;
     const matchMorphemeId =
@@ -473,13 +517,10 @@ function renderTraditionalParagraphTokens(
           { label: '—', value: "There's no direct match for this word in the original." }
         ];
 
-    renderParts.push({
-      text: token.text,
-      html: renderWordToken(token.text, popoverId, metadataEntries)
-    });
+    appendTokenHtml(token.text, renderWordToken(token.text, popoverId, metadataEntries));
   }
 
-  return renderTokenParts(renderParts);
+  return html;
 }
 
 function renderTokenParts(parts: RenderableTokenPart[]): string {
@@ -830,48 +871,59 @@ function getChapterPageCss(): string[] {
     '}',
     '.chapter-note {',
     '  color: var(--muted);',
-    '  margin-bottom: 1rem;',
+    '  margin-bottom: 0.5rem;',
+    '}',
+    '.snippet-grid-header {',
+    '  display: grid;',
+    '  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);',
+    '  gap: 0.65rem;',
+    '  align-items: end;',
+    '  margin-bottom: 0.45rem;',
+    '}',
+    '.snippet-grid-header-label {',
+    '  min-width: 0;',
+    '  font-size: 0.78rem;',
+    '  text-transform: uppercase;',
+    '  letter-spacing: 0.08em;',
+    '  color: var(--muted);',
+    '  font-weight: 700;',
     '}',
     '.snippet-grid {',
     '  display: flex;',
     '  flex-direction: column;',
-    '  gap: 0.85rem;',
+    '  gap: 0.55rem;',
     '}',
     '.snippet-row {',
     '  display: grid;',
-    '  grid-template-columns: minmax(2.75rem, 3.5rem) minmax(0, 1fr) minmax(0, 1fr);',
+    '  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);',
     '  gap: 0.65rem;',
-    '  align-items: start;',
+    '  align-items: center;',
+    '  padding: 0.2rem 0 0.45rem;',
     '}',
     '.snippet-row > * {',
     '  min-width: 0;',
     '}',
-    '.snippet-label {',
+    '.verse-num {',
+    '  display: inline-block;',
     '  font-weight: 700;',
-    '  font-size: 1rem;',
-    '  line-height: 1.2;',
+    '  font-size: 0.85rem;',
+    '  line-height: 1;',
     '  color: var(--label-fg);',
-    '  border: 1px solid var(--pane-border);',
-    '  border-radius: 0.45rem;',
-    '  text-align: center;',
-    '  padding: 0.4rem 0.25rem;',
     '  background: var(--label-bg);',
-    '  position: sticky;',
-    '  top: 0.5rem;',
+    '  border: 1px solid var(--pane-border);',
+    '  border-radius: 0.35rem;',
+    '  padding: 0.15rem 0.35rem;',
+    '  user-select: none;',
+    '  cursor: pointer;',
+    '  vertical-align: middle;',
+    '  margin-right: 0.3em;',
     '}',
     '.snippet-pane {',
-    '  border: 1px solid var(--pane-border);',
-    '  border-radius: 0.5rem;',
-    '  background: var(--pane-bg);',
+    '  border: 0;',
+    '  border-radius: 0;',
+    '  background: transparent;',
     '  color: var(--pane-fg);',
-    '  padding: 0.55rem 0.65rem 0.65rem;',
-    '}',
-    '.pane-title {',
-    '  font-size: 0.78rem;',
-    '  text-transform: uppercase;',
-    '  letter-spacing: 0.06em;',
-    '  color: var(--muted);',
-    '  margin-bottom: 0.4rem;',
+    '  padding: 0;',
     '}',
     '.pane-text, .traditional-paragraph, .traditional-heading, .traditional-crossref, .traditional-footnote {',
     '  margin: 0.25rem 0;',
@@ -976,16 +1028,6 @@ function getChapterPageCss(): string[] {
     '.traditional-crossref a {',
     '  color: var(--link);',
     '  text-decoration: underline;',
-    '}',
-    '@media (max-width: 760px) {',
-    '  .snippet-row {',
-    '    grid-template-columns: 1fr;',
-    '  }',
-    '  .snippet-label {',
-    '    position: static;',
-    '    width: fit-content;',
-    '    min-width: 2.5rem;',
-    '  }',
     '}'
   ];
 }
