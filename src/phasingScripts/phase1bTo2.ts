@@ -1456,7 +1456,7 @@ function normalizeTokenForAlignment(token: string): string {
 }
 
 function isSuppliedWord(word: string): boolean {
-    return word.includes('[') || word.includes(']');
+    return word.includes('[') || word.includes(']') || word.includes('{') || word.includes('}');
 }
 
 function isEnglishArticle(normalizedWord: string): boolean {

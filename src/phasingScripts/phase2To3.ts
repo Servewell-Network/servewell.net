@@ -372,7 +372,7 @@ function renderTraditionalPane(snippet: Snippet): string {
 
   for (const item of snippet.EnglishHeadingsAndWords) {
     if (isEnglishWord(item)) {
-      const token = normalizeTokenText(item.EnglishWord);
+      const token = normalizeTraditionalText(item.EnglishWord);
       if (token) {
         const wordSegments = splitTokenIntoWords(token);
 
@@ -516,6 +516,10 @@ function shouldInsertSpaceBeforeToken(token: string, existingText: string): bool
 
 function normalizeTokenText(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
+}
+
+function normalizeTraditionalText(value: string): string {
+  return normalizeTokenText(value.replace(/[\[\]{}]/g, ''));
 }
 
 function splitTokenIntoWords(tokenText: string): string[] {
