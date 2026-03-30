@@ -1385,6 +1385,82 @@ body.app-panel-open #app-shell-root .app-overlay {
     if (currentGroup.length > 0) groups.push(currentGroup);
     return groups.map(buildSelectionText).join("\n\n");
   }
+  function rangeIntersectsNode(range, node) {
+    try {
+      const nodeRange = document.createRange();
+      nodeRange.selectNodeContents(node);
+      const endsAfterNodeStart = range.compareBoundaryPoints(Range.START_TO_END, nodeRange) > 0;
+      const startsBeforeNodeEnd = range.compareBoundaryPoints(Range.END_TO_START, nodeRange) < 0;
+      return endsAfterNodeStart && startsBeforeNodeEnd;
+    } catch {
+      return false;
+    }
+  }
+  function rectsOverlap(a, b) {
+    const overlapWidth = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+    const overlapHeight = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+    return overlapWidth > 0 && overlapHeight > 0;
+  }
+  function hasVisualRangeOverlap(rangeRects, element) {
+    const tokenRects = Array.from(element.getClientRects());
+    if (tokenRects.length === 0) return false;
+    for (const tokenRect of tokenRects) {
+      for (const rangeRect of rangeRects) {
+        if (rectsOverlap(tokenRect, rangeRect)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  function tokenIsSelectedByRange(range, rangeRects, token) {
+    if (!rangeIntersectsNode(range, token)) return false;
+    if (rangeRects.length > 0) {
+      return hasVisualRangeOverlap(rangeRects, token);
+    }
+    return true;
+  }
+  function buildTraditionalSelectionTextFromRange(page, selection) {
+    if (selection.rangeCount === 0) return "";
+    const range = selection.getRangeAt(0);
+    const rangeRects = Array.from(range.getClientRects());
+    const blocks = Array.from(
+      page.querySelectorAll(
+        ".traditional-pane .traditional-heading, .traditional-pane .traditional-crossref, .traditional-pane .traditional-paragraph"
+      )
+    );
+    const pieces = [];
+    function pushPiece(text, kind) {
+      const normalized = normalizeTokenText(text);
+      if (!normalized) return;
+      pieces.push({ text: normalized, kind });
+    }
+    for (const block of blocks) {
+      if (!rangeIntersectsNode(range, block)) continue;
+      if (block.classList.contains("traditional-paragraph")) {
+        const tokens = Array.from(block.querySelectorAll("button.word-token")).filter(
+          (token) => tokenIsSelectedByRange(range, rangeRects, token)
+        );
+        if (tokens.length > 0) {
+          pushPiece(buildSelectionText(tokens), "paragraph");
+        }
+        continue;
+      }
+      if (block.classList.contains("traditional-heading")) {
+        pushPiece(block.textContent ?? "", "heading");
+        continue;
+      }
+      pushPiece(block.textContent ?? "", "crossref");
+    }
+    let result = "";
+    for (const piece of pieces) {
+      if (result) {
+        result += piece.kind === "heading" ? "\n\n\n" : "\n\n";
+      }
+      result += piece.text;
+    }
+    return result;
+  }
   function resolvePaneMode(selection) {
     const beginPane = getPaneKindFromNode(selection.anchorNode);
     const endPane = getPaneKindFromNode(selection.focusNode);
@@ -1394,15 +1470,45 @@ body.app-panel-open #app-shell-root .app-overlay {
   function getSelectedTokens(page, selection, mode) {
     if (selection.rangeCount === 0) return [];
     const range = selection.getRangeAt(0);
+    const rangeRects = Array.from(range.getClientRects());
     const tokens = Array.from(page.querySelectorAll("button.word-token"));
     return tokens.filter((token) => {
       if (!tokenMatchesPaneMode(token, mode)) return false;
-      try {
-        return range.intersectsNode(token);
-      } catch {
-        return false;
-      }
+      return tokenIsSelectedByRange(range, rangeRects, token);
     });
+  }
+  function getSelectedPanesInVisualOrder(tokens) {
+    const panesByKind = /* @__PURE__ */ new Map();
+    for (const token of tokens) {
+      const kind = getPaneKindFromElement(token);
+      if (!kind || panesByKind.has(kind)) continue;
+      const pane = token.closest(".snippet-pane");
+      if (pane instanceof HTMLElement) {
+        panesByKind.set(kind, pane);
+      }
+    }
+    return Array.from(panesByKind.entries()).sort(([, a], [, b]) => a.getBoundingClientRect().left - b.getBoundingClientRect().left).map(([kind, element]) => ({ kind, element }));
+  }
+  function inferPaneFromPointerX(selectedPanes, pointerClientX) {
+    if (selectedPanes.length === 0) return null;
+    if (selectedPanes.length === 1) return selectedPanes[0].kind;
+    let left = Number.POSITIVE_INFINITY;
+    let right = Number.NEGATIVE_INFINITY;
+    for (const pane of selectedPanes) {
+      const rect = pane.element.getBoundingClientRect();
+      left = Math.min(left, rect.left);
+      right = Math.max(right, rect.right);
+    }
+    if (!(right > left)) return null;
+    const clampedX = Math.min(Math.max(pointerClientX, left), right - 1e-3);
+    const segmentWidth = (right - left) / selectedPanes.length;
+    const index = Math.min(selectedPanes.length - 1, Math.floor((clampedX - left) / segmentWidth));
+    return selectedPanes[index]?.kind ?? null;
+  }
+  function getVisibleModePane(page) {
+    if (page.classList.contains("mode-traditional-only")) return "traditional";
+    if (page.classList.contains("mode-literal-only")) return "literal";
+    return null;
   }
   function addPartialSuffix(verseLabel, suffix) {
     if (/^\d+$/.test(verseLabel)) {
@@ -1473,6 +1579,29 @@ body.app-panel-open #app-shell-root .app-overlay {
     }
     return `${bookName} ${chapterLabel}:${verseRangeLabel}`;
   }
+  function trimLikelyBoundaryLeadToken(page, mode, tokens, lastGestureStartedOnToken) {
+    if (mode === "both") return tokens;
+    if (lastGestureStartedOnToken) return tokens;
+    if (tokens.length < 2) return tokens;
+    const firstToken = tokens[0];
+    const secondToken = tokens[1];
+    const firstVerse = getTokenVerseLabel(firstToken);
+    const secondVerse = getTokenVerseLabel(secondToken);
+    if (!firstVerse || !secondVerse || firstVerse === secondVerse) return tokens;
+    const firstVerseCount = tokens.filter((token) => getTokenVerseLabel(token) === firstVerse).length;
+    if (firstVerseCount !== 1) return tokens;
+    const allTokensInMode = Array.from(page.querySelectorAll("button.word-token")).filter(
+      (token) => tokenMatchesPaneMode(token, mode)
+    );
+    let lastTokenInFirstVerse = null;
+    for (const token of allTokensInMode) {
+      if (getTokenVerseLabel(token) === firstVerse) {
+        lastTokenInFirstVerse = token;
+      }
+    }
+    if (lastTokenInFirstVerse !== firstToken) return tokens;
+    return tokens.slice(1);
+  }
   function buildBothPanesSectionText(page, selection) {
     function groupByRow(tokens) {
       const rowMap = /* @__PURE__ */ new Map();
@@ -1485,14 +1614,14 @@ body.app-panel-open #app-shell-root .app-overlay {
       return Array.from(rowMap.values());
     }
     const literalGroups = groupByRow(getSelectedTokens(page, selection, "literal"));
-    const traditionalGroups = groupByRow(getSelectedTokens(page, selection, "traditional"));
-    if (literalGroups.length === 0 && traditionalGroups.length === 0) return null;
+    const traditionalText = buildTraditionalSelectionTextFromRange(page, selection);
+    if (literalGroups.length === 0 && !traditionalText) return null;
     const sections = [];
     if (literalGroups.length > 0) {
       sections.push("LITERAL\n" + literalGroups.map(buildSelectionText).join("\n\n"));
     }
-    if (traditionalGroups.length > 0) {
-      sections.push("TRADITIONAL\n" + traditionalGroups.map((g) => buildTraditionalSelectionText(g)).join("\n\n"));
+    if (traditionalText) {
+      sections.push("TRADITIONAL\n" + traditionalText);
     }
     return sections.join("\n\n");
   }
@@ -1519,6 +1648,10 @@ body.app-panel-open #app-shell-root .app-overlay {
     let pointerId = null;
     let startPane = null;
     let lastPointerClientX = null;
+    let gestureStartedOnToken = false;
+    let lastGestureStartedOnToken = false;
+    let gestureCrossedPanes = false;
+    let lastGestureCrossedPanes = false;
     const disposers = [];
     function setLockedPane(pane) {
       if (!page) return;
@@ -1528,6 +1661,8 @@ body.app-panel-open #app-shell-root .app-overlay {
     function resetGestureState() {
       pointerId = null;
       startPane = null;
+      gestureStartedOnToken = false;
+      gestureCrossedPanes = false;
       window.setTimeout(() => setLockedPane(null), 0);
     }
     function onPointerDown(event) {
@@ -1535,20 +1670,23 @@ body.app-panel-open #app-shell-root .app-overlay {
       if (!event.isPrimary) return;
       if (event.pointerType === "mouse" && event.button !== 0) return;
       if (!(event.target instanceof Node)) return;
-      if (!page.contains(event.target)) return;
       pointerId = event.pointerId;
       startPane = getPaneKindFromNode(event.target);
       lastPointerClientX = event.clientX;
+      gestureStartedOnToken = asElement(event.target)?.closest("button.word-token") !== null;
+      lastGestureStartedOnToken = false;
+      gestureCrossedPanes = false;
+      lastGestureCrossedPanes = false;
       setLockedPane(startPane);
     }
     function onPointerMove(event) {
       if (!page) return;
       if (pointerId === null || event.pointerId !== pointerId) return;
       if (!(event.target instanceof Node)) return;
-      if (!page.contains(event.target)) return;
       lastPointerClientX = event.clientX;
       const hoverPane = getPaneKindFromNode(event.target);
       if (startPane && hoverPane && hoverPane !== startPane) {
+        gestureCrossedPanes = true;
         setLockedPane(null);
         return;
       }
@@ -1560,9 +1698,13 @@ body.app-panel-open #app-shell-root .app-overlay {
       if (pointerId === null) return;
       if (event.pointerId !== pointerId) return;
       lastPointerClientX = event.clientX;
+      lastGestureStartedOnToken = gestureStartedOnToken;
+      lastGestureCrossedPanes = gestureCrossedPanes;
       resetGestureState();
     }
     function onWindowBlur() {
+      lastGestureStartedOnToken = false;
+      lastGestureCrossedPanes = false;
       resetGestureState();
     }
     function onCopy(event) {
@@ -1570,21 +1712,35 @@ body.app-panel-open #app-shell-root .app-overlay {
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
       const range = selection.getRangeAt(0);
-      if (!page.contains(range.commonAncestorContainer)) return;
+      const selectionTouchesPage = page.contains(range.commonAncestorContainer) || rangeIntersectsNode(range, page);
+      if (!selectionTouchesPage) return;
+      const allSelectedTokens = getSelectedTokens(page, selection, "both");
+      const traditionalBodyFromRange = buildTraditionalSelectionTextFromRange(page, selection);
+      const forcedPane = getVisibleModePane(page);
       let paneMode = resolvePaneMode(selection);
-      if (paneMode !== "both" && lastPointerClientX !== null && window.innerWidth > 0) {
-        const xPane = lastPointerClientX > window.innerWidth / 2 ? "traditional" : "literal";
-        if (xPane !== paneMode) {
-          paneMode = xPane;
+      if (forcedPane) {
+        paneMode = forcedPane;
+      }
+      const selectedPanes = getSelectedPanesInVisualOrder(
+        forcedPane ? allSelectedTokens.filter((token) => getPaneKindFromElement(token) === forcedPane) : allSelectedTokens
+      );
+      if (!forcedPane && selectedPanes.length === 1) {
+        paneMode = selectedPanes[0].kind;
+      } else if (!forcedPane && selectedPanes.length === 0 && traditionalBodyFromRange) {
+        paneMode = "traditional";
+      } else if (!forcedPane && selectedPanes.length > 1) {
+        if (lastGestureCrossedPanes) {
+          paneMode = "both";
+        } else if (lastPointerClientX !== null) {
+          const inferredPane = inferPaneFromPointerX(selectedPanes, lastPointerClientX);
+          if (inferredPane) {
+            paneMode = inferredPane;
+          }
         }
       }
       if (paneMode === "both") {
-        const beginPane = getPaneKindFromNode(selection.anchorNode);
-        const endPane = getPaneKindFromNode(selection.focusNode);
-        if (!beginPane || !endPane || beginPane === endPane) return;
-        const allTokens = getSelectedTokens(page, selection, "both");
-        if (allTokens.length === 0) return;
-        const prefix2 = buildReferencePrefix(page, allTokens, "both");
+        if (selectedPanes.length < 2) return;
+        const prefix2 = buildReferencePrefix(page, allSelectedTokens, "both");
         const bodyText2 = buildBothPanesSectionText(page, selection);
         if (!prefix2 && !bodyText2) return;
         const payload2 = prefix2 ? bodyText2 ? `${prefix2}
@@ -1594,10 +1750,16 @@ ${bodyText2}` : prefix2 : bodyText2 ?? "";
         event.clipboardData?.setData("text/plain", payload2);
         return;
       }
-      const selectedTokens = getSelectedTokens(page, selection, paneMode);
-      if (selectedTokens.length === 0) return;
-      const prefix = buildReferencePrefix(page, selectedTokens, paneMode);
-      const bodyText = paneMode === "traditional" ? buildTraditionalSelectionText(selectedTokens) : buildSelectionText(selectedTokens);
+      let selectedTokens = allSelectedTokens.filter((token) => getPaneKindFromElement(token) === paneMode);
+      selectedTokens = trimLikelyBoundaryLeadToken(page, paneMode, selectedTokens, lastGestureStartedOnToken);
+      const prefix = selectedTokens.length > 0 ? buildReferencePrefix(page, selectedTokens, paneMode) : null;
+      let bodyText = "";
+      if (paneMode === "traditional") {
+        bodyText = !lastGestureStartedOnToken && traditionalBodyFromRange ? traditionalBodyFromRange : selectedTokens.length > 0 ? buildTraditionalSelectionText(selectedTokens) : traditionalBodyFromRange;
+      } else {
+        if (selectedTokens.length === 0) return;
+        bodyText = buildSelectionText(selectedTokens);
+      }
       if (!prefix && !bodyText) return;
       const payload = prefix ? bodyText ? `${prefix}
 ${bodyText}` : prefix : bodyText;
@@ -1639,6 +1801,10 @@ ${bodyText}` : prefix : bodyText;
         pointerId = null;
         startPane = null;
         lastPointerClientX = null;
+        gestureStartedOnToken = false;
+        lastGestureStartedOnToken = false;
+        gestureCrossedPanes = false;
+        lastGestureCrossedPanes = false;
         page = null;
       }
     };
