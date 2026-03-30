@@ -265,7 +265,6 @@ function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
     ...baseHtml.headToBody,
     `<script id="bible-nav-data" type="application/json">${bibleNavDataJson}</script>`,
     `<main class="chapter-page" data-book="${escapeHtml(chapter.DocOrBookAbbreviation)}" data-chapter="${chapter.ChapterNumber}">`,
-    `<p class="chapter-note">Click any word to see more.</p>`,
     `<div class="snippet-grid-header" role="group" aria-label="Column visibility">`,
     `<label class="snippet-grid-header-card" for="column-toggle-literal">`,
     `<input type="checkbox" id="column-toggle-literal" data-column-toggle="literal" />`,

@@ -170,6 +170,10 @@ async function processStepFile(fileName: string, isNt?: string) {
   console.log('Finished processing file:', fileName.split(' - ')[0]);
 }
 
+function normalizeLiteralGlossForOutput(gloss: string): string {
+  return gloss.toUpperCase();
+}
+
 
 function processGreekWord(currentChapter: Partial<Chapter>, currentSnippet: Snippet, fields: StepWord, wordIdx: string, source: string) {
 // Word & Type	Greek	English translation	dStrongs = Grammar	Dictionary form =  Gloss	editions	Meaning variants	Spelling variants	Spanish translation	Sub-meaning	Conjoin word	sStrong+Instance
@@ -178,7 +182,7 @@ function processGreekWord(currentChapter: Partial<Chapter>, currentSnippet: Snip
   const [strongsRaw, grammarRaw] = fields[GreekWord.dStrongsAndGrammar].split('=');
   const strongs = strongsRaw.trim();
   const grammarCode = (grammarRaw || '').trim();
-  const engMorpheme = fields[GreekWord.EnglishTranslation].trim();
+  const engMorpheme = normalizeLiteralGlossForOutput(fields[GreekWord.EnglishTranslation].trim());
   const [origRoot, engRoot] = fields[GreekWord.DictionaryFormAndGloss].split('=');
   const [origScript, translit] = fields[GreekWord.Greek].replace(')', '').split(' (');
   const morpheme: Morpheme = {
@@ -242,7 +246,7 @@ function createMorphemeFromSemiticWord(
   grammarCode: string
 ): Morpheme {
   const strongs = fields[SemiticWord.dStrongs].replace('{', '').replace('}', '');
-  const engMorpheme = fields[SemiticWord.Translation].trim();
+  const engMorpheme = normalizeLiteralGlossForOutput(fields[SemiticWord.Translation].trim());
   const engInfo = fields[SemiticWord.ExpandedStrongTags].split('=').pop()?.replace('}', '')?.trim() || '';
   const preAndPostArrows = engInfo.split('»');
   const substitutionInfo = preAndPostArrows[1]?.includes('@') ? preAndPostArrows[1] : '';
