@@ -74,6 +74,7 @@ export function jsDomFramework() {
 
   theme.restore();
   modules.render();
+  modules.restoreFromStorage();
   if (onDemoPage) {
     modules.activate('demo');
     shell.appendDemoLine('Framework booted');

@@ -16,10 +16,17 @@ export type ModuleRegistry = {
   deactivate: (id: string) => void;
   isActive: (id: string) => boolean;
   getAll: () => AppModule[];
+  restoreFromStorage: () => void;
 };
 
 function qs<T extends HTMLElement>(selector: string): T | null {
   return document.querySelector(selector) as T | null;
+}
+
+const STORAGE_KEY_PREFIX = 'servewell-module-';
+
+function storageKey(id: string): string {
+  return `${STORAGE_KEY_PREFIX}${id}`;
 }
 
 export function createModuleRegistry(shell: ShellApi): ModuleRegistry {
@@ -34,11 +41,19 @@ export function createModuleRegistry(shell: ShellApi): ModuleRegistry {
   }
 
   function activate(id: string) {
-    modules[id]?.activate();
+    const module = modules[id];
+    if (!module) return;
+    module.activate();
+    shell.syncModuleInputs(id, true);
+    try { localStorage.setItem(storageKey(id), '1'); } catch {}
   }
 
   function deactivate(id: string) {
-    modules[id]?.deactivate();
+    const module = modules[id];
+    if (!module) return;
+    module.deactivate();
+    shell.syncModuleInputs(id, false);
+    try { localStorage.removeItem(storageKey(id)); } catch {}
   }
 
   function isActive(id: string): boolean {
@@ -49,5 +64,14 @@ export function createModuleRegistry(shell: ShellApi): ModuleRegistry {
     return Object.values(modules);
   }
 
-  return { register, render, activate, deactivate, isActive, getAll };
+  function restoreFromStorage() {
+    Object.values(modules).forEach((module) => {
+      if (module.includeInMenu === false) return;
+      let saved = '';
+      try { saved = localStorage.getItem(storageKey(module.id)) ?? ''; } catch {}
+      if (saved === '1') activate(module.id);
+    });
+  }
+
+  return { register, render, activate, deactivate, isActive, getAll, restoreFromStorage };
 }

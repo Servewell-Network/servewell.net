@@ -387,6 +387,10 @@ body.app-panel-open #app-shell-root .app-overlay {
   }
 
   // src/phasingScripts/phase2To3/createModuleRegistry.ts
+  var STORAGE_KEY_PREFIX = "servewell-module-";
+  function storageKey(id) {
+    return `${STORAGE_KEY_PREFIX}${id}`;
+  }
   function createModuleRegistry(shell) {
     const modules = {};
     function register(module) {
@@ -396,10 +400,24 @@ body.app-panel-open #app-shell-root .app-overlay {
       shell.renderModuleList(Object.values(modules).filter((module) => module.includeInMenu !== false));
     }
     function activate(id) {
-      modules[id]?.activate();
+      const module = modules[id];
+      if (!module) return;
+      module.activate();
+      shell.syncModuleInputs(id, true);
+      try {
+        localStorage.setItem(storageKey(id), "1");
+      } catch {
+      }
     }
     function deactivate(id) {
-      modules[id]?.deactivate();
+      const module = modules[id];
+      if (!module) return;
+      module.deactivate();
+      shell.syncModuleInputs(id, false);
+      try {
+        localStorage.removeItem(storageKey(id));
+      } catch {
+      }
     }
     function isActive(id) {
       return !!modules[id]?.active;
@@ -407,7 +425,18 @@ body.app-panel-open #app-shell-root .app-overlay {
     function getAll() {
       return Object.values(modules);
     }
-    return { register, render, activate, deactivate, isActive, getAll };
+    function restoreFromStorage() {
+      Object.values(modules).forEach((module) => {
+        if (module.includeInMenu === false) return;
+        let saved = "";
+        try {
+          saved = localStorage.getItem(storageKey(module.id)) ?? "";
+        } catch {
+        }
+        if (saved === "1") activate(module.id);
+      });
+    }
+    return { register, render, activate, deactivate, isActive, getAll, restoreFromStorage };
   }
 
   // src/phasingScripts/phase2To3/registerShellListeners.ts
@@ -1268,6 +1297,7 @@ body.app-panel-open #app-shell-root .app-overlay {
     registerShellListeners(delegator, shell, theme, modules);
     theme.restore();
     modules.render();
+    modules.restoreFromStorage();
     if (onDemoPage) {
       modules.activate("demo");
       shell.appendDemoLine("Framework booted");
