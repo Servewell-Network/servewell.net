@@ -222,10 +222,6 @@ body.app-panel-open #app-shell-root .app-overlay {
     <button type="button" data-action="menu-open" aria-label="Open menu">☰</button>
     <a class="app-topbar-home" href="/">Servewell.net</a>
     <span class="app-spacer"></span>
-    <label class="app-checkrow">
-      <input type="checkbox" data-setting="dark-mode">
-      <span>Dark</span>
-    </label>
   </header>
 
   <aside class="app-sidepanel">
