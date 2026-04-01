@@ -176,4 +176,6 @@ dist
 
 
 # specific to this project
+reports/
+
 src/json-Phase2/**/*
