@@ -70,6 +70,7 @@ type BsbSupplementMap = Record<string, BsbSupplementValue>;
 interface MorphemeAlignmentCandidate {
     morphemeId: string;
     originalMorphemeOrdinal: number;
+    wordNumber?: number;
     isPunctuation: boolean;
     normalizedGlossTokens: Set<string>;
     normalizedGlossPhrase: string;
@@ -558,17 +559,44 @@ function resolveWordAlignment(
             };
         }
 
+        // For articles, use regular unclaimed check (by morpheme ID, not cluster)
+        // because an article can still match even if another morpheme in its cluster is claimed
         const unclaimedArticleCandidates = getUnclaimedStrongCandidates(snippetArticleCandidates);
-        const selectedArticleCandidate = unclaimedArticleCandidates.length > 0
+        
+        // Try to select a candidate whose cluster contains a morpheme matching our Strongs base
+        const selectedArticleCandidate = selectBestClusteredCandidate(
+            unclaimedArticleCandidates.length > 0 ? unclaimedArticleCandidates : snippetArticleCandidates,
+            context,
+            context.rowStrongsBase,
+            currentVerseData?.OriginalMorphemes || []
+        );
+        
+        // If selectBestClusteredCandidate found a match, use it
+        if (selectedArticleCandidate) {
+            return {
+                originalMorphemeId: selectedArticleCandidate.morphemeId
+            };
+        }
+
+        // If we have a Strongs base but couldn't find a matching candidate, leave unmatched
+        if (context.rowStrongsBase) {
+            return {
+                candidateMorphemeIds: uniqueStrings(snippetArticleCandidates.map((candidate) => candidate.morphemeId)),
+                issueReason: 'article-without-source-morpheme'
+            };
+        }
+
+        // Fallback (no Strongs base): use occurrence-based selection
+        const fallbackArticle = unclaimedArticleCandidates.length > 0
             ? unclaimedArticleCandidates[0]
             : snippetArticleCandidates[Math.min(
                 getPriorWordOccurrenceCount(normalizedWord),
                 snippetArticleCandidates.length - 1
             )];
 
-        if (selectedArticleCandidate) {
+        if (fallbackArticle) {
             return {
-                originalMorphemeId: selectedArticleCandidate.morphemeId
+                originalMorphemeId: fallbackArticle.morphemeId
             };
         }
 
@@ -591,8 +619,23 @@ function resolveWordAlignment(
         }
         if (exactGlossMatches.length > 1) {
             const unclaimed = getUnclaimedStrongCandidates(exactGlossMatches);
-            const ordered = (unclaimed.length > 0 ? [...unclaimed] : [...exactGlossMatches])
-                .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
+            const candidatesToUse = unclaimed.length > 0 ? unclaimed : exactGlossMatches;
+            
+            // Try cluster-aware selection if we have a Strongs base
+            if (context.rowStrongsBase && currentVerseData?.OriginalMorphemes) {
+                const clusteredSelect = selectBestClusteredCandidate(
+                    candidatesToUse,
+                    context,
+                    context.rowStrongsBase,
+                    currentVerseData.OriginalMorphemes
+                );
+                if (clusteredSelect) {
+                    return { originalMorphemeId: clusteredSelect.morphemeId };
+                }
+            }
+            
+            // Fallback to occurrence-based ordering
+            const ordered = candidatesToUse.sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
             const priorCount = getPriorWordOccurrenceCount(normalizedWord, context.rowStrongsBase);
             const selected = ordered[Math.min(priorCount, ordered.length - 1)];
             if (selected) return { originalMorphemeId: selected.morphemeId };
@@ -612,6 +655,19 @@ function resolveWordAlignment(
         }
 
         if (strongMatches.length > 1) {
+            // Try cluster-aware selection for multiple Strongs matches
+            if (currentVerseData?.OriginalMorphemes) {
+                const clusteredSelect = selectBestClusteredCandidate(
+                    strongMatches,
+                    context,
+                    context.rowStrongsBase,
+                    currentVerseData.OriginalMorphemes
+                );
+                if (clusteredSelect) {
+                    return { originalMorphemeId: clusteredSelect.morphemeId };
+                }
+            }
+            
             matchingCandidates = strongMatches;
         }
     }
@@ -876,6 +932,7 @@ function mapMorphemeCandidates(morphemes: Morpheme[]): MorphemeAlignmentCandidat
             return {
                 morphemeId: morpheme.MorphemeId,
                 originalMorphemeOrdinal: morpheme.OriginalMorphemeOrdinal,
+                wordNumber: morpheme.WordNumber,
                 isPunctuation: Boolean(morpheme.IsPunctuation),
                 normalizedGlossTokens,
                 normalizedGlossPhrase: normalizePhraseForAlignment(gloss),
@@ -919,7 +976,18 @@ function resolveWithSnippetCandidates(
     if (snippetExactMatches.length === 1) {
         return { originalMorphemeId: snippetExactMatches[0].morphemeId };
     }
-    if (snippetExactMatches.length > 1 && context.rowStrongsBase) {
+    if (snippetExactMatches.length > 1) {
+        if (context.rowStrongsBase && currentVerseData?.OriginalMorphemes) {
+            const clusteredSelect = selectBestClusteredCandidate(
+                snippetExactMatches,
+                context,
+                context.rowStrongsBase,
+                currentVerseData.OriginalMorphemes
+            );
+            if (clusteredSelect) {
+                return { originalMorphemeId: clusteredSelect.morphemeId };
+            }
+        }
         const strongExact = snippetExactMatches.filter(
             (candidate) => candidate.strongsBase === context.rowStrongsBase
         );
@@ -996,9 +1064,25 @@ function resolveWithSnippetCandidates(
 
     if (strongMatches.length > 1) {
         const unclaimedStrongCandidates = getUnclaimedStrongCandidates(strongCandidates);
-        const orderedStrongCandidates = (unclaimedStrongCandidates.length > 0
-            ? [...unclaimedStrongCandidates]
-            : [...strongCandidates])
+        const candidatesToUse = unclaimedStrongCandidates.length > 0
+            ? unclaimedStrongCandidates
+            : strongCandidates;
+
+        // Try cluster-aware selection for multiple strong matches
+        if (currentVerseData?.OriginalMorphemes) {
+            const clusteredSelect = selectBestClusteredCandidate(
+                candidatesToUse,
+                context,
+                context.rowStrongsBase,
+                currentVerseData.OriginalMorphemes
+            );
+            if (clusteredSelect) {
+                return { originalMorphemeId: clusteredSelect.morphemeId };
+            }
+        }
+
+        // Fallback to occurrence-based ordering
+        const orderedStrongCandidates = candidatesToUse
             .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
 
         const priorOccurrenceCount = getPriorWordOccurrenceCount(normalizedWord, context.rowStrongsBase);
@@ -1338,6 +1422,39 @@ function getPriorWordOccurrenceCount(normalizedWord: string, strongsBase?: strin
     }, 0);
 }
 
+function getClaimedWordNumbers(allMorphemes: Morpheme[]): Set<number> {
+    const claimedWordNumbers = new Set<number>();
+    if (!currentVerseData) {
+        return claimedWordNumbers;
+    }
+
+    const claimedIds = new Set<string>();
+    currentVerseData.EnglishHeadingsAndWords.forEach((entry) => {
+        if (!isEnglishWordInfo(entry)) {
+            return;
+        }
+
+        (entry.ResolvedOriginalMorphemeIds || [])
+            .filter((morphemeId) => morphemeId && morphemeId !== NO_MORPHEME_ID)
+            .forEach((morphemeId) => claimedIds.add(morphemeId));
+
+        if (entry.OriginalMorphemeId && entry.OriginalMorphemeId !== NO_MORPHEME_ID) {
+            claimedIds.add(entry.OriginalMorphemeId);
+        }
+    });
+
+    // Map claimed morpheme IDs to their word numbers
+    allMorphemes.forEach((morpheme) => {
+        if (morpheme.MorphemeId && claimedIds.has(morpheme.MorphemeId)) {
+            if (morpheme.WordNumber !== undefined) {
+                claimedWordNumbers.add(morpheme.WordNumber);
+            }
+        }
+    });
+
+    return claimedWordNumbers;
+}
+
 function getUnclaimedStrongCandidates(candidates: MorphemeAlignmentCandidate[]): MorphemeAlignmentCandidate[] {
     if (!currentVerseData || candidates.length === 0) {
         return [];
@@ -1360,6 +1477,77 @@ function getUnclaimedStrongCandidates(candidates: MorphemeAlignmentCandidate[]):
 
     return candidates.filter((candidate) => !claimedIds.has(candidate.morphemeId));
 }
+
+function getUnclaimedCandidatesRespectingClusters(
+    candidates: MorphemeAlignmentCandidate[],
+    allMorphemes: Morpheme[]
+): MorphemeAlignmentCandidate[] {
+    if (!currentVerseData || candidates.length === 0) {
+        return [];
+    }
+
+    // Get word numbers of all claimed morphemes
+    const claimedWordNumbers = getClaimedWordNumbers(allMorphemes);
+
+    // Filter out candidates whose word number is in a claimed cluster
+    return candidates.filter((candidate) => {
+        if (candidate.wordNumber === undefined) {
+            return true; // Keep candidates without word number info
+        }
+        return !claimedWordNumbers.has(candidate.wordNumber);
+    });
+}
+
+function selectBestClusteredCandidate(
+    candidates: MorphemeAlignmentCandidate[],
+    context: RowAlignmentContext,
+    rowStrongsBase: string | undefined,
+    allMorphemes: Morpheme[]
+): MorphemeAlignmentCandidate | undefined {
+    if (candidates.length === 0) {
+        return undefined;
+    }
+
+    // If we have a Strongs base, try to find a candidate in a cluster 
+    // whose other morphemes match that Strongs base
+    if (rowStrongsBase && allMorphemes.length > 0) {
+        for (const candidate of candidates) {
+            if (candidate.wordNumber === undefined) continue;
+
+            // Find all significant morphemes in the same cluster (excluding pure articles/prepositions)
+            const clusterMorphemes = allMorphemes.filter(
+                (m) => m.WordNumber === candidate.wordNumber && 
+                       !['HTd', 'Td', 'HR', 'Hd', 'HC', 'To', 'HTo'].includes(m.OriginalMorphemeGrammarCode || '') &&
+                       m.OriginalMorphemeGrammarFunction !== 'Particle' &&
+                       m.OriginalMorphemeGrammarFunction !== 'Conjunction'
+            );
+
+            // Special case for articles: if the candidate IS an article (Strongs H9009),
+            // allow it if the cluster contains ANY noun (not necessarily matching Strongs)
+            const isArticle = candidate.strongsBase === '9009';
+            if (isArticle && clusterMorphemes.length > 0) {
+                return candidate;
+            }
+
+            // General case: check if any morpheme in this cluster matches our Strongs base
+            const hasMatchingMorpheme = clusterMorphemes.some((morpheme) => {
+                const parsedStrongs = parseStrongsId(morpheme.OriginalRootStrongsID);
+                return parsedStrongs?.base === rowStrongsBase;
+            });
+
+            if (hasMatchingMorpheme) {
+                return candidate;
+            }
+        }
+
+        // No candidate has a matching morpheme in its cluster—return undefined
+        return undefined;
+    }
+
+    // Fallback: return first candidate (for cases without Strongs base)
+    return candidates[0];
+}
+
 
 function isEnglishWordInfo(value: unknown): value is EnglishWordInfo {
     return Boolean(value && typeof value === 'object' && 'EnglishWord' in value);
