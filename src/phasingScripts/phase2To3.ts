@@ -290,7 +290,7 @@ function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
 
 function renderSnippetRow(snippet: Snippet): string {
   const snippetLabel = getSnippetLabel(snippet);
-  const snippetId = `snippet-${toSafeDomId(snippet.SnippetId || snippetLabel)}`;
+  const snippetId = toSafeDomId(snippetLabel);
 
   return [
     `<article class="snippet-row" id="${snippetId}">`,
