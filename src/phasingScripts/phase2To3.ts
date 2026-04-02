@@ -147,11 +147,33 @@ for (const chapterFilePath of chapterFilePaths) {
 const bibleNavDataJson = buildBibleNavDataJson(bookChapterCounts, bookUrlPaths);
 
 let renderedChapters = 0;
-for (const { chapter, bookDirName, chapterNumber } of chapterPayloads) {
+for (let i = 0; i < chapterPayloads.length; i++) {
+  const { chapter, bookDirName, chapterNumber } = chapterPayloads[i];
+  const prevPayload = i > 0 ? chapterPayloads[i - 1] : undefined;
+  const nextPayload = i < chapterPayloads.length - 1 ? chapterPayloads[i + 1] : undefined;
+
+  const prevInfo: AdjacentChapterInfo | undefined =
+    prevPayload && prevPayload.chapter.SnippetsAndExplanations.length > 0
+      ? {
+          label: `${prevPayload.chapter.DocumentOrBook} ${prevPayload.chapterNumber}`,
+          url: `/-/${prevPayload.bookDirName}/${prevPayload.chapterNumber}`,
+          snippet: prevPayload.chapter.SnippetsAndExplanations[prevPayload.chapter.SnippetsAndExplanations.length - 1]
+        }
+      : undefined;
+
+  const nextInfo: AdjacentChapterInfo | undefined =
+    nextPayload && nextPayload.chapter.SnippetsAndExplanations.length > 0
+      ? {
+          label: `${nextPayload.chapter.DocumentOrBook} ${nextPayload.chapterNumber}`,
+          url: `/-/${nextPayload.bookDirName}/${nextPayload.chapterNumber}`,
+          snippet: nextPayload.chapter.SnippetsAndExplanations[0]
+        }
+      : undefined;
+
   const outputDir = path.join(baseDistDir, bookDirName);
   await fs.promises.mkdir(outputDir, { recursive: true });
   const outputPath = path.join(outputDir, `${chapterNumber}.html`);
-  await fs.promises.writeFile(outputPath, renderChapterPage(chapter, bibleNavDataJson), { encoding: 'utf8' });
+  await fs.promises.writeFile(outputPath, renderChapterPage(chapter, bibleNavDataJson, prevInfo, nextInfo), { encoding: 'utf8' });
   renderedChapters += 1;
 }
 
@@ -251,18 +273,37 @@ function resolveChapterPayload(rawPayload: unknown): Chapter | null {
   };
 }
 
+interface AdjacentChapterInfo {
+  label: string;
+  url: string;
+  snippet: Snippet;
+}
+
 // Sections: each inner array is one visual group (no visible label). Defined here at build time.
-function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
+function renderChapterPage(
+  chapter: Chapter,
+  bibleNavDataJson: string,
+  prevInfo?: AdjacentChapterInfo,
+  nextInfo?: AdjacentChapterInfo
+): string {
   const title = `${chapter.DocumentOrBook} ${chapter.ChapterNumber}`;
   const description = `First-pass literal and traditional view for ${title}`;
   const baseHtml = makeHtmlBase(title, description);
 
   const snippetRows = chapter.SnippetsAndExplanations.map((snippet) => renderSnippetRow(snippet)).join('\n');
 
+  // Split headToBody so we can insert the top chapter nav before the h1.
+  // makeHtmlBase always ends headToBody with the <h1> line.
+  const headToBodyLines = baseHtml.headToBody;
+  const h1Line = headToBodyLines[headToBodyLines.length - 1];
+  const headToBodyBeforeH1 = headToBodyLines.slice(0, -1);
+
   return [
     ...baseHtml.topOfHead,
     ...getChapterPageCss(),
-    ...baseHtml.headToBody,
+    ...headToBodyBeforeH1,
+    prevInfo ? renderChapterNavHeader(prevInfo, nextInfo) : '',
+    h1Line,
     `<script id="bible-nav-data" type="application/json">${bibleNavDataJson}</script>`,
     `<main class="chapter-page" data-book="${escapeHtml(chapter.DocOrBookAbbreviation)}" data-chapter="${chapter.ChapterNumber}">`,
     `<div class="snippet-grid-header" role="group" aria-label="Column visibility">`,
@@ -280,6 +321,7 @@ function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
     snippetRows,
     `</section>`,
     USE_SHARED_WORD_POPOVER ? renderSharedWordPopover() : '',
+    nextInfo ? renderChapterNavFooter(nextInfo) : '',
     `</main>`,
     renderColumnVisibilityScript(),
     USE_SHARED_WORD_POPOVER ? renderSharedWordPopoverScript() : '',
@@ -288,25 +330,59 @@ function renderChapterPage(chapter: Chapter, bibleNavDataJson: string): string {
   ].join('\n');
 }
 
-function renderSnippetRow(snippet: Snippet): string {
+function renderChapterNavHeader(prevInfo: AdjacentChapterInfo, nextInfo?: AdjacentChapterInfo): string {
+  const prevHref = escapeHtmlAttribute(prevInfo.url);
+  const prevLabel = escapeHtml(prevInfo.label);
+  const nextArrow = nextInfo
+    ? `<a href="${escapeHtmlAttribute(nextInfo.url)}" class="chapter-nav-next-arrow" aria-label="Next chapter: ${escapeHtml(nextInfo.label)}">&#8594;</a>`
+    : '';
+  return [
+    `<div class="chapter-nav-header">`,
+    `<div class="chapter-nav-header-row">`,
+    `<a href="${prevHref}" class="chapter-nav-prev-link">&#8592; ${prevLabel}</a>`,
+    nextArrow,
+    `</div>`,
+    `<div class="chapter-nav-prev-preview snippet-grid">`,
+    renderSnippetRow(prevInfo.snippet, 'prev-'),
+    `</div>`,
+    `</div>`
+  ].join('\n');
+}
+
+function renderChapterNavFooter(nextInfo: AdjacentChapterInfo): string {
+  const nextHref = escapeHtmlAttribute(nextInfo.url);
+  const nextLabel = escapeHtml(nextInfo.label);
+  return [
+    `<div class="chapter-nav-footer">`,
+    `<div class="chapter-nav-footer-row">`,
+    `<a href="${nextHref}" class="chapter-nav-next-link">${nextLabel} &#8594;</a>`,
+    `</div>`,
+    `<div class="chapter-nav-next-preview snippet-grid">`,
+    renderSnippetRow(nextInfo.snippet, 'next-'),
+    `</div>`,
+    `</div>`
+  ].join('\n');
+}
+
+function renderSnippetRow(snippet: Snippet, idPrefix = ''): string {
   const snippetLabel = getSnippetLabel(snippet);
-  const snippetId = toSafeDomId(snippetLabel);
+  const snippetId = toSafeDomId(`${idPrefix}${snippetLabel}`);
 
   return [
     `<article class="snippet-row" id="${snippetId}">`,
     `<div class="snippet-pane literal-pane" aria-label="Literal">`,
-    renderLiteralPane(snippet),
+    renderLiteralPane(snippet, idPrefix),
     `</div>`,
     `<div class="snippet-pane traditional-pane" aria-label="Traditional">`,
-    renderTraditionalPane(snippet),
+    renderTraditionalPane(snippet, idPrefix),
     `</div>`,
     `</article>`
   ].join('\n');
 }
 
-function renderLiteralPane(snippet: Snippet): string {
+function renderLiteralPane(snippet: Snippet, idPrefix = ''): string {
   const snippetLabel = getSnippetLabel(snippet);
-  const snippetKey = snippet.SnippetId || snippetLabel;
+  const snippetKey = `${idPrefix}${snippet.SnippetId || snippetLabel}`;
   const renderParts: RenderableTokenPart[] = [];
   let tokenOrdinal = 0;
 
@@ -350,9 +426,9 @@ function renderLiteralPane(snippet: Snippet): string {
   return `<div class="pane-text word-line">${verseNumBtn}${renderTokenParts(renderParts)}</div>`;
 }
 
-function renderTraditionalPane(snippet: Snippet): string {
+function renderTraditionalPane(snippet: Snippet, idPrefix = ''): string {
   const snippetLabel = getSnippetLabel(snippet);
-  const snippetKey = snippet.SnippetId || snippetLabel;
+  const snippetKey = `${idPrefix}${snippet.SnippetId || snippetLabel}`;
   const paneLines: string[] = [];
   const currentParagraphTokens: TraditionalParagraphToken[] = [];
   let traditionalWordOrdinal = 0;
@@ -1250,6 +1326,104 @@ function getChapterPageCss(): string[] {
     '.traditional-crossref a {',
     '  color: var(--link);',
     '  text-decoration: underline;',
+    '}',
+    '/* Chapter-to-chapter navigation */',
+    'html {',
+    '  scroll-snap-type: y proximity;',
+    '}',
+    'h1 {',
+    '  scroll-initial-target: nearest;',
+    '  scroll-snap-align: start;',
+    '  scroll-margin-top: 2em;',
+    '}',
+    '.chapter-nav-header {',
+    '  margin-bottom: 0.5rem;',
+    '  scroll-snap-align: start;',
+    '  scroll-margin-top: 4em;',
+    '  margin-top: 1em;',
+    '}',
+    '.chapter-nav-header-row {',
+    '  display: flex;',
+    '  gap: 0.5rem;',
+    '  margin-bottom: 0.65rem;',
+    '}',
+    '.chapter-nav-prev-link {',
+    '  flex: 1 1 0;',
+    '  min-width: 0;',
+    '  display: inline-flex;',
+    '  align-items: center;',
+    '  padding: 0.45rem 0.75rem;',
+    '  border: 1px solid var(--pane-border);',
+    '  border-radius: 0.45rem;',
+    '  background: var(--pane-bg);',
+    '  color: var(--link);',
+    '  text-decoration: none;',
+    '  font-weight: 600;',
+    '  overflow: hidden;',
+    '  text-overflow: ellipsis;',
+    '  white-space: nowrap;',
+    '}',
+    '.chapter-nav-prev-link:hover {',
+    '  background: var(--hover-bg);',
+    '  color: var(--hover-fg);',
+    '}',
+    '.chapter-nav-next-arrow {',
+    '  display: inline-flex;',
+    '  align-items: center;',
+    '  justify-content: center;',
+    '  padding: 0.45rem 0.7rem;',
+    '  border: 1px solid var(--pane-border);',
+    '  border-radius: 0.45rem;',
+    '  background: var(--pane-bg);',
+    '  color: var(--link);',
+    '  text-decoration: none;',
+    '  font-weight: 600;',
+    '  flex-shrink: 0;',
+    '}',
+    '.chapter-nav-next-arrow:hover {',
+    '  background: var(--hover-bg);',
+    '  color: var(--hover-fg);',
+    '}',
+    '.chapter-nav-prev-preview {',
+    '  opacity: 0.75;',
+    '}',
+    '.chapter-nav-footer {',
+    '  margin-top: 2.5rem;',
+    '}',
+    '.chapter-nav-footer-row {',
+    '  display: flex;',
+    '  justify-content: center;',
+    '  margin-bottom: 1rem;',
+    '}',
+    '.chapter-nav-next-link {',
+    '  display: inline-flex;',
+    '  align-items: center;',
+    '  padding: 0.55rem 1.75rem;',
+    '  border: 1px solid var(--pane-border);',
+    '  border-radius: 0.45rem;',
+    '  background: var(--pane-bg);',
+    '  color: var(--link);',
+    '  text-decoration: none;',
+    '  font-weight: 600;',
+    '}',
+    '.chapter-nav-next-link:hover {',
+    '  background: var(--hover-bg);',
+    '  color: var(--hover-fg);',
+    '}',
+    '.chapter-nav-next-preview {',
+    '  position: relative;',
+    '  max-height: 11rem;',
+    '  overflow: hidden;',
+    '}',
+    '.chapter-nav-next-preview::after {',
+    '  content: "";',
+    '  position: absolute;',
+    '  bottom: 0;',
+    '  left: 0;',
+    '  right: 0;',
+    '  height: 70%;',
+    '  background: linear-gradient(to bottom, transparent, var(--page-bg));',
+    '  pointer-events: none;',
     '}'
   ];
 }
