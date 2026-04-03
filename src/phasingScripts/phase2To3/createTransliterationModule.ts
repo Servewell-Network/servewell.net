@@ -103,10 +103,13 @@ function ensureStyle(): void {
 }
 
 export function createTransliterationModule(): AppModule {
+  const isChapterPage = !!document.querySelector('main.chapter-page');
+
   return {
     id: 'transliteration',
     label: 'Show transliteration beneath each word',
     active: false,
+    includeInMenu: isChapterPage,
     activate() {
       this.active = true;
       ensureStyle();
