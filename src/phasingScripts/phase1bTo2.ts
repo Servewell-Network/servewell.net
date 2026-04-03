@@ -17,6 +17,8 @@ const bsbSupplementAutoPath = path.join(__dirname, './phase1To2/bsb_supplement_a
 const pathToPhase2 = path.join(__dirname, '../json-Phase2/');
 const alignmentReportPath = path.join(pathToPhase2, 'traditional-word-alignment-report.json');
 const ALIGNMENT_SAMPLE_LIMIT = 50000;
+const ROW_LEADING_CONJUNCTION_SAMPLE_LIMIT = 2000;
+const rowLeadingConjunctionReportPath = path.join(pathToPhase2, 'row-leading-conjunction-candidate-report.json');
 const NO_MORPHEME_ID = 'None';
 const BSB_VERSE_NUMBER_MARKER_PATTERN = /<span class=\|reftext\|><a href=\|[^|]*\|><b>(\d+)<\/b><\/a><\/span>/g;
 
@@ -87,6 +89,9 @@ interface RowAlignmentContext {
     rowLanguage: SupportedLanguage;
     rowStrongsId?: string;
     rowStrongsBase?: string;
+    rowParsing1: string;
+    rowParsing2: string;
+    rowHasConjunctiveWaw: boolean;
     rowSourceToken: string;
     rowSourceNormalizedPhrase: string;
     rawSort?: number;
@@ -111,6 +116,19 @@ interface AlignmentIssueSample {
     rowSourceToken: string;
     rowStrongsId?: string;
     candidateMorphemeIds: string[];
+    reason: string;
+}
+
+interface AlignmentSuccessSample {
+    verseId: string;
+    snippetId: string;
+    language: SupportedLanguage;
+    englishWord: string;
+    rowSourceToken: string;
+    rowStrongsId?: string;
+    rowParsing1: string;
+    rowParsing2: string;
+    originalMorphemeId: string;
     reason: string;
 }
 
@@ -143,6 +161,8 @@ let bsbSupplementMap: BsbSupplementMap = {};
 const unusedBsbSupplementKeys = new Set<string>();
 const alignmentReasonCounts: Record<string, number> = {};
 const alignmentIssueSamples: AlignmentIssueSample[] = [];
+const alignmentSuccessReasonCounts: Record<string, number> = {};
+const alignmentSuccessSamples: AlignmentSuccessSample[] = [];
 
 async function processBSBFile(fileName: string) {
     await loadBsbSupplement();
@@ -269,6 +289,7 @@ async function processBSBFile(fileName: string) {
 
     await writeChapter(currentChapterData, currentChapterPath);
     await writeAlignmentReport();
+    await writeRowLeadingConjunctionReport();
     reportUnusedBsbSupplementKeys();
     console.info('Finished processing BSB file');
 }
@@ -394,6 +415,19 @@ async function writeAlignmentReport() {
     });
 }
 
+async function writeRowLeadingConjunctionReport() {
+    const payload = {
+        generatedAt: new Date().toISOString(),
+        sampleLimit: ROW_LEADING_CONJUNCTION_SAMPLE_LIMIT,
+        reasonCounts: alignmentSuccessReasonCounts,
+        sampledAssignments: alignmentSuccessSamples
+    };
+
+    await fs.promises.writeFile(rowLeadingConjunctionReportPath, JSON.stringify(payload, null, 2)).catch((err) => {
+        console.error(`Error writing row-leading conjunction report at ${rowLeadingConjunctionReportPath}:`, err);
+    });
+}
+
 function normalizeLanguage(rawLanguage: string, fallback: SupportedLanguage = 'Hebrew'): SupportedLanguage {
     const normalized = rawLanguage.trim();
     if (normalized === 'Greek' || normalized === 'Aramaic' || normalized === 'Hebrew') {
@@ -486,6 +520,9 @@ function appendAlignedWords(
             if (resolution.resolvedMorphemeIds && resolution.resolvedMorphemeIds.length > 1) {
                 entry.ResolvedOriginalMorphemeIds = resolution.resolvedMorphemeIds;
             }
+            if (resolution.issueReason === 'row-leading-conjunction-candidate') {
+                recordAlignmentSuccess(fields, targetSnippet.SnippetId, word, context, resolution.issueReason, resolution.originalMorphemeId);
+            }
             if (!isNonLexical) {
                 uniquelyAlignedWords += 1;
             }
@@ -513,6 +550,8 @@ function buildRowAlignmentContext(fields: string[], rowLanguage: SupportedLangua
     const rowMorphemes = getRowMorphemeCandidates(fields, rowLanguage, snippet, sortValues.normalizedSort);
     const rowStrongsId = formatRowStrongsId(fields, rowLanguage);
     const parsedRowStrongs = parseStrongsId(rowStrongsId);
+    const rowParsing1 = fields[BsbWord.Parsing1] || '';
+    const rowParsing2 = fields[BsbWord.Parsing2] || '';
     const rowSourceToken = fields[BsbWord.BsbVersion].trim();
     const candidates = mapMorphemeCandidates(rowMorphemes);
     const snippetCandidates = mapMorphemeCandidates(snippet.OriginalMorphemes);
@@ -521,6 +560,9 @@ function buildRowAlignmentContext(fields: string[], rowLanguage: SupportedLangua
         rowLanguage,
         rowStrongsId: parsedRowStrongs?.canonical || rowStrongsId,
         rowStrongsBase: parsedRowStrongs?.base,
+        rowParsing1,
+        rowParsing2,
+        rowHasConjunctiveWaw: hasConjunctiveWawSignal(rowParsing1, rowParsing2),
         rowSourceToken,
         rowSourceNormalizedPhrase: normalizePhraseForAlignment(rowSourceToken),
         rawSort: sortValues.rawSort,
@@ -543,6 +585,20 @@ function resolveWordAlignment(
             originalMorphemeId: NO_MORPHEME_ID,
             issueReason: 'supplied-word-implied'
         };
+    }
+
+    // Generic conjunction preference for Hebrew/Aramaic cluster rows: when a
+    // conjunction morpheme exists in row candidates and the current token is an
+    // early alignable token in a multi-token English row, prefer the conjunction
+    // candidate before Strongs-heavy fallback logic.
+    if (shouldPreferRowConjunctionCandidate(context, normalizedWord, rowWordIndex, normalizedRowWords)) {
+        const conjunctionCandidate = selectConjunctiveWawCandidate(context.candidates);
+        if (conjunctionCandidate) {
+            return {
+                originalMorphemeId: conjunctionCandidate.morphemeId,
+                issueReason: 'row-leading-conjunction-candidate'
+            };
+        }
     }
 
     if (isEnglishArticle(normalizedWord)) {
@@ -1651,6 +1707,137 @@ function isEnglishArticle(normalizedWord: string): boolean {
     return ENGLISH_ARTICLES.has(normalizedWord);
 }
 
+function isFirstAlignableTokenIndex(rowWordIndex?: number, normalizedRowWords: string[] = []): boolean {
+    if (rowWordIndex === undefined || rowWordIndex < 0 || rowWordIndex >= normalizedRowWords.length) {
+        return false;
+    }
+
+    for (let idx = 0; idx < normalizedRowWords.length; idx += 1) {
+        const token = normalizedRowWords[idx];
+        if (!token) {
+            continue;
+        }
+
+        return idx === rowWordIndex;
+    }
+
+    return false;
+}
+
+function countAlignableTokens(normalizedRowWords: string[] = []): number {
+    let count = 0;
+    for (const token of normalizedRowWords) {
+        if (token) {
+            count += 1;
+        }
+    }
+    return count;
+}
+
+function shouldPreferRowConjunctionCandidate(
+    context: RowAlignmentContext,
+    normalizedWord: string,
+    rowWordIndex?: number,
+    normalizedRowWords: string[] = []
+): boolean {
+    if (!normalizedWord) {
+        return false;
+    }
+
+    if (context.rowLanguage !== 'Hebrew' && context.rowLanguage !== 'Aramaic') {
+        return false;
+    }
+
+    if (!context.rowHasConjunctiveWaw) {
+        return false;
+    }
+
+    if (!isFirstAlignableTokenIndex(rowWordIndex, normalizedRowWords)) {
+        return false;
+    }
+
+    if (countAlignableTokens(normalizedRowWords) < 2) {
+        return false;
+    }
+
+    const conjunctionCandidates = context.candidates.filter(isConjunctionCandidate);
+    const nonConjunctionCandidates = context.candidates.filter((candidate) => !isConjunctionCandidate(candidate));
+    if (conjunctionCandidates.length === 0 || nonConjunctionCandidates.length === 0) {
+        return false;
+    }
+
+    // Strong signal from BSB parsing: when row parsing explicitly marks
+    // conjunctive waw, trust that signal for the row-leading alignable token.
+    if (context.rowHasConjunctiveWaw) {
+        return true;
+    }
+
+    // If the leading token already has a lexical tie to non-conjunction
+    // candidates, keep regular resolution to avoid over-assigning conjunctions.
+    const hasNonConjunctionLexicalSignal = nonConjunctionCandidates.some((candidate) =>
+        candidateHasLexicalSignal(candidate, normalizedWord)
+    );
+    return !hasNonConjunctionLexicalSignal;
+}
+
+function hasConjunctiveWawSignal(parsing1: string, parsing2: string): boolean {
+    const firstBlock = (parsing1 || '').toLowerCase().split('|')[0]?.trim() || '';
+    const secondBlock = (parsing2 || '').toLowerCase().split('|')[0]?.trim() || '';
+    const combined = `${parsing1} ${parsing2}`.toLowerCase();
+
+    if (/\bconj\s*-\s*w\b/.test(firstBlock) || /\bconj\s*-\s*w\b/.test(secondBlock)) {
+        return true;
+    }
+
+    if (/\bconjunctive\s+waw\b/.test(firstBlock) || /\bconjunctive\s+waw\b/.test(secondBlock)) {
+        return true;
+    }
+
+    if (/\bconjunctive\s+waw\b/.test(combined)) {
+        return true;
+    }
+
+    return /\bconj\s*-\s*w\b/.test(combined);
+}
+
+function isConjunctionCandidate(candidate: MorphemeAlignmentCandidate): boolean {
+    const functionName = (candidate.grammarFunction || '').toLowerCase();
+    const label = (candidate.grammarLabel || '').toLowerCase();
+    const grammarCode = (candidate.grammarCode || '').toLowerCase();
+    const strongsBase = (candidate.strongsBase || '').toUpperCase();
+
+    if (functionName.includes('conjunction') || label.includes('conjunction')) {
+        return true;
+    }
+
+    // STEP grammar codes often include HC for conjunctions.
+    if (/(^|[^a-z])hc([^a-z]|$)/.test(grammarCode)) {
+        return true;
+    }
+
+    // Some datasets encode conjunction morphemes with H9002.
+    return strongsBase === 'H9002';
+}
+
+function selectConjunctiveWawCandidate(candidates: MorphemeAlignmentCandidate[]): MorphemeAlignmentCandidate | undefined {
+    const conjunctionCandidates = candidates
+        .filter(isConjunctionCandidate)
+        .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
+
+    if (conjunctionCandidates.length === 0) {
+        return undefined;
+    }
+
+    if (conjunctionCandidates.length === 1) {
+        return conjunctionCandidates[0];
+    }
+
+    const unclaimedCandidates = getUnclaimedStrongCandidates(conjunctionCandidates)
+        .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
+
+    return unclaimedCandidates[0] || conjunctionCandidates[0];
+}
+
 function isArticleCandidate(candidate: MorphemeAlignmentCandidate): boolean {
     const functionName = (candidate.grammarFunction || '').toLowerCase();
     const label = (candidate.grammarLabel || '').toLowerCase();
@@ -1749,6 +1936,33 @@ function recordAlignmentIssue(
         rowSourceToken: fields[BsbWord.BsbVersion].trim(),
         rowStrongsId: context.rowStrongsId,
         candidateMorphemeIds,
+        reason
+    });
+}
+
+function recordAlignmentSuccess(
+    fields: string[],
+    snippetId: string | undefined,
+    englishWord: string,
+    context: RowAlignmentContext,
+    reason: string,
+    originalMorphemeId: string
+) {
+    alignmentSuccessReasonCounts[reason] = (alignmentSuccessReasonCounts[reason] || 0) + 1;
+    if (alignmentSuccessSamples.length >= ROW_LEADING_CONJUNCTION_SAMPLE_LIMIT) {
+        return;
+    }
+
+    alignmentSuccessSamples.push({
+        verseId: currentVerseId,
+        snippetId: snippetId || '',
+        language: context.rowLanguage,
+        englishWord,
+        rowSourceToken: fields[BsbWord.BsbVersion].trim(),
+        rowStrongsId: context.rowStrongsId,
+        rowParsing1: context.rowParsing1,
+        rowParsing2: context.rowParsing2,
+        originalMorphemeId,
         reason
     });
 }
