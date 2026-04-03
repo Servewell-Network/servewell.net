@@ -134,13 +134,26 @@ a {
 .chapter-page.mode-traditional-only .snippet-row {
   grid-template-columns: minmax(0, 1fr);
 }
+.chapter-nav-header.mode-literal-only .snippet-row,
+.chapter-nav-header.mode-traditional-only .snippet-row {
+  grid-template-columns: minmax(0, 1fr);
+}
 .chapter-page.mode-literal-only .traditional-pane {
+  display: none;
+}
+.chapter-nav-header.mode-literal-only .traditional-pane {
   display: none;
 }
 .chapter-page.mode-traditional-only .literal-pane {
   display: none;
 }
+.chapter-nav-header.mode-traditional-only .literal-pane {
+  display: none;
+}
 .chapter-page.mode-none .snippet-grid {
+  display: none;
+}
+.chapter-nav-header.mode-none .snippet-grid {
   display: none;
 }
 .verse-num {
@@ -702,6 +715,7 @@ h1 {
   const literalToggle = page.querySelector('input[data-column-toggle="literal"]');
   const traditionalToggle = page.querySelector('input[data-column-toggle="traditional"]');
   const emptyMessage = page.querySelector("[data-column-empty-message]");
+  const prevHeader = document.querySelector(".chapter-nav-header");
   if (!(literalToggle instanceof HTMLInputElement) || !(traditionalToggle instanceof HTMLInputElement) || !(emptyMessage instanceof HTMLElement)) return;
 
   function readState() {
@@ -737,6 +751,12 @@ h1 {
     page.classList.toggle("mode-literal-only", showLiteral && !showTraditional);
     page.classList.toggle("mode-traditional-only", !showLiteral && showTraditional);
     page.classList.toggle("mode-none", !showLiteral && !showTraditional);
+    if (prevHeader instanceof HTMLElement) {
+      prevHeader.classList.toggle("mode-both", showLiteral && showTraditional);
+      prevHeader.classList.toggle("mode-literal-only", showLiteral && !showTraditional);
+      prevHeader.classList.toggle("mode-traditional-only", !showLiteral && showTraditional);
+      prevHeader.classList.toggle("mode-none", !showLiteral && !showTraditional);
+    }
     emptyMessage.hidden = showLiteral || showTraditional;
   }
 
