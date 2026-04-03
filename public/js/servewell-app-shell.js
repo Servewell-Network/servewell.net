@@ -106,6 +106,7 @@ body.with-app-shell {
   font-weight: 700;
   letter-spacing: 0.01em;
   text-decoration: none;
+  margin-right: 1em;
 }
 
 #app-shell-root .app-topbar-home:hover {
@@ -629,6 +630,9 @@ body.app-panel-open #app-shell-root .app-overlay {
   }
   var STORAGE_KEY_BOOKMARKS = "servewell-nav-bookmarks";
   var STORAGE_KEY_ALPHABETICAL = "servewell-nav-alphabetical";
+  function isChapterRoute(pathname) {
+    return /^\/-\/[^/]+\/(\d+)(?:\.html)?\/?$/.test(pathname);
+  }
   function qs3(selector) {
     return document.querySelector(selector);
   }
@@ -760,7 +764,12 @@ body.app-panel-open #app-shell-root .app-overlay {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.85rem;
+  color: var(--fg);
   cursor: pointer;
+}
+
+.nav-check-row input {
+  accent-color: #3b82f6;
 }
 
 .nav-goto-btn {
@@ -873,6 +882,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       });
     }
     function getCurrentRef() {
+      if (typeof window !== "undefined" && !isChapterRoute(window.location.pathname)) return null;
       const main = qs3("main.chapter-page");
       if (!main) return null;
       const book = main.dataset.book ?? "";
@@ -974,7 +984,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       if (!container) return;
       const cur = getCurrentRef();
       if (!cur) {
-        container.innerHTML = "";
+        container.innerHTML = `<button type="button" class="nav-ref-btn" popovertarget="bible-nav-popover" data-nav-slot="current">Bible</button>`;
         return;
       }
       const slots = [
@@ -1012,9 +1022,10 @@ body.app-panel-open #app-shell-root .app-overlay {
       ensureNavDataLoaded();
       const isCurrentSlot = activeSlot === "current";
       const bmIdx = typeof activeSlot === "number" ? activeSlot : -1;
-      const slotRef = isCurrentSlot ? getCurrentRef() : bookmarks[bmIdx] ?? null;
+      const currentRef = getCurrentRef();
+      const slotRef = isCurrentSlot ? currentRef : bookmarks[bmIdx] ?? null;
       let topControls = "";
-      if (isCurrentSlot) {
+      if (isCurrentSlot && currentRef) {
         const checked = isCurrentBookmarked() ? " checked" : "";
         topControls = `<label class="nav-check-row"><input type="checkbox" id="nav-bookmark-chk"${checked}><span>Bookmark This Reference</span></label>`;
       } else if (slotRef) {
@@ -1843,8 +1854,8 @@ ${bodyText}` : prefix : bodyText;
       modules.activate("demo");
       shell.appendDemoLine("Framework booted");
     }
+    modules.activate("bible-nav");
     if (document.querySelector("main.chapter-page")) {
-      modules.activate("bible-nav");
       modules.activate("selection-control");
     }
   }

@@ -57,6 +57,10 @@ const STORAGE_KEY_ALPHABETICAL = 'servewell-nav-alphabetical';
 
 type NavRef = { book: string; chapter: number };
 
+function isChapterRoute(pathname: string): boolean {
+  return /^\/-\/[^/]+\/(\d+)(?:\.html)?\/?$/.test(pathname);
+}
+
 function qs<T extends HTMLElement>(selector: string): T | null {
   return document.querySelector(selector) as T | null;
 }
@@ -192,7 +196,12 @@ const CSS = `
   align-items: center;
   gap: 0.4rem;
   font-size: 0.85rem;
+  color: var(--fg);
   cursor: pointer;
+}
+
+.nav-check-row input {
+  accent-color: #3b82f6;
 }
 
 .nav-goto-btn {
@@ -320,6 +329,7 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
   // ---- state helpers --------------------------------------------------------
 
   function getCurrentRef(): NavRef | null {
+    if (typeof window !== 'undefined' && !isChapterRoute(window.location.pathname)) return null;
     const main = qs<HTMLElement>('main.chapter-page');
     if (!main) return null;
     const book = main.dataset.book ?? '';
@@ -427,7 +437,10 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
     if (!container) return;
 
     const cur = getCurrentRef();
-    if (!cur) { container.innerHTML = ''; return; }
+    if (!cur) {
+      container.innerHTML = `<button type="button" class="nav-ref-btn" popovertarget="bible-nav-popover" data-nav-slot="current">Bible</button>`;
+      return;
+    }
 
     // slots: current ref first, then bookmarks that are not the current ref
     const slots: Array<{ ref: NavRef; isCurrent: boolean; bmIdx: number }> = [
@@ -479,13 +492,14 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
     ensureNavDataLoaded();
     const isCurrentSlot = activeSlot === 'current';
     const bmIdx = typeof activeSlot === 'number' ? activeSlot : -1;
+    const currentRef = getCurrentRef();
     const slotRef: NavRef | null = isCurrentSlot
-      ? getCurrentRef()
+      ? currentRef
       : (bookmarks[bmIdx] ?? null);
 
     // top controls
     let topControls = '';
-    if (isCurrentSlot) {
+    if (isCurrentSlot && currentRef) {
       const checked = isCurrentBookmarked() ? ' checked' : '';
       topControls = `<label class="nav-check-row"><input type="checkbox" id="nav-bookmark-chk"${checked}><span>Bookmark This Reference</span></label>`;
     } else if (slotRef) {

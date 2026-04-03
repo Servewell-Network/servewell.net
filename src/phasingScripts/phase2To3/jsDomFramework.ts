@@ -81,8 +81,8 @@ export function jsDomFramework() {
     modules.activate('demo');
     shell.appendDemoLine('Framework booted');
   }
+  modules.activate('bible-nav');
   if (document.querySelector('main.chapter-page')) {
-    modules.activate('bible-nav');
     modules.activate('selection-control');
   }
 }
