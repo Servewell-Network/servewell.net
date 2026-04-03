@@ -32,6 +32,7 @@ const ENGLISH_PREPOSITIONS = new Set([
 const ENGLISH_CONJUNCTIONS = new Set(['and', 'but', 'for', 'if', 'nor', 'or', 'so', 'yet']);
 const ROW_LEADING_PREFIX_STRONGS_BASES = new Set(['H9001', 'H9003', 'H9004', 'H9005', 'H9008']);
 const ENGLISH_RELATIVE_WORDS = new Set(['that', 'which', 'who', 'whom', 'whose', 'where', 'when']);
+const BLOCKED_TRADITIONAL_STRONGS_BASES = new Set(['H853']);
 
 enum BsbWord {
     HebSort = 0,
@@ -514,9 +515,10 @@ function appendAlignedWords(
             totalTraditionalWords += 1;
         }
 
-        const resolution = supplementedMorphemeIds
+        const rawResolution = supplementedMorphemeIds
             ? buildSupplementResolution(supplementedMorphemeIds)
             : resolveWordAlignment(word, context, wordIndex, normalizedRowWords);
+        const resolution = sanitizeTraditionalResolution(rawResolution, targetSnippet);
         if (resolution.originalMorphemeId) {
             entry.OriginalMorphemeId = resolution.originalMorphemeId;
             if (resolution.resolvedMorphemeIds && resolution.resolvedMorphemeIds.length > 1) {
@@ -555,8 +557,10 @@ function buildRowAlignmentContext(fields: string[], rowLanguage: SupportedLangua
     const rowParsing1 = fields[BsbWord.Parsing1] || '';
     const rowParsing2 = fields[BsbWord.Parsing2] || '';
     const rowSourceToken = fields[BsbWord.BsbVersion].trim();
-    const candidates = mapMorphemeCandidates(rowMorphemes);
-    const snippetCandidates = mapMorphemeCandidates(snippet.OriginalMorphemes);
+    const candidates = mapMorphemeCandidates(rowMorphemes)
+        .filter((candidate) => !isBlockedTraditionalCandidate(candidate));
+    const snippetCandidates = mapMorphemeCandidates(snippet.OriginalMorphemes)
+        .filter((candidate) => !isBlockedTraditionalCandidate(candidate));
 
     return {
         rowLanguage,
@@ -572,6 +576,82 @@ function buildRowAlignmentContext(fields: string[], rowLanguage: SupportedLangua
         candidates,
         snippetCandidates
     };
+}
+
+function sanitizeTraditionalResolution(
+    resolution: WordAlignmentResolution,
+    snippet: Snippet
+): WordAlignmentResolution {
+    const candidatePool = [
+        ...(resolution.resolvedMorphemeIds || []),
+        resolution.originalMorphemeId || ''
+    ].filter(Boolean);
+
+    const uniqueCandidates = uniqueStrings(candidatePool);
+    const allowedCandidates = uniqueCandidates.filter(
+        (morphemeId) => !isBlockedTraditionalMorphemeId(snippet, morphemeId)
+    );
+
+    if (allowedCandidates.length === 0) {
+        if (resolution.originalMorphemeId && resolution.originalMorphemeId !== NO_MORPHEME_ID) {
+            return {
+                ...resolution,
+                originalMorphemeId: NO_MORPHEME_ID,
+                resolvedMorphemeIds: undefined,
+                issueReason: resolution.issueReason || 'blocked-object-indicator-morpheme'
+            };
+        }
+
+        return {
+            ...resolution,
+            candidateMorphemeIds: (resolution.candidateMorphemeIds || []).filter(
+                (morphemeId) => !isBlockedTraditionalMorphemeId(snippet, morphemeId)
+            )
+        };
+    }
+
+    if (!resolution.originalMorphemeId || !isBlockedTraditionalMorphemeId(snippet, resolution.originalMorphemeId)) {
+        if (resolution.candidateMorphemeIds && resolution.candidateMorphemeIds.length > 0) {
+            return {
+                ...resolution,
+                candidateMorphemeIds: resolution.candidateMorphemeIds.filter(
+                    (morphemeId) => !isBlockedTraditionalMorphemeId(snippet, morphemeId)
+                )
+            };
+        }
+
+        return resolution;
+    }
+
+    return {
+        ...resolution,
+        originalMorphemeId: allowedCandidates[0],
+        resolvedMorphemeIds: allowedCandidates.length > 1 ? allowedCandidates : undefined
+    };
+}
+
+function isBlockedTraditionalMorphemeId(snippet: Snippet, morphemeId: string): boolean {
+    if (!morphemeId || morphemeId === NO_MORPHEME_ID) {
+        return false;
+    }
+
+    const morpheme = snippet.OriginalMorphemes.find((entry) => entry.MorphemeId === morphemeId);
+    if (!morpheme) {
+        return false;
+    }
+
+    const parsed = parseStrongsId(morpheme.OriginalRootStrongsID);
+    if (parsed && BLOCKED_TRADITIONAL_STRONGS_BASES.has(parsed.base.toUpperCase())) {
+        return true;
+    }
+
+    return (morpheme.OriginalMorphemeGrammar || '').toLowerCase().includes('object indicator');
+}
+
+function isBlockedTraditionalCandidate(candidate: MorphemeAlignmentCandidate): boolean {
+    return BLOCKED_TRADITIONAL_STRONGS_BASES.has((candidate.strongsBase || '').toUpperCase())
+        || (candidate.grammarLabel || '').toLowerCase().includes('object indicator')
+        || (candidate.grammarFunction || '').toLowerCase().includes('object indicator');
 }
 
 function resolveWordAlignment(
