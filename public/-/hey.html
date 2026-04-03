@@ -6,6 +6,18 @@
 		
 <title>hey</title>
 <meta name="description" content="This is a description of the hey page">
+<script>
+(function () {
+  try {
+    const savedTheme = localStorage.getItem('servewell-theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      document.documentElement.dataset.theme = savedTheme;
+    }
+  } catch (_error) {
+    // Ignore storage access failures (private mode, disabled storage).
+  }
+})();
+</script>
 <style>
 body {
    font-family: sans-serif;
