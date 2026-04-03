@@ -87,6 +87,22 @@ body.with-app-shell {
   color: var(--muted);
 }
 
+#app-shell-root .app-topbar-link {
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: var(--panel);
+  white-space: nowrap;
+}
+
+#app-shell-root .app-topbar-link:hover {
+  color: var(--fg);
+  background: var(--bg);
+}
+
 #app-shell-root .app-spacer {
   flex: 1;
 }
@@ -154,6 +170,26 @@ body.app-panel-open #app-shell-root .app-overlay {
   margin-bottom: 1.25rem;
 }
 
+#app-shell-root .app-sidepanel-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+#app-shell-root .app-sidepanel-link {
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--bar);
+}
+
+#app-shell-root .app-sidepanel-link:hover {
+  background: var(--bg);
+}
+
 #app-shell-root .app-sidepanel h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
@@ -192,7 +228,8 @@ body.app-panel-open #app-shell-root .app-overlay {
 
 @media (max-width: 640px) {
   #app-shell-root .app-topbar > .app-topbar-home,
-  #app-shell-root .app-topbar > .app-checkrow {
+  #app-shell-root .app-topbar > .app-checkrow,
+  #app-shell-root .app-topbar > .app-topbar-link {
     display: none;
   }
 }
@@ -223,6 +260,9 @@ body.app-panel-open #app-shell-root .app-overlay {
   <header class="app-topbar">
     <button type="button" data-action="menu-open" aria-label="Open menu">☰</button>
     <a class="app-topbar-home" href="/">Servewell.net</a>
+    <a class="app-topbar-link" href="/features">Features</a>
+    <a class="app-topbar-link" href="/whats-next">What's Next</a>
+    <a class="app-topbar-link" href="/about">About</a>
     <span class="app-spacer"></span>
   </header>
 
@@ -231,6 +271,12 @@ body.app-panel-open #app-shell-root .app-overlay {
       <a class="app-sidepanel-home" href="/">Servewell.net</a>
       <button type="button" data-action="menu-close">✕</button>
     </div>
+
+    <section class="app-sidepanel-links">
+      <a class="app-sidepanel-link" href="/features">Features</a>
+      <a class="app-sidepanel-link" href="/whats-next">What's Next</a>
+      <a class="app-sidepanel-link" href="/about">About</a>
+    </section>
 
     <section>
       <label class="app-checkrow">
