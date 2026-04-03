@@ -30,6 +30,8 @@ const ENGLISH_PREPOSITIONS = new Set([
     'until', 'unto', 'up', 'upon', 'with', 'within', 'without'
 ]);
 const ENGLISH_CONJUNCTIONS = new Set(['and', 'but', 'for', 'if', 'nor', 'or', 'so', 'yet']);
+const ROW_LEADING_PREFIX_STRONGS_BASES = new Set(['H9001', 'H9003', 'H9004', 'H9005', 'H9008']);
+const ENGLISH_RELATIVE_WORDS = new Set(['that', 'which', 'who', 'whom', 'whose', 'where', 'when']);
 
 enum BsbWord {
     HebSort = 0,
@@ -520,7 +522,7 @@ function appendAlignedWords(
             if (resolution.resolvedMorphemeIds && resolution.resolvedMorphemeIds.length > 1) {
                 entry.ResolvedOriginalMorphemeIds = resolution.resolvedMorphemeIds;
             }
-            if (resolution.issueReason === 'row-leading-conjunction-candidate') {
+            if (resolution.issueReason?.startsWith('row-leading-')) {
                 recordAlignmentSuccess(fields, targetSnippet.SnippetId, word, context, resolution.issueReason, resolution.originalMorphemeId);
             }
             if (!isNonLexical) {
@@ -597,6 +599,20 @@ function resolveWordAlignment(
             return {
                 originalMorphemeId: conjunctionCandidate.morphemeId,
                 issueReason: 'row-leading-conjunction-candidate'
+            };
+        }
+    }
+
+    if (shouldPreferRowLeadingPrefixCandidate(context, normalizedWord, rowWordIndex, normalizedRowWords)) {
+        const expectedPrefixBase = getExpectedRowLeadingPrefixBase(context.rowParsing1, context.rowParsing2);
+        const prefixCandidate = expectedPrefixBase
+            ? selectRowLeadingPrefixCandidate(context.candidates, expectedPrefixBase)
+            : undefined;
+        if (prefixCandidate) {
+            const reasonSuffix = (prefixCandidate.strongsBase || 'generic').toLowerCase();
+            return {
+                originalMorphemeId: prefixCandidate.morphemeId,
+                issueReason: `row-leading-prefix-candidate-${reasonSuffix}`
             };
         }
     }
@@ -1780,6 +1796,51 @@ function shouldPreferRowConjunctionCandidate(
     return !hasNonConjunctionLexicalSignal;
 }
 
+function shouldPreferRowLeadingPrefixCandidate(
+    context: RowAlignmentContext,
+    normalizedWord: string,
+    rowWordIndex?: number,
+    normalizedRowWords: string[] = []
+): boolean {
+    if (!normalizedWord) {
+        return false;
+    }
+
+    if (context.rowLanguage !== 'Hebrew' && context.rowLanguage !== 'Aramaic') {
+        return false;
+    }
+
+    if (!isFirstAlignableTokenIndex(rowWordIndex, normalizedRowWords)) {
+        return false;
+    }
+
+    if (countAlignableTokens(normalizedRowWords) < 2) {
+        return false;
+    }
+
+    const expectedPrefixBase = getExpectedRowLeadingPrefixBase(context.rowParsing1, context.rowParsing2);
+    if (!expectedPrefixBase) {
+        return false;
+    }
+
+    if (!isLikelyPrefixRendering(normalizedWord, expectedPrefixBase)) {
+        return false;
+    }
+
+    const prefixCandidates = context.candidates
+        .filter(isRowLeadingPrefixCandidate)
+        .filter((candidate) => (candidate.strongsBase || '').toUpperCase() === expectedPrefixBase);
+    const nonPrefixCandidates = context.candidates.filter((candidate) => !isRowLeadingPrefixCandidate(candidate));
+    if (prefixCandidates.length === 0 || nonPrefixCandidates.length === 0) {
+        return false;
+    }
+
+    const hasNonPrefixLexicalSignal = nonPrefixCandidates.some((candidate) =>
+        candidateHasLexicalSignal(candidate, normalizedWord)
+    );
+    return !hasNonPrefixLexicalSignal;
+}
+
 function hasConjunctiveWawSignal(parsing1: string, parsing2: string): boolean {
     const firstBlock = (parsing1 || '').toLowerCase().split('|')[0]?.trim() || '';
     const secondBlock = (parsing2 || '').toLowerCase().split('|')[0]?.trim() || '';
@@ -1836,6 +1897,67 @@ function selectConjunctiveWawCandidate(candidates: MorphemeAlignmentCandidate[])
         .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
 
     return unclaimedCandidates[0] || conjunctionCandidates[0];
+}
+
+function isRowLeadingPrefixCandidate(candidate: MorphemeAlignmentCandidate): boolean {
+    return ROW_LEADING_PREFIX_STRONGS_BASES.has((candidate.strongsBase || '').toUpperCase());
+}
+
+function getExpectedRowLeadingPrefixBase(parsing1: string, parsing2: string): string | undefined {
+    const firstBlock = `${(parsing1 || '').split('|')[0] || ''} ${(parsing2 || '').split('|')[0] || ''}`.toLowerCase();
+
+    if (/\bprep(?:osition)?\s*-\s*l\b/.test(firstBlock)) {
+        return 'H9001';
+    }
+    if (/\bprep(?:osition)?\s*-\s*b\b/.test(firstBlock)) {
+        return 'H9003';
+    }
+    if (/\bprep(?:osition)?\s*-\s*k\b/.test(firstBlock)) {
+        return 'H9004';
+    }
+    if (/\bprep(?:osition)?\s*-\s*m\b/.test(firstBlock)) {
+        return 'H9005';
+    }
+    if (/\brel(?:ative)?(?:\s*particle)?\b|\brd\b/.test(firstBlock)) {
+        return 'H9008';
+    }
+
+    return undefined;
+}
+
+function isLikelyPrefixRendering(normalizedWord: string, expectedPrefixBase: string): boolean {
+    if (expectedPrefixBase === 'H9008') {
+        return ENGLISH_RELATIVE_WORDS.has(normalizedWord);
+    }
+
+    if (ENGLISH_PREPOSITIONS.has(normalizedWord)) {
+        return true;
+    }
+
+    return normalizedWord === 'like' || normalizedWord === 'according' || normalizedWord === 'than';
+}
+
+function selectRowLeadingPrefixCandidate(
+    candidates: MorphemeAlignmentCandidate[],
+    expectedPrefixBase: string
+): MorphemeAlignmentCandidate | undefined {
+    const prefixCandidates = candidates
+        .filter(isRowLeadingPrefixCandidate)
+        .filter((candidate) => (candidate.strongsBase || '').toUpperCase() === expectedPrefixBase)
+        .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
+
+    if (prefixCandidates.length === 0) {
+        return undefined;
+    }
+
+    if (prefixCandidates.length === 1) {
+        return prefixCandidates[0];
+    }
+
+    const unclaimedCandidates = getUnclaimedStrongCandidates(prefixCandidates)
+        .sort((a, b) => a.originalMorphemeOrdinal - b.originalMorphemeOrdinal);
+
+    return unclaimedCandidates[0] || prefixCandidates[0];
 }
 
 function isArticleCandidate(candidate: MorphemeAlignmentCandidate): boolean {
