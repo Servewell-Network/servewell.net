@@ -1938,16 +1938,31 @@ ${bodyText}` : prefix : bodyText;
     function highlight() {
       const hash = window.location.hash;
       if (!hash) return;
-      const verseNum = hash.slice(1);
-      if (!verseNum || !/^\d+$/.test(verseNum)) return;
-      const target = document.getElementById(verseNum);
-      if (!target || !target.classList.contains("snippet-row")) return;
-      target.classList.remove("verse-highlight");
-      void target.offsetWidth;
-      target.classList.add("verse-highlight");
-      target.addEventListener("animationend", () => {
+      const verseRef = hash.slice(1);
+      const match = /^(\d+)(?:-(\d+))?$/.exec(verseRef);
+      if (!match) return;
+      const start = parseInt(match[1], 10);
+      const end = match[2] ? parseInt(match[2], 10) : start;
+      const low = Math.min(start, end);
+      const high = Math.max(start, end);
+      if (high - low > 200) return;
+      const targets = [];
+      for (let verse = low; verse <= high; verse += 1) {
+        const el = document.getElementById(String(verse));
+        if (el && el.classList.contains("snippet-row")) {
+          targets.push(el);
+        }
+      }
+      if (targets.length === 0) return;
+      targets[0].scrollIntoView({ block: "start" });
+      targets.forEach((target) => {
         target.classList.remove("verse-highlight");
-      }, { once: true });
+        void target.offsetWidth;
+        target.classList.add("verse-highlight");
+        target.addEventListener("animationend", () => {
+          target.classList.remove("verse-highlight");
+        }, { once: true });
+      });
     }
     window.addEventListener("hashchange", highlight);
     highlight();

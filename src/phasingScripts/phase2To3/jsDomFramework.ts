@@ -119,17 +119,38 @@ function activateVerseHashHighlight() {
   function highlight() {
     const hash = window.location.hash;
     if (!hash) return;
-    const verseNum = hash.slice(1); // e.g. "15"
-    if (!verseNum || !/^\d+$/.test(verseNum)) return;
-    const target = document.getElementById(verseNum);
-    if (!target || !target.classList.contains('snippet-row')) return;
-    target.classList.remove('verse-highlight');
-    // Force reflow to restart animation if hash is clicked again
-    void (target as HTMLElement).offsetWidth;
-    target.classList.add('verse-highlight');
-    target.addEventListener('animationend', () => {
+    const verseRef = hash.slice(1); // e.g. "15" or "15-16"
+    const match = /^(\d+)(?:-(\d+))?$/.exec(verseRef);
+    if (!match) return;
+
+    const start = parseInt(match[1], 10);
+    const end = match[2] ? parseInt(match[2], 10) : start;
+    const low = Math.min(start, end);
+    const high = Math.max(start, end);
+
+    // Keep the range bounded to avoid accidental very large highlights.
+    if (high - low > 200) return;
+
+    const targets: HTMLElement[] = [];
+    for (let verse = low; verse <= high; verse += 1) {
+      const el = document.getElementById(String(verse));
+      if (el && el.classList.contains('snippet-row')) {
+        targets.push(el as HTMLElement);
+      }
+    }
+    if (targets.length === 0) return;
+
+    targets[0].scrollIntoView({ block: 'start' });
+
+    targets.forEach((target) => {
       target.classList.remove('verse-highlight');
-    }, { once: true });
+      // Force reflow to restart animation if hash is clicked again
+      void target.offsetWidth;
+      target.classList.add('verse-highlight');
+      target.addEventListener('animationend', () => {
+        target.classList.remove('verse-highlight');
+      }, { once: true });
+    });
   }
 
   window.addEventListener('hashchange', highlight);
