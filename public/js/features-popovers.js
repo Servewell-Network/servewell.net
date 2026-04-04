@@ -61,7 +61,7 @@
     },
     headerFunds: {
       title: 'Funds',
-      content: '<p>Estimated cost to implement or maintain the feature. Values like "3K/5K" show (collected/needed). Click a funds cell to see donation options.</p><p style="margin-top: 0.5rem;">💡 Donation opportunities coming soon!</p>'
+      content: '<p>Funds show donations tracked for that specific feature row. If there is just one value, it is how much has been donated for that feature.</p><p>Parent features and subfeatures are tracked separately. A parent row only reflects donations for the general parent feature, and does not include donations given to subfeatures.</p><p style="margin-top: 0.5rem;">💡 Donation opportunities coming soon!</p>'
     },
     headerWhy: {
       title: 'Why',
@@ -102,9 +102,49 @@
       title: 'Bookmarks for Reading Progress',
       content: '<p><strong>Value</strong><br>Save your reading position and favorite passages across the Bible. Bookmarks survive page refreshes and browser restarts.</p><p><strong>Status</strong><br>Stable — sync across devices is on the <a href="/whats-next" style="color:var(--fg);text-decoration:underline;">roadmap</a>.</p><p><strong>Steps</strong><br>While reading any chapter, tap the bookmark icon to save it. Access saved bookmarks from the bookmarks menu in the top bar. Tap a bookmark to return to that passage.</p>'
     },
+    'task-wcag-aa': {
+      title: 'WCAG AA Compliance',
+      content: '<p><strong>Value</strong><br>Ensures ServeWell.Net meets the WCAG 2.1 AA standard — a well-recognized benchmark that covers color contrast, keyboard access, screen-reader compatibility, and more. Passing it means a much wider range of people can use the site without workarounds.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Audit existing pages against WCAG 2.1 AA criteria, fix contrast ratios in light and dark themes, add proper ARIA labels and landmark roles, and verify with common screen readers and keyboard-only navigation.</p>'
+    },
     'feat-dark-mode': {
       title: 'Dark Mode',
       content: '<p><strong>Value</strong><br>Reduces eye strain in low-light environments. All pages — Bible, Features, and What&#39;s Next — respect your dark mode preference.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Tap the theme toggle in the top bar (sun/moon icon) to switch between light and dark mode. Your preference is saved and applied automatically on future visits.</p>'
+    },
+    'task-search-all': {
+      title: 'Search Across All Chapters',
+      content: '<p><strong>Value</strong><br>Find verses, names, and themes quickly across the full Bible corpus instead of searching chapter by chapter.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Build an indexed backend query path, expose relevance-ranked results, and link every result directly to a verse anchor in the chapter pages.</p>'
+    },
+    'task-basic-search': {
+      title: 'Basic Search',
+      content: '<p><strong>Value</strong><br>Simple, fast lookup that supports the immediate reading flow and validates search UX before advanced indexing.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Ship a scoped query mode first (book/chapter), then layer in highlighting, keyboard navigation, and relevance tuning.</p>'
+    },
+    'task-comparison-view': {
+      title: 'Comparison View (2+ Translations)',
+      content: '<p><strong>Value</strong><br>Place multiple translations side by side so readers can compare wording, theology-adjacent nuances, and readability in one workspace.</p><p><strong>Status</strong><br>In progress</p><p><strong>Steps</strong><br>Align verses across selected translations, preserve shared navigation state, and add quick toggle controls for mobile/desktop layouts.</p>'
+    },
+    'task-bookmark-sync': {
+      title: 'Bookmark Sync Across Devices',
+      content: '<p><strong>Value</strong><br>Keeps reading progress consistent across phone, tablet, and desktop so users can resume instantly.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Add authenticated bookmark storage, conflict-safe merge behavior, and transparent sync indicators in the Bible navigation UI.</p>'
+    },
+    'task-offline': {
+      title: 'Offline Mode',
+      content: '<p><strong>Value</strong><br>Ensures Scripture remains usable in low-connectivity settings, travel, and constrained regions.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Cache core reading assets and selected books, provide clear offline availability badges, and gracefully queue non-critical writes.</p>'
+    },
+    'task-mobile-app': {
+      title: 'Mobile App for iOS / Android',
+      content: '<p><strong>Value</strong><br>Improves daily engagement with native navigation, notifications, and stronger offline behavior.</p><p><strong>Status</strong><br>Backlog</p><p><strong>Steps</strong><br>Stabilize web capabilities first, define shared APIs, then choose native or hybrid implementation based on performance and maintenance cost.</p>'
+    },
+    'task-accessibility': {
+      title: 'Accessibility Improvements',
+      content: '<p><strong>Value</strong><br>ServeWell.Net should be usable by everyone, regardless of ability or device. That means clear layouts, readable text, keyboard-friendly navigation, and enough contrast so nothing gets lost in the design.</p><p><strong>Status</strong><br>In progress</p><p><strong>Steps</strong><br>Identify and fix the most impactful barriers first — focus management, contrast, touch target size — and continue improving from there based on real user feedback.</p>'
+    },
+    'task-inspire-equip': {
+      title: 'Inspire and Equip',
+      content: '<p><strong>Value</strong><br>Resources and tools that help people encourage, teach, and build up those around them — turning personal study into something that can be shared, taught, and multiplied.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Start with verse-level commentaries as the first building block. Expand to include other formats that support teaching, small groups, and mentoring.</p>'
+    },
+    'task-footnotes': {
+      title: 'Verse-level Commentaries',
+      content: '<p><strong>Value</strong><br>Short, encouraging, and practical mini-articles attached to individual verses — easy to share with a friend, or use as the foundation for a class or lesson. The goal is insight that fits the moment without requiring a full commentary reading.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Build a submission form for drafting and editing commentary articles. Once published, an article — and the form to contribute a new one — will be accessible by tapping on the verse number in any chapter view.</p>'
     }
   };
 
@@ -137,11 +177,40 @@
   });
 
   // Task name popovers
+  function buildFallbackTaskPopover(taskEl) {
+    const row = taskEl.closest('tr');
+    if (!row) return null;
+
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 4) return null;
+
+    const task = (cells[0].textContent || '').trim();
+    const votes = (cells[1].textContent || '').trim();
+    const funds = (cells[2].textContent || '').trim();
+    const whyCell = cells[3];
+    const whyLink = whyCell.querySelector('a');
+    const whyText = whyLink ? whyLink.textContent.trim() : (whyCell.textContent || '').trim();
+    const whyHref = whyLink ? whyLink.getAttribute('href') : null;
+
+    const whyHtml = whyHref
+      ? `<a href="${whyHref}" style="color:var(--fg);text-decoration:underline;">${whyText}</a>`
+      : whyText;
+
+    return {
+      title: task || 'Task/Feature',
+      content:
+        `<p><strong>Value</strong><br>${task || 'Roadmap item in progress.'}</p>` +
+        `<p><strong>Votes</strong><br>${votes || '(+0)'}</p>` +
+        `<p><strong>Funds</strong><br>${funds || '$0'}</p>` +
+        `<p><strong>Why</strong><br>${whyHtml || 'Roadmap alignment.'}</p>`
+    };
+  }
+
   document.querySelectorAll('.task-name').forEach(task => {
     task.addEventListener('click', function(e) {
       e.stopPropagation();
       const taskId = this.getAttribute('data-task-id');
-      const popoverData = taskPopovers[taskId];
+      const popoverData = taskPopovers[taskId] || buildFallbackTaskPopover(this);
       if (popoverData) {
         const rect = this.getBoundingClientRect();
         showPopover(popoverData.title, popoverData.content, rect.left + rect.width / 2, rect.top + rect.height);

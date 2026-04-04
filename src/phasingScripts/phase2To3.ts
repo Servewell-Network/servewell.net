@@ -1127,6 +1127,7 @@ function getChapterPageCss(): string[] {
     '  gap: 0.65rem;',
     '  align-items: center;',
     '  padding: 0.2rem 0 0.45rem;',
+    '  scroll-margin-top: 68px;',
     '}',
     '.snippet-row > * {',
     '  min-width: 0;',

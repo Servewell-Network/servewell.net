@@ -14,46 +14,111 @@
 			main {
 				max-width: 100%;
 			}
-			.roadmap-table {
+			.features-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 1rem;
+				margin-bottom: 1.5rem;
+				flex-wrap: wrap;
+			}
+			.filter-widget {
+				flex: 1;
+				min-width: 200px;
+				display: flex;
+				gap: 0.5rem;
+				align-items: center;
+			}
+			.filter-widget input {
+				flex: 1;
+				padding: 0.5rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.35rem;
+				font-size: 1rem;
+			}
+			[data-theme="dark"] .filter-widget input {
+				background: var(--panel, #171a20);
+				color: var(--fg, #f1f3f5);
+				border-color: var(--border, #2c323c);
+			}
+			[data-theme="dark"] .filter-widget input::placeholder {
+				color: var(--muted, #888);
+			}
+			.suggest-button {
+				padding: 0.5rem 1rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.35rem;
+				background: var(--bar, #f4f4f5);
+				color: var(--fg);
+				font-size: 0.95rem;
+				margin-right: 0.35rem;
+				cursor: pointer;
+			}
+			.suggest-button:hover {
+				background: var(--bg);
+			}
+			.features-table {
 				width: 100%;
 				border-collapse: collapse;
 				margin-top: 1rem;
 			}
-			.roadmap-table thead {
+			.features-table thead {
 				position: sticky;
 				top: 56px;
 				background: var(--bar, #f4f4f5);
 				border-bottom: 2px solid var(--border, #d9d9de);
 				z-index: 10;
 			}
-			.roadmap-table th {
+			.features-table th {
 				text-align: left;
 				padding: 0.75rem;
 				font-weight: 600;
 				color: var(--fg);
+				cursor: help;
+				position: relative;
+				white-space: nowrap;
 			}
-			.roadmap-table td {
+			.features-table th::after {
+				content: " ⓘ";
+				font-size: 0.85em;
+				opacity: 0.6;
+			}
+			.features-table td {
 				padding: 0.75rem;
 				border-bottom: 1px solid var(--border, #d9d9de);
 				vertical-align: top;
 			}
-			.roadmap-table tbody tr:hover {
+			.features-table tbody tr:hover {
 				background: var(--panel, #ffffff);
 			}
 			.task-name {
 				font-weight: 500;
-			}
-			.status-badge {
-				display: inline-block;
-				padding: 0.25rem 0.5rem;
-				border-radius: 0.25rem;
-				font-size: 0.85rem;
-				background: var(--bar);
+				cursor: pointer;
+				text-decoration: none;
 				color: var(--fg);
+			}
+			.task-name:hover {
+				opacity: 0.8;
+			}
+			@keyframes fadeHighlight {
+				0%   { background-color: rgba(254, 249, 195, 0.85); }
+				60%  { background-color: rgba(254, 249, 195, 0.85); }
+				100% { background-color: rgba(254, 249, 195, 0); }
+			}
+			[data-theme="dark"] .row-highlight,
+			:root[data-theme="dark"] tr.row-highlight {
+				animation-name: fadeHighlightDark;
+			}
+			@keyframes fadeHighlightDark {
+				0%   { background-color: rgba(251, 191, 36, 0.22); outline: 2px solid rgba(251, 191, 36, 0.55); }
+				60%  { background-color: rgba(251, 191, 36, 0.22); outline: 2px solid rgba(251, 191, 36, 0.55); }
+				100% { background-color: rgba(251, 191, 36, 0); outline: 2px solid rgba(251, 191, 36, 0); }
+			}
+			.row-highlight {
+				animation: fadeHighlight 2.2s ease-out forwards;
 			}
 			.votes-cell {
 				font-family: monospace;
-				cursor: help;
 			}
 			.votes-main {
 				color: var(--fg);
@@ -63,6 +128,25 @@
 				color: var(--muted, #666666);
 				font-size: 0.9em;
 				margin-left: 0.3em;
+			}
+			.funds-cell {
+				cursor: help;
+			}
+			.why-cell {
+				max-width: 250px;
+			}
+			.why-link {
+				display: inline-block;
+				color: var(--fg);
+				text-decoration: none;
+				margin-right: 0.5em;
+				cursor: pointer;
+			}
+			.why-link:hover {
+				opacity: 0.7;
+			}
+			.why-link:visited {
+				color: var(--fg);
 			}
 			/* Popover styles */
 			.popover-overlay {
@@ -157,170 +241,98 @@
 	<body>
 		<main>
 			<h1>What's Next</h1>
-			<table class="roadmap-table">
+
+			<div class="features-header">
+				<div class="filter-widget">
+					<input type="text" id="featureFilter" placeholder="Search roadmap..." />
+				</div>
+				<button class="suggest-button" id="suggestButton">Suggest a feature</button>
+			</div>
+
+			<table class="features-table">
 				<thead>
 					<tr>
-						<th>Task</th>
-						<th>Votes</th>
-						<th>Funds</th>
-						<th>Why</th>
-						<th>Status</th>
+						<th id="headerTask">Task/Feature</th>
+						<th id="headerVotes">Votes</th>
+						<th id="headerFunds">Funds</th>
+						<th id="headerWhy">Why</th>
 					</tr>
 				</thead>
-				<tbody>
-					<tr>
-						<td><span class="task-name">Interlinear view improvements</span></td>
-						<td class="votes-cell" data-feature-id="task-interlinear-improvements"><span class="votes-main">8</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Better cross-language alignment for study</td>
-						<td><span class="status-badge">Planned</span></td>
+				<tbody id="featuresBody">
+					<tr id="task-search-all">
+						<td><span class="task-name" data-task-id="task-search-all">Search across all chapters</span></td>
+						<td class="votes-cell" data-feature-id="task-search-all"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="/-/2-Timothy/3.html#15" class="why-link">2 Timothy 3:15</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Features / What's Next UI polish</span></td>
-						<td class="votes-cell" data-feature-id="task-ui-polish"><span class="votes-main">2</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Make roadmap more discoverable and interactive</td>
-						<td><span class="status-badge">In Progress</span></td>
+					<tr id="task-basic-search">
+						<td><span class="task-name" data-task-id="task-basic-search">Basic search</span></td>
+						<td class="votes-cell" data-feature-id="task-basic-search"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#task-search-all" class="why-link">Search across all chapters</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Search across all chapters</span></td>
-						<td class="votes-cell" data-feature-id="task-search-all"><span class="votes-main">15</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Find references and topics instantly</td>
-						<td><span class="status-badge">Backlog</span></td>
+
+					<tr id="task-inspire-equip">
+						<td><span class="task-name" data-task-id="task-inspire-equip">Inspire and equip</span></td>
+						<td class="votes-cell" data-feature-id="task-inspire-equip"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="/-/Ephesians/4.html#12" class="why-link">Ephesians 4:12</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Basic search</span></td>
-						<td class="votes-cell" data-feature-id="task-basic-search"><span class="votes-main">6</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Fast reference and keyword lookup in the current reading flow</td>
-						<td><span class="status-badge">Planned</span></td>
+					<tr id="task-footnotes">
+						<td><span class="task-name" data-task-id="task-footnotes">Verse-level commentaries</span></td>
+						<td class="votes-cell" data-feature-id="task-footnotes"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#task-inspire-equip" class="why-link">Inspire and equip</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Bookmark sync across devices</span></td>
-						<td class="votes-cell" data-feature-id="task-bookmark-sync"><span class="votes-main">12</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Keep reading progress synchronized</td>
-						<td><span class="status-badge">Planned</span></td>
+					<tr id="task-topical-index">
+						<td><span class="task-name" data-task-id="task-topical-index">Topical index generation</span></td>
+						<td class="votes-cell" data-feature-id="task-topical-index"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#task-search-all" class="why-link">Search across all chapters</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Greek / Hebrew reference panels</span></td>
-						<td class="votes-cell" data-feature-id="task-reference-panels"><span class="votes-main">10</span><span class="votes-unverified">(+0)</span></td>
-						<td>$500</td>
-						<td>Deep linguistic study support</td>
-						<td><span class="status-badge">Backlog</span></td>
+					<tr id="task-bookmark-sync">
+						<td><span class="task-name" data-task-id="task-bookmark-sync">Bookmark sync across devices</span></td>
+						<td class="votes-cell" data-feature-id="task-bookmark-sync"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="/features#feat-bookmarks" class="why-link">Bookmarks for reading progress</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Comparison view (2+ translations)</span></td>
-						<td class="votes-cell" data-feature-id="task-comparison-view"><span class="votes-main">14</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Side-by-side translation analysis</td>
-						<td><span class="status-badge">In Progress</span></td>
+
+					<tr id="task-offline">
+						<td><span class="task-name" data-task-id="task-offline">Offline mode</span></td>
+						<td class="votes-cell" data-feature-id="task-offline"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="/features#feat-comparative-bible" class="why-link">Comparative Bible</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Verse-level footnotes and commentaries</span></td>
-						<td class="votes-cell" data-feature-id="task-footnotes"><span class="votes-main">9</span><span class="votes-unverified">(+0)</span></td>
-						<td>$1200</td>
-						<td>Theological depth and context</td>
-						<td><span class="status-badge">Backlog</span></td>
+					<tr id="task-mobile-app">
+						<td><span class="task-name" data-task-id="task-mobile-app">Mobile app for iOS / Android</span></td>
+						<td class="votes-cell" data-feature-id="task-mobile-app"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#task-offline" class="why-link">Offline mode</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Reading plans and daily studies</span></td>
-						<td class="votes-cell" data-feature-id="task-reading-plans"><span class="votes-main">7</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Guided spiritual growth pathways</td>
-						<td><span class="status-badge">Backlog</span></td>
+					<tr id="task-audio">
+						<td><span class="task-name" data-task-id="task-audio">Audio narration with timestamps</span></td>
+						<td class="votes-cell" data-feature-id="task-audio"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="/features#feat-comparative-bible" class="why-link">Comparative Bible</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Dark mode refinements</span></td>
-						<td class="votes-cell" data-feature-id="task-dark-mode-refinements"><span class="votes-main">4</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Better contrast and eye comfort</td>
-						<td><span class="status-badge">Planned</span></td>
+					<tr id="task-annotations">
+						<td><span class="task-name" data-task-id="task-annotations">Community annotations</span></td>
+						<td class="votes-cell" data-feature-id="task-annotations"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#task-footnotes" class="why-link">Verse-level commentaries</a></td>
 					</tr>
-					<tr>
-						<td><span class="task-name">Community annotations</span></td>
-						<td class="votes-cell" data-feature-id="task-annotations"><span class="votes-main">11</span><span class="votes-unverified">(+0)</span></td>
-						<td>$2000</td>
-						<td>Crowdsourced insights and questions</td>
-						<td><span class="status-badge">Backlog</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Export to PDF or Word</span></td>
-						<td class="votes-cell" data-feature-id="task-export"><span class="votes-main">6</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Share and print favorite passages</td>
-						<td><span class="status-badge">Planned</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Topical index generation</span></td>
-						<td class="votes-cell" data-feature-id="task-topical-index"><span class="votes-main">8</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Navigate themes across Scripture</td>
-						<td><span class="status-badge">Backlog</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Mobile app for iOS / Android</span></td>
-						<td class="votes-cell" data-feature-id="task-mobile-app"><span class="votes-main">18</span><span class="votes-unverified">(+0)</span></td>
-						<td>$5000</td>
-						<td>Native mobile reading experience</td>
-						<td><span class="status-badge">Backlog</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Offline mode</span></td>
-						<td class="votes-cell" data-feature-id="task-offline"><span class="votes-main">13</span><span class="votes-unverified">(+0)</span></td>
-						<td>$800</td>
-						<td>Read without internet connection</td>
-						<td><span class="status-badge">Planned</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Audio narration with timestamps</span></td>
-						<td class="votes-cell" data-feature-id="task-audio"><span class="votes-main">11</span><span class="votes-unverified">(+0)</span></td>
-						<td>$3000</td>
-						<td>Listen while reading or driving</td>
-						<td><span class="status-badge">Backlog</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Cross-reference map visualization</span></td>
-						<td class="votes-cell" data-feature-id="task-xref-map"><span class="votes-main">5</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>See how verses relate to each other</td>
-						<td><span class="status-badge">Backlog</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Discussion groups and cohorts</span></td>
-						<td class="votes-cell" data-feature-id="task-discussion"><span class="votes-main">9</span><span class="votes-unverified">(+0)</span></td>
-						<td>$1500</td>
-						<td>Study together with others</td>
-						<td><span class="status-badge">Backlog</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Passage memory tools</span></td>
-						<td class="votes-cell" data-feature-id="task-memory-tools"><span class="votes-main">7</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Spaced repetition for memorization</td>
-						<td><span class="status-badge">Planned</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Translation-specific notes</span></td>
-						<td class="votes-cell" data-feature-id="task-translation-notes"><span class="votes-main">6</span><span class="votes-unverified">(+0)</span></td>
-						<td>$600</td>
-						<td>Understand translation choices</td>
-						<td><span class="status-badge">Backlog</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name">Workspace / project management</span></td>
-						<td class="votes-cell" data-feature-id="task-workspace"><span class="votes-main">4</span><span class="votes-unverified">(+0)</span></td>
-						<td>—</td>
-						<td>Organize custom studies and research</td>
-						<td><span class="status-badge">Backlog</span></td>
-					</tr>
+
 					<tr id="task-accessibility">
-						<td><span class="task-name">Accessibility improvements (WCAG AA)</span></td>
-						<td class="votes-cell" data-feature-id="task-accessibility"><span class="votes-main">3</span><span class="votes-unverified">(+0)</span></td>
-						<td>$700</td>
-						<td>Inclusivity for all readers</td>
-						<td><span class="status-badge">In Progress</span></td>
+						<td><span class="task-name" data-task-id="task-accessibility">Accessibility improvements</span></td>
+						<td class="votes-cell" data-feature-id="task-accessibility"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="/-/Luke/6.html#31" class="why-link">Luke 6:31</a></td>
+					</tr>
+					<tr id="task-wcag-aa">
+						<td><span class="task-name" data-task-id="task-wcag-aa">WCAG AA compliance</span></td>
+						<td class="votes-cell" data-feature-id="task-wcag-aa"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#task-accessibility" class="why-link">Accessibility improvements</a></td>
 					</tr>
 				</tbody>
 			</table>
@@ -336,5 +348,28 @@
 
 		<script src="/js/servewell-app-shell.js"></script>
 		<script src="/js/features-popovers.js"></script>
+		<script>
+			(function() {
+				function highlightTargetRow() {
+					var hash = window.location.hash;
+					if (!hash) return;
+					var target = document.querySelector('tr' + hash);
+					if (!target) return;
+					target.classList.remove('row-highlight');
+					// Force reflow so re-adding the class restarts the animation
+					void target.offsetWidth;
+					target.classList.add('row-highlight');
+					target.addEventListener('animationend', function() {
+						target.classList.remove('row-highlight');
+					}, { once: true });
+				}
+				window.addEventListener('hashchange', highlightTargetRow);
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', highlightTargetRow);
+				} else {
+					highlightTargetRow();
+				}
+			})();
+		</script>
 	</body>
 </html>

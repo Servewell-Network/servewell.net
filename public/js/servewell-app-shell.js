@@ -691,7 +691,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 #bible-nav-btns {
   display: flex;
   gap: 0.25rem;
-  margin-left: 0.5rem;
+  margin-left: 1rem;
   align-items: center;
   min-width: 0;
   flex: 1;
