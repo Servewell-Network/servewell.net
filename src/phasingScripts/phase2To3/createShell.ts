@@ -262,7 +262,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 <div id="app-shell-root">
   <header class="app-topbar">
     <button type="button" data-action="menu-open" aria-label="Open menu">☰</button>
-    <a class="app-topbar-home" href="/">Servewell.net</a>
+    <a class="app-topbar-home" href="/">ServeWell.Net</a>
     <a class="app-topbar-link" href="/features">Features</a>
     <a class="app-topbar-link" href="/whats-next">What's Next</a>
     <a class="app-topbar-link" href="/about">About</a>
@@ -271,7 +271,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   <aside class="app-sidepanel">
     <div class="app-sidepanel-header">
-      <a class="app-sidepanel-home" href="/">Servewell.net</a>
+      <a class="app-sidepanel-home" href="/">ServeWell.Net</a>
       <button type="button" data-action="menu-close">✕</button>
     </div>
 

@@ -1,5 +1,5 @@
 /**
- * Servewell.net Worker
+ * ServeWell.Net Worker
  * Handles static assets and dynamic endpoints for votes, suggestions, etc.
  */
 
