@@ -12,14 +12,210 @@
 				font-size: large;
 			}
 			main {
-				max-width: 56rem;
+				max-width: 100%;
+			}
+			.roadmap-table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 1rem;
+			}
+			.roadmap-table thead {
+				position: sticky;
+				top: 56px;
+				background: var(--bar, #f4f4f5);
+				border-bottom: 2px solid var(--border, #d9d9de);
+				z-index: 10;
+			}
+			.roadmap-table th {
+				text-align: left;
+				padding: 0.75rem;
+				font-weight: 600;
+				color: var(--fg);
+			}
+			.roadmap-table td {
+				padding: 0.75rem;
+				border-bottom: 1px solid var(--border, #d9d9de);
+				vertical-align: top;
+			}
+			.roadmap-table tbody tr:hover {
+				background: var(--panel, #ffffff);
+			}
+			.task-name {
+				font-weight: 500;
+			}
+			.status-badge {
+				display: inline-block;
+				padding: 0.25rem 0.5rem;
+				border-radius: 0.25rem;
+				font-size: 0.85rem;
+				background: var(--bar);
+				color: var(--fg);
 			}
 		</style>
 	</head>
 	<body>
 		<main>
 			<h1>What's Next</h1>
-			<p>This page is a stub for near-term priorities and roadmap notes.</p>
+			<table class="roadmap-table">
+				<thead>
+					<tr>
+						<th>Task</th>
+						<th>Votes</th>
+						<th>Funds</th>
+						<th>Why</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><span class="task-name">Interlinear view improvements</span></td>
+						<td>8</td>
+						<td>—</td>
+						<td>Better cross-language alignment for study</td>
+						<td><span class="status-badge">Planned</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Features / What's Next UI polish</span></td>
+						<td>2</td>
+						<td>—</td>
+						<td>Make roadmap more discoverable and interactive</td>
+						<td><span class="status-badge">In Progress</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Search across all chapters</span></td>
+						<td>15</td>
+						<td>—</td>
+						<td>Find references and topics instantly</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Bookmark sync across devices</span></td>
+						<td>12</td>
+						<td>—</td>
+						<td>Keep reading progress synchronized</td>
+						<td><span class="status-badge">Planned</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Greek / Hebrew reference panels</span></td>
+						<td>10</td>
+						<td>$500</td>
+						<td>Deep linguistic study support</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Comparison view (2+ translations)</span></td>
+						<td>14</td>
+						<td>—</td>
+						<td>Side-by-side translation analysis</td>
+						<td><span class="status-badge">In Progress</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Verse-level footnotes and commentaries</span></td>
+						<td>9</td>
+						<td>$1200</td>
+						<td>Theological depth and context</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Reading plans and daily studies</span></td>
+						<td>7</td>
+						<td>—</td>
+						<td>Guided spiritual growth pathways</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Dark mode refinements</span></td>
+						<td>4</td>
+						<td>—</td>
+						<td>Better contrast and eye comfort</td>
+						<td><span class="status-badge">Planned</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Community annotations</span></td>
+						<td>11</td>
+						<td>$2000</td>
+						<td>Crowdsourced insights and questions</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Export to PDF or Word</span></td>
+						<td>6</td>
+						<td>—</td>
+						<td>Share and print favorite passages</td>
+						<td><span class="status-badge">Planned</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Topical index generation</span></td>
+						<td>8</td>
+						<td>—</td>
+						<td>Navigate themes across Scripture</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Mobile app for iOS / Android</span></td>
+						<td>18</td>
+						<td>$5000</td>
+						<td>Native mobile reading experience</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Offline mode</span></td>
+						<td>13</td>
+						<td>$800</td>
+						<td>Read without internet connection</td>
+						<td><span class="status-badge">Planned</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Audio narration with timestamps</span></td>
+						<td>11</td>
+						<td>$3000</td>
+						<td>Listen while reading or driving</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Cross-reference map visualization</span></td>
+						<td>5</td>
+						<td>—</td>
+						<td>See how verses relate to each other</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Discussion groups and cohorts</span></td>
+						<td>9</td>
+						<td>$1500</td>
+						<td>Study together with others</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Passage memory tools</span></td>
+						<td>7</td>
+						<td>—</td>
+						<td>Spaced repetition for memorization</td>
+						<td><span class="status-badge">Planned</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Translation-specific notes</span></td>
+						<td>6</td>
+						<td>$600</td>
+						<td>Understand translation choices</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Workspace / project management</span></td>
+						<td>4</td>
+						<td>—</td>
+						<td>Organize custom studies and research</td>
+						<td><span class="status-badge">Backlog</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name">Accessibility improvements (WCAG AA)</span></td>
+						<td>3</td>
+						<td>$700</td>
+						<td>Inclusivity for all readers</td>
+						<td><span class="status-badge">In Progress</span></td>
+					</tr>
+				</tbody>
+			</table>
 		</main>
 		<script src="/js/servewell-app-shell.js"></script>
 	</body>

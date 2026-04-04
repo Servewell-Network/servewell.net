@@ -77,6 +77,9 @@ body.with-app-shell {
   padding-top: 56px;
   padding-bottom: 60px;
   padding-left: 1%;
+}
+
+body.with-app-shell main.chapter-page {
   padding-right: 1%;
 }
 
