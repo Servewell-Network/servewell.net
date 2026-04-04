@@ -38,6 +38,54 @@ Useful commands:
 - `npm run test` run tests
 - `npm run build:servewell-app-shell` bundle browser app shell
 
+## Auth Setup (Magic Links)
+
+Implemented auth endpoints:
+
+- `POST /api/auth/request-link`
+- `GET /auth/verify?token=...`
+- `POST /api/auth/consume`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+
+Required auth config:
+
+- `AUTH_DB` as a D1 database binding
+- `AUTH_FROM_EMAIL` as a Wrangler `vars` value
+- `RESEND_API_KEY` as a Wrangler secret
+
+Optional:
+
+- `AUTH_ORIGIN` as a Wrangler `vars` value when you want magic links to use an explicit canonical origin
+
+Notes:
+
+- Magic link tokens are single-use and expire in 15 minutes.
+- Sessions use secure cookies with 30-day idle timeout and 90-day absolute lifetime.
+- On localhost, if email settings are missing, the API returns a `dev_magic_link` for testing.
+
+Suggested Cloudflare setup:
+
+```bash
+npx wrangler d1 create servewell-auth
+npx wrangler secret put RESEND_API_KEY
+```
+
+Then update `wrangler.jsonc` with the returned D1 `database_id`, and add these vars:
+
+```jsonc
+"vars": {
+	"AUTH_FROM_EMAIL": "noreply@example.com",
+	"AUTH_ORIGIN": "https://servewell.net"
+}
+```
+
+Finally redeploy:
+
+```bash
+npx wrangler deploy
+```
+
 ## Content Generation Scripts
 
 This repository includes phased data-processing scripts used to generate chapter pages and related assets.

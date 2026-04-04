@@ -2,40 +2,53 @@ import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloud
 import { describe, it, expect } from 'vitest';
 import worker from '../src';
 
-describe('Hello World user worker', () => {
-	describe('request for /message', () => {
-		it('/ responds with "Hello, World!" (unit style)', async () => {
-			const request = new Request<unknown, IncomingRequestCfProperties>('http://example.com/message');
-			// Create an empty context to pass to `worker.fetch()`.
-			const ctx = createExecutionContext();
-			const response = await worker.fetch(request, env, ctx);
-			// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-			await waitOnExecutionContext(ctx);
-			expect(await response.text()).toMatchInlineSnapshot(`"Hello, World!"`);
-		});
+describe('servewell worker', () => {
+	it('returns vote totals as JSON', async () => {
+		const request = new Request<unknown, IncomingRequestCfProperties>('http://example.com/api/votes');
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
 
-		it('responds with "Hello, World!" (integration style)', async () => {
-			const request = new Request('http://example.com/message');
-			const response = await SELF.fetch(request);
-			expect(await response.text()).toMatchInlineSnapshot(`"Hello, World!"`);
+		expect(response.status).toBe(200);
+		expect(response.headers.get('content-type')).toContain('application/json');
+		expect(await response.json()).toEqual(expect.any(Object));
+	});
+
+	it('records anonymous votes as unverified', async () => {
+		const featureId = `test-${crypto.randomUUID()}`;
+		const request = new Request<unknown, IncomingRequestCfProperties>(
+			`http://example.com/api/vote/${featureId}/up`,
+			{
+				method: 'POST',
+				headers: { 'cf-connecting-ip': '203.0.113.10' }
+			}
+		);
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
+
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toMatchObject({
+			success: true,
+			featureId,
+			vote_scope: 'unverified',
+			votes: {
+				main: 0,
+				unverified: 1,
+				breakdown: {
+					verified_up: 0,
+					verified_down: 0,
+					unverified_up: 1,
+					unverified_down: 0
+				}
+			}
 		});
 	});
 
-	describe('request for /random', () => {
-		it('/ responds with a random UUID (unit style)', async () => {
-			const request = new Request<unknown, IncomingRequestCfProperties>('http://example.com/random');
-			// Create an empty context to pass to `worker.fetch()`.
-			const ctx = createExecutionContext();
-			const response = await worker.fetch(request, env, ctx);
-			// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-			await waitOnExecutionContext(ctx);
-			expect(await response.text()).toMatch(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/);
-		});
+	it('reports signed-out auth state when auth is not configured', async () => {
+		const response = await SELF.fetch('http://example.com/api/auth/me');
 
-		it('responds with a random UUID (integration style)', async () => {
-			const request = new Request('http://example.com/random');
-			const response = await SELF.fetch(request);
-			expect(await response.text()).toMatch(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/);
-		});
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toEqual({ authenticated: false });
 	});
 });

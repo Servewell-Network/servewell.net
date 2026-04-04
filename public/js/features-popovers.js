@@ -49,6 +49,46 @@
     popoverPanel.style.top = top + 'px';
   }
 
+  let authState = { authenticated: false, email: '' };
+
+  function getVotesIntroHtml() {
+    if (authState.authenticated) {
+      const emailLine = authState.email
+        ? `<p style="font-size:0.9em;margin-top:0.35rem;">Signed in as ${authState.email}.</p>`
+        : '';
+      return `<p style="font-size:1.05rem;font-weight:600;margin-top:0;">Your votes count as verified.</p>${emailLine}`;
+    }
+
+    return '<p style="font-size:1.05rem;font-weight:600;margin-top:0;">Sign in so your votes count as verified.</p><p><button id="headerVotesSignInBtn" type="button" style="border:1px solid var(--border,#d9d9de);border-radius:0.35rem;padding:0.4rem 0.65rem;background:var(--bar,#f4f4f5);color:var(--fg);cursor:pointer;">Sign in</button></p>';
+  }
+
+  function getHeaderVotesContent() {
+    return `${getVotesIntroHtml()}<p>Community votes on feature importance. The first number is verified user votes. The second number (gray) is unverified votes, which may include spam.</p><p style="font-size:0.9em;margin-bottom:0;">Total = Upvotes - Downvotes.</p>`;
+  }
+
+  function getVoteActionsContent() {
+    return `${getVotesIntroHtml()}<p>Use upvote or downvote for this row. Clicking an active vote removes it.</p><div class="vote-buttons"><button class="vote-btn" id="voteUpBtn" type="button">👍 Upvote</button><button class="vote-btn" id="voteDownBtn" type="button">👎 Downvote</button></div><p class="vote-action-hint" id="voteActionHint" style="font-size: 0.85em; margin-top: 0.5rem;"></p>`;
+  }
+
+  async function refreshVoteAuthState() {
+    try {
+      const response = await fetch('/api/auth/me', {
+        headers: { Accept: 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error('Could not refresh vote auth state');
+      }
+      const data = await response.json();
+      authState = {
+        authenticated: Boolean(data.authenticated),
+        email: typeof data.email === 'string' ? data.email.trim().toLowerCase() : ''
+      };
+    } catch (error) {
+      console.warn('Could not refresh vote auth state', error);
+      authState = { authenticated: false, email: '' };
+    }
+  }
+
   // --- Popover Content Definitions ---
   const popovers = {
     headerTask: {
@@ -57,7 +97,11 @@
     },
     headerVotes: {
       title: 'Votes',
-      content: '<p>Community votes on feature importance. First number is verified user votes. Second number (gray) is unverified votes, which may include spam.</p><div class="vote-buttons"><button class="vote-btn" id="voteUpBtn" type="button">👍 Upvote</button><button class="vote-btn" id="voteDownBtn" type="button">👎 Downvote</button></div><p class="vote-action-hint" id="voteActionHint" style="font-size: 0.85em; margin-top: 0.5rem;"></p><p style="font-size: 0.85em; margin-top: 0.5rem;">Total = Upvotes - Downvotes. Create an account for verified voting.</p>'
+      content: ''
+    },
+    voteActions: {
+      title: 'Vote on this item',
+      content: ''
     },
     headerFunds: {
       title: 'Funds',
@@ -65,7 +109,7 @@
     },
     headerWhy: {
       title: 'Why',
-      content: 'Parent task or reason this feature matters. Click linked items to jump to that task in What\'s Next or Features page.'
+      content: 'Parent task or reason this feature matters. Click linked items to jump to that task in What\'s Next or Features page. Top level features have Bible passage links as their "Why."'
     }
   };
 
@@ -113,6 +157,18 @@
     'feat-cc0-public-domain-license': {
       title: 'CC0 Public Domain License',
       content: '<p><strong>Value</strong><br>Makes feature content openly reusable without legal friction, so people can copy, adapt, and redistribute material to serve others more freely under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline;">CC0 public domain dedication</a>.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Go to the <a href="https://github.com/Servewell-Network/servewell.net" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline;">ServeWell GitHub repository</a>, open the LICENSE file, and review the CC0 wording there so you can confirm exactly what is covered.</p>'
+    },
+    'feat-community-edits': {
+      title: 'Community edits',
+      content: '<p><strong>Value</strong><br>Creates an early path for the community to help shape what gets built and improved, instead of leaving product direction isolated to one person or one moment.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Use voting to signal which features matter most. Use GitHub when you want to suggest a specific change, explain a problem, or discuss implementation details. Over time, those two paths can expand into richer contribution and moderation workflows.</p>'
+    },
+    'feat-task-feature-voting': {
+      title: 'Task/feature voting',
+      content: '<p><strong>Value</strong><br>Lets people register support or concern directly on Features and What\'s Next items, making product direction more visible and easier to prioritize together.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Open the Votes cell for any row, cast an upvote or downvote, and sign in if you want your vote counted as verified.</p>'
+    },
+    'feat-logins': {
+      title: 'Magic-link logins',
+      content: '<p><strong>Value</strong><br>Account sign-in now makes verified voting possible without requiring passwords, while leaving room to evolve the account model later if contribution workflows grow more complex.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Click Sign in in the top bar, enter your email, and use your magic link. Verified votes then appear in the main vote count.</p>'
     },
     'task-search-all': {
       title: 'Search Across All Chapters',
@@ -178,15 +234,20 @@
       title: 'Topical Index Generation',
       content: '<p><strong>Value</strong><br>Lets readers discover related passages by theme (for example forgiveness, hope, justice, prayer) without needing to know exact references in advance.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Generate a curated topic map tied to verse references, expose topic browsing and search, and connect each indexed topic to chapter links that open directly at the relevant verse.</p>'
     },
-    'task-annotations': {
-      title: 'Community Edits',
-      content: '<p><strong>Value</strong><br>Allows the community to improve commentary quality over time by suggesting fixes, clarifications, and additions directly where readers are already studying.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Introduce a moderation workflow where submitted edits are reviewed before publication. Start with simple approval controls and auditing, then refine the moderation process over time as contributor patterns and quality needs become clearer.</p>'
-    },
-    'task-logins': {
-      title: 'Logins',
-      content: '<p><strong>Value</strong><br>Account-based logins make community editing safer and more accountable by tying submissions and moderation actions to identifiable users.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Implement sign-in and session management, add role-aware permissions for contributors and moderators, and connect edit history to user identities for transparent review and rollback.</p>'
-    }
+
   };
+
+  function wireSignInCta() {
+    const signInBtn = document.getElementById('headerVotesSignInBtn');
+    if (!signInBtn) return;
+    signInBtn.addEventListener('click', function() {
+      closePopover();
+      const authButton = document.querySelector('[data-auth-button]');
+      if (authButton instanceof HTMLButtonElement) {
+        authButton.click();
+      }
+    });
+  }
 
   // --- Event Listeners ---
   
@@ -205,13 +266,20 @@
 
   // Header popovers
   document.querySelectorAll('.features-table th').forEach(th => {
-    th.addEventListener('click', function(e) {
+    th.addEventListener('click', async function(e) {
       e.stopPropagation();
       const id = this.id;
       const popoverData = popovers[id];
       if (popoverData) {
+        if (id === 'headerVotes') {
+          await refreshVoteAuthState();
+        }
         const rect = this.getBoundingClientRect();
-        showPopover(popoverData.title, popoverData.content, rect.left + rect.width / 2, rect.top + rect.height);
+        const content = id === 'headerVotes' ? getHeaderVotesContent() : popoverData.content;
+        showPopover(popoverData.title, content, rect.left + rect.width / 2, rect.top + rect.height);
+        if (id === 'headerVotes') {
+          setTimeout(wireSignInCta, 0);
+        }
       }
     });
   });
@@ -260,15 +328,17 @@
 
   // Votes cell popovers (click to show voting UI)
   document.querySelectorAll('.votes-cell').forEach(cell => {
-    cell.addEventListener('click', function(e) {
+    cell.addEventListener('click', async function(e) {
       e.stopPropagation();
       const featureId = this.getAttribute('data-feature-id');
-      const popoverData = popovers.headerVotes;
+      const popoverData = popovers.voteActions;
+      await refreshVoteAuthState();
       const rect = this.getBoundingClientRect();
-      showPopover(popoverData.title, popoverData.content, rect.left + rect.width / 2, rect.top + rect.height);
+      showPopover(popoverData.title, getVoteActionsContent(), rect.left + rect.width / 2, rect.top + rect.height);
       
       // Wire up vote buttons with feature ID context
       setTimeout(() => {
+        wireSignInCta();
         const upBtn = document.getElementById('voteUpBtn');
         const downBtn = document.getElementById('voteDownBtn');
         renderVoteButtonState(featureId);
@@ -313,18 +383,38 @@
   // --- Vote Handler (Phase 2 integrates with server) ---
   // Track current votes to enable toggling - persisted to localStorage
   const userVotes = {}; // { [featureId]: 'up' | 'down' | null }
+  let voteStorageKey = 'servewell-user-votes:anon';
 
-  // Load stored votes from localStorage
-  try {
-    const stored = localStorage.getItem('servewell-user-votes');
-    if (stored) Object.assign(userVotes, JSON.parse(stored));
-  } catch (e) {
-    console.warn('Could not load stored votes');
+  function loadStoredVotes() {
+    Object.keys(userVotes).forEach(key => {
+      delete userVotes[key];
+    });
+
+    try {
+      const stored = localStorage.getItem(voteStorageKey);
+      if (stored) Object.assign(userVotes, JSON.parse(stored));
+    } catch (e) {
+      console.warn('Could not load stored votes');
+    }
   }
+
+  loadStoredVotes();
 
   function saveVotes() {
-    localStorage.setItem('servewell-user-votes', JSON.stringify(userVotes));
+    localStorage.setItem(voteStorageKey, JSON.stringify(userVotes));
   }
+
+  window.addEventListener('servewell-auth-changed', (event) => {
+    const email = event.detail && typeof event.detail.email === 'string'
+      ? event.detail.email.trim().toLowerCase()
+      : '';
+    authState = {
+      authenticated: Boolean(event.detail && event.detail.authenticated),
+      email
+    };
+    voteStorageKey = email ? `servewell-user-votes:${email}` : 'servewell-user-votes:anon';
+    loadStoredVotes();
+  });
 
   function renderVoteButtonState(featureId) {
     const currentVote = userVotes[featureId] || null;
@@ -449,10 +539,28 @@
 
   // Load votes when page initializes
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadVoteCounts);
+    document.addEventListener('DOMContentLoaded', () => {
+      void refreshVoteAuthState();
+      loadVoteCounts();
+    });
   } else {
+    void refreshVoteAuthState();
     loadVoteCounts();
   }
+
+  window.addEventListener('focus', () => {
+    void refreshVoteAuthState();
+  });
+
+  window.addEventListener('pageshow', () => {
+    void refreshVoteAuthState();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      void refreshVoteAuthState();
+    }
+  });
 
   console.log('Features popovers initialized');
 })();

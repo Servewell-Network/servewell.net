@@ -1,0 +1,9 @@
+Auth-related Worker code lives in `src/index.ts`.
+
+Resend setup note:
+
+- Run `npx wrangler secret put RESEND_API_KEY` from the project root.
+- Paste the Resend API key when Wrangler prompts for it.
+- This stores the key as a Cloudflare Worker secret for this project; it does not belong in source files or `wrangler.jsonc`.
+- If using a Resend subdomain (for example `updates.servewell.net`), set `AUTH_FROM_EMAIL` in `wrangler.jsonc` to that subdomain sender (for example `no-reply@updates.servewell.net`).
+- After setting the secret, run `npx wrangler deploy` so the deployed Worker can use it for magic-link email delivery.

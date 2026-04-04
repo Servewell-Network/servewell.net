@@ -16,9 +16,12 @@
 	"kv_namespaces": [
 		{ "binding": "VOTES", "id": "fdb80cfbdf664ada848eeb605f259862", "preview_id": "60a58779b57a43b196106b815a78fdd7" }
 	],
+	"d1_databases": [
+		{ "binding": "AUTH_DB", "database_name": "servewell-auth", "database_id": "b830fdcb-2dd6-43c6-af10-b6ee6a3df9f0" }
+	],
 	"observability": {
 		"enabled": true
-	}
+	},
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
@@ -36,7 +39,10 @@
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
-	// "vars": { "MY_VARIABLE": "production_value" },
+	"vars": {
+		"AUTH_ORIGIN": "https://servewell.net",
+		"AUTH_FROM_EMAIL": "no-reply@updates.servewell.net"
+	},
 	/**
 	 * Note: Use secrets to store sensitive data.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
