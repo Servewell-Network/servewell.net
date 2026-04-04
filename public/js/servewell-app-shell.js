@@ -491,7 +491,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       <button type="button" class="app-auth-menu-toggle" data-auth-menu-toggle aria-haspopup="true" aria-expanded="false">Account</button>
       <div class="app-auth-menu" data-auth-menu hidden>
         <div class="app-auth-menu-status" data-auth-menu-status>Not signed in</div>
-        <div class="app-auth-menu-copy" data-auth-menu-copy>Use magic-link sign in for verified voting.</div>
+        <div class="app-auth-menu-copy" data-auth-menu-copy>Signing in is a simplified process called magic-link that is the same simple step regardless of whether you have an account yet or not.</div>
         <div class="app-auth-menu-actions">
           <button type="button" class="app-auth-button" data-auth-button>Sign in</button>
         </div>
@@ -649,7 +649,7 @@ body.app-panel-open #app-shell-root .app-overlay {
         el.textContent = statusText;
       });
       qsa("[data-auth-menu-copy]").forEach((el) => {
-        el.textContent = authState.authenticated ? "Verified votes now count in the main total." : "Use magic-link sign in for verified voting.";
+        el.textContent = authState.authenticated ? "Verified votes now count in the main total." : "Signing in is a simplified process called magic-link that is the same simple step regardless of whether you have an account yet or not.";
       });
       qsa("[data-auth-panel-status]").forEach((el) => {
         el.textContent = statusText;
