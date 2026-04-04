@@ -110,6 +110,10 @@
       title: 'Dark Mode',
       content: '<p><strong>Value</strong><br>Reduces eye strain in low-light environments. All pages — Bible, Features, and What&#39;s Next — respect your dark mode preference.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Tap the theme toggle in the top bar (sun/moon icon) to switch between light and dark mode. Your preference is saved and applied automatically on future visits.</p>'
     },
+    'feat-cc0-public-domain-license': {
+      title: 'CC0 Public Domain License',
+      content: '<p><strong>Value</strong><br>Makes feature content openly reusable without legal friction, so people can copy, adapt, and redistribute material to serve others more freely under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline;">CC0 public domain dedication</a>.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Go to the <a href="https://github.com/Servewell-Network/servewell.net" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline;">ServeWell GitHub repository</a>, open the LICENSE file, and review the CC0 wording there so you can confirm exactly what is covered.</p>'
+    },
     'task-search-all': {
       title: 'Search Across All Chapters',
       content: '<p><strong>Value</strong><br>Find verses, names, and themes quickly across the full Bible corpus instead of searching chapter by chapter.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Build an indexed backend query path, expose relevance-ranked results, and link every result directly to a verse anchor in the chapter pages.</p>'
@@ -117,6 +121,10 @@
     'task-basic-search': {
       title: 'Basic Search',
       content: '<p><strong>Value</strong><br>Simple, fast lookup that supports the immediate reading flow and validates search UX before advanced indexing.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Ship a scoped query mode first (book/chapter), then layer in highlighting, keyboard navigation, and relevance tuning.</p>'
+    },
+    'task-settings-in-links': {
+      title: 'Settings in Links',
+      content: '<p><strong>Value</strong><br>Lets people share links that preserve meaningful on-screen settings so friends can open the same passage and immediately see the same important context.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Define which settings are safe and useful to encode in URLs, add copy-link controls that include those settings, and ensure incoming links restore view state predictably across supported pages.</p>'
     },
     'task-reliability': {
       title: 'Reliability',
