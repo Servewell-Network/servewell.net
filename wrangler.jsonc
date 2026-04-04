@@ -14,7 +14,7 @@
 		"directory": "./public",
 	},
 	"kv_namespaces": [
-		{ "binding": "VOTES", "id": "servewell-votes", "preview_id": "servewell-votes-preview" }
+		{ "binding": "VOTES", "id": "fdb80cfbdf664ada848eeb605f259862", "preview_id": "60a58779b57a43b196106b815a78fdd7" }
 	],
 	"observability": {
 		"enabled": true
