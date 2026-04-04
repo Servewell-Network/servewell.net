@@ -84,5 +84,54 @@ export function jsDomFramework() {
   modules.activate('bible-nav');
   if (document.querySelector('main.chapter-page')) {
     modules.activate('selection-control');
+    activateVerseHashHighlight();
   }
+}
+
+function activateVerseHashHighlight() {
+  // Inject keyframe animation CSS once
+  const styleId = 'verse-highlight-style';
+  if (!document.getElementById(styleId)) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = [
+      '@keyframes verseHighlight {',
+      '  0%   { outline: 3px solid rgba(253, 224, 71, 0.9); background-color: rgba(254, 249, 195, 0.6); }',
+      '  60%  { outline: 3px solid rgba(253, 224, 71, 0.9); background-color: rgba(254, 249, 195, 0.6); }',
+      '  100% { outline: 3px solid rgba(253, 224, 71, 0); background-color: rgba(254, 249, 195, 0); }',
+      '}',
+      '@keyframes verseHighlightDark {',
+      '  0%   { outline: 3px solid rgba(251, 191, 36, 0.6); background-color: rgba(251, 191, 36, 0.18); }',
+      '  60%  { outline: 3px solid rgba(251, 191, 36, 0.6); background-color: rgba(251, 191, 36, 0.18); }',
+      '  100% { outline: 3px solid rgba(251, 191, 36, 0); background-color: rgba(251, 191, 36, 0); }',
+      '}',
+      '.verse-highlight {',
+      '  animation: verseHighlight 2.2s ease-out forwards;',
+      '  border-radius: 4px;',
+      '}',
+      '[data-theme="dark"] .verse-highlight {',
+      '  animation-name: verseHighlightDark;',
+      '}',
+    ].join('\n');
+    document.head.appendChild(style);
+  }
+
+  function highlight() {
+    const hash = window.location.hash;
+    if (!hash) return;
+    const verseNum = hash.slice(1); // e.g. "15"
+    if (!verseNum || !/^\d+$/.test(verseNum)) return;
+    const target = document.getElementById(verseNum);
+    if (!target || !target.classList.contains('snippet-row')) return;
+    target.classList.remove('verse-highlight');
+    // Force reflow to restart animation if hash is clicked again
+    void (target as HTMLElement).offsetWidth;
+    target.classList.add('verse-highlight');
+    target.addEventListener('animationend', () => {
+      target.classList.remove('verse-highlight');
+    }, { once: true });
+  }
+
+  window.addEventListener('hashchange', highlight);
+  highlight();
 }

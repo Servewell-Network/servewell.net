@@ -36,6 +36,14 @@
 				border-radius: 0.35rem;
 				font-size: 1rem;
 			}
+			[data-theme="dark"] .filter-widget input {
+				background: var(--panel, #171a20);
+				color: var(--fg, #f1f3f5);
+				border-color: var(--border, #2c323c);
+			}
+			[data-theme="dark"] .filter-widget input::placeholder {
+				color: var(--muted, #888);
+			}
 			.suggest-button {
 				padding: 0.5rem 1rem;
 				border: 1px solid var(--border, #d9d9de);
@@ -43,6 +51,7 @@
 				background: var(--bar, #f4f4f5);
 				color: var(--fg);
 				font-size: 0.95rem;
+				margin-right: 0.35rem;
 				cursor: pointer;
 			}
 			.suggest-button:hover {
@@ -67,6 +76,7 @@
 				color: var(--fg);
 				cursor: help;
 				position: relative;
+				white-space: nowrap;
 			}
 			.features-table th::after {
 				content: " ⓘ";
@@ -84,20 +94,28 @@
 			.task-name {
 				font-weight: 500;
 				cursor: pointer;
-				text-decoration: underline;
+				text-decoration: none;
 				color: var(--fg);
 			}
 			.task-name:hover {
 				opacity: 0.8;
 			}
-			.status-badge {
-				display: inline-block;
-				padding: 0.25rem 0.5rem;
-				border-radius: 0.25rem;
-				font-size: 0.85rem;
-				background: var(--bar);
-				color: var(--fg);
-				cursor: help;
+			@keyframes fadeHighlight {
+				0%   { background-color: rgba(254, 249, 195, 0.85); }
+				60%  { background-color: rgba(254, 249, 195, 0.85); }
+				100% { background-color: rgba(254, 249, 195, 0); }
+			}
+			[data-theme="dark"] .row-highlight,
+			:root[data-theme="dark"] tr.row-highlight {
+				animation-name: fadeHighlightDark;
+			}
+			@keyframes fadeHighlightDark {
+				0%   { background-color: rgba(251, 191, 36, 0.22); outline: 2px solid rgba(251, 191, 36, 0.55); }
+				60%  { background-color: rgba(251, 191, 36, 0.22); outline: 2px solid rgba(251, 191, 36, 0.55); }
+				100% { background-color: rgba(251, 191, 36, 0); outline: 2px solid rgba(251, 191, 36, 0); }
+			}
+			.row-highlight {
+				animation: fadeHighlight 2.2s ease-out forwards;
 			}
 			.votes-cell {
 				font-family: monospace;
@@ -120,12 +138,15 @@
 			.why-link {
 				display: inline-block;
 				color: var(--fg);
-				text-decoration: underline;
+				text-decoration: none;
 				margin-right: 0.5em;
 				cursor: pointer;
 			}
 			.why-link:hover {
 				opacity: 0.7;
+			}
+			.why-link:visited {
+				color: var(--fg);
 			}
 			/* Popover styles */
 			.popover-overlay {
@@ -196,6 +217,25 @@
 			.vote-btn:hover {
 				background: var(--bg);
 			}
+			@media (max-width: 600px) {
+				body {
+					margin: 1rem;
+				}
+				.popover-panel {
+					max-width: calc(100vw - 20px);
+					max-height: 85vh;
+				}
+				.popover-content {
+					font-size: 1rem;
+				}
+				.popover-title {
+					font-size: 1.05rem;
+				}
+				.vote-btn {
+					font-size: 1rem;
+					padding: 0.6rem 0.4rem;
+				}
+			}
 		</style>
 	</head>
 	<body>
@@ -216,30 +256,62 @@
 						<th id="headerVotes">Votes</th>
 						<th id="headerFunds">Funds</th>
 						<th id="headerWhy">Why</th>
-						<th id="headerStatus">Status</th>
 					</tr>
 				</thead>
 				<tbody id="featuresBody">
+					<tr id="feat-comparative-bible">
+						<td><span class="task-name" data-task-id="feat-comparative-bible">Comparative Bible</span></td>
+						<td class="votes-cell" data-feature-id="feat-comparative-bible"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="/-/2-Timothy/3.html#15" class="why-link">2 Timothy 3:15</a></td>
+					</tr>
+					<tr id="feat-literal">
+						<td><span class="task-name" data-task-id="feat-literal">Literal translation</span></td>
+						<td class="votes-cell" data-feature-id="feat-literal"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#feat-comparative-bible" class="why-link">Comparative Bible</a></td>
+					</tr>
 					<tr>
-						<td><span class="task-name" data-task-id="feat-interlinear">Interlinear and transliteration tools</span></td>
+						<td><span class="task-name" data-task-id="feat-word-popover-literal">Word popover (Literal)</span></td>
+						<td class="votes-cell" data-feature-id="feat-word-popover-literal"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#feat-literal" class="why-link">Literal translation</a></td>
+					</tr>
+					<tr id="feat-traditional">
+						<td><span class="task-name" data-task-id="feat-traditional">Traditional translation</span></td>
+						<td class="votes-cell" data-feature-id="feat-traditional"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#feat-comparative-bible" class="why-link">Comparative Bible</a></td>
+					</tr>
+					<tr>
+						<td><span class="task-name" data-task-id="feat-word-popover-traditional">Word popover (Traditional)</span></td>
+						<td class="votes-cell" data-feature-id="feat-word-popover-traditional"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#feat-traditional" class="why-link">Traditional translation</a></td>
+					</tr>
+					<tr>
+						<td><span class="task-name" data-task-id="feat-interlinear">Interlinear transliteration tools</span></td>
 						<td class="votes-cell" data-feature-id="feat-interlinear"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
 						<td class="funds-cell">$0</td>
-						<td class="why-cell"><span class="why-link" data-ref="whats-next">Original-language study</span></td>
-						<td><span class="status-badge" data-status="experimental">Experimental</span></td>
+						<td class="why-cell"><a href="#feat-comparative-bible" class="why-link">Comparative Bible</a></td>
+					</tr>
+					<tr id="feat-bible-navigation">
+						<td><span class="task-name" data-task-id="feat-bible-navigation">Bible navigation</span></td>
+						<td class="votes-cell" data-feature-id="feat-bible-navigation"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#feat-comparative-bible" class="why-link">Comparative Bible</a></td>
+					</tr>
+					<tr>
+						<td><span class="task-name" data-task-id="feat-bookmarks">Bookmarks for reading progress</span></td>
+						<td class="votes-cell" data-feature-id="feat-bookmarks"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="#feat-bible-navigation" class="why-link">Bible navigation</a></td>
 					</tr>
 					<tr>
 						<td><span class="task-name" data-task-id="feat-dark-mode">Dark mode</span></td>
 						<td class="votes-cell" data-feature-id="feat-dark-mode"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
 						<td class="funds-cell">$0</td>
-						<td class="why-cell"><span class="why-link">Visual accessibility</span></td>
-						<td><span class="status-badge" data-status="stable">Stable</span></td>
-					</tr>
-					<tr>
-						<td><span class="task-name" data-task-id="feat-bookmarks">Bookmarks and reading progress</span></td>
-						<td class="votes-cell" data-feature-id="feat-bookmarks"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
-						<td class="funds-cell">$0</td>
-						<td class="why-cell"><span class="why-link">User experience</span></td>
-						<td><span class="status-badge" data-status="stable">Stable</span></td>
+						<td class="why-cell"><a href="/whats-next#task-accessibility" class="why-link">Accessibility</a></td>
 					</tr>
 				</tbody>
 			</table>
@@ -255,5 +327,28 @@
 
 		<script src="/js/servewell-app-shell.js"></script>
 		<script src="/js/features-popovers.js"></script>
+		<script>
+			(function() {
+				function highlightTargetRow() {
+					var hash = window.location.hash;
+					if (!hash) return;
+					var target = document.querySelector('tr' + hash);
+					if (!target) return;
+					target.classList.remove('row-highlight');
+					// Force reflow so re-adding the class restarts the animation
+					void target.offsetWidth;
+					target.classList.add('row-highlight');
+					target.addEventListener('animationend', function() {
+						target.classList.remove('row-highlight');
+					}, { once: true });
+				}
+				window.addEventListener('hashchange', highlightTargetRow);
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', highlightTargetRow);
+				} else {
+					highlightTargetRow();
+				}
+			})();
+		</script>
 	</body>
 </html>

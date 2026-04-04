@@ -133,6 +133,25 @@
 			.vote-btn:hover {
 				background: var(--bg);
 			}
+			@media (max-width: 600px) {
+				body {
+					margin: 1rem;
+				}
+				.popover-panel {
+					max-width: calc(100vw - 20px);
+					max-height: 85vh;
+				}
+				.popover-content {
+					font-size: 1rem;
+				}
+				.popover-title {
+					font-size: 1.05rem;
+				}
+				.vote-btn {
+					font-size: 1rem;
+					padding: 0.6rem 0.4rem;
+				}
+			}
 		</style>
 	</head>
 	<body>
@@ -296,7 +315,7 @@
 						<td>Organize custom studies and research</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
-					<tr>
+					<tr id="task-accessibility">
 						<td><span class="task-name">Accessibility improvements (WCAG AA)</span></td>
 						<td class="votes-cell" data-feature-id="task-accessibility"><span class="votes-main">3</span><span class="votes-unverified">(+0)</span></td>
 						<td>$700</td>

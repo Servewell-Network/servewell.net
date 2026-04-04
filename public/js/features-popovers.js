@@ -66,41 +66,45 @@
     headerWhy: {
       title: 'Why',
       content: 'Parent task or reason this feature matters. Click linked items to jump to that task in What\'s Next or Features page.'
-    },
-    headerStatus: {
-      title: 'Status',
-      content: 'Feature state: <strong>Stable</strong> (production-ready), <strong>Experimental</strong> (in testing), <strong>At Risk</strong> (needs funding), or <strong>Deprecated</strong> (being phased out). Hover over status badge for details.'
-    },
-    statusStable: {
-      title: 'Stable',
-      content: 'Feature is production-ready, well-tested, and actively maintained.'
-    },
-    statusExperimental: {
-      title: 'Experimental',
-      content: 'Feature is under active development or testing. Behavior or UI may change. Feedback welcome!'
-    },
-    statusAtRisk: {
-      title: 'At Risk',
-      content: '<p>Feature maintenance is at risk due to funding or resource constraints. Support helps ensure continued operation.</p><p style="margin-top: 0.5rem;"><a href="/features#donate" style="color: var(--fg); text-decoration: underline;">Donate now</a> to keep this feature alive.</p>'
-    },
-    statusDeprecated: {
-      title: 'Deprecated',
-      content: 'Feature is being phased out. Plan to move to newer alternatives. See details for migration guidance.'
     }
   };
 
   const taskPopovers = {
+    'feat-comparative-bible': {
+      title: 'Comparative Bible',
+      content: '<p><strong>Value</strong><br>A unified study environment where you can explore Scripture across Literal, Traditional, and Interlinear translation views — without switching apps or tabs. Navigation, bookmarks, and word popovers are shared across all views.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Use the Bible button in the top bar to open any chapter. Switch between Literal and Traditional using the mode selector at the top. Each chapter URL is shareable — click the address bar and copy it to share any passage.</p>'
+    },
+    'feat-literal': {
+      title: 'Literal Translation',
+      content: '<p><strong>Value</strong><br>Word-for-word rendering that stays as close as possible to the Greek or Hebrew source. Useful for studying translation choices and seeing what the original text says — without needing the original languages.</p><p><strong>Credit</strong><br>Builds on data from <a href="https://github.com/STEPBible/STEPBible-Data" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline;">STEPBible.org</a> (CC BY). Huge thanks to so many who gave so much to make that available.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Open any chapter and select Literal view. Each ALL-CAPS English word corresponds to one original-language word. Tap any word to see its lemma, morphology, transliteration, and definition.</p>'
+    },
+    'feat-traditional': {
+      title: 'Traditional Translation',
+      content: '<p><strong>Value</strong><br>Readable, natural-English rendering suitable for devotional reading, study, and sharing. Based on established translation traditions.</p><p><strong>Credit</strong><br>Built on the <a href="https://berean.bible/licensing.htm" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline;">Berean Standard Bible</a> (BSB) — freely available public domain text. Huge thanks to so many who gave so much to make that available.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Open any chapter and select Traditional view. The BSB text appears verse by verse. Tap any word to see translator notes, the underlying original, and alternate renderings.</p>'
+    },
+    'feat-word-popover-literal': {
+      title: 'Word Popover (Literal View)',
+      content: '<p><strong>Value</strong><br>Tap any word in Literal view to see the original Greek or Hebrew source — lemma, morphology, transliteration, and definition — without leaving your reading flow. Closest thing to having a language tutor beside you.</p><p><strong>Status</strong><br>Experimental — coverage and data quality continue to improve.</p><p><strong>Steps</strong><br>In Literal view, tap or click any highlighted word. The popover shows: the original script, phonetic pronunciation, grammatical function (e.g. &ldquo;verb, aorist, third person plural&rdquo;), and core meaning. Dismiss with ✕ or tap elsewhere.</p>'
+    },
+    'feat-word-popover-traditional': {
+      title: 'Word Popover (Traditional View)',
+      content: '<p><strong>Value</strong><br>Tap any word in Traditional view to see the original-language word behind the English, how other traditions translate it, and why translators made specific choices. Understand the <em>why</em> behind the text, not just the <em>what</em>.</p><p><strong>Status</strong><br>Experimental — alternate renderings and translator notes are incrementally expanded.</p><p><strong>Steps</strong><br>In Traditional view, tap or click any word. The popover shows: the underlying Greek or Hebrew, alternate renderings, translator notes, and related cross-references. Dismiss with ✕ or tap elsewhere.</p>'
+    },
     'feat-interlinear': {
-      title: 'Interlinear and Transliteration Tools',
-      content: 'Word-by-word original-language study tools that combine interlinear display with Hebrew and Greek transliteration support. Useful for deep study, language learning, and pronunciation.'
+      title: 'Interlinear Transliteration Tools',
+      content: '<p><strong>Value</strong><br>Displays the original Greek or Hebrew text word-by-word with the English rendering directly beneath each word. Phonetic transliteration lets you approximate original pronunciation — no prior language knowledge required.</p><p><strong>Credit</strong><br>Builds on data from <a href="https://github.com/STEPBible/STEPBible-Data" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline;">STEPBible.org</a> (CC BY).</p><p><strong>Status</strong><br>Experimental — layout and coverage are actively improving.</p><p><strong>Steps</strong><br>Open any chapter and enable Interlinear view from the mode selector. The original-language text appears above its English equivalent. Tap any word to open the full morphology popover.</p>'
+    },
+    'feat-bible-navigation': {
+      title: 'Bible Navigation',
+      content: '<p><strong>Value</strong><br>Move freely between books, chapters, and verses. Every passage has its own URL — copy and share it anytime. Navigation state is shared across Literal, Traditional, and Interlinear views so you stay in sync when switching.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Use the arrow buttons at the top of any chapter to move forward or back. Click a book or chapter name to jump directly. Copy the URL from your browser to share or bookmark any passage.</p>'
+    },
+    'feat-bookmarks': {
+      title: 'Bookmarks for Reading Progress',
+      content: '<p><strong>Value</strong><br>Save your reading position and favorite passages across the Bible. Bookmarks survive page refreshes and browser restarts.</p><p><strong>Status</strong><br>Stable — sync across devices is on the <a href="/whats-next" style="color:var(--fg);text-decoration:underline;">roadmap</a>.</p><p><strong>Steps</strong><br>While reading any chapter, tap the bookmark icon to save it. Access saved bookmarks from the bookmarks menu in the top bar. Tap a bookmark to return to that passage.</p>'
     },
     'feat-dark-mode': {
       title: 'Dark Mode',
-      content: 'Eye-friendly dark color scheme available in menu. Reduces eye strain in low-light environments. Synced across all pages.'
-    },
-    'feat-bookmarks': {
-      title: 'Bookmarks',
-      content: 'Save favorite passages and track reading progress. Bookmarks sync in your browser and work across devices with an account.'
+      content: '<p><strong>Value</strong><br>Reduces eye strain in low-light environments. All pages — Bible, Features, and What&#39;s Next — respect your dark mode preference.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Tap the theme toggle in the top bar (sun/moon icon) to switch between light and dark mode. Your preference is saved and applied automatically on future visits.</p>'
     }
   };
 
@@ -125,20 +129,6 @@
       e.stopPropagation();
       const id = this.id;
       const popoverData = popovers[id];
-      if (popoverData) {
-        const rect = this.getBoundingClientRect();
-        showPopover(popoverData.title, popoverData.content, rect.left + rect.width / 2, rect.top + rect.height);
-      }
-    });
-  });
-
-  // Status badge popovers
-  document.querySelectorAll('.status-badge').forEach(badge => {
-    badge.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const status = this.getAttribute('data-status');
-      const key = 'status' + status.charAt(0).toUpperCase() + status.slice(1);
-      const popoverData = popovers[key];
       if (popoverData) {
         const rect = this.getBoundingClientRect();
         showPopover(popoverData.title, popoverData.content, rect.left + rect.width / 2, rect.top + rect.height);
@@ -186,18 +176,6 @@
       const popoverData = popovers.headerFunds;
       const rect = this.getBoundingClientRect();
       showPopover(popoverData.title, popoverData.content, rect.left + rect.width / 2, rect.top + rect.height);
-    });
-  });
-
-  // Why link popovers (cross-page navigation)
-  document.querySelectorAll('.why-link').forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const ref = this.getAttribute('data-ref');
-      if (ref === 'whats-next') {
-        window.location.href = '/whats-next';
-      }
-      // Local refs within Features page would be fragment jumps
     });
   });
 
