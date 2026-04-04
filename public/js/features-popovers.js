@@ -118,6 +118,22 @@
       title: 'Basic Search',
       content: '<p><strong>Value</strong><br>Simple, fast lookup that supports the immediate reading flow and validates search UX before advanced indexing.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Ship a scoped query mode first (book/chapter), then layer in highlighting, keyboard navigation, and relevance tuning.</p>'
     },
+    'task-reliability': {
+      title: 'Reliability',
+      content: '<p><strong>Value</strong><br>Readers need to trust that core features keep working every day. Reliable behavior protects study momentum and prevents avoidable frustration.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Define reliability targets for key journeys (chapter loading, navigation, voting, and popovers), monitor regressions, and prioritize fixes that reduce breakage risk.</p>'
+    },
+    'task-automated-tests': {
+      title: 'Automated Tests',
+      content: '<p><strong>Value</strong><br>Creates a safety net that catches regressions before deployment and strengthens confidence when shipping changes quickly.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Expand unit and integration coverage for critical flows, add targeted end-to-end checks for chapter navigation and feature tables, and run tests automatically in pre-deploy workflows.</p>'
+    },
+    'task-clarified-bible-column': {
+      title: 'Clarified Bible Column',
+      content: '<p><strong>Value</strong><br>Adds a companion reading column focused on plain-language clarification so readers can quickly grasp meaning without losing connection to the underlying text.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Design the column layout, define how clarifications are anchored to verses, and establish editorial guidelines to keep explanations faithful, clear, and concise.</p>'
+    },
+    'task-clarified-bible-snippets': {
+      title: 'Clarified Bible Snippets',
+      content: '<p><strong>Value</strong><br>Provides short, verse-level clarifications that are easy to scan, share, and revisit during study conversations.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Create snippet authoring workflow, attach snippets to verse references, and expose them in the Clarified Bible column with consistent formatting and source traceability.</p>'
+    },
     'task-comparison-view': {
       title: 'Comparison View (2+ Translations)',
       content: '<p><strong>Value</strong><br>Place multiple translations side by side so readers can compare wording, theology-adjacent nuances, and readability in one workspace.</p><p><strong>Status</strong><br>In progress</p><p><strong>Steps</strong><br>Align verses across selected translations, preserve shared navigation state, and add quick toggle controls for mobile/desktop layouts.</p>'
@@ -134,6 +150,10 @@
       title: 'Mobile App for iOS / Android',
       content: '<p><strong>Value</strong><br>Improves daily engagement with native navigation, notifications, and stronger offline behavior.</p><p><strong>Status</strong><br>Backlog</p><p><strong>Steps</strong><br>Stabilize web capabilities first, define shared APIs, then choose native or hybrid implementation based on performance and maintenance cost.</p>'
     },
+    'task-audio': {
+      title: 'Audio Narrations',
+      content: '<p><strong>Value</strong><br>Helps people absorb Scripture while commuting, walking, or resting, and supports learners who retain more through listening than reading alone.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Create per-chapter narration tracks with timestamp alignment to verses, provide simple playback controls in chapter view, and keep audio synchronized with shared verse links and navigation.</p>'
+    },
     'task-accessibility': {
       title: 'Accessibility Improvements',
       content: '<p><strong>Value</strong><br>ServeWell.Net should be usable by everyone, regardless of ability or device. That means clear layouts, readable text, keyboard-friendly navigation, and enough contrast so nothing gets lost in the design.</p><p><strong>Status</strong><br>In progress</p><p><strong>Steps</strong><br>Identify and fix the most impactful barriers first — focus management, contrast, touch target size — and continue improving from there based on real user feedback.</p>'
@@ -145,6 +165,18 @@
     'task-footnotes': {
       title: 'Verse-level Commentaries',
       content: '<p><strong>Value</strong><br>Short, encouraging, and practical mini-articles attached to individual verses — easy to share with a friend, or use as the foundation for a class or lesson. The goal is insight that fits the moment without requiring a full commentary reading.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Build a submission form for drafting and editing commentary articles. Once published, an article — and the form to contribute a new one — will be accessible by tapping on the verse number in any chapter view.</p>'
+    },
+    'task-topical-index': {
+      title: 'Topical Index Generation',
+      content: '<p><strong>Value</strong><br>Lets readers discover related passages by theme (for example forgiveness, hope, justice, prayer) without needing to know exact references in advance.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Generate a curated topic map tied to verse references, expose topic browsing and search, and connect each indexed topic to chapter links that open directly at the relevant verse.</p>'
+    },
+    'task-annotations': {
+      title: 'Community Edits',
+      content: '<p><strong>Value</strong><br>Allows the community to improve commentary quality over time by suggesting fixes, clarifications, and additions directly where readers are already studying.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Introduce a moderation workflow where submitted edits are reviewed before publication. Start with simple approval controls and auditing, then refine the moderation process over time as contributor patterns and quality needs become clearer.</p>'
+    },
+    'task-logins': {
+      title: 'Logins',
+      content: '<p><strong>Value</strong><br>Account-based logins make community editing safer and more accountable by tying submissions and moderation actions to identifiable users.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Implement sign-in and session management, add role-aware permissions for contributors and moderators, and connect edit history to user identities for transparent review and rollback.</p>'
     }
   };
 
