@@ -13,6 +13,9 @@
 	"assets": {
 		"directory": "./public",
 	},
+	"kv_namespaces": [
+		{ "binding": "VOTES", "id": "servewell-votes", "preview_id": "servewell-votes-preview" }
+	],
 	"observability": {
 		"enabled": true
 	}

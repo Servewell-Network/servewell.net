@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Features | ServeWell.Net</title>
-		<meta name="description" content="Features roadmap stub for ServeWell.Net" />
+		<meta name="description" content="Features and roadmap for ServeWell.Net" />
 		<style>
 			body {
 				margin: 2.25rem;
@@ -12,15 +12,248 @@
 				font-size: large;
 			}
 			main {
-				max-width: 56rem;
+				max-width: 100%;
+			}
+			.features-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 1rem;
+				margin-bottom: 1.5rem;
+				flex-wrap: wrap;
+			}
+			.filter-widget {
+				flex: 1;
+				min-width: 200px;
+				display: flex;
+				gap: 0.5rem;
+				align-items: center;
+			}
+			.filter-widget input {
+				flex: 1;
+				padding: 0.5rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.35rem;
+				font-size: 1rem;
+			}
+			.suggest-button {
+				padding: 0.5rem 1rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.35rem;
+				background: var(--bar, #f4f4f5);
+				color: var(--fg);
+				font-size: 0.95rem;
+				cursor: pointer;
+			}
+			.suggest-button:hover {
+				background: var(--bg);
+			}
+			.features-table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 1rem;
+			}
+			.features-table thead {
+				position: sticky;
+				top: 56px;
+				background: var(--bar, #f4f4f5);
+				border-bottom: 2px solid var(--border, #d9d9de);
+				z-index: 10;
+			}
+			.features-table th {
+				text-align: left;
+				padding: 0.75rem;
+				font-weight: 600;
+				color: var(--fg);
+				cursor: help;
+				position: relative;
+			}
+			.features-table th::after {
+				content: " ⓘ";
+				font-size: 0.85em;
+				opacity: 0.6;
+			}
+			.features-table td {
+				padding: 0.75rem;
+				border-bottom: 1px solid var(--border, #d9d9de);
+				vertical-align: top;
+			}
+			.features-table tbody tr:hover {
+				background: var(--panel, #ffffff);
+			}
+			.task-name {
+				font-weight: 500;
+				cursor: pointer;
+				text-decoration: underline;
+				color: var(--fg);
+			}
+			.task-name:hover {
+				opacity: 0.8;
+			}
+			.status-badge {
+				display: inline-block;
+				padding: 0.25rem 0.5rem;
+				border-radius: 0.25rem;
+				font-size: 0.85rem;
+				background: var(--bar);
+				color: var(--fg);
+				cursor: help;
+			}
+			.votes-cell {
+				font-family: monospace;
+			}
+			.votes-main {
+				color: var(--fg);
+				font-weight: 500;
+			}
+			.votes-unverified {
+				color: var(--muted, #666666);
+				font-size: 0.9em;
+				margin-left: 0.3em;
+			}
+			.funds-cell {
+				cursor: help;
+			}
+			.why-cell {
+				max-width: 250px;
+			}
+			.why-link {
+				display: inline-block;
+				color: var(--fg);
+				text-decoration: underline;
+				margin-right: 0.5em;
+				cursor: pointer;
+			}
+			.why-link:hover {
+				opacity: 0.7;
+			}
+			/* Popover styles */
+			.popover-overlay {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.2);
+				z-index: 100;
+			}
+			.popover-overlay.active {
+				display: block;
+			}
+			.popover-panel {
+				position: fixed;
+				background: var(--panel, #ffffff);
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.5rem;
+				padding: 1rem;
+				max-width: 380px;
+				max-height: 70vh;
+				overflow-y: auto;
+				z-index: 101;
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+			}
+			.popover-title {
+				font-weight: 600;
+				margin-bottom: 0.5rem;
+				color: var(--fg);
+			}
+			.popover-content {
+				font-size: 0.95rem;
+				line-height: 1.5;
+				color: var(--fg);
+			}
+			.popover-content p {
+				margin: 0.5rem 0;
+			}
+			.popover-close {
+				position: absolute;
+				top: 0.5rem;
+				right: 0.5rem;
+				background: none;
+				border: none;
+				font-size: 1.5rem;
+				cursor: pointer;
+				color: var(--muted);
+			}
+			.vote-buttons {
+				display: flex;
+				gap: 0.5rem;
+				margin-top: 0.75rem;
+			}
+			.vote-btn {
+				flex: 1;
+				padding: 0.4rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.25rem;
+				background: var(--bar);
+				color: var(--fg);
+				cursor: pointer;
+				font-size: 0.9rem;
+			}
+			.vote-btn.active {
+				background: var(--fg);
+				color: var(--bg, #ffffff);
+				border-color: var(--fg);
+			}
+			.vote-btn:hover {
+				background: var(--bg);
 			}
 		</style>
 	</head>
 	<body>
 		<main>
 			<h1>Features</h1>
-			<p>This page is a stub for upcoming feature documentation.</p>
+			
+			<div class="features-header">
+				<div class="filter-widget">
+					<input type="text" id="featureFilter" placeholder="Search features..." />
+				</div>
+				<button class="suggest-button" id="suggestButton">Suggest a feature</button>
+			</div>
+
+			<table class="features-table">
+				<thead>
+					<tr>
+						<th id="headerTask">Task/Feature</th>
+						<th id="headerVotes">Votes</th>
+						<th id="headerFunds">Funds</th>
+						<th id="headerWhy">Why</th>
+						<th id="headerStatus">Status</th>
+					</tr>
+				</thead>
+				<tbody id="featuresBody">
+					<tr>
+						<td><span class="task-name" data-task-id="feat-interlinear">Interlinear and transliteration tools</span></td>
+						<td class="votes-cell" data-feature-id="feat-interlinear"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><span class="why-link" data-ref="whats-next">Original-language study</span></td>
+						<td><span class="status-badge" data-status="experimental">Experimental</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name" data-task-id="feat-dark-mode">Dark mode</span></td>
+						<td class="votes-cell" data-feature-id="feat-dark-mode"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><span class="why-link">Visual accessibility</span></td>
+						<td><span class="status-badge" data-status="stable">Stable</span></td>
+					</tr>
+					<tr>
+						<td><span class="task-name" data-task-id="feat-bookmarks">Bookmarks and reading progress</span></td>
+						<td class="votes-cell" data-feature-id="feat-bookmarks"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><span class="why-link">User experience</span></td>
+						<td><span class="status-badge" data-status="stable">Stable</span></td>
+					</tr>
+				</tbody>
+			</table>
 		</main>
+
+		<!-- Popovers -->
+		<div class="popover-overlay" id="popoverOverlay"></div>
+		<div class="popover-panel" id="popoverPanel" style="display: none;">
+			<button class="popover-close" id="popoverClose">✕</button>
+			<div class="popover-title" id="popoverTitle"></div>
+			<div class="popover-content" id="popoverContent"></div>
+		</div>
+
 		<script src="/js/servewell-app-shell.js"></script>
+		<script src="/js/features-popovers.js"></script>
 	</body>
 </html>

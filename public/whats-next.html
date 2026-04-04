@@ -51,6 +51,88 @@
 				background: var(--bar);
 				color: var(--fg);
 			}
+			.votes-cell {
+				font-family: monospace;
+				cursor: help;
+			}
+			.votes-main {
+				color: var(--fg);
+				font-weight: 500;
+			}
+			.votes-unverified {
+				color: var(--muted, #666666);
+				font-size: 0.9em;
+				margin-left: 0.3em;
+			}
+			/* Popover styles */
+			.popover-overlay {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.2);
+				z-index: 100;
+			}
+			.popover-overlay.active {
+				display: block;
+			}
+			.popover-panel {
+				position: fixed;
+				background: var(--panel, #ffffff);
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.5rem;
+				padding: 1rem;
+				max-width: 380px;
+				max-height: 70vh;
+				overflow-y: auto;
+				z-index: 101;
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+			}
+			.popover-title {
+				font-weight: 600;
+				margin-bottom: 0.5rem;
+				color: var(--fg);
+			}
+			.popover-content {
+				font-size: 0.95rem;
+				line-height: 1.5;
+				color: var(--fg);
+			}
+			.popover-content p {
+				margin: 0.5rem 0;
+			}
+			.popover-close {
+				position: absolute;
+				top: 0.5rem;
+				right: 0.5rem;
+				background: none;
+				border: none;
+				font-size: 1.5rem;
+				cursor: pointer;
+				color: var(--muted);
+			}
+			.vote-buttons {
+				display: flex;
+				gap: 0.5rem;
+				margin-top: 0.75rem;
+			}
+			.vote-btn {
+				flex: 1;
+				padding: 0.4rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.25rem;
+				background: var(--bar);
+				color: var(--fg);
+				cursor: pointer;
+				font-size: 0.9rem;
+			}
+			.vote-btn.active {
+				background: var(--fg);
+				color: var(--bg, #ffffff);
+				border-color: var(--fg);
+			}
+			.vote-btn:hover {
+				background: var(--bg);
+			}
 		</style>
 	</head>
 	<body>
@@ -69,147 +151,154 @@
 				<tbody>
 					<tr>
 						<td><span class="task-name">Interlinear view improvements</span></td>
-						<td>8</td>
+						<td class="votes-cell" data-feature-id="task-interlinear-improvements"><span class="votes-main">8</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Better cross-language alignment for study</td>
 						<td><span class="status-badge">Planned</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Features / What's Next UI polish</span></td>
-						<td>2</td>
+						<td class="votes-cell" data-feature-id="task-ui-polish"><span class="votes-main">2</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Make roadmap more discoverable and interactive</td>
 						<td><span class="status-badge">In Progress</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Search across all chapters</span></td>
-						<td>15</td>
+						<td class="votes-cell" data-feature-id="task-search-all"><span class="votes-main">15</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Find references and topics instantly</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
+						<td><span class="task-name">Basic search</span></td>
+						<td class="votes-cell" data-feature-id="task-basic-search"><span class="votes-main">6</span><span class="votes-unverified">(+0)</span></td>
+						<td>—</td>
+						<td>Fast reference and keyword lookup in the current reading flow</td>
+						<td><span class="status-badge">Planned</span></td>
+					</tr>
+					<tr>
 						<td><span class="task-name">Bookmark sync across devices</span></td>
-						<td>12</td>
+						<td class="votes-cell" data-feature-id="task-bookmark-sync"><span class="votes-main">12</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Keep reading progress synchronized</td>
 						<td><span class="status-badge">Planned</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Greek / Hebrew reference panels</span></td>
-						<td>10</td>
+						<td class="votes-cell" data-feature-id="task-reference-panels"><span class="votes-main">10</span><span class="votes-unverified">(+0)</span></td>
 						<td>$500</td>
 						<td>Deep linguistic study support</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Comparison view (2+ translations)</span></td>
-						<td>14</td>
+						<td class="votes-cell" data-feature-id="task-comparison-view"><span class="votes-main">14</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Side-by-side translation analysis</td>
 						<td><span class="status-badge">In Progress</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Verse-level footnotes and commentaries</span></td>
-						<td>9</td>
+						<td class="votes-cell" data-feature-id="task-footnotes"><span class="votes-main">9</span><span class="votes-unverified">(+0)</span></td>
 						<td>$1200</td>
 						<td>Theological depth and context</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Reading plans and daily studies</span></td>
-						<td>7</td>
+						<td class="votes-cell" data-feature-id="task-reading-plans"><span class="votes-main">7</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Guided spiritual growth pathways</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Dark mode refinements</span></td>
-						<td>4</td>
+						<td class="votes-cell" data-feature-id="task-dark-mode-refinements"><span class="votes-main">4</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Better contrast and eye comfort</td>
 						<td><span class="status-badge">Planned</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Community annotations</span></td>
-						<td>11</td>
+						<td class="votes-cell" data-feature-id="task-annotations"><span class="votes-main">11</span><span class="votes-unverified">(+0)</span></td>
 						<td>$2000</td>
 						<td>Crowdsourced insights and questions</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Export to PDF or Word</span></td>
-						<td>6</td>
+						<td class="votes-cell" data-feature-id="task-export"><span class="votes-main">6</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Share and print favorite passages</td>
 						<td><span class="status-badge">Planned</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Topical index generation</span></td>
-						<td>8</td>
+						<td class="votes-cell" data-feature-id="task-topical-index"><span class="votes-main">8</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Navigate themes across Scripture</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Mobile app for iOS / Android</span></td>
-						<td>18</td>
+						<td class="votes-cell" data-feature-id="task-mobile-app"><span class="votes-main">18</span><span class="votes-unverified">(+0)</span></td>
 						<td>$5000</td>
 						<td>Native mobile reading experience</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Offline mode</span></td>
-						<td>13</td>
+						<td class="votes-cell" data-feature-id="task-offline"><span class="votes-main">13</span><span class="votes-unverified">(+0)</span></td>
 						<td>$800</td>
 						<td>Read without internet connection</td>
 						<td><span class="status-badge">Planned</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Audio narration with timestamps</span></td>
-						<td>11</td>
+						<td class="votes-cell" data-feature-id="task-audio"><span class="votes-main">11</span><span class="votes-unverified">(+0)</span></td>
 						<td>$3000</td>
 						<td>Listen while reading or driving</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Cross-reference map visualization</span></td>
-						<td>5</td>
+						<td class="votes-cell" data-feature-id="task-xref-map"><span class="votes-main">5</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>See how verses relate to each other</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Discussion groups and cohorts</span></td>
-						<td>9</td>
+						<td class="votes-cell" data-feature-id="task-discussion"><span class="votes-main">9</span><span class="votes-unverified">(+0)</span></td>
 						<td>$1500</td>
 						<td>Study together with others</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Passage memory tools</span></td>
-						<td>7</td>
+						<td class="votes-cell" data-feature-id="task-memory-tools"><span class="votes-main">7</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Spaced repetition for memorization</td>
 						<td><span class="status-badge">Planned</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Translation-specific notes</span></td>
-						<td>6</td>
+						<td class="votes-cell" data-feature-id="task-translation-notes"><span class="votes-main">6</span><span class="votes-unverified">(+0)</span></td>
 						<td>$600</td>
 						<td>Understand translation choices</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Workspace / project management</span></td>
-						<td>4</td>
+						<td class="votes-cell" data-feature-id="task-workspace"><span class="votes-main">4</span><span class="votes-unverified">(+0)</span></td>
 						<td>—</td>
 						<td>Organize custom studies and research</td>
 						<td><span class="status-badge">Backlog</span></td>
 					</tr>
 					<tr>
 						<td><span class="task-name">Accessibility improvements (WCAG AA)</span></td>
-						<td>3</td>
+						<td class="votes-cell" data-feature-id="task-accessibility"><span class="votes-main">3</span><span class="votes-unverified">(+0)</span></td>
 						<td>$700</td>
 						<td>Inclusivity for all readers</td>
 						<td><span class="status-badge">In Progress</span></td>
@@ -217,6 +306,16 @@
 				</tbody>
 			</table>
 		</main>
+		
+		<!-- Popovers -->
+		<div class="popover-overlay" id="popoverOverlay"></div>
+		<div class="popover-panel" id="popoverPanel" style="display: none;">
+			<button class="popover-close" id="popoverClose">✕</button>
+			<div class="popover-title" id="popoverTitle"></div>
+			<div class="popover-content" id="popoverContent"></div>
+		</div>
+
 		<script src="/js/servewell-app-shell.js"></script>
+		<script src="/js/features-popovers.js"></script>
 	</body>
 </html>
