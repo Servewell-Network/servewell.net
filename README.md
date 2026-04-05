@@ -1,12 +1,12 @@
 # ServeWell.Net
 
-ServeWell.Net is a Cloudflare Workers site focused on Bible reading, comparative views, and tools that help people serve others well.
+[ServeWell.Net](https://ServeWell.Net) is a Cloudflare Workers site focused on Bible reading, comparative views, and tools that help people serve others well.
 
 Most product details now live on the website itself:
 
-- `/features` for currently available capabilities
-- `/whats-next` for roadmap items and direction
-- `/about` for mission and contribution context
+- [/features](https://ServeWell.Net/features) for currently available capabilities
+- [/whats-next](https://ServeWell.Net/whats-next) for roadmap items and direction
+- [/about](https://ServeWell.Net/about) for mission and contribution context
 
 ## Project Guidance
 
