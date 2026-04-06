@@ -553,10 +553,68 @@ type VoteData = {
 	};
 };
 
+type VoteCounts = {
+	verified_up: number;
+	verified_down: number;
+	unverified_up: number;
+	unverified_down: number;
+};
+
+function normalizeFeatureId(featureId: string): string {
+	return featureId.replace(/^(feat|task)-/, 'need-');
+}
+
+function getLegacyFeatureIds(featureId: string): string[] {
+	if (!featureId.startsWith('need-')) return [];
+	const suffix = featureId.slice('need-'.length);
+	return [`feat-${suffix}`, `task-${suffix}`];
+}
+
+function emptyVoteCounts(): VoteCounts {
+	return {
+		verified_up: 0,
+		verified_down: 0,
+		unverified_up: 0,
+		unverified_down: 0
+	};
+}
+
+function normalizeVoteData(votes: VoteData): { votes: VoteData; changed: boolean } {
+	let changed = false;
+	const normalized: VoteData = {};
+
+	for (const [featureId, counts] of Object.entries(votes)) {
+		const targetId = normalizeFeatureId(featureId);
+		if (targetId !== featureId) changed = true;
+
+		const current = normalized[targetId] || emptyVoteCounts();
+		normalized[targetId] = {
+			verified_up: current.verified_up + (counts?.verified_up || 0),
+			verified_down: current.verified_down + (counts?.verified_down || 0),
+			unverified_up: current.unverified_up + (counts?.unverified_up || 0),
+			unverified_down: current.unverified_down + (counts?.unverified_down || 0)
+		};
+	}
+
+	if (!changed) {
+		const originalKeys = Object.keys(votes).sort().join(',');
+		const normalizedKeys = Object.keys(normalized).sort().join(',');
+		changed = originalKeys !== normalizedKeys;
+	}
+
+	return { votes: normalized, changed };
+}
+
 async function handleGetVotes(env: Env): Promise<Response> {
 	try {
-		const votes = await env.VOTES.get('all_votes', 'json') as VoteData | null;
-		const result = votes || {};
+		const rawVotes = await env.VOTES.get('all_votes', 'json') as VoteData | null;
+		const votes = rawVotes || {};
+		const normalized = normalizeVoteData(votes);
+		const result = normalized.votes;
+
+		if (normalized.changed) {
+			await env.VOTES.put('all_votes', JSON.stringify(result));
+		}
 		
 		return new Response(JSON.stringify(result), {
 			headers: { 'Content-Type': 'application/json' },
@@ -580,7 +638,7 @@ async function handleVote(request: Request, env: Env, url: URL): Promise<Respons
 			});
 		}
 
-		const featureId = parts[3];
+		const featureId = normalizeFeatureId(parts[3]);
 		const direction = parts[4]; // 'up', 'down', or 'neutral'
 
 		if (!['up', 'down', 'neutral'].includes(direction)) {
@@ -597,8 +655,21 @@ async function handleVote(request: Request, env: Env, url: URL): Promise<Respons
 		const voteKey = `vote:${voteScope}:${featureId}:${voteActor}`;
 
 		// Check if user already voted on this feature
-		const existingVoteStr = await env.VOTES.get(voteKey);
+		let existingVoteStr = await env.VOTES.get(voteKey);
 		let previousDirection: string | null = null;
+		let legacyVoteKeyUsed: string | null = null;
+
+		if (!existingVoteStr) {
+			for (const legacyFeatureId of getLegacyFeatureIds(featureId)) {
+				const legacyVoteKey = `vote:${voteScope}:${legacyFeatureId}:${voteActor}`;
+				const legacyVoteStr = await env.VOTES.get(legacyVoteKey);
+				if (legacyVoteStr) {
+					existingVoteStr = legacyVoteStr;
+					legacyVoteKeyUsed = legacyVoteKey;
+					break;
+				}
+			}
+		}
 		
 		if (existingVoteStr) {
 			try {
@@ -619,7 +690,9 @@ async function handleVote(request: Request, env: Env, url: URL): Promise<Respons
 		}
 
 		// Get current votes
-		let votes = (await env.VOTES.get('all_votes', 'json') as VoteData | null) || {};
+		const rawVotes = (await env.VOTES.get('all_votes', 'json') as VoteData | null) || {};
+		const normalized = normalizeVoteData(rawVotes);
+		let votes = normalized.votes;
 
 		// Initialize feature if needed
 		if (!votes[featureId]) {
@@ -662,6 +735,9 @@ async function handleVote(request: Request, env: Env, url: URL): Promise<Respons
 			await env.VOTES.delete(voteKey);
 		} else {
 			await env.VOTES.put(voteKey, JSON.stringify({ direction, timestamp: Date.now() }), { expirationTtl: 2592000 }); // 30 days
+		}
+		if (legacyVoteKeyUsed) {
+			await env.VOTES.delete(legacyVoteKeyUsed);
 		}
 
 		// Save updated votes
