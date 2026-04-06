@@ -171,6 +171,10 @@
       title: 'Magic-link logins',
       content: '<p><strong>Value</strong><br>Account sign-in now makes verified voting possible without requiring passwords, while leaving room to evolve the account model later if contribution workflows grow more complex.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Click Sign in in the top bar, enter your email, and use your magic link. Verified votes then appear in the main vote count.</p>'
     },
+    'feat-new-feature-marker': {
+      title: 'New feature marker',
+      content: '<p><strong>Value</strong><br>As features (existing and next) become more numerous, it becomes difficult to see which ones are new versus which ones have already been seen. A new feature marker makes it easy to find which features are new since last reading.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps to use</strong><br>When you scroll a feature into view and pause for more than five seconds, that feature is saved in your browser (localStorage). On your next visit to Features or What\'s Next, any features you haven\'t yet viewed appear with a bright blue &ldquo;New&rdquo; label, making recently added content easy to spot.</p>'
+    },
     'task-search-all': {
       title: 'Search across all chapters',
       content: '<p><strong>Value</strong><br>Find verses, names, and themes quickly across the full Bible corpus instead of searching chapter by chapter.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Build an indexed backend query path, expose relevance-ranked results, and link every result directly to a verse anchor in the chapter pages.</p>'
@@ -564,4 +568,106 @@
   });
 
   console.log('Features popovers initialized');
+
+  // --- New Feature Marker Tracking ---
+  // Track when features have been viewed (in viewport for 5+ seconds)
+  // and mark newly added features with a bright blue "New" badge
+
+  const VIEWED_FEATURES_KEY = 'servewell-viewed-features';
+  const VISIBILITY_THRESHOLD_MS = 5000; // 5 seconds
+  
+  // Track active visibility timers per feature row
+  const visibilityTimers = new Map();
+
+  function getViewedFeatures() {
+    try {
+      const stored = localStorage.getItem(VIEWED_FEATURES_KEY);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch (e) {
+      console.warn('Could not load viewed features', e);
+      return new Set();
+    }
+  }
+
+  function saveViewedFeatures(featureSet) {
+    try {
+      localStorage.setItem(VIEWED_FEATURES_KEY, JSON.stringify(Array.from(featureSet)));
+    } catch (e) {
+      console.warn('Could not save viewed features', e);
+    }
+  }
+
+  function addNewBadge(taskEl) {
+    // Check if badge already exists
+    if (taskEl.querySelector('.new-badge')) return;
+    
+    const badge = document.createElement('span');
+    badge.className = 'new-badge';
+    badge.textContent = 'New';
+    taskEl.insertBefore(badge, taskEl.firstChild);
+  }
+
+  function initializeNewFeatureMarkers() {
+    const viewed = getViewedFeatures();
+    const isFirstEverVisit = !localStorage.getItem(VIEWED_FEATURES_KEY);
+    
+    // On first visit, initialize localStorage but don't show badges
+    if (isFirstEverVisit) {
+      saveViewedFeatures(new Set());
+    }
+    
+    // Get all feature rows from the table
+    const taskNameElements = document.querySelectorAll('.task-name');
+    
+    // Set up Intersection Observer to track visibility
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const taskEl = entry.target;
+        const taskId = taskEl.getAttribute('data-task-id');
+        
+        if (entry.isIntersecting) {
+          // Element is visible - start timer if not already running
+          if (!visibilityTimers.has(taskId)) {
+            const timer = setTimeout(() => {
+              // Mark as viewed in localStorage, but don't update UI
+              const currentViewed = getViewedFeatures();
+              currentViewed.add(taskId);
+              saveViewedFeatures(currentViewed);
+              visibilityTimers.delete(taskId);
+            }, VISIBILITY_THRESHOLD_MS);
+            visibilityTimers.set(taskId, timer);
+          }
+        } else {
+          // Element is not visible - clear timer if running
+          const timer = visibilityTimers.get(taskId);
+          if (timer) {
+            clearTimeout(timer);
+            visibilityTimers.delete(taskId);
+          }
+        }
+      });
+    }, {
+      threshold: 0.5 // Element must be at least 50% visible
+    });
+
+    // Initialize badges based on localStorage and set up observers
+    taskNameElements.forEach(taskEl => {
+      const taskId = taskEl.getAttribute('data-task-id');
+      
+      // Add badge only if NOT first visit and not yet viewed
+      if (!isFirstEverVisit && !viewed.has(taskId)) {
+        addNewBadge(taskEl);
+      }
+      
+      // Start observing this element for visibility
+      observer.observe(taskEl);
+    });
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeNewFeatureMarkers);
+  } else {
+    initializeNewFeatureMarkers();
+  }
 })();

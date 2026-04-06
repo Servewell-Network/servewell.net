@@ -148,6 +148,20 @@
 			.why-link:visited {
 				color: var(--fg);
 			}
+			.new-badge {
+				display: inline-block;
+				background: #0099ff;
+				color: white;
+				font-size: 0.75em;
+				font-weight: 700;
+				padding: 0.2em 0.4em;
+				border-radius: 0.25em;
+				margin-right: 0.4em;
+				white-space: nowrap;
+			}
+			[data-theme="dark"] .new-badge {
+				background: #0077cc;
+			}
 			/* Popover styles */
 			.popover-overlay {
 				display: none;
@@ -336,6 +350,12 @@
 						<td class="votes-cell" data-feature-id="feat-logins"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
 						<td class="funds-cell">$0</td>
 						<td class="why-cell"><a href="#feat-community-edits" class="why-link">Community edits</a></td>
+					</tr>
+					<tr id="feat-new-feature-marker">
+						<td><span class="task-name" data-task-id="feat-new-feature-marker"><span class="new-badge">New</span> New feature marker</span></td>
+						<td class="votes-cell" data-feature-id="feat-new-feature-marker"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+						<td class="funds-cell">$0</td>
+						<td class="why-cell"><a href="/whats-next#task-accessibility" class="why-link">Reasonable accessibility</a></td>
 					</tr>
 
 				</tbody>
