@@ -621,7 +621,7 @@
   // Track when features have been viewed (in viewport for 5+ seconds)
   // and mark newly added features with a bright blue "New" badge
 
-  const VIEWED_FEATURES_KEY = 'servewell-viewed-features';
+  const VIEWED_FEATURES_KEY = `servewell-viewed-features:${pathname || '/'}`;
   const VISIBILITY_THRESHOLD_MS = 5000; // 5 seconds
   
   // Track active visibility timers per feature row
@@ -662,8 +662,8 @@
       .map((taskEl) => taskEl.getAttribute('data-task-id'))
       .filter((taskId) => Boolean(taskId));
 
-    // First/legacy-empty load should establish a baseline of "already known" items.
-    // This prevents marking everything as New when a user has no prior viewed list yet.
+    // First load on this page should establish a baseline of "already known" items.
+    // This prevents marking everything as New when this page has no prior viewed list yet.
     const hasStoredList = localStorage.getItem(VIEWED_FEATURES_KEY) !== null;
     let viewed = getViewedFeatures();
     if (!hasStoredList || viewed.size === 0) {
