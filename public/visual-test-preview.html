@@ -25,9 +25,35 @@
 				color: var(--ink);
 			}
 			main {
-				max-width: 1200px;
+				max-width: 1760px;
 				margin: 0 auto;
 				padding: 1rem 1rem 2rem;
+			}
+			.layout {
+				display: grid;
+				grid-template-columns: 220px minmax(0, 1fr);
+				gap: 1rem;
+				align-items: start;
+			}
+			.controls-panel {
+				background: var(--panel);
+				border: 1px solid var(--border);
+				border-radius: 0.65rem;
+				padding: 0.7rem;
+			}
+			.controls-panel p {
+				margin: 0;
+			}
+			.sr-only {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				white-space: nowrap;
+				border: 0;
 			}
 			h1 {
 				margin: 0 0 0.5rem;
@@ -36,17 +62,18 @@
 			p { margin: 0 0 0.5rem; color: var(--muted); }
 			.toolbar {
 				display: flex;
-				gap: 0.5rem;
-				flex-wrap: wrap;
-				margin: 1rem 0;
+				gap: 0.45rem;
+				flex-direction: column;
+				margin-top: 0.75rem;
 			}
 			button {
 				border: 1px solid var(--border);
 				background: var(--panel);
 				color: var(--ink);
-				padding: 0.55rem 0.85rem;
+				padding: 0.48rem 0.7rem;
 				border-radius: 0.4rem;
 				font: inherit;
+				font-size: 0.95rem;
 				cursor: pointer;
 			}
 			button.primary {
@@ -68,6 +95,15 @@
 				font-size: 0.95rem;
 				color: var(--muted);
 			}
+			#slideDetail {
+				margin: 0 0 0.75rem;
+				font-size: 0.93rem;
+				color: var(--muted);
+			}
+			#slideDetail.is-error {
+				color: #b35a00;
+				font-weight: 600;
+			}
 			.frame-wrap {
 				display: flex;
 				justify-content: center;
@@ -78,6 +114,7 @@
 				border-radius: 0.45rem;
 			}
 			iframe {
+				flex-shrink: 0;
 				border: 2px solid #9a9075;
 				border-radius: 0.45rem;
 				background: #ffffff;
@@ -98,31 +135,44 @@
 				padding-left: 1.25rem;
 			}
 			.checklist li { margin: 0.25rem 0; }
+			@media (max-width: 960px) {
+				.layout {
+					grid-template-columns: 1fr;
+				}
+				.toolbar {
+					flex-direction: row;
+					flex-wrap: wrap;
+				}
+			}
 		</style>
 	</head>
 	<body>
 		<main>
-			<h1>Visual Pre-Deploy Preview</h1>
-			<p>
-				Use Space or Next to advance. Confirm layout, popovers, voting, and auth behavior
-				on both narrow and wide viewports.
-			</p>
+			<h1 class="sr-only">Visual Pre-Deploy Preview</h1>
+			<div class="layout">
+				<aside class="controls-panel">
+					<p>
+						Use Space or Next to advance. Confirm layout, popovers, voting, and auth behavior
+						on both narrow and wide viewports.
+					</p>
+					<div class="toolbar">
+						<button id="prevBtn">Previous</button>
+						<button id="nextBtn" class="primary">Next</button>
+						<button id="reloadBtn">Reload Frame</button>
+					</div>
+				</aside>
 
-			<div class="toolbar">
-				<button id="prevBtn">Previous</button>
-				<button id="nextBtn" class="primary">Next</button>
-				<button id="reloadBtn">Reload Frame</button>
-			</div>
-
-			<section class="stage">
-				<div class="slide-meta">
-					<div id="slideTitle"></div>
-					<div id="slideCounter"></div>
+				<section class="stage">
+					<div class="slide-meta">
+						<div id="slideTitle"></div>
+						<div id="slideCounter"></div>
+					</div>
+					<p id="slideDetail"></p>
+					<div class="frame-wrap">
+						<iframe id="previewFrame" title="Visual check preview frame" src="/" width="1220" height="600"></iframe>
+					</div>
+				</section>
 				</div>
-				<div class="frame-wrap">
-					<iframe id="previewFrame" title="Visual check preview frame" src="/" width="1280" height="800"></iframe>
-				</div>
-			</section>
 
 			<section class="checklist">
 				<h2>Manual checklist</h2>
@@ -138,54 +188,261 @@
 		</main>
 
 		<script>
-			const slides = [
-				{ title: 'Home - Wide', path: '/', width: 1280, height: 800 },
-				{ title: 'Home - Narrow', path: '/', width: 375, height: 600 },
-				{ title: 'Features - Wide', path: '/features', width: 1280, height: 800 },
-				{ title: 'Features - Narrow', path: '/features', width: 375, height: 600 },
-				{ title: "What\'s Next - Wide", path: '/whats-next', width: 1280, height: 800 },
-				{ title: "What\'s Next - Narrow", path: '/whats-next', width: 375, height: 600 }
+			function baseRun(label) {
+				return [
+					{ type: 'page', title: `${label}: Home - Wide`, path: '/', width: 1220, height: 600 },
+					{ type: 'page', title: `${label}: Home - Narrow`, path: '/', width: 375, height: 600 },
+					{ type: 'page', title: `${label}: Features - Wide`, path: '/features', width: 1220, height: 600 },
+					{ type: 'page', title: `${label}: Features - Narrow`, path: '/features', width: 375, height: 600 },
+					{ type: 'page', title: `${label}: What's Next - Wide`, path: '/whats-next', width: 1220, height: 600 },
+					{ type: 'page', title: `${label}: What's Next - Narrow`, path: '/whats-next', width: 375, height: 600 },
+					{ type: 'page', title: `${label}: About - Wide`, path: '/about', width: 1220, height: 600 },
+					{ type: 'page', title: `${label}: About - Narrow`, path: '/about', width: 375, height: 600 },
+					{ type: 'page', title: `${label}: Genesis 1`, path: '/-/Genesis/1', width: 1220, height: 600 },
+					{ type: 'page', title: `${label}: Malachi 4:6`, path: '/-/Malachi/4#6', width: 1220, height: 600 },
+					{ type: 'page', title: `${label}: Matthew 1`, path: '/-/Matthew/1', width: 1220, height: 600 },
+					{ type: 'page', title: `${label}: Revelation 22:21`, path: '/-/Revelation/22#21', width: 1220, height: 600 }
+				];
+			}
+
+			const rawSlides = [
+				...baseRun('Run 1'),
+				{ type: 'action', title: 'Action: Open app menu', selector: '[data-action="menu-open"]', event: 'click' },
+				{ type: 'action', title: 'Action: Enable transliteration', selector: 'input[data-module-id="transliteration"]', event: 'check' },
+				{ type: 'action', title: 'Action: Enable dark mode', selector: 'input[data-setting="dark-mode"]', event: 'check' },
+				{ type: 'action', title: 'Action: Close app menu', selector: '[data-action="menu-close"]', event: 'click' },
+
+				{ type: 'page', title: 'Run 2: Home - Wide', path: '/', width: 1220, height: 600 },
+				{ type: 'action', title: 'Action: Open account popover', selector: '[data-auth-menu-toggle]', event: 'click' },
+				{ type: 'action', title: 'Action: Close account popover', selector: '[data-auth-menu-toggle]', event: 'click' },
+				{ type: 'page', title: 'Run 2: Home - Narrow', path: '/', width: 375, height: 600 },
+
+				{ type: 'page', title: 'Run 2: Features - Wide', path: '/features', width: 1220, height: 600 },
+				{ type: 'action', title: 'Action: Open vote popover', selector: '.votes-cell', event: 'click' },
+				{ type: 'action', title: 'Action: Click vote button', selector: '#voteUpBtn', event: 'click' },
+				{ type: 'action', title: 'Action: Open account from features', selector: '[data-auth-menu-toggle]', event: 'click' },
+				{ type: 'action', title: 'Action: Open main feature popover', selector: '.task-name', event: 'click' },
+				{ type: 'page', title: 'Run 2: Features - Narrow', path: '/features', width: 375, height: 600 },
+
+				{ type: 'page', title: "Run 2: What's Next - Wide", path: '/whats-next', width: 1220, height: 600 },
+				{ type: 'page', title: "Run 2: What's Next - Narrow", path: '/whats-next', width: 375, height: 600 },
+				{ type: 'page', title: 'Run 2: About - Wide', path: '/about', width: 1220, height: 600 },
+				{ type: 'page', title: 'Run 2: About - Narrow', path: '/about', width: 375, height: 600 },
+				{ type: 'page', title: 'Run 2: Genesis 1', path: '/-/Genesis/1', width: 1220, height: 600 },
+				{ type: 'page', title: 'Run 2: Malachi 4:6', path: '/-/Malachi/4#6', width: 1220, height: 600 },
+				{ type: 'action', title: 'Action: Select last verse in Malachi 4', selector: '.snippet-row[id="6"] .verse-num[aria-label="Verse 6"]', event: 'click' },
+				{ type: 'page', title: 'Run 2: Matthew 1', path: '/-/Matthew/1', width: 1220, height: 600 },
+				{ type: 'page', title: 'Run 2: Revelation 22:21', path: '/-/Revelation/22#21', width: 1220, height: 600 },
+				{ type: 'action', title: 'Action: Enable Literal column', selector: '#column-toggle-literal', event: 'check' },
+				{ type: 'action', title: 'Action: Disable Traditional column', selector: '#column-toggle-traditional', event: 'uncheck' },
+				{ type: 'action', title: 'Action: Re-enable Traditional column', selector: '#column-toggle-traditional', event: 'check' },
+				{ type: 'action', title: 'Action: Select last verse in Revelation 22', selector: '.snippet-row[id="21"] .verse-num[aria-label="Verse 21"]', event: 'click' },
+				{ type: 'action', title: 'Action: Show literal popover (Revelation 22:21)', selector: '.snippet-row[id="21"] .literal-pane .word-token', event: 'click' },
+				{ type: 'action', title: 'Action: Show traditional popover (Revelation 22:21)', selector: '.snippet-row[id="21"] .traditional-pane .word-token', event: 'click' },
+				{ type: 'action', title: 'Action: Open Bible nav widget', selector: '#bible-nav-btns .nav-ref-btn', event: 'click' },
+				{ type: 'action', title: 'Action: Choose a Bible book', selector: 'button[data-nav-pick-book]', event: 'click' }
 			];
+
+			const slides = [];
+			let carry = { path: '/', width: 1220, height: 600 };
+			for (const rawSlide of rawSlides) {
+				const slide = { ...rawSlide };
+				const inheritedPath = slide.type === 'action'
+					? carry.path.split('#')[0]
+					: carry.path;
+				slide.path = slide.path ?? inheritedPath;
+				slide.width = slide.width ?? carry.width;
+				slide.height = slide.height ?? carry.height;
+				carry = { path: slide.path, width: slide.width, height: slide.height };
+				slides.push(slide);
+			}
 
 			const frame = document.getElementById('previewFrame');
 			const title = document.getElementById('slideTitle');
 			const counter = document.getElementById('slideCounter');
+			const detail = document.getElementById('slideDetail');
+			const prevBtn = document.getElementById('prevBtn');
+			const nextBtn = document.getElementById('nextBtn');
+			const reloadBtn = document.getElementById('reloadBtn');
+			const frameWrap = frame.parentElement;
 			let index = 0;
+			let busy = false;
 
-			function render() {
-				const slide = slides[index];
-				title.textContent = `${slide.title} (${slide.width}x${slide.height})`;
+			function sleep(ms) {
+				return new Promise((resolve) => setTimeout(resolve, ms));
+			}
+
+			function clearServewellStorage() {
+				const clearMatchingKeys = (storage) => {
+					if (!storage) return;
+					const toRemove = [];
+					for (let i = 0; i < storage.length; i += 1) {
+						const key = storage.key(i);
+						if (key && key.startsWith('servewell-')) {
+							toRemove.push(key);
+						}
+					}
+					toRemove.forEach((key) => storage.removeItem(key));
+				};
+				clearMatchingKeys(window.localStorage);
+				clearMatchingKeys(window.sessionStorage);
+			}
+
+			function updateControls() {
+				prevBtn.disabled = busy || index === 0;
+				nextBtn.disabled = busy || index >= slides.length - 1;
+				reloadBtn.disabled = busy;
+			}
+
+			function getAppliedWidth(slide) {
+				if (slide.width < 1000) return slide.width;
+				const wrap = frame.parentElement;
+				const available = Math.floor((wrap?.clientWidth || window.innerWidth) - 6);
+				return Math.max(375, Math.min(available, 1500));
+			}
+
+			function updateHeader(slide, appliedWidth) {
+				title.textContent = `${slide.title} (${appliedWidth}x${slide.height})`;
 				counter.textContent = `Slide ${index + 1} / ${slides.length}`;
-				frame.width = String(slide.width);
+				detail.classList.remove('is-error');
+				detail.textContent = slide.type === 'action'
+					? `Action slide on ${slide.path}`
+					: `Page slide for ${slide.path}`;
+			}
+
+			function waitForLoadIfNeeded(path, forceReload) {
+				const currentUrl = new URL(frame.src, window.location.origin);
+				const currentPath = `${currentUrl.pathname}${currentUrl.hash}`;
+				if (!forceReload && currentPath === path) return Promise.resolve();
+				return new Promise((resolve) => {
+					const onLoad = () => {
+						frame.removeEventListener('load', onLoad);
+						resolve();
+					};
+					frame.addEventListener('load', onLoad);
+					frame.src = path;
+				});
+			}
+
+			async function waitForElement(doc, selector, containsText, timeoutMs = 5000) {
+				const start = Date.now();
+				while (Date.now() - start < timeoutMs) {
+					let matches = Array.from(doc.querySelectorAll(selector));
+					if (containsText) {
+						const targetText = containsText.toLowerCase();
+						matches = matches.filter((el) => (el.textContent || '').toLowerCase().includes(targetText));
+					}
+					if (matches.length > 0) return matches;
+					await sleep(100);
+				}
+				throw new Error(`Could not find selector: ${selector}`);
+			}
+
+			function dispatchCheckEvents(el) {
+				el.dispatchEvent(new Event('input', { bubbles: true }));
+				el.dispatchEvent(new Event('change', { bubbles: true }));
+			}
+
+			async function executeAction(slide) {
+				if (slide.event === 'pause') {
+					await sleep(slide.waitMs || 800);
+					return;
+				}
+				const doc = frame.contentDocument;
+				if (!doc) throw new Error('Frame document not available');
+				const matches = await waitForElement(doc, slide.selector, slide.containsText);
+				const target = matches[Math.min(slide.index || 0, matches.length - 1)];
+				if (!target) throw new Error(`No target element for selector: ${slide.selector}`);
+
+				switch (slide.event) {
+					case 'click':
+						target.click();
+						break;
+					case 'check':
+						target.checked = true;
+						dispatchCheckEvents(target);
+						break;
+					case 'uncheck':
+						target.checked = false;
+						dispatchCheckEvents(target);
+						break;
+					default:
+						throw new Error(`Unsupported event: ${slide.event}`);
+				}
+				await sleep(slide.waitMs || 450);
+			}
+
+			async function render(forceReload = false) {
+				if (busy) return;
+				busy = true;
+				window.scrollTo(0, 0);
+				if (frameWrap) {
+					frameWrap.scrollTop = 0;
+					frameWrap.scrollLeft = 0;
+				}
+				updateControls();
+				const slide = slides[index];
+				const appliedWidth = getAppliedWidth(slide);
+				updateHeader(slide, appliedWidth);
+				frame.width = String(appliedWidth);
 				frame.height = String(slide.height);
-				frame.src = slide.path;
+				try {
+					await waitForLoadIfNeeded(slide.path, forceReload);
+					if (slide.type === 'action') {
+						await executeAction(slide);
+						detail.textContent = `${detail.textContent} - complete`;
+					}
+					window.scrollTo(0, 0);
+					if (frameWrap) {
+						frameWrap.scrollTop = 0;
+						frameWrap.scrollLeft = 0;
+					}
+				} catch (error) {
+					detail.classList.add('is-error');
+					detail.textContent = `${detail.textContent} - failed: ${error.message}`;
+				}
+				busy = false;
+				updateControls();
 			}
 
-			function next() {
-				index = (index + 1) % slides.length;
-				render();
+			function goToNext() {
+				if (index >= slides.length - 1 || busy) return;
+				index += 1;
+				void render(false);
 			}
 
-			function prev() {
-				index = (index - 1 + slides.length) % slides.length;
-				render();
+			function goToPrevious() {
+				if (index <= 0 || busy) return;
+				index -= 1;
+				void render(false);
 			}
 
-			document.getElementById('nextBtn').addEventListener('click', next);
-			document.getElementById('prevBtn').addEventListener('click', prev);
-			document.getElementById('reloadBtn').addEventListener('click', render);
+			nextBtn.addEventListener('click', goToNext);
+			prevBtn.addEventListener('click', goToPrevious);
+			reloadBtn.addEventListener('click', () => {
+				void render(true);
+			});
 
 			document.addEventListener('keydown', (event) => {
 				if (event.code === 'Space') {
 					event.preventDefault();
-					next();
+					goToNext();
 				} else if (event.code === 'ArrowLeft') {
 					event.preventDefault();
-					prev();
+					goToPrevious();
 				}
 			});
 
-			render();
+			window.addEventListener('resize', () => {
+				if (busy) return;
+				const current = slides[index];
+				if (current && current.width >= 1000) {
+					void render(false);
+				}
+			});
+
+			clearServewellStorage();
+			void render(true);
 		</script>
 	</body>
 </html>
