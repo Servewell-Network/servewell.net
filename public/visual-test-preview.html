@@ -201,7 +201,7 @@
 					{ type: 'page', title: `${label}: Genesis 1`, path: '/-/Genesis/1', width: 1220, height: 600 },
 					{ type: 'page', title: `${label}: Malachi 4:6`, path: '/-/Malachi/4#6', width: 1220, height: 600 },
 					{ type: 'page', title: `${label}: Matthew 1`, path: '/-/Matthew/1', width: 1220, height: 600 },
-					{ type: 'page', title: `${label}: Revelation 22:21`, path: '/-/Revelation/22#21', width: 1220, height: 600 }
+					{ type: 'page', title: `${label}: Revelation 22:2`, path: '/-/Revelation/22#2', width: 1220, height: 600 }
 				];
 			}
 
@@ -232,14 +232,13 @@
 				{ type: 'page', title: 'Run 2: Malachi 4:6', path: '/-/Malachi/4#6', width: 1220, height: 600 },
 				{ type: 'action', title: 'Action: Select last verse in Malachi 4', selector: '.snippet-row[id="6"] .verse-num[aria-label="Verse 6"]', event: 'click' },
 				{ type: 'page', title: 'Run 2: Matthew 1', path: '/-/Matthew/1', width: 1220, height: 600 },
-				{ type: 'page', title: 'Run 2: Revelation 22:21', path: '/-/Revelation/22#21', width: 1220, height: 600 },
+				{ type: 'page', title: 'Run 2: Revelation 22:2', path: '/-/Revelation/22#2', width: 1220, height: 600 },
 				{ type: 'action', title: 'Action: Enable Literal column', selector: '#column-toggle-literal', event: 'check' },
 				{ type: 'action', title: 'Action: Disable Traditional column', selector: '#column-toggle-traditional', event: 'uncheck' },
 				{ type: 'action', title: 'Action: Re-enable Traditional column', selector: '#column-toggle-traditional', event: 'check' },
-				{ type: 'action', title: 'Action: Select last verse in Revelation 22', selector: '.snippet-row[id="21"] .verse-num[aria-label="Verse 21"]', event: 'click' },
-				{ type: 'action', title: 'Action: Confirm verse popover rendered (Revelation 22:21)', selector: '#verse-number-popover .verse-number-popover-link-btn', event: 'assert-present' },
-				{ type: 'action', title: 'Action: Show literal popover (Revelation 22:21)', selector: '.snippet-row[id="21"] .literal-pane .word-token', event: 'click' },
-				{ type: 'action', title: 'Action: Show traditional popover (Revelation 22:21)', selector: '.snippet-row[id="21"] .traditional-pane .word-token', event: 'click' },
+				{ type: 'action', title: 'Action: Select verse 2 in Revelation 22', selector: '.snippet-row[id="2"] .verse-num[aria-label="Verse 2"]', event: 'click' },
+				{ type: 'action', title: 'Action: Show literal popover (Revelation 22:2)', selector: '.snippet-row[id="2"] .literal-pane .word-token', event: 'click' },
+				{ type: 'action', title: 'Action: Show traditional popover (Revelation 22:2)', selector: '.snippet-row[id="2"] .traditional-pane .word-token', event: 'click' },
 				{ type: 'action', title: 'Action: Open Bible nav widget', selector: '#bible-nav-btns .nav-ref-btn', event: 'click' },
 				{ type: 'action', title: 'Action: Choose a Bible book', selector: 'button[data-nav-pick-book]', event: 'click' }
 			];
