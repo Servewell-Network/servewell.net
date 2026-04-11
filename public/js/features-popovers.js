@@ -187,14 +187,6 @@
       title: 'Settings in links',
       content: '<p><strong>Value</strong><br>Lets people share links that preserve meaningful on-screen settings so friends can open the same passage and immediately see the same important context.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Define which settings are safe and useful to encode in URLs, add copy-link controls that include those settings, and ensure incoming links restore view state predictably across supported pages.</p>'
     },
-    'need-reliability': {
-      title: 'Reliability',
-      content: '<p><strong>Value</strong><br>Readers need to trust that core features keep working every day. Reliable behavior protects study momentum and prevents avoidable frustration.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Define reliability targets for key journeys (chapter loading, navigation, voting, and popovers), monitor regressions, and prioritize fixes that reduce breakage risk.</p>'
-    },
-    'need-automated-tests': {
-      title: 'Automated tests',
-      content: '<p><strong>Value</strong><br>Creates a safety net that catches regressions before deployment and strengthens confidence when shipping changes quickly.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Expand unit and integration coverage for critical flows, add targeted end-to-end checks for chapter navigation and feature tables, and run tests automatically in pre-deploy workflows.</p>'
-    },
     'need-clarified-bible-column': {
       title: 'Clarified Bible column',
       content: '<p><strong>Value</strong><br>Adds a companion reading column focused on plain-language clarification so readers can quickly grasp meaning without losing connection to the underlying text.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Design the column layout, define how clarifications are anchored to verses, and establish editorial guidelines to keep explanations faithful, clear, and concise.</p>'
@@ -266,6 +258,14 @@
     'need-better-use-of-space': {
       title: 'Better use of space',
       content: '<p><strong>Value</strong><br>Currently there are two significant space issues. One is that to keep the translations aligned, we have to introduce space between the verses, which is misleading because the original text did not even have the concept of verses. The other is that on a narrow screen it is better to divide the screen horizontally rather than vertically.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Both of these issues can theoretically be solved by a nuanced scrolling mechanism. The idea is to dynamically adjust the scrolling speed of each column to keep parallel content aligned.</p>'
+    },
+    'need-septuagint': {
+      title: 'Septuagint',
+      content: '<p><strong>Value</strong><br>The New Testament reveals that the Septuagint, the Greek translation of the Hebrew Scriptures, represented a text tradition that was deeply respected by the followers of God. Comparing it with what we currently call the traditional Hebrew manuscripts helps us with many details regarding how to understand the Bible.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>We would ideally find freely licensed data tagging Septuagint words with translations, and then provide the ability to reveal those along with existing translations.</p>'
+    },
+    'need-second-batch-ancient-texts': {
+      title: 'Add 2nd batch of ancient texts',
+      content: '<p><strong>Value</strong><br>Additional revered texts on this platform will facilitate meaningful conversations between faith communities and allow more people to discover a bigger view of God. There will also be language and culture insights.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>We would ideally find freely licensed data tagging original words of ancient texts with their translations, and then build on those.</p>'
     },
     'need-improve-page-load-performance': {
       title: 'Improve page load performance',
