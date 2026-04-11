@@ -457,6 +457,10 @@ body.app-panel-open #app-shell-root .app-overlay {
   #app-shell-root .app-topbar > .app-topbar-link {
     display: none;
   }
+
+  #app-shell-root .app-topbar > .app-auth-cluster {
+    display: none;
+  }
 }
 
 @media (min-width: 900px) {
