@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      phasing: ${{ steps.filter.outputs.phasing }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'public/**'
+              - 'playwright.config.ts'
+              - 'test/e2e/**'
+            backend:
+              - 'src/index.ts'
+              - 'test/index.spec.ts'
+              - 'test/api-contracts.spec.ts'
+              - 'test/schemas/**'
+              - 'wrangler.jsonc'
+            phasing:
+              - 'src/phasingScripts/**'
+              - 'src/json-Phase2/**'
+              - 'test/phasing.spec.ts'
+              - 'scripts/generate-bible-spot-check-fixture.mjs'
+              - 'test/fixtures/bible-spot-checks.json'
+            shared:
+              - 'src/shared/**'
+              - 'test/feature-inventory.spec.ts'
+              - 'scripts/generate-feature-inventory.mjs'
+
+  base-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generate fixture files
+        run: |
+          npm run generate:bible-spot-checks
+          npm run generate:feature-inventory
+      - name: Verify generated files are committed
+        run: git diff --exit-code -- test/fixtures/bible-spot-checks.json src/shared/feature-inventory.json
+      - name: Type check
+        run: npx tsc --noEmit
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    needs: [changes, base-checks]
+    if: needs.changes.outputs.backend == 'true' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run backend and inventory unit tests
+        run: npm run test:run
+
+  phasing-tests:
+    runs-on: ubuntu-latest
+    needs: [changes, base-checks]
+    if: needs.changes.outputs.phasing == 'true' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run generate:bible-spot-checks
+      - name: Run phasing exact-match tests
+        run: npm run test:phasing
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [changes, base-checks]
+    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run e2e smoke tests
+        run: npm run test:e2e
+        env:
+          CI: true

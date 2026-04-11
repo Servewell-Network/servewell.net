@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Visual Pre-Deploy Preview | ServeWell.Net</title>
+		<style>
+			:root {
+				--bg: #f3efe4;
+				--panel: #fffdf7;
+				--ink: #1f1e1a;
+				--muted: #5f5b4f;
+				--accent: #005f73;
+				--accent-2: #9b2226;
+				--border: #d2c8ac;
+			}
+			* { box-sizing: border-box; }
+			body {
+				margin: 0;
+				font-family: Georgia, Cambria, "Times New Roman", serif;
+				background:
+					radial-gradient(circle at 80% 10%, rgba(0,95,115,0.12), transparent 32%),
+					radial-gradient(circle at 5% 80%, rgba(155,34,38,0.1), transparent 30%),
+					var(--bg);
+				color: var(--ink);
+			}
+			main {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 1rem 1rem 2rem;
+			}
+			h1 {
+				margin: 0 0 0.5rem;
+				font-size: clamp(1.4rem, 3vw, 2rem);
+			}
+			p { margin: 0 0 0.5rem; color: var(--muted); }
+			.toolbar {
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+				margin: 1rem 0;
+			}
+			button {
+				border: 1px solid var(--border);
+				background: var(--panel);
+				color: var(--ink);
+				padding: 0.55rem 0.85rem;
+				border-radius: 0.4rem;
+				font: inherit;
+				cursor: pointer;
+			}
+			button.primary {
+				background: var(--accent);
+				color: #ffffff;
+				border-color: var(--accent);
+			}
+			.stage {
+				background: var(--panel);
+				border: 1px solid var(--border);
+				border-radius: 0.65rem;
+				padding: 1rem;
+			}
+			.slide-meta {
+				display: flex;
+				justify-content: space-between;
+				gap: 1rem;
+				margin-bottom: 0.75rem;
+				font-size: 0.95rem;
+				color: var(--muted);
+			}
+			.frame-wrap {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				overflow: auto;
+				padding: 0.5rem;
+				background: #ede7d8;
+				border-radius: 0.45rem;
+			}
+			iframe {
+				border: 2px solid #9a9075;
+				border-radius: 0.45rem;
+				background: #ffffff;
+			}
+			.checklist {
+				margin-top: 1rem;
+				background: #fbf7ea;
+				border: 1px dashed #b4a67a;
+				border-radius: 0.45rem;
+				padding: 0.75rem;
+			}
+			.checklist h2 {
+				font-size: 1.05rem;
+				margin: 0 0 0.5rem;
+			}
+			.checklist ul {
+				margin: 0;
+				padding-left: 1.25rem;
+			}
+			.checklist li { margin: 0.25rem 0; }
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>Visual Pre-Deploy Preview</h1>
+			<p>
+				Use Space or Next to advance. Confirm layout, popovers, voting, and auth behavior
+				on both narrow and wide viewports.
+			</p>
+
+			<div class="toolbar">
+				<button id="prevBtn">Previous</button>
+				<button id="nextBtn" class="primary">Next</button>
+				<button id="reloadBtn">Reload Frame</button>
+			</div>
+
+			<section class="stage">
+				<div class="slide-meta">
+					<div id="slideTitle"></div>
+					<div id="slideCounter"></div>
+				</div>
+				<div class="frame-wrap">
+					<iframe id="previewFrame" title="Visual check preview frame" src="/" width="1280" height="800"></iframe>
+				</div>
+			</section>
+
+			<section class="checklist">
+				<h2>Manual checklist</h2>
+				<ul>
+					<li>No clipped text or horizontal overflow on narrow slides</li>
+					<li>Popover opens and closes correctly</li>
+					<li>Vote controls still respond and totals update</li>
+					<li>Auth button opens sign-in flow</li>
+					<li>New badges only appear where expected</li>
+					<li>No obvious console/runtime errors in inspected pages</li>
+				</ul>
+			</section>
+		</main>
+
+		<script>
+			const slides = [
+				{ title: 'Home - Wide', path: '/', width: 1280, height: 800 },
+				{ title: 'Home - Narrow', path: '/', width: 375, height: 600 },
+				{ title: 'Features - Wide', path: '/features', width: 1280, height: 800 },
+				{ title: 'Features - Narrow', path: '/features', width: 375, height: 600 },
+				{ title: "What\'s Next - Wide", path: '/whats-next', width: 1280, height: 800 },
+				{ title: "What\'s Next - Narrow", path: '/whats-next', width: 375, height: 600 }
+			];
+
+			const frame = document.getElementById('previewFrame');
+			const title = document.getElementById('slideTitle');
+			const counter = document.getElementById('slideCounter');
+			let index = 0;
+
+			function render() {
+				const slide = slides[index];
+				title.textContent = `${slide.title} (${slide.width}x${slide.height})`;
+				counter.textContent = `Slide ${index + 1} / ${slides.length}`;
+				frame.width = String(slide.width);
+				frame.height = String(slide.height);
+				frame.src = slide.path;
+			}
+
+			function next() {
+				index = (index + 1) % slides.length;
+				render();
+			}
+
+			function prev() {
+				index = (index - 1 + slides.length) % slides.length;
+				render();
+			}
+
+			document.getElementById('nextBtn').addEventListener('click', next);
+			document.getElementById('prevBtn').addEventListener('click', prev);
+			document.getElementById('reloadBtn').addEventListener('click', render);
+
+			document.addEventListener('keydown', (event) => {
+				if (event.code === 'Space') {
+					event.preventDefault();
+					next();
+				} else if (event.code === 'ArrowLeft') {
+					event.preventDefault();
+					prev();
+				}
+			});
+
+			render();
+		</script>
+	</body>
+</html>

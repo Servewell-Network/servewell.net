@@ -1,0 +1,2022 @@
+{
+  "generatedAt": "2026-04-11T20:08:50.878Z",
+  "source": "Phase2 canonical JSON outputs",
+  "spotChecks": [
+    {
+      "reference": "Genesis 1:1",
+      "file": "src/json-Phase2/docs/01-Gen/Gen001.json",
+      "snippetId": "Gen1:1",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Heading",
+          "Text": "The Creation"
+        },
+        {
+          "InsertionType": "Cross Ref.",
+          "Text": "<br /><span class=|cross|>(<a href =|../john/1.htm|>John 1:1–5</a>; <a href =|../hebrews/11.htm|>Hebrews 11:1–3</a>)</span>"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "In",
+          "StrongsId": "H7225",
+          "OriginalMorphemeId": "Gen1:1.1"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H7225",
+          "OriginalMorphemeIds": [
+            "Gen1:1.6",
+            "Gen1:1.10"
+          ]
+        },
+        {
+          "EnglishWord": "beginning",
+          "StrongsId": "H7225",
+          "OriginalMorphemeId": "Gen1:1.2"
+        },
+        {
+          "EnglishWord": "God",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Gen1:1.4"
+        },
+        {
+          "EnglishWord": "created",
+          "StrongsId": "H1254",
+          "OriginalMorphemeId": "Gen1:1.3"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H8064",
+          "OriginalMorphemeId": "Gen1:1.6"
+        },
+        {
+          "EnglishWord": "heavens",
+          "StrongsId": "H8064",
+          "OriginalMorphemeId": "Gen1:1.7"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H853",
+          "OriginalMorphemeId": "Gen1:1.8"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H776",
+          "OriginalMorphemeId": "Gen1:1.10"
+        },
+        {
+          "EnglishWord": "earth.",
+          "StrongsId": "H776",
+          "OriginalMorphemeId": "Gen1:1.11"
+        }
+      ]
+    },
+    {
+      "reference": "Genesis 1:2",
+      "file": "src/json-Phase2/docs/01-Gen/Gen001.json",
+      "snippetId": "Gen1:2",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "Now",
+          "StrongsId": "H776",
+          "OriginalMorphemeId": "Gen1:2.1"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H776",
+          "OriginalMorphemeId": "Gen1:2.2"
+        },
+        {
+          "EnglishWord": "earth",
+          "StrongsId": "H776",
+          "OriginalMorphemeId": "Gen1:2.3"
+        },
+        {
+          "EnglishWord": "was",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen1:2.4"
+        },
+        {
+          "EnglishWord": "formless",
+          "StrongsId": "H8414",
+          "OriginalMorphemeId": "Gen1:2.5"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H922",
+          "OriginalMorphemeId": "Gen1:2.6"
+        },
+        {
+          "EnglishWord": "void,",
+          "StrongsId": "H922",
+          "OriginalMorphemeId": "Gen1:2.7"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H2822",
+          "OriginalMorphemeId": "Gen1:2.8"
+        },
+        {
+          "EnglishWord": "darkness",
+          "StrongsId": "H2822",
+          "OriginalMorphemeId": "Gen1:2.9"
+        },
+        {
+          "EnglishWord": "was",
+          "StrongsId": "H5921",
+          "OriginalMorphemeId": "Gen1:2.10"
+        },
+        {
+          "EnglishWord": "over",
+          "StrongsId": "H5921",
+          "OriginalMorphemeId": "Gen1:2.10"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H6440",
+          "OriginalMorphemeIds": [
+            "Gen1:2.2",
+            "Gen1:2.21"
+          ]
+        },
+        {
+          "EnglishWord": "surface",
+          "StrongsId": "H6440",
+          "OriginalMorphemeId": "Gen1:2.12"
+        },
+        {
+          "EnglishWord": "of",
+          "StrongsId": "H8415",
+          "OriginalMorphemeId": "Gen1:2.13"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H8415",
+          "OriginalMorphemeIds": [
+            "Gen1:2.2",
+            "Gen1:2.21"
+          ]
+        },
+        {
+          "EnglishWord": "deep.",
+          "StrongsId": "H8415",
+          "OriginalMorphemeId": "Gen1:2.13"
+        },
+        {
+          "EnglishWord": "And",
+          "StrongsId": "H7307",
+          "OriginalMorphemeId": "Gen1:2.14"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H7307",
+          "OriginalMorphemeIds": [
+            "Gen1:2.2",
+            "Gen1:2.21"
+          ]
+        },
+        {
+          "EnglishWord": "Spirit",
+          "StrongsId": "H7307",
+          "OriginalMorphemeId": "Gen1:2.15"
+        },
+        {
+          "EnglishWord": "of",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Gen1:2.16"
+        },
+        {
+          "EnglishWord": "God",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Gen1:2.16"
+        },
+        {
+          "EnglishWord": "was",
+          "StrongsId": "H7363",
+          "OriginalMorphemeId": "Gen1:2.17"
+        },
+        {
+          "EnglishWord": "hovering",
+          "StrongsId": "H7363",
+          "OriginalMorphemeId": "Gen1:2.17"
+        },
+        {
+          "EnglishWord": "over",
+          "StrongsId": "H5921",
+          "OriginalMorphemeId": "Gen1:2.18"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H6440",
+          "OriginalMorphemeIds": [
+            "Gen1:2.2",
+            "Gen1:2.21"
+          ]
+        },
+        {
+          "EnglishWord": "surface",
+          "StrongsId": "H6440",
+          "OriginalMorphemeId": "Gen1:2.20"
+        },
+        {
+          "EnglishWord": "of",
+          "StrongsId": "H4325",
+          "OriginalMorphemeId": "Gen1:2.22"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H4325",
+          "OriginalMorphemeId": "Gen1:2.21"
+        },
+        {
+          "EnglishWord": "waters.",
+          "StrongsId": "H4325",
+          "OriginalMorphemeId": "Gen1:2.22"
+        }
+      ]
+    },
+    {
+      "reference": "Genesis 1:3",
+      "file": "src/json-Phase2/docs/01-Gen/Gen001.json",
+      "snippetId": "Gen1:3",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Heading",
+          "Text": "The First Day"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "And",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Gen1:3.1"
+        },
+        {
+          "EnglishWord": "God",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Gen1:3.3"
+        },
+        {
+          "EnglishWord": "said,",
+          "StrongsId": "H559",
+          "OriginalMorphemeId": "Gen1:3.2"
+        },
+        {
+          "EnglishWord": "“Let",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen1:3.4"
+        },
+        {
+          "EnglishWord": "there",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen1:3.4"
+        },
+        {
+          "EnglishWord": "be",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen1:3.4"
+        },
+        {
+          "EnglishWord": "light,”",
+          "StrongsId": "H216",
+          "OriginalMorphemeId": "Gen1:3.5"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "Cited in 2 Corinthians 4:6"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen1:3.6"
+        },
+        {
+          "EnglishWord": "there",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen1:3.7"
+        },
+        {
+          "EnglishWord": "was",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen1:3.7"
+        },
+        {
+          "EnglishWord": "light.",
+          "StrongsId": "H216",
+          "OriginalMorphemeId": "Gen1:3.5"
+        }
+      ]
+    },
+    {
+      "reference": "Genesis 12:1",
+      "file": "src/json-Phase2/docs/01-Gen/Gen012.json",
+      "snippetId": "Gen12:1",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Heading",
+          "Text": "The Call of Abram"
+        },
+        {
+          "InsertionType": "Cross Ref.",
+          "Text": "<br /><span class=|cross|>(<a href =|../genesis/26.htm|>Genesis 26:1–5</a>; <a href =|../acts/7.htm|>Acts 7:1–8</a>)</span>"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "Then",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Gen12:1.1"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeIds": [
+            "Gen12:1.25"
+          ]
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Gen12:1.3"
+        },
+        {
+          "EnglishWord": "said",
+          "StrongsId": "H559",
+          "OriginalMorphemeId": "Gen12:1.2"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Gen12:1.4"
+        },
+        {
+          "EnglishWord": "Abram,",
+          "StrongsId": "H87",
+          "OriginalMorphemeId": "Gen12:1.6"
+        },
+        {
+          "EnglishWord": "“Leave",
+          "StrongsId": "H1980",
+          "OriginalMorphemeId": "Gen12:1.7"
+        },
+        {
+          "EnglishWord": "your",
+          "OriginalMorphemeId": "Gen12:1.7"
+        },
+        {
+          "EnglishWord": "country,",
+          "StrongsId": "H776",
+          "OriginalMorphemeId": "Gen12:1.12"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H4138",
+          "OriginalMorphemeId": "Gen12:1.13"
+        },
+        {
+          "EnglishWord": "kindred,",
+          "StrongsId": "H4138",
+          "OriginalMorphemeId": "Gen12:1.16"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H1",
+          "OriginalMorphemeId": "Gen12:1.18"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H1",
+          "OriginalMorphemeId": "Gen12:1.22"
+        },
+        {
+          "EnglishWord": "father’s",
+          "StrongsId": "H1",
+          "OriginalMorphemeId": "Gen12:1.21"
+        },
+        {
+          "EnglishWord": "household,",
+          "StrongsId": "H1004",
+          "OriginalMorphemeId": "Gen12:1.20"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Gen12:1.18"
+        },
+        {
+          "EnglishWord": "go",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Gen12:1.7"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Gen12:1.23"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H776",
+          "OriginalMorphemeId": "Gen12:1.25"
+        },
+        {
+          "EnglishWord": "land",
+          "StrongsId": "H776",
+          "OriginalMorphemeId": "Gen12:1.12"
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H7200",
+          "OriginalMorphemeId": "Gen12:1.28"
+        },
+        {
+          "EnglishWord": "will",
+          "StrongsId": "H7200",
+          "OriginalMorphemeId": "Gen12:1.28"
+        },
+        {
+          "EnglishWord": "show",
+          "StrongsId": "H7200",
+          "OriginalMorphemeId": "Gen12:1.28"
+        },
+        {
+          "EnglishWord": "you.",
+          "StrongsId": "H7200",
+          "OriginalMorphemeId": "Gen12:1.28"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "Cited in Acts 7:3"
+        }
+      ]
+    },
+    {
+      "reference": "Genesis 12:2",
+      "file": "src/json-Phase2/docs/01-Gen/Gen012.json",
+      "snippetId": "Gen12:2",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H6213",
+          "OriginalMorphemeId": "Gen12:2.2"
+        },
+        {
+          "EnglishWord": "will",
+          "StrongsId": "H6213",
+          "OriginalMorphemeId": "Gen12:2.2"
+        },
+        {
+          "EnglishWord": "make",
+          "StrongsId": "H6213",
+          "OriginalMorphemeId": "Gen12:2.2"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H1419",
+          "OriginalMorphemeId": "Gen12:2.6"
+        },
+        {
+          "EnglishWord": "into",
+          "StrongsId": "H1419",
+          "OriginalMorphemeId": "Gen12:2.6"
+        },
+        {
+          "EnglishWord": "a",
+          "StrongsId": "H1419",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "great",
+          "StrongsId": "H1419",
+          "OriginalMorphemeId": "Gen12:2.6"
+        },
+        {
+          "EnglishWord": "nation,",
+          "StrongsId": "H1471",
+          "OriginalMorphemeId": "Gen12:2.5"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:2.7"
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:2.8"
+        },
+        {
+          "EnglishWord": "will",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:2.8"
+        },
+        {
+          "EnglishWord": "bless",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:2.8"
+        },
+        {
+          "EnglishWord": "you;",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:2.9"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H8034",
+          "OriginalMorphemeId": "Gen12:2.12"
+        },
+        {
+          "EnglishWord": "will",
+          "StrongsId": "H8034",
+          "OriginalMorphemeId": "Gen12:2.12"
+        },
+        {
+          "EnglishWord": "make",
+          "StrongsId": "H8034",
+          "OriginalMorphemeId": "Gen12:2.12"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H8034",
+          "OriginalMorphemeId": "Gen12:2.13"
+        },
+        {
+          "EnglishWord": "name",
+          "StrongsId": "H8034",
+          "OriginalMorphemeId": "Gen12:2.12"
+        },
+        {
+          "EnglishWord": "great,",
+          "StrongsId": "H1431",
+          "OriginalMorphemeId": "Gen12:2.11"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "so",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen12:2.14"
+        },
+        {
+          "EnglishWord": "that",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen12:2.15"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen12:2.15"
+        },
+        {
+          "EnglishWord": "will",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen12:2.15"
+        },
+        {
+          "EnglishWord": "be",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Gen12:2.15"
+        },
+        {
+          "EnglishWord": "a",
+          "StrongsId": "H1293",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "blessing.",
+          "StrongsId": "H1293",
+          "OriginalMorphemeId": "Gen12:2.16"
+        }
+      ]
+    },
+    {
+      "reference": "Genesis 12:3",
+      "file": "src/json-Phase2/docs/01-Gen/Gen012.json",
+      "snippetId": "Gen12:3",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.2"
+        },
+        {
+          "EnglishWord": "will",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.2"
+        },
+        {
+          "EnglishWord": "bless",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.2"
+        },
+        {
+          "EnglishWord": "those",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.3"
+        },
+        {
+          "EnglishWord": "who",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.3"
+        },
+        {
+          "EnglishWord": "bless",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.3"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.4"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H779",
+          "OriginalMorphemeId": "Gen12:3.8"
+        },
+        {
+          "EnglishWord": "curse",
+          "StrongsId": "H779",
+          "OriginalMorphemeId": "Gen12:3.8"
+        },
+        {
+          "EnglishWord": "those",
+          "StrongsId": "H7043",
+          "OriginalMorphemeId": "Gen12:3.6"
+        },
+        {
+          "EnglishWord": "who",
+          "StrongsId": "H7043",
+          "OriginalMorphemeId": "Gen12:3.6"
+        },
+        {
+          "EnglishWord": "curse",
+          "StrongsId": "H7043",
+          "OriginalMorphemeId": "Gen12:3.6"
+        },
+        {
+          "EnglishWord": "you;",
+          "StrongsId": "H7043",
+          "OriginalMorphemeId": "Gen12:3.7"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Gen12:3.13"
+        },
+        {
+          "EnglishWord": "all",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Gen12:3.13"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H4940",
+          "OriginalMorphemeIds": [
+            "Gen12:3.15"
+          ]
+        },
+        {
+          "EnglishWord": "families",
+          "StrongsId": "H4940",
+          "OriginalMorphemeId": "Gen12:3.14"
+        },
+        {
+          "EnglishWord": "of",
+          "StrongsId": "H127",
+          "OriginalMorphemeId": "Gen12:3.16"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H127",
+          "OriginalMorphemeId": "Gen12:3.15"
+        },
+        {
+          "EnglishWord": "earth",
+          "StrongsId": "H127",
+          "OriginalMorphemeId": "Gen12:3.16"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "will",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.10"
+        },
+        {
+          "EnglishWord": "be",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.10"
+        },
+        {
+          "EnglishWord": "blessed",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Gen12:3.10"
+        },
+        {
+          "EnglishWord": "through",
+          "OriginalMorphemeId": "Gen12:3.11"
+        },
+        {
+          "EnglishWord": "you.",
+          "OriginalMorphemeId": "Gen12:3.12"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "See Galatians 3:8"
+        },
+        {
+          "InsertionType": "End Text",
+          "Text": "”"
+        }
+      ]
+    },
+    {
+      "reference": "Exodus 3:14",
+      "file": "src/json-Phase2/docs/02-Exo/Exo003.json",
+      "snippetId": "Exo3:14",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "God",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Exo3:14.3"
+        },
+        {
+          "EnglishWord": "said",
+          "StrongsId": "H559",
+          "OriginalMorphemeId": "Exo3:14.2"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Exo3:14.20"
+        },
+        {
+          "EnglishWord": "Moses,",
+          "StrongsId": "H4872",
+          "OriginalMorphemeId": "Exo3:14.6"
+        },
+        {
+          "EnglishWord": "“I",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Exo3:14.7"
+        },
+        {
+          "EnglishWord": "AM",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Exo3:14.7"
+        },
+        {
+          "EnglishWord": "WHO",
+          "StrongsId": "H834",
+          "OriginalMorphemeId": "Exo3:14.8"
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Exo3:14.9"
+        },
+        {
+          "EnglishWord": "AM.",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Exo3:14.9"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "Or <i>I WILL BE WHAT I WILL BE</i>"
+        },
+        {
+          "EnglishWord": "This",
+          "StrongsId": "H3541",
+          "OriginalMorphemeId": "Exo3:14.12"
+        },
+        {
+          "EnglishWord": "is",
+          "StrongsId": "H3541",
+          "OriginalMorphemeId": "Exo3:14.12"
+        },
+        {
+          "EnglishWord": "what",
+          "StrongsId": "H3541",
+          "OriginalMorphemeId": "Exo3:14.12"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H559",
+          "OriginalMorphemeId": "Exo3:14.21"
+        },
+        {
+          "EnglishWord": "are",
+          "StrongsId": "H559",
+          "OriginalMorphemeId": "Exo3:14.11"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H559",
+          "OriginalMorphemeId": "Exo3:14.11"
+        },
+        {
+          "EnglishWord": "say",
+          "StrongsId": "H559",
+          "OriginalMorphemeId": "Exo3:14.11"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H1121",
+          "OriginalMorphemeId": "Exo3:14.14"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H1121",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "Israelites:",
+          "StrongsId": "H1121",
+          "OriginalMorphemeId": "Exo3:14.16"
+        },
+        {
+          "EnglishWord": "‘I",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Exo3:14.17"
+        },
+        {
+          "EnglishWord": "AM",
+          "StrongsId": "H1961",
+          "OriginalMorphemeId": "Exo3:14.17"
+        },
+        {
+          "EnglishWord": "has",
+          "StrongsId": "H7971",
+          "OriginalMorphemeId": "Exo3:14.18"
+        },
+        {
+          "EnglishWord": "sent",
+          "StrongsId": "H7971",
+          "OriginalMorphemeId": "Exo3:14.18"
+        },
+        {
+          "EnglishWord": "me",
+          "StrongsId": "H7971",
+          "OriginalMorphemeId": "Exo3:14.18"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Exo3:14.20"
+        },
+        {
+          "EnglishWord": "you.’”",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Exo3:14.20"
+        }
+      ]
+    },
+    {
+      "reference": "Leviticus 19:18",
+      "file": "src/json-Phase2/docs/03-Lev/Lev019.json",
+      "snippetId": "Lev19:18",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "EnglishWord": "Do",
+          "StrongsId": "H3808",
+          "OriginalMorphemeId": "Lev19:18.1"
+        },
+        {
+          "EnglishWord": "not",
+          "StrongsId": "H3808",
+          "OriginalMorphemeId": "Lev19:18.1"
+        },
+        {
+          "EnglishWord": "seek",
+          "StrongsId": "H5358",
+          "OriginalMorphemeId": "Lev19:18.3"
+        },
+        {
+          "EnglishWord": "revenge",
+          "StrongsId": "H5358",
+          "OriginalMorphemeId": "Lev19:18.3"
+        },
+        {
+          "EnglishWord": "or",
+          "StrongsId": "H5201",
+          "OriginalMorphemeId": "Lev19:18.7"
+        },
+        {
+          "EnglishWord": "bear",
+          "StrongsId": "H5201",
+          "OriginalMorphemeId": "Lev19:18.7"
+        },
+        {
+          "EnglishWord": "a",
+          "StrongsId": "H5201",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "grudge",
+          "StrongsId": "H5201",
+          "OriginalMorphemeId": "Lev19:18.7"
+        },
+        {
+          "EnglishWord": "against",
+          "StrongsId": "H1121",
+          "OriginalMorphemeId": "Lev19:18.10"
+        },
+        {
+          "EnglishWord": "any",
+          "StrongsId": "H1121",
+          "OriginalMorphemeId": "Lev19:18.10"
+        },
+        {
+          "EnglishWord": "of",
+          "StrongsId": "H5971",
+          "OriginalMorphemeId": "Lev19:18.11"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H5971",
+          "OriginalMorphemeId": "Lev19:18.12"
+        },
+        {
+          "EnglishWord": "people,",
+          "StrongsId": "H5971",
+          "OriginalMorphemeId": "Lev19:18.11"
+        },
+        {
+          "EnglishWord": "but",
+          "StrongsId": "H157",
+          "OriginalMorphemeId": "Lev19:18.13"
+        },
+        {
+          "EnglishWord": "love",
+          "StrongsId": "H157",
+          "OriginalMorphemeId": "Lev19:18.14"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H7453",
+          "OriginalMorphemeId": "Lev19:18.17"
+        },
+        {
+          "EnglishWord": "neighbor",
+          "StrongsId": "H7453",
+          "OriginalMorphemeId": "Lev19:18.16"
+        },
+        {
+          "EnglishWord": "as",
+          "StrongsId": "H3644",
+          "OriginalMorphemeId": "Lev19:18.18"
+        },
+        {
+          "EnglishWord": "yourself.",
+          "StrongsId": "H3644",
+          "OriginalMorphemeId": "Lev19:18.19"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "Cited in Matthew 5:43, Matthew 19:19, Matthew 22:39, Mark 12:31, Luke 10:27, Romans 13:9, Galatians 5:14, and James 2:8"
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H589",
+          "OriginalMorphemeId": "Lev19:18.20"
+        },
+        {
+          "EnglishWord": "am",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Lev19:18.21"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD.",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Lev19:18.21"
+        }
+      ]
+    },
+    {
+      "reference": "Numbers 6:24",
+      "file": "src/json-Phase2/docs/04-Num/Num006.json",
+      "snippetId": "Num6:24",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "‘May",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Num6:24.1"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Num6:24.3"
+        },
+        {
+          "EnglishWord": "bless",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Num6:24.1"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H1288",
+          "OriginalMorphemeId": "Num6:24.1"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H8104",
+          "OriginalMorphemeId": "Num6:24.4"
+        },
+        {
+          "EnglishWord": "keep",
+          "StrongsId": "H8104",
+          "OriginalMorphemeId": "Num6:24.5"
+        },
+        {
+          "EnglishWord": "you;",
+          "StrongsId": "H8104",
+          "OriginalMorphemeId": "Num6:24.5"
+        }
+      ]
+    },
+    {
+      "reference": "Numbers 6:25",
+      "file": "src/json-Phase2/docs/04-Num/Num006.json",
+      "snippetId": "Num6:25",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "may",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Num6:25.1"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Num6:25.2"
+        },
+        {
+          "EnglishWord": "cause",
+          "StrongsId": "H6440",
+          "OriginalMorphemeId": "Num6:25.4"
+        },
+        {
+          "EnglishWord": "His",
+          "StrongsId": "H6440",
+          "OriginalMorphemeId": "Num6:25.4"
+        },
+        {
+          "EnglishWord": "face",
+          "StrongsId": "H6440",
+          "OriginalMorphemeId": "Num6:25.4"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H215",
+          "OriginalMorphemeId": "Num6:25.1"
+        },
+        {
+          "EnglishWord": "shine",
+          "StrongsId": "H215",
+          "OriginalMorphemeId": "Num6:25.1"
+        },
+        {
+          "EnglishWord": "upon",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Num6:25.6"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Num6:25.6"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H2603",
+          "OriginalMorphemeId": "Num6:25.8"
+        },
+        {
+          "EnglishWord": "be",
+          "StrongsId": "H2603",
+          "OriginalMorphemeId": "Num6:25.9"
+        },
+        {
+          "EnglishWord": "gracious",
+          "StrongsId": "H2603",
+          "OriginalMorphemeId": "Num6:25.9"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H2603",
+          "OriginalMorphemeId": "Num6:25.6"
+        },
+        {
+          "EnglishWord": "you;",
+          "StrongsId": "H2603",
+          "OriginalMorphemeId": "Num6:25.7"
+        }
+      ]
+    },
+    {
+      "reference": "Numbers 6:26",
+      "file": "src/json-Phase2/docs/04-Num/Num006.json",
+      "snippetId": "Num6:26",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "may",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Num6:26.1"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Num6:26.2"
+        },
+        {
+          "EnglishWord": "lift",
+          "StrongsId": "H5375",
+          "OriginalMorphemeId": "Num6:26.1"
+        },
+        {
+          "EnglishWord": "up",
+          "StrongsId": "H5375",
+          "OriginalMorphemeId": "Num6:26.1"
+        },
+        {
+          "EnglishWord": "His",
+          "StrongsId": "H6440",
+          "OriginalMorphemeId": "Num6:26.5"
+        },
+        {
+          "EnglishWord": "countenance",
+          "StrongsId": "H6440",
+          "OriginalMorphemeId": "Num6:26.4"
+        },
+        {
+          "EnglishWord": "toward",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Num6:26.6"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Num6:26.6"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H7760",
+          "OriginalMorphemeId": "Num6:26.8"
+        },
+        {
+          "EnglishWord": "give",
+          "StrongsId": "H7760",
+          "OriginalMorphemeId": "Num6:26.9"
+        },
+        {
+          "EnglishWord": "you",
+          "OriginalMorphemeId": "Num6:26.11"
+        },
+        {
+          "EnglishWord": "peace.’",
+          "StrongsId": "H7965",
+          "OriginalMorphemeId": "Num6:26.12"
+        }
+      ]
+    },
+    {
+      "reference": "Deuteronomy 6:4",
+      "file": "src/json-Phase2/docs/05-Deu/Deu006.json",
+      "snippetId": "Deu6:4",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "Hear,",
+          "StrongsId": "H8085",
+          "OriginalMorphemeId": "Deu6:4.1"
+        },
+        {
+          "EnglishWord": "O",
+          "StrongsId": "H3478",
+          "OriginalMorphemeId": "Deu6:4.2"
+        },
+        {
+          "EnglishWord": "Israel:",
+          "StrongsId": "H3478",
+          "OriginalMorphemeId": "Deu6:4.2"
+        },
+        {
+          "EnglishWord": "The",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Deu6:4.3"
+        },
+        {
+          "EnglishWord": "our",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Deu6:4.5"
+        },
+        {
+          "EnglishWord": "God,",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Deu6:4.4"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Deu6:4.6"
+        },
+        {
+          "EnglishWord": "is",
+          "StrongsId": "H259",
+          "OriginalMorphemeId": "Deu6:4.8"
+        },
+        {
+          "EnglishWord": "One.",
+          "StrongsId": "H259",
+          "OriginalMorphemeId": "Deu6:4.8"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "Or <i>The LORD our God is One LORD</i> or <i>The LORD is our God, the LORD is One</i> or <i>The LORD is our God, the LORD alone</i>; cited in Mark 12:29"
+        }
+      ]
+    },
+    {
+      "reference": "Deuteronomy 6:5",
+      "file": "src/json-Phase2/docs/05-Deu/Deu006.json",
+      "snippetId": "Deu6:5",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "EnglishWord": "And",
+          "StrongsId": "H157",
+          "OriginalMorphemeId": "Deu6:5.1"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H157",
+          "OriginalMorphemeId": "Deu6:5.2"
+        },
+        {
+          "EnglishWord": "shall",
+          "StrongsId": "H157",
+          "OriginalMorphemeId": "Deu6:5.2"
+        },
+        {
+          "EnglishWord": "love",
+          "StrongsId": "H157",
+          "OriginalMorphemeId": "Deu6:5.2"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Deu6:5.4"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Deu6:5.6"
+        },
+        {
+          "EnglishWord": "God",
+          "StrongsId": "H430",
+          "OriginalMorphemeId": "Deu6:5.5"
+        },
+        {
+          "EnglishWord": "with",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Deu6:5.7"
+        },
+        {
+          "EnglishWord": "all",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Deu6:5.8"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H3824",
+          "OriginalMorphemeId": "Deu6:5.11"
+        },
+        {
+          "EnglishWord": "heart",
+          "StrongsId": "H3824",
+          "OriginalMorphemeId": "Deu6:5.10"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Deu6:5.12"
+        },
+        {
+          "EnglishWord": "with",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Deu6:5.13"
+        },
+        {
+          "EnglishWord": "all",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Deu6:5.14"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H5315",
+          "OriginalMorphemeId": "Deu6:5.17"
+        },
+        {
+          "EnglishWord": "soul",
+          "StrongsId": "H5315",
+          "OriginalMorphemeId": "Deu6:5.16"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Deu6:5.18"
+        },
+        {
+          "EnglishWord": "with",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Deu6:5.19"
+        },
+        {
+          "EnglishWord": "all",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Deu6:5.20"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H3966",
+          "OriginalMorphemeId": "Deu6:5.23"
+        },
+        {
+          "EnglishWord": "strength.",
+          "StrongsId": "H3966",
+          "OriginalMorphemeId": "Deu6:5.22"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "Cited in Matthew 22:37, Mark 12:30, and Luke 10:27"
+        }
+      ]
+    },
+    {
+      "reference": "Proverbs 3:5",
+      "file": "src/json-Phase2/docs/20-Pro/Pro003.json",
+      "snippetId": "Pro3:5",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "Trust",
+          "StrongsId": "H982",
+          "OriginalMorphemeId": "Pro3:5.1"
+        },
+        {
+          "EnglishWord": "in",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Pro3:5.2"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Pro3:5.4"
+        },
+        {
+          "EnglishWord": "with",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Pro3:5.5"
+        },
+        {
+          "EnglishWord": "all",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Pro3:5.6"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H3820",
+          "OriginalMorphemeId": "Pro3:5.9"
+        },
+        {
+          "EnglishWord": "heart,",
+          "StrongsId": "H3820",
+          "OriginalMorphemeId": "Pro3:5.8"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H8172",
+          "OriginalMorphemeId": "Pro3:5.17"
+        },
+        {
+          "EnglishWord": "lean",
+          "StrongsId": "H8172",
+          "OriginalMorphemeId": "Pro3:5.17"
+        },
+        {
+          "EnglishWord": "not",
+          "StrongsId": "H408",
+          "OriginalMorphemeId": "Pro3:5.15"
+        },
+        {
+          "EnglishWord": "on",
+          "StrongsId": "H413",
+          "OriginalMorphemeId": "Pro3:5.11"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H998",
+          "OriginalMorphemeId": "Pro3:5.14"
+        },
+        {
+          "EnglishWord": "own",
+          "StrongsId": "H998",
+          "OriginalMorphemeId": "Pro3:5.13"
+        },
+        {
+          "EnglishWord": "understanding;",
+          "StrongsId": "H998",
+          "OriginalMorphemeId": "Pro3:5.13"
+        }
+      ]
+    },
+    {
+      "reference": "Proverbs 3:6",
+      "file": "src/json-Phase2/docs/20-Pro/Pro003.json",
+      "snippetId": "Pro3:6",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "in",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Pro3:6.1"
+        },
+        {
+          "EnglishWord": "all",
+          "StrongsId": "H3605",
+          "OriginalMorphemeId": "Pro3:6.2"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H1870",
+          "OriginalMorphemeId": "Pro3:6.5"
+        },
+        {
+          "EnglishWord": "ways",
+          "StrongsId": "H1870",
+          "OriginalMorphemeId": "Pro3:6.4"
+        },
+        {
+          "EnglishWord": "acknowledge",
+          "StrongsId": "H3045",
+          "OriginalMorphemeId": "Pro3:6.6"
+        },
+        {
+          "EnglishWord": "Him,",
+          "StrongsId": "H3045",
+          "OriginalMorphemeId": "Pro3:6.7"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H1931",
+          "OriginalMorphemeId": "Pro3:6.8"
+        },
+        {
+          "EnglishWord": "He",
+          "StrongsId": "H1931",
+          "OriginalMorphemeId": "Pro3:6.9"
+        },
+        {
+          "EnglishWord": "will",
+          "StrongsId": "H3474",
+          "OriginalMorphemeId": "Pro3:6.10"
+        },
+        {
+          "EnglishWord": "make",
+          "StrongsId": "H3474",
+          "OriginalMorphemeId": "Pro3:6.10"
+        },
+        {
+          "EnglishWord": "your",
+          "StrongsId": "H734",
+          "OriginalMorphemeId": "Pro3:6.12"
+        },
+        {
+          "EnglishWord": "paths",
+          "StrongsId": "H734",
+          "OriginalMorphemeId": "Pro3:6.11"
+        },
+        {
+          "EnglishWord": "{straight}.",
+          "StrongsId": "H734",
+          "OriginalMorphemeId": "None"
+        }
+      ]
+    },
+    {
+      "reference": "Psalm 23:1",
+      "file": "src/json-Phase2/docs/19-Psa/Psa023.json",
+      "snippetId": "Psa23:1",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "The",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "LORD",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Psa23:1.1"
+        },
+        {
+          "EnglishWord": "is",
+          "StrongsId": "H7462",
+          "OriginalMorphemeId": "Psa23:1.2"
+        },
+        {
+          "EnglishWord": "my",
+          "StrongsId": "H7462",
+          "OriginalMorphemeId": "Psa23:1.3"
+        },
+        {
+          "EnglishWord": "shepherd;",
+          "StrongsId": "H7462",
+          "OriginalMorphemeId": "Psa23:1.2"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "See Revelation 7:17."
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H3808",
+          "OriginalMorphemeId": "Psa23:1.4"
+        },
+        {
+          "EnglishWord": "shall",
+          "StrongsId": "H3808",
+          "OriginalMorphemeId": "Psa23:1.4"
+        },
+        {
+          "EnglishWord": "not",
+          "StrongsId": "H3808",
+          "OriginalMorphemeId": "Psa23:1.4"
+        },
+        {
+          "EnglishWord": "want.",
+          "StrongsId": "H2637",
+          "OriginalMorphemeId": "Psa23:1.5"
+        }
+      ]
+    },
+    {
+      "reference": "Isaiah 53:5",
+      "file": "src/json-Phase2/docs/23-Isa/Isa053.json",
+      "snippetId": "Isa53:5",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "But",
+          "StrongsId": "H1931",
+          "OriginalMorphemeId": "Isa53:5.1"
+        },
+        {
+          "EnglishWord": "He",
+          "StrongsId": "H1931",
+          "OriginalMorphemeId": "Isa53:5.2"
+        },
+        {
+          "EnglishWord": "was",
+          "StrongsId": "H2490",
+          "OriginalMorphemeId": "Isa53:5.3"
+        },
+        {
+          "EnglishWord": "pierced",
+          "StrongsId": "H2490",
+          "OriginalMorphemeId": "Isa53:5.3"
+        },
+        {
+          "EnglishWord": "for",
+          "StrongsId": "H6588",
+          "OriginalMorphemeId": "Isa53:5.4"
+        },
+        {
+          "EnglishWord": "our",
+          "StrongsId": "H6588",
+          "OriginalMorphemeId": "Isa53:5.6"
+        },
+        {
+          "EnglishWord": "transgressions,",
+          "StrongsId": "H6588",
+          "OriginalMorphemeId": "Isa53:5.5"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "He",
+          "StrongsId": "H1792",
+          "OriginalMorphemeId": "Isa53:5.7"
+        },
+        {
+          "EnglishWord": "was",
+          "StrongsId": "H1792",
+          "OriginalMorphemeId": "Isa53:5.7"
+        },
+        {
+          "EnglishWord": "crushed",
+          "StrongsId": "H1792",
+          "OriginalMorphemeId": "Isa53:5.7"
+        },
+        {
+          "EnglishWord": "for",
+          "StrongsId": "H5771",
+          "OriginalMorphemeId": "Isa53:5.8"
+        },
+        {
+          "EnglishWord": "our",
+          "StrongsId": "H5771",
+          "OriginalMorphemeId": "Isa53:5.10"
+        },
+        {
+          "EnglishWord": "iniquities;",
+          "StrongsId": "H5771",
+          "OriginalMorphemeId": "Isa53:5.9"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H4148",
+          "OriginalMorphemeId": "None"
+        },
+        {
+          "EnglishWord": "punishment",
+          "StrongsId": "H4148",
+          "OriginalMorphemeId": "Isa53:5.11"
+        },
+        {
+          "EnglishWord": "that",
+          "StrongsId": "H7965",
+          "OriginalMorphemeId": "Isa53:5.12"
+        },
+        {
+          "EnglishWord": "brought",
+          "StrongsId": "H7965",
+          "OriginalMorphemeId": "Isa53:5.12"
+        },
+        {
+          "EnglishWord": "us",
+          "StrongsId": "H7965",
+          "OriginalMorphemeId": "Isa53:5.12"
+        },
+        {
+          "EnglishWord": "peace",
+          "StrongsId": "H7965",
+          "OriginalMorphemeId": "Isa53:5.12"
+        },
+        {
+          "EnglishWord": "was",
+          "StrongsId": "H5921",
+          "OriginalMorphemeId": "Isa53:5.14"
+        },
+        {
+          "EnglishWord": "upon",
+          "StrongsId": "H5921",
+          "OriginalMorphemeId": "Isa53:5.14"
+        },
+        {
+          "EnglishWord": "Him,",
+          "StrongsId": "H5921",
+          "OriginalMorphemeId": "Isa53:5.15"
+        },
+        {
+          "InsertionType": "Paragraph Start",
+          "Text": ""
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H2250",
+          "OriginalMorphemeId": "Isa53:5.16"
+        },
+        {
+          "EnglishWord": "by",
+          "StrongsId": "H2250",
+          "OriginalMorphemeId": "Isa53:5.17"
+        },
+        {
+          "EnglishWord": "His",
+          "StrongsId": "H2250",
+          "OriginalMorphemeId": "Isa53:5.19"
+        },
+        {
+          "EnglishWord": "stripes",
+          "StrongsId": "H2250",
+          "OriginalMorphemeId": "Isa53:5.18"
+        },
+        {
+          "EnglishWord": "we",
+          "StrongsId": "H7495",
+          "OriginalMorphemeId": "Isa53:5.20"
+        },
+        {
+          "EnglishWord": "are",
+          "StrongsId": "H7495",
+          "OriginalMorphemeId": "Isa53:5.20"
+        },
+        {
+          "EnglishWord": "healed.",
+          "StrongsId": "H7495",
+          "OriginalMorphemeId": "Isa53:5.20"
+        },
+        {
+          "InsertionType": "Footnotes",
+          "Text": "Cited in 1 Peter 2:24"
+        }
+      ]
+    },
+    {
+      "reference": "Jeremiah 29:11",
+      "file": "src/json-Phase2/docs/24-Jer/Jer029.json",
+      "snippetId": "Jer29:11",
+      "expectedEnglishHeadingsAndWords": [
+        {
+          "EnglishWord": "For",
+          "StrongsId": "H3588",
+          "OriginalMorphemeId": "Jer29:11.1"
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H595",
+          "OriginalMorphemeId": "Jer29:11.2"
+        },
+        {
+          "EnglishWord": "know",
+          "StrongsId": "H3045",
+          "OriginalMorphemeId": "Jer29:11.3"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H4284",
+          "OriginalMorphemeId": "Jer29:11.6"
+        },
+        {
+          "EnglishWord": "plans",
+          "StrongsId": "H4284",
+          "OriginalMorphemeId": "Jer29:11.7"
+        },
+        {
+          "EnglishWord": "I",
+          "StrongsId": "H595",
+          "OriginalMorphemeId": "Jer29:11.9"
+        },
+        {
+          "EnglishWord": "have",
+          "StrongsId": "H2803",
+          "OriginalMorphemeId": "Jer29:11.10"
+        },
+        {
+          "EnglishWord": "for",
+          "StrongsId": "H5921",
+          "OriginalMorphemeId": "Jer29:11.11"
+        },
+        {
+          "EnglishWord": "you,",
+          "StrongsId": "H5921",
+          "OriginalMorphemeId": "Jer29:11.12"
+        },
+        {
+          "EnglishWord": "declares",
+          "StrongsId": "H5002",
+          "OriginalMorphemeId": "Jer29:11.13"
+        },
+        {
+          "EnglishWord": "the",
+          "StrongsId": "H3068",
+          "OriginalMorphemeIds": [
+            "Jer29:11.6"
+          ]
+        },
+        {
+          "EnglishWord": "LORD,",
+          "StrongsId": "H3068",
+          "OriginalMorphemeId": "Jer29:11.15"
+        },
+        {
+          "EnglishWord": "plans",
+          "StrongsId": "H4284",
+          "OriginalMorphemeId": "Jer29:11.16"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H7965",
+          "OriginalMorphemeId": "Jer29:11.17"
+        },
+        {
+          "EnglishWord": "prosper",
+          "StrongsId": "H7965",
+          "OriginalMorphemeId": "Jer29:11.17"
+        },
+        {
+          "EnglishWord": "you",
+          "StrongsId": "H7965",
+          "OriginalMorphemeId": "Jer29:11.17"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H3808",
+          "OriginalMorphemeId": "Jer29:11.18"
+        },
+        {
+          "EnglishWord": "not",
+          "StrongsId": "H3808",
+          "OriginalMorphemeId": "Jer29:11.19"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H7451",
+          "OriginalMorphemeId": "Jer29:11.20"
+        },
+        {
+          "EnglishWord": "harm",
+          "StrongsId": "H7451",
+          "OriginalMorphemeId": "Jer29:11.21"
+        },
+        {
+          "EnglishWord": "you,",
+          "StrongsId": "H7451",
+          "OriginalMorphemeId": "Jer29:11.21"
+        },
+        {
+          "EnglishWord": "to",
+          "StrongsId": "H5414",
+          "OriginalMorphemeId": "Jer29:11.22"
+        },
+        {
+          "EnglishWord": "give",
+          "StrongsId": "H5414",
+          "OriginalMorphemeId": "Jer29:11.23"
+        },
+        {
+          "EnglishWord": "you",
+          "OriginalMorphemeId": "Jer29:11.25"
+        },
+        {
+          "EnglishWord": "a",
+          "StrongsId": "H319",
+          "OriginalMorphemeIds": [
+            "Jer29:11.6"
+          ]
+        },
+        {
+          "EnglishWord": "future",
+          "StrongsId": "H319",
+          "OriginalMorphemeId": "Jer29:11.26"
+        },
+        {
+          "EnglishWord": "and",
+          "StrongsId": "H8615",
+          "OriginalMorphemeId": "Jer29:11.27"
+        },
+        {
+          "EnglishWord": "a",
+          "StrongsId": "H8615",
+          "OriginalMorphemeIds": [
+            "Jer29:11.6"
+          ]
+        },
+        {
+          "EnglishWord": "hope.",
+          "StrongsId": "H8615",
+          "OriginalMorphemeId": "Jer29:11.28"
+        }
+      ]
+    }
+  ]
+}

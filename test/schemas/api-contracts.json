@@ -1,0 +1,57 @@
+{
+  "featureIdPattern": "^need-[a-z0-9-]+$",
+  "voteRequest": {
+    "type": "object",
+    "required": ["featureId", "direction"],
+    "properties": {
+      "featureId": { "type": "string", "pattern": "^need-[a-z0-9-]+$" },
+      "direction": { "type": "string", "enum": ["up", "down", "neutral"] }
+    }
+  },
+  "voteResponse": {
+    "type": "object",
+    "required": ["success", "featureId", "direction", "votes"],
+    "properties": {
+      "success": { "type": "boolean" },
+      "featureId": { "type": "string", "pattern": "^need-[a-z0-9-]+$" },
+      "direction": { "type": "string", "enum": ["up", "down", "neutral"] },
+      "vote_scope": { "type": "string", "enum": ["verified", "unverified"] },
+      "votes": {
+        "type": "object",
+        "required": ["main", "unverified", "breakdown"],
+        "properties": {
+          "main": { "type": "number" },
+          "unverified": { "type": "number" },
+          "breakdown": {
+            "type": "object",
+            "required": ["verified_up", "verified_down", "unverified_up", "unverified_down"],
+            "properties": {
+              "verified_up": { "type": "number" },
+              "verified_down": { "type": "number" },
+              "unverified_up": { "type": "number" },
+              "unverified_down": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "authMeResponse": {
+    "type": "object",
+    "required": ["authenticated"],
+    "properties": {
+      "authenticated": { "type": "boolean" },
+      "email": { "type": "string" }
+    }
+  },
+  "votesCollectionValue": {
+    "type": "object",
+    "required": ["verified_up", "verified_down", "unverified_up", "unverified_down"],
+    "properties": {
+      "verified_up": { "type": "number" },
+      "verified_down": { "type": "number" },
+      "unverified_up": { "type": "number" },
+      "unverified_down": { "type": "number" }
+    }
+  }
+}

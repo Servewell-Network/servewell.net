@@ -356,13 +356,10 @@ async function requireAuthUser(request: Request, env: AuthDbEnv): Promise<AuthUs
 	return { id: row.user_id, email: row.email };
 }
 
-let authTablesReady = false;
 async function ensureAuthTables(db: D1Database): Promise<void> {
-	if (authTablesReady) return;
 	for (const sql of TABLES_SQL) {
 		await db.prepare(sql).run();
 	}
-	authTablesReady = true;
 }
 
 function getAuthOrigin(url: URL, env: AuthDbEnv): string {
@@ -408,7 +405,9 @@ async function parseBody(request: Request): Promise<Record<string, unknown>> {
 	if (isFormRequest(request)) {
 		const form = await request.formData();
 		const out: Record<string, unknown> = {};
-		for (const [k, v] of form.entries()) out[k] = typeof v === 'string' ? v : '';
+		form.forEach((v, k) => {
+			out[k] = typeof v === 'string' ? v : '';
+		});
 		return out;
 	}
 	return {};

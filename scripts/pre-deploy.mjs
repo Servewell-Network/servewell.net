@@ -1,0 +1,160 @@
+#!/usr/bin/env node
+import { spawn } from 'node:child_process';
+import net from 'node:net';
+import readline from 'node:readline';
+
+const isYes = process.argv.includes('--yes');
+const skipE2E = process.argv.includes('--skip-e2e');
+
+function run(command, args, label) {
+  return new Promise((resolve, reject) => {
+    console.log(`\n== ${label} ==`);
+    const child = spawn(command, args, {
+      stdio: 'inherit',
+      shell: process.platform === 'win32'
+    });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve(undefined);
+        return;
+      }
+      reject(new Error(`${label} failed with exit code ${code}`));
+    });
+  });
+}
+
+function ask(question) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim());
+    });
+  });
+}
+
+function isPortAvailable(port) {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.unref();
+    server.on('error', () => resolve(false));
+    server.listen(port, '127.0.0.1', () => {
+      server.close(() => resolve(true));
+    });
+  });
+}
+
+async function findAvailablePort(preferredPort = 8787, maxOffset = 20) {
+  for (let offset = 0; offset <= maxOffset; offset += 1) {
+    const candidate = preferredPort + offset;
+    if (await isPortAvailable(candidate)) {
+      return candidate;
+    }
+  }
+  throw new Error(`No available local port found between ${preferredPort} and ${preferredPort + maxOffset}`);
+}
+
+function startDevServer(port) {
+  return spawn('npx', ['wrangler', 'dev', '--port', String(port)], {
+    stdio: 'inherit',
+    shell: process.platform === 'win32'
+  });
+}
+
+function openVisualPage(port) {
+  const url = `http://localhost:${port}/visual-test-preview.html`;
+  if (process.platform === 'darwin') {
+    spawn('open', [url], { stdio: 'ignore', detached: true });
+    return;
+  }
+  if (process.platform === 'win32') {
+    spawn('cmd', ['/c', 'start', '', url], { stdio: 'ignore', detached: true });
+    return;
+  }
+  spawn('xdg-open', [url], { stdio: 'ignore', detached: true });
+}
+
+function waitForDevServerBoot(devProcess, timeoutMs = 3500) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(undefined);
+    }, timeoutMs);
+
+    const onClose = (code) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error(`Dev server exited early with code ${code}`));
+    };
+
+    function cleanup() {
+      clearTimeout(timer);
+      devProcess.off('close', onClose);
+    }
+
+    devProcess.on('close', onClose);
+  });
+}
+
+async function main() {
+  try {
+    console.log('Starting pre-deploy checks...');
+
+    await run('npm', ['run', 'generate:feature-inventory'], 'Generate feature inventory');
+    await run('npm', ['run', 'generate:bible-spot-checks'], 'Generate Bible spot-check fixtures');
+
+    await run('npm', ['run', 'test:run'], 'Run unit/integration tests');
+    await run('npx', ['tsc', '--noEmit'], 'Typecheck app code');
+    await run('npm', ['run', 'test:phasing'], 'Run phasing verse exact-match tests');
+
+    if (!skipE2E) {
+      await run('npm', ['run', 'test:e2e'], 'Run Playwright end-to-end tests');
+    } else {
+      console.log('\nSkipping e2e checks due to --skip-e2e');
+    }
+
+    console.log('\n== Visual inspection gate ==');
+  const visualPort = await findAvailablePort(8787, 20);
+  console.log(`Starting local dev server on http://localhost:${visualPort}`);
+  const dev = startDevServer(visualPort);
+
+  await waitForDevServerBoot(dev, 3500);
+    console.log('Opening visual preview page...');
+  openVisualPage(visualPort);
+    console.log('Review the slideshow in browser, then return here.');
+
+    await ask('Press Enter after visual inspection is complete... ');
+
+    dev.kill('SIGINT');
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    let approved = isYes;
+    if (!approved) {
+      const answer = await ask('Ready to deploy now? (y/n): ');
+      approved = answer.toLowerCase() === 'y';
+    }
+
+    if (!approved) {
+      console.log('Deployment cancelled by user.');
+      process.exit(0);
+    }
+
+    await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
+    process.exit(0);
+  } catch (error) {
+    console.error('\nPre-deploy failed.');
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
+
+main();
