@@ -60,7 +60,8 @@ async function findAvailablePort(preferredPort = 8787, maxOffset = 20) {
 
 function startDevServer(port) {
   return spawn('npx', ['wrangler', 'dev', '--port', String(port)], {
-    stdio: 'inherit',
+    // Keep stdout/stderr visible, but prevent dev server from consuming prompt input.
+    stdio: ['ignore', 'inherit', 'inherit'],
     shell: process.platform === 'win32'
   });
 }
@@ -105,6 +106,15 @@ function waitForDevServerBoot(devProcess, timeoutMs = 3500) {
   });
 }
 
+async function askYesNo(question) {
+  for (;;) {
+    const answer = (await ask(question)).toLowerCase();
+    if (answer === 'y' || answer === 'yes') return true;
+    if (answer === 'n' || answer === 'no') return false;
+    console.log('Please enter y or n.');
+  }
+}
+
 async function main() {
   try {
     console.log('Starting pre-deploy checks...');
@@ -139,8 +149,7 @@ async function main() {
 
     let approved = isYes;
     if (!approved) {
-      const answer = await ask('Ready to deploy now? (y/n): ');
-      approved = answer.toLowerCase() === 'y';
+      approved = await askYesNo('Ready to deploy now? (y/n): ');
     }
 
     if (!approved) {
