@@ -28,7 +28,7 @@ const featuresIds = extractNeedIds(featuresHtml);
 const whatsNextIds = extractNeedIds(whatsNextHtml);
 
 const inventory = {
-  generatedAt: new Date().toISOString(),
+  generatedAt: 'fixture-v1',
   featuresPageIds: featuresIds,
   whatsNextPageIds: whatsNextIds,
   allNeedIds: Array.from(new Set([...featuresIds, ...whatsNextIds])).sort()

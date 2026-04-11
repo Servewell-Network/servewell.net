@@ -38,8 +38,48 @@ function getSnippet(filePath, snippetId) {
   return snippet.EnglishHeadingsAndWords;
 }
 
+function listMissingSourceFiles() {
+  const missing = [];
+  const seen = new Set();
+
+  for (const item of verseChecks) {
+    if (seen.has(item.file)) {
+      continue;
+    }
+    seen.add(item.file);
+
+    const absolutePath = path.join(root, item.file);
+    if (!fs.existsSync(absolutePath)) {
+      missing.push(item.file);
+    }
+  }
+
+  return missing;
+}
+
+function printMissingSourceNotice(missingFiles, outputPath) {
+  console.warn('Phase2 source files are unavailable; skipping bible spot-check fixture regeneration.');
+  console.warn(`Missing files: ${missingFiles.length}`);
+  console.warn(missingFiles.map((file) => `  - ${file}`).join('\n'));
+  console.warn(`Keeping existing fixture at ${outputPath}`);
+}
+
+const outputPath = path.join(root, 'test/fixtures/bible-spot-checks.json');
+const missingSourceFiles = listMissingSourceFiles();
+
+if (missingSourceFiles.length > 0) {
+  if (fs.existsSync(outputPath)) {
+    printMissingSourceNotice(missingSourceFiles, outputPath);
+    process.exit(0);
+  }
+
+  console.error('Phase2 source files are unavailable and no committed fallback fixture exists.');
+  console.error(`Expected fixture path: ${outputPath}`);
+  process.exit(1);
+}
+
 const fixture = {
-  generatedAt: new Date().toISOString(),
+  generatedAt: 'fixture-v1',
   source: 'Phase2 canonical JSON outputs',
   spotChecks: verseChecks.map((item) => {
     const absolutePath = path.join(root, item.file);
@@ -52,7 +92,6 @@ const fixture = {
   })
 };
 
-const outputPath = path.join(root, 'test/fixtures/bible-spot-checks.json');
 fs.writeFileSync(outputPath, `${JSON.stringify(fixture, null, 2)}\n`);
 
 console.log(`Wrote ${fixture.spotChecks.length} verse checks to ${outputPath}`);
