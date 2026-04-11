@@ -68,7 +68,7 @@
   }
 
   function getVoteActionsContent() {
-    return `${getVotesIntroHtml()}<p>Use upvote or downvote for this row. Clicking an active vote removes it.</p><div class="vote-buttons"><button class="vote-btn" id="voteUpBtn" type="button">👍 Upvote</button><button class="vote-btn" id="voteDownBtn" type="button">👎 Downvote</button></div><p class="vote-action-hint" id="voteActionHint" style="font-size: 0.85em; margin-top: 0.5rem;"></p>`;
+    return `${getVotesIntroHtml()}<p>Use upvote or downvote for this row. Clicking an active vote removes it.</p><div class="vote-buttons"><button class="vote-btn" id="voteUpBtn" type="button">👍 Upvote</button><button class="vote-btn" id="voteDownBtn" type="button">👎 Downvote</button></div><div id="voteFeedbackPopover" style="position: fixed; left: -9999px; top: -9999px; z-index: 2000; border: 1px solid var(--border,#d9d9de); background: var(--panel,#fff); color: var(--fg,#111); border-radius: 0.45rem; padding: 0.35rem 0.55rem; box-shadow: 0 8px 24px rgba(0,0,0,0.18); font-size: 0.85rem; pointer-events: none; display: none; max-width: min(280px, calc(100vw - 24px));"></div><p class="vote-action-hint" id="voteActionHint" style="font-size: 0.85em; margin-top: 0.5rem;"></p>`;
   }
 
   async function refreshVoteAuthState() {
@@ -496,6 +496,43 @@
     }
   }
 
+  let voteFeedbackTimer = 0;
+
+  function showVoteFeedback(message, tone) {
+    const feedback = document.getElementById('voteFeedbackPopover');
+    const upBtn = document.getElementById('voteUpBtn');
+    const downBtn = document.getElementById('voteDownBtn');
+    if (!feedback || !upBtn || !downBtn) return;
+
+    const anchor = downBtn;
+    const rect = anchor.getBoundingClientRect();
+    feedback.textContent = message;
+    feedback.style.display = 'block';
+    feedback.style.borderColor = tone === 'error' ? '#b35a00' : 'var(--border,#d9d9de)';
+    feedback.style.color = tone === 'error' ? '#8a3f00' : 'var(--fg,#111)';
+
+    const feedbackRect = feedback.getBoundingClientRect();
+    const margin = 8;
+    let left = rect.left + rect.width / 2 - feedbackRect.width / 2;
+    let top = rect.bottom + 8;
+    if (left < margin) left = margin;
+    if (left + feedbackRect.width > window.innerWidth - margin) {
+      left = window.innerWidth - feedbackRect.width - margin;
+    }
+    if (top + feedbackRect.height > window.innerHeight - margin) {
+      top = Math.max(margin, rect.top - feedbackRect.height - 8);
+    }
+    feedback.style.left = `${Math.round(left)}px`;
+    feedback.style.top = `${Math.round(top)}px`;
+
+    window.clearTimeout(voteFeedbackTimer);
+    voteFeedbackTimer = window.setTimeout(() => {
+      feedback.style.display = 'none';
+      feedback.style.left = '-9999px';
+      feedback.style.top = '-9999px';
+    }, 3000);
+  }
+
   async function handleVote(featureId, direction) {
     try {
       // Direct voting: up always sets +1, down always sets -1.
@@ -513,8 +550,13 @@
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        alert(error.error || 'Failed to record vote');
+        let errorMessage = 'Failed to record vote';
+        try {
+          const error = await response.json();
+          errorMessage = error.error || errorMessage;
+        } catch (_parseError) {
+        }
+        showVoteFeedback(errorMessage, 'error');
         return;
       }
 
@@ -542,7 +584,7 @@
       }
     } catch (e) {
       console.error('Vote error:', e);
-      alert('Error recording vote: ' + e.message);
+      showVoteFeedback('Error recording vote: ' + (e && e.message ? e.message : 'Unknown error'), 'error');
     }
   }
 

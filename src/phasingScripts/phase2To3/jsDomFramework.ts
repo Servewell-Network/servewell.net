@@ -37,6 +37,7 @@ import { createModuleRegistry } from './createModuleRegistry';
 import { registerShellListeners } from './registerShellListeners';
 import { createDemoModule } from './createDemoModule';
 import { createBibleNavModule } from './createBibleNavModule';
+import { createVerseNumberPopoverModule } from './createVerseNumberPopoverModule';
 import { createTransliterationModule } from './createTransliterationModule';
 import { createSelectionControlModule } from './createSelectionControlModule';
 
@@ -69,6 +70,7 @@ export function jsDomFramework() {
     modules.register(createDemoModule(delegator, shell));
   }
   modules.register(createBibleNavModule(delegator));
+  modules.register(createVerseNumberPopoverModule(delegator));
   modules.register(createTransliterationModule());
   modules.register(createSelectionControlModule());
 
@@ -83,6 +85,7 @@ export function jsDomFramework() {
   }
   modules.activate('bible-nav');
   if (document.querySelector('main.chapter-page')) {
+    modules.activate('verse-number-popover');
     modules.activate('selection-control');
     activateVerseHashHighlight();
   }

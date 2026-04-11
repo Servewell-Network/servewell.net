@@ -237,6 +237,7 @@
 				{ type: 'action', title: 'Action: Disable Traditional column', selector: '#column-toggle-traditional', event: 'uncheck' },
 				{ type: 'action', title: 'Action: Re-enable Traditional column', selector: '#column-toggle-traditional', event: 'check' },
 				{ type: 'action', title: 'Action: Select last verse in Revelation 22', selector: '.snippet-row[id="21"] .verse-num[aria-label="Verse 21"]', event: 'click' },
+				{ type: 'action', title: 'Action: Confirm verse popover rendered (Revelation 22:21)', selector: '#verse-number-popover .verse-number-popover-link-btn', event: 'assert-present' },
 				{ type: 'action', title: 'Action: Show literal popover (Revelation 22:21)', selector: '.snippet-row[id="21"] .literal-pane .word-token', event: 'click' },
 				{ type: 'action', title: 'Action: Show traditional popover (Revelation 22:21)', selector: '.snippet-row[id="21"] .traditional-pane .word-token', event: 'click' },
 				{ type: 'action', title: 'Action: Open Bible nav widget', selector: '#bible-nav-btns .nav-ref-btn', event: 'click' },
@@ -324,13 +325,26 @@
 				});
 			}
 
-			async function waitForElement(doc, selector, containsText, timeoutMs = 5000) {
+			function isVisible(el) {
+				if (!(el instanceof HTMLElement)) return false;
+				const style = el.ownerDocument.defaultView?.getComputedStyle(el);
+				if (!style || style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+					return false;
+				}
+				const rect = el.getBoundingClientRect();
+				return rect.width > 0 && rect.height > 0;
+			}
+
+			async function waitForElement(doc, selector, containsText, timeoutMs = 5000, visibleOnly = false) {
 				const start = Date.now();
 				while (Date.now() - start < timeoutMs) {
 					let matches = Array.from(doc.querySelectorAll(selector));
 					if (containsText) {
 						const targetText = containsText.toLowerCase();
 						matches = matches.filter((el) => (el.textContent || '').toLowerCase().includes(targetText));
+					}
+					if (visibleOnly) {
+						matches = matches.filter((el) => isVisible(el));
 					}
 					if (matches.length > 0) return matches;
 					await sleep(100);
@@ -350,7 +364,7 @@
 				}
 				const doc = frame.contentDocument;
 				if (!doc) throw new Error('Frame document not available');
-				const matches = await waitForElement(doc, slide.selector, slide.containsText);
+				const matches = await waitForElement(doc, slide.selector, slide.containsText, slide.timeoutMs || 5000, slide.visible === true);
 				const target = matches[Math.min(slide.index || 0, matches.length - 1)];
 				if (!target) throw new Error(`No target element for selector: ${slide.selector}`);
 
@@ -365,6 +379,9 @@
 					case 'uncheck':
 						target.checked = false;
 						dispatchCheckEvents(target);
+						break;
+					case 'assert-visible':
+					case 'assert-present':
 						break;
 					default:
 						throw new Error(`Unsupported event: ${slide.event}`);

@@ -54,10 +54,26 @@ test('vote popover renders vote controls and accepts click', async ({ page }) =>
   expect([200, 400]).toContain(voteResponse.status());
   if (voteResponse.status() === 400) {
     const body = await voteResponse.json() as { error?: string };
-    expect(body.error || '').toContain('already voted');
+    const errorText = body.error || '';
+    expect(errorText).toContain('already voted');
+    await expect(page.locator('#voteFeedbackPopover')).toContainText(errorText);
   }
 
   await expect(firstVotesCell.locator('.votes-unverified')).toBeVisible();
+});
+
+test('verse number popover shows link action and copy feedback', async ({ page }) => {
+  await page.goto('/-/Revelation/22');
+
+  const verseButton = page.locator('button.verse-num:visible').first();
+  await verseButton.click();
+
+  const versePopover = page.locator('#verse-number-popover');
+  await expect(versePopover).toBeVisible();
+  await expect(versePopover).toContainText('More content coming here soon');
+
+  await versePopover.getByRole('button', { name: 'Link' }).click();
+  await expect(page.locator('#verse-link-copied-popover')).toContainText('link copied');
 });
 
 test('auth modal opens from auth button', async ({ page }) => {
