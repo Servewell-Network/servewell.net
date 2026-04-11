@@ -12,7 +12,7 @@
 		"test:run": "npm run test:unit && npm run test:inventory",
 		"test:unit": "vitest --run test/index.spec.ts test/api-contracts.spec.ts",
 		"test:contracts": "vitest --run test/api-contracts.spec.ts",
-		"test:inventory": "vitest --run --config vitest.node.config.mts test/feature-inventory.spec.ts",
+		"test:inventory": "vitest --run --config vitest.node.config.mts test/feature-inventory.spec.ts test/rendering-regressions.spec.ts test/rendering-global-regressions.spec.ts",
 		"test:api-only": "vitest --run test/index.spec.ts",
 		"test:phasing": "vitest --run --config vitest.node.config.mts test/phasing.spec.ts",
 		"test:e2e": "playwright test",

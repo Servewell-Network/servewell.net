@@ -433,6 +433,7 @@ function renderTraditionalPane(snippet: Snippet, idPrefix = ''): string {
   const currentParagraphTokens: TraditionalParagraphToken[] = [];
   let traditionalWordOrdinal = 0;
   let didRenderVerseNum = false;
+  let footnoteIndex = 0;
   const verseNumBtn = `<button type="button" class="verse-num" aria-label="Verse ${escapeHtml(snippetLabel)}">${escapeHtml(snippetLabel)}</button>`;
 
   const literalMetaByMorphemeId = new Map<string, MetadataEntry[]>();
@@ -458,7 +459,8 @@ function renderTraditionalPane(snippet: Snippet, idPrefix = ''): string {
       snippetLabel,
       snippetKey,
       literalMetaByMorphemeId,
-      didRenderVerseNum ? undefined : verseNumBtn
+      didRenderVerseNum ? undefined : verseNumBtn,
+      () => `fn-${toSafeDomId(snippetKey)}-${footnoteIndex++}`
     );
     currentParagraphTokens.length = 0;
     if (paragraph) {
@@ -546,7 +548,8 @@ function renderTraditionalParagraphTokens(
   snippetLabel: string,
   snippetKey: string,
   literalMetaByMorphemeId: Map<string, MetadataEntry[]>,
-  leadingHtmlBeforeFirstWord?: string
+  leadingHtmlBeforeFirstWord: string | undefined,
+  nextFootnoteId: () => string
 ): string {
   let html = '';
   let plainText = '';
@@ -580,10 +583,9 @@ function renderTraditionalParagraphTokens(
     suppressSpacingBeforeNextToken = true;
   };
 
-  let footnoteIndex = 0;
   for (const token of tokens) {
     if (token.kind === 'text') {
-      const plainText = normalizeTokenText(token.text);
+      const plainText = sanitizeInlineTraditionalText(token.text);
       if (!plainText) continue;
 
       appendTokenHtml(plainText, escapeHtml(plainText));
@@ -592,7 +594,7 @@ function renderTraditionalParagraphTokens(
 
     if (token.kind === 'footnote') {
       if (token.text.trim()) {
-        const footnoteId = `fn-${toSafeDomId(snippetKey)}-${footnoteIndex++}`;
+        const footnoteId = nextFootnoteId();
         const fnBtn = renderFootnoteMarker(token.text, footnoteId);
         const lastWordWrapIdx = html.lastIndexOf('<span class="word-wrap">');
         if (lastWordWrapIdx >= 0) {
@@ -663,7 +665,17 @@ function normalizeTokenText(value: string): string {
 }
 
 function normalizeTraditionalText(value: string): string {
-  return normalizeTokenText(value.replace(/[\[\]{}]/g, ''));
+  return sanitizeInlineTraditionalText(value.replace(/[\[\]{}]/g, ''));
+}
+
+function sanitizeInlineTraditionalText(value: string): string {
+  return normalizeTokenText(
+    value
+      .replace(/&lt;\s*\/?\s*span(?:\s+[^&]*?)?&gt;/gi, '')
+      .replace(/<\s*\/?\s*span(?:\s+[^>]*)?>/gi, '')
+      .replace(/&lt;\s*br\s*\/?&gt;/gi, ' ')
+      .replace(/<\s*br\s*\/?>/gi, ' ')
+  );
 }
 
 function splitTokenIntoWords(tokenText: string): string[] {

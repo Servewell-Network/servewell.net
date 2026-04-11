@@ -49,6 +49,10 @@ It is intended for both human contributors and AI coding agents.
 - Run the smallest relevant script/test set for your changes first.
 - Regenerate affected outputs and confirm logs are clean enough for merge.
 
+11. Prefer TDD when practical.
+- When a bug or behavior change is reported, add or update a focused failing test first.
+- Implement the minimal fix, then rerun the same test(s) to confirm they pass.
+
 ## Standard Validation Checklist
 
 - Data ingestion/alignment changes: run `npm run p1a-2` and/or `npm run p1b-2` as applicable.
