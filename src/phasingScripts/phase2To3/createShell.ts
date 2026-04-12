@@ -1,6 +1,7 @@
 export type ShellModuleListItem = {
   id: string;
   label: string;
+  infoHref?: string;
   active: boolean;
 };
 
@@ -307,6 +308,26 @@ body.with-app-shell main.chapter-page {
   gap: 0.5rem;
 }
 
+#app-shell-root .app-checkrow-info {
+  margin-left: auto;
+  color: var(--fg);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  width: 1.1rem;
+  height: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  line-height: 1;
+  background: var(--panel);
+}
+
+#app-shell-root .app-checkrow-info:hover {
+  background: var(--bg);
+}
+
 #app-shell-root .app-sidepanel {
   position: fixed;
   top: 0;
@@ -504,6 +525,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       <label class="app-checkrow">
         <input type="checkbox" data-setting="dark-mode">
         <span>Dark mode</span>
+        <a class="app-checkrow-info" href="/features#need-dark-mode" title="Open details" aria-label="Open details for Dark mode">i</a>
       </label>
     </section>
 
@@ -848,10 +870,14 @@ body.app-panel-open #app-shell-root .app-overlay {
     container.innerHTML = modules
       .map((module) => {
         const checked = module.active ? ' checked' : '';
+        const infoLink = module.infoHref
+          ? `<a class="app-checkrow-info" href="${module.infoHref}" title="Open details" aria-label="Open details for ${module.label}">i</a>`
+          : '';
         return `
 <label class="app-checkrow">
   <input type="checkbox" data-module-id="${module.id}"${checked}>
   <span>${module.label}</span>
+  ${infoLink}
 </label>`;
       })
       .join('\n');

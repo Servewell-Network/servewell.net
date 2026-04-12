@@ -107,7 +107,8 @@ export function createTransliterationModule(): AppModule {
 
   return {
     id: 'transliteration',
-    label: 'Show transliteration beneath each word',
+    label: 'Transliteration interlinear',
+    infoHref: '/features#need-interlinear',
     active: false,
     includeInMenu: isChapterPage,
     activate() {

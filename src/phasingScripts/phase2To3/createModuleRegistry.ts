@@ -3,6 +3,7 @@ import type { ShellApi } from './createShell';
 export type AppModule = {
   id: string;
   label: string;
+  infoHref?: string;
   active: boolean;
   includeInMenu?: boolean;
   available?: boolean;
