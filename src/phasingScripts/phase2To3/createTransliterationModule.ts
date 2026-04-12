@@ -38,6 +38,9 @@ function parseDataM(raw: string): Record<string, string> {
 
 function applyTransliterations(): void {
   document.querySelectorAll<HTMLElement>('.snippet-row').forEach((snippetRow) => {
+    // Ensure re-apply events (focus/pageshow/visibility resume) do not stack duplicate transliteration rows.
+    snippetRow.querySelectorAll('.word-translit').forEach((el) => el.remove());
+
     // Assign color indices in literal-pane morpheme order so that the same
     // morpheme ID always resolves to the same color in both panes.
     const colorMap = new Map<string, string>();

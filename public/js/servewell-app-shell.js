@@ -3057,6 +3057,7 @@ body.app-panel-open #app-shell-root .app-overlay {
   }
   function applyTransliterations() {
     document.querySelectorAll(".snippet-row").forEach((snippetRow) => {
+      snippetRow.querySelectorAll(".word-translit").forEach((el) => el.remove());
       const colorMap = /* @__PURE__ */ new Map();
       let colorCounter = 0;
       snippetRow.querySelectorAll(".literal-pane .word-token").forEach((btn) => {
