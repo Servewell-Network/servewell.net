@@ -38,6 +38,8 @@ import { registerShellListeners } from './registerShellListeners';
 import { createDemoModule } from './createDemoModule';
 import { createBibleNavModule } from './createBibleNavModule';
 import { createVerseNumberPopoverModule } from './createVerseNumberPopoverModule';
+import { createDeveloperRoleModule } from './createDeveloperRoleModule';
+import { createDevTimeModule } from './createDevTimeModule';
 import { createTransliterationModule } from './createTransliterationModule';
 import { createSelectionControlModule } from './createSelectionControlModule';
 
@@ -63,12 +65,16 @@ export function jsDomFramework() {
   const shell = createShell();
   const theme = createTheme(shell);
   const modules = createModuleRegistry(shell);
+  const developerRoleModule = createDeveloperRoleModule();
+  const devTimeModule = createDevTimeModule();
   const onDemoPage = typeof window !== 'undefined' && isDemoRoute(window.location.pathname);
 
   // Register modules
   if (onDemoPage) {
     modules.register(createDemoModule(delegator, shell));
   }
+  modules.register(developerRoleModule);
+  modules.register(devTimeModule);
   modules.register(createBibleNavModule(delegator));
   modules.register(createVerseNumberPopoverModule(delegator));
   modules.register(createTransliterationModule());
@@ -79,6 +85,40 @@ export function jsDomFramework() {
   theme.restore();
   modules.render();
   modules.restoreFromStorage();
+
+  function applyRoleAvailability(detail: unknown) {
+    const roles = Array.isArray((detail as { roles?: unknown[] })?.roles)
+      ? (detail as { roles?: unknown[] }).roles!.filter((role): role is string => typeof role === 'string')
+      : [];
+    const hasDeveloper = roles.includes('developer');
+    developerRoleModule.available = hasDeveloper;
+    if (!hasDeveloper) {
+      if (modules.isActive('dev-time')) modules.deactivate('dev-time');
+      if (modules.isActive('developer-role')) modules.deactivate('developer-role');
+      devTimeModule.available = false;
+    }
+    modules.render();
+    if (hasDeveloper) {
+      modules.restoreFromStorage();
+    }
+  }
+
+  window.addEventListener('servewell-auth-changed', (event) => {
+    const customEvent = event as CustomEvent;
+    applyRoleAvailability(customEvent.detail);
+  });
+
+  window.addEventListener('servewell-developer-mode-changed', (event) => {
+    const enabled = Boolean((event as CustomEvent).detail?.enabled);
+    devTimeModule.available = enabled;
+    if (enabled) {
+      modules.activate('dev-time');
+    } else if (modules.isActive('dev-time')) {
+      modules.deactivate('dev-time');
+    }
+    modules.render();
+  });
+
   if (onDemoPage) {
     modules.activate('demo');
     shell.appendDemoLine('Framework booted');

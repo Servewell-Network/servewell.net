@@ -634,7 +634,9 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   type AuthState = {
     authenticated: boolean;
+    userId?: string;
     email?: string;
+    roles?: string[];
   };
 
   let authState: AuthState = { authenticated: false };
@@ -682,11 +684,13 @@ body.app-panel-open #app-shell-root .app-overlay {
       const data = await response.json() as { authenticated?: boolean; email?: string };
       authState = {
         authenticated: Boolean(data.authenticated),
-        email: data.email
+        userId: typeof (data as any).userId === 'string' ? (data as any).userId : undefined,
+        email: data.email,
+        roles: Array.isArray((data as any).roles) ? (data as any).roles.filter((role: unknown) => typeof role === 'string') : []
       };
     } catch (error) {
       console.warn('Could not refresh auth state', error);
-      authState = { authenticated: false };
+      authState = { authenticated: false, roles: [] };
     }
 
     syncAuthUi();

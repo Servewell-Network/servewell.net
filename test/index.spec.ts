@@ -155,8 +155,23 @@ describe('servewell worker', () => {
 		expect(me.status).toBe(200);
 		await expect(me.json()).resolves.toMatchObject({
 			authenticated: true,
-			email
+			email,
+			roles: expect.any(Array)
 		});
+	});
+
+	it('rejects developer time endpoints for non-developer users', async () => {
+		const needsResponse = await workerFetch('/api/dev/time/needs');
+		expect(needsResponse.status).toBe(403);
+
+		const eventResponse = await workerFetch('/api/dev/time/event', jsonRequest({
+			trackerSessionId: crypto.randomUUID(),
+			eventType: 'start',
+			workType: 'dev',
+			needId: 'need-search-all',
+			eventAt: Date.now()
+		}));
+		expect(eventResponse.status).toBe(403);
 	});
 
 	it('returns an error when consume token is missing', async () => {

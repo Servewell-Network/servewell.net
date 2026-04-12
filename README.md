@@ -57,6 +57,7 @@ Required auth config:
 Optional:
 
 - `AUTH_ORIGIN` as a Wrangler `vars` value when you want magic links to use an explicit canonical origin
+- `AUTH_DEVELOPER_EMAILS` as a Wrangler secret or var (comma/space-separated emails) for granting `developer` role at sign-in without hardcoding personal emails in source control
 
 Notes:
 
@@ -69,6 +70,7 @@ Suggested Cloudflare setup:
 ```bash
 npx wrangler d1 create servewell-auth
 npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put AUTH_DEVELOPER_EMAILS
 ```
 
 Then update `wrangler.jsonc` with the returned D1 `database_id`, and add these vars:

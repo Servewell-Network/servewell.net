@@ -3,10 +3,13 @@
  * Handles static assets and dynamic endpoints for votes and authentication.
  */
 
+import featureInventory from './shared/feature-inventory.json';
+
 type AuthDbEnv = Env & {
 	AUTH_DB?: D1Database;
 	AUTH_ORIGIN?: string;
 	AUTH_FROM_EMAIL?: string;
+	AUTH_DEVELOPER_EMAILS?: string;
 	RESEND_API_KEY?: string;
 };
 
@@ -47,7 +50,40 @@ const TABLES_SQL = [
 		created_user_agent TEXT,
 		FOREIGN KEY (user_id) REFERENCES auth_users(id)
 	)`,
-	`CREATE INDEX IF NOT EXISTS idx_auth_sessions_user_id ON auth_sessions(user_id)`
+	`CREATE INDEX IF NOT EXISTS idx_auth_sessions_user_id ON auth_sessions(user_id)`,
+	`CREATE TABLE IF NOT EXISTS auth_user_roles (
+		user_id TEXT NOT NULL,
+		role TEXT NOT NULL,
+		created_at INTEGER NOT NULL,
+		PRIMARY KEY (user_id, role),
+		FOREIGN KEY (user_id) REFERENCES auth_users(id)
+	)`,
+	`CREATE INDEX IF NOT EXISTS idx_auth_user_roles_role ON auth_user_roles(role)`,
+	`CREATE TABLE IF NOT EXISTS dev_time_events (
+		id TEXT PRIMARY KEY,
+		user_id TEXT NOT NULL,
+		tracker_session_id TEXT NOT NULL,
+		event_type TEXT NOT NULL,
+		work_type TEXT NOT NULL,
+		need_id TEXT NOT NULL,
+		event_at INTEGER NOT NULL,
+		created_at INTEGER NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES auth_users(id)
+	)`,
+	`CREATE INDEX IF NOT EXISTS idx_dev_time_events_user_created ON dev_time_events(user_id, created_at)`,
+	`CREATE TABLE IF NOT EXISTS dev_time_entries (
+		id TEXT PRIMARY KEY,
+		user_id TEXT NOT NULL,
+		tracker_session_id TEXT NOT NULL,
+		work_type TEXT NOT NULL,
+		need_id TEXT NOT NULL,
+		start_time INTEGER NOT NULL,
+		end_time INTEGER NOT NULL,
+		duration_minutes INTEGER NOT NULL,
+		created_at INTEGER NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES auth_users(id)
+	)`,
+	`CREATE INDEX IF NOT EXISTS idx_dev_time_entries_user_created ON dev_time_entries(user_id, created_at)`
 ];
 
 export default {
@@ -69,6 +105,18 @@ export default {
 		}
 		if (url.pathname === '/api/auth/me' && method === 'GET') {
 			return handleAuthMe(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/dev/time/needs' && method === 'GET') {
+			return handleDevTimeNeeds(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/dev/time/event' && method === 'POST') {
+			return handleDevTimeEvent(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/dev/time/save' && method === 'POST') {
+			return handleDevTimeSave(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/dev/time/summary' && method === 'GET') {
+			return handleDevTimeSummary(request, env as AuthDbEnv, url);
 		}
 
 		// Vote endpoints
@@ -321,7 +369,256 @@ async function handleAuthMe(request: Request, env: AuthDbEnv): Promise<Response>
 	if (!auth) {
 		return jsonResponse({ authenticated: false });
 	}
-	return jsonResponse({ authenticated: true, email: auth.email });
+	const roles = await getUserRoles(db, auth.id);
+	return jsonResponse({ authenticated: true, userId: auth.id, email: auth.email, roles });
+}
+
+function normalizeRole(value: string): string {
+	return value.trim().toLowerCase();
+}
+
+function getConfiguredDeveloperEmails(env: AuthDbEnv): Set<string> {
+	const raw = (env.AUTH_DEVELOPER_EMAILS || '').trim();
+	if (!raw) return new Set();
+	return new Set(
+		raw
+			.split(/[\s,;]+/)
+			.map((part) => normalizeEmail(part))
+			.filter(Boolean)
+	);
+}
+
+async function ensureConfiguredDeveloperRole(db: D1Database, env: AuthDbEnv, user: AuthUser): Promise<void> {
+	const emails = getConfiguredDeveloperEmails(env);
+	if (!emails.has(user.email)) return;
+	await db
+		.prepare('INSERT OR IGNORE INTO auth_user_roles (user_id, role, created_at) VALUES (?, ?, ?)')
+		.bind(user.id, 'developer', Date.now())
+		.run();
+}
+
+async function getUserRoles(db: D1Database, userId: string): Promise<string[]> {
+	const rows = await db
+		.prepare('SELECT role FROM auth_user_roles WHERE user_id = ? ORDER BY role ASC')
+		.bind(userId)
+		.all<{ role: string }>();
+	const rawRows = rows.results || [];
+	return rawRows.map((row) => normalizeRole(row.role)).filter(Boolean);
+}
+
+async function requireDeveloperAuth(request: Request, env: AuthDbEnv): Promise<{ user: AuthUser; roles: string[] } | null> {
+	const db = env.AUTH_DB;
+	if (!db) return null;
+	await ensureAuthTables(db);
+	const user = await requireAuthUser(request, env);
+	if (!user) return null;
+	await ensureConfiguredDeveloperRole(db, env, user);
+	const roles = await getUserRoles(db, user.id);
+	if (!roles.includes('developer')) return null;
+	return { user, roles };
+}
+
+function isValidWorkType(value: string): value is 'dev' | 'adm' | 'copy' {
+	return value === 'dev' || value === 'adm' || value === 'copy';
+}
+
+function isValidEventType(value: string): value is 'start' | 'pause' | 'stop' {
+	return value === 'start' || value === 'pause' || value === 'stop';
+}
+
+function sanitizeNeedId(value: unknown): string {
+	const raw = typeof value === 'string' ? value.trim() : '';
+	if (!raw) return '';
+	if (!/^need-[a-z0-9-]+$/.test(raw)) return '';
+	return raw;
+}
+
+// Empty string is an acceptable needId (means "no specific need selected")
+
+type DevTimeNeed = { id: string; label: string };
+
+function toNeedLabel(id: string): string {
+	const compact = id.replace(/^need-/, '').replace(/-/g, ' ').trim();
+	if (!compact) return id;
+	return compact
+		.split(/\s+/)
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.join(' ');
+}
+
+function getAllNeedOptions(): DevTimeNeed[] {
+	const source = Array.isArray((featureInventory as any).allNeedIds) ? (featureInventory as any).allNeedIds as string[] : [];
+	const ids = source.filter((id) => /^need-[a-z0-9-]+$/.test(id));
+	return ids.map((id) => ({ id, label: toNeedLabel(id) }));
+}
+
+async function handleDevTimeNeeds(request: Request, env: AuthDbEnv): Promise<Response> {
+	const auth = await requireDeveloperAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Developer access required' }, 403);
+	return jsonResponse({ needs: getAllNeedOptions() });
+}
+
+async function handleDevTimeEvent(request: Request, env: AuthDbEnv): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	const auth = await requireDeveloperAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Developer access required' }, 403);
+
+	const body = await parseBody(request);
+	const trackerSessionId = typeof body.trackerSessionId === 'string' ? body.trackerSessionId.trim() : '';
+	const eventType = typeof body.eventType === 'string' ? body.eventType.trim().toLowerCase() : '';
+	const workType = typeof body.workType === 'string' ? body.workType.trim().toLowerCase() : '';
+	const needId = sanitizeNeedId(body.needId);
+	const eventAtRaw = Number(body.eventAt);
+	const eventAt = Number.isFinite(eventAtRaw) && eventAtRaw > 0 ? Math.floor(eventAtRaw) : Date.now();
+
+	if (!trackerSessionId) return jsonResponse({ error: 'trackerSessionId is required' }, 400);
+	if (!isValidEventType(eventType)) return jsonResponse({ error: 'Invalid eventType' }, 400);
+	if (!isValidWorkType(workType)) return jsonResponse({ error: 'Invalid workType' }, 400);
+
+	const id = crypto.randomUUID();
+	const now = Date.now();
+	await db
+		.prepare(
+			`INSERT INTO dev_time_events
+				(id, user_id, tracker_session_id, event_type, work_type, need_id, event_at, created_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+		)
+		.bind(id, auth.user.id, trackerSessionId, eventType, workType, needId, eventAt, now)
+		.run();
+
+	return jsonResponse({ success: true, id });
+}
+
+async function handleDevTimeSave(request: Request, env: AuthDbEnv): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	const auth = await requireDeveloperAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Developer access required' }, 403);
+
+	const body = await parseBody(request);
+	const trackerSessionId = typeof body.trackerSessionId === 'string' ? body.trackerSessionId.trim() : '';
+	const workType = typeof body.workType === 'string' ? body.workType.trim().toLowerCase() : '';
+	const needId = sanitizeNeedId(body.needId);
+	const startTime = Math.floor(Number(body.startTime));
+	const endTime = Math.floor(Number(body.endTime));
+	const durationMinutes = Math.floor(Number(body.durationMinutes));
+
+	if (!trackerSessionId) return jsonResponse({ error: 'trackerSessionId is required' }, 400);
+	if (!isValidWorkType(workType)) return jsonResponse({ error: 'Invalid workType' }, 400);
+	if (!Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime < startTime) {
+		return jsonResponse({ error: 'Invalid startTime/endTime' }, 400);
+	}
+	if (!Number.isFinite(durationMinutes) || durationMinutes < 0 || durationMinutes > 24 * 60) {
+		return jsonResponse({ error: 'Invalid durationMinutes' }, 400);
+	}
+
+	if (durationMinutes === 0) {
+		return jsonResponse({ success: true, reset: true });
+	}
+
+	const id = crypto.randomUUID();
+	const now = Date.now();
+	await db
+		.prepare(
+			`INSERT INTO dev_time_entries
+				(id, user_id, tracker_session_id, work_type, need_id, start_time, end_time, duration_minutes, created_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		)
+		.bind(id, auth.user.id, trackerSessionId, workType, needId, startTime, endTime, durationMinutes, now)
+		.run();
+
+	return jsonResponse({ success: true, id });
+}
+
+function toDatePartsInOffset(epochMs: number, tzOffsetMinutes: number): { year: number; month: number; day: number; weekday: number } {
+	const adjusted = new Date(epochMs - tzOffsetMinutes * 60_000);
+	return {
+		year: adjusted.getUTCFullYear(),
+		month: adjusted.getUTCMonth(),
+		day: adjusted.getUTCDate(),
+		weekday: adjusted.getUTCDay()
+	};
+}
+
+function localDateToEpoch(year: number, month: number, day: number, tzOffsetMinutes: number): number {
+	return Date.UTC(year, month, day) + tzOffsetMinutes * 60_000;
+}
+
+function computeSummaryRanges(nowMs: number, tzOffsetMinutes: number): {
+	sevenDayStart: number;
+	thisWeekStart: number;
+	thisWeekEnd: number;
+	prevWeekStart: number;
+	prevWeekEnd: number;
+} {
+	const parts = toDatePartsInOffset(nowMs, tzOffsetMinutes);
+	const todayStart = localDateToEpoch(parts.year, parts.month, parts.day, tzOffsetMinutes);
+	const thisWeekStart = todayStart - parts.weekday * 24 * 60 * 60 * 1000;
+	const thisWeekEnd = thisWeekStart + 7 * 24 * 60 * 60 * 1000;
+	const prevWeekStart = thisWeekStart - 7 * 24 * 60 * 60 * 1000;
+	const prevWeekEnd = thisWeekStart;
+	const sevenDayStart = nowMs - 7 * 24 * 60 * 60 * 1000;
+	return { sevenDayStart, thisWeekStart, thisWeekEnd, prevWeekStart, prevWeekEnd };
+}
+
+type SummaryRow = { dev: number; adm: number; copy: number };
+
+function emptySummaryRow(): SummaryRow {
+	return { dev: 0, adm: 0, copy: 0 };
+}
+
+async function readDurationByWorkType(
+	db: D1Database,
+	userId: string,
+	startAt: number,
+	endAt: number
+): Promise<SummaryRow> {
+	const rows = await db
+		.prepare(
+			`SELECT work_type, COALESCE(SUM(duration_minutes), 0) AS total
+			 FROM dev_time_entries
+			 WHERE user_id = ? AND end_time >= ? AND end_time < ?
+			 GROUP BY work_type`
+		)
+		.bind(userId, startAt, endAt)
+		.all<{ work_type: string; total: number }>();
+
+	const out = emptySummaryRow();
+	for (const row of rows.results || []) {
+		const key = normalizeRole(row.work_type);
+		const total = Number(row.total || 0);
+		if (key === 'dev') out.dev = total;
+		if (key === 'adm') out.adm = total;
+		if (key === 'copy') out.copy = total;
+	}
+	return out;
+}
+
+async function handleDevTimeSummary(request: Request, env: AuthDbEnv, url: URL): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	const auth = await requireDeveloperAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Developer access required' }, 403);
+
+	const tzOffsetMinutesRaw = Number(url.searchParams.get('tzOffsetMinutes'));
+	const tzOffsetMinutes = Number.isFinite(tzOffsetMinutesRaw) ? Math.max(-14 * 60, Math.min(14 * 60, Math.floor(tzOffsetMinutesRaw))) : 0;
+	const now = Date.now();
+	const ranges = computeSummaryRanges(now, tzOffsetMinutes);
+
+	const [pastSevenDays, thisWeek, previousWeek] = await Promise.all([
+		readDurationByWorkType(db, auth.user.id, ranges.sevenDayStart, now),
+		readDurationByWorkType(db, auth.user.id, ranges.thisWeekStart, ranges.thisWeekEnd),
+		readDurationByWorkType(db, auth.user.id, ranges.prevWeekStart, ranges.prevWeekEnd)
+	]);
+
+	return jsonResponse({
+		summary: {
+			pastSevenDays,
+			thisWeek,
+			previousWeek
+		}
+	});
 }
 
 async function requireAuthUser(request: Request, env: AuthDbEnv): Promise<AuthUser | null> {
@@ -353,7 +650,9 @@ async function requireAuthUser(request: Request, env: AuthDbEnv): Promise<AuthUs
 		.bind(now, Math.min(now + SESSION_IDLE_MS, row.absolute_expires_at), row.id)
 		.run();
 
-	return { id: row.user_id, email: row.email };
+	const user = { id: row.user_id, email: row.email };
+	await ensureConfiguredDeveloperRole(db, env, user);
+	return user;
 }
 
 async function ensureAuthTables(db: D1Database): Promise<void> {

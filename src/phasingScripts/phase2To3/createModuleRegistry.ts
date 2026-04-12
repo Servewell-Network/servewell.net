@@ -5,6 +5,7 @@ export type AppModule = {
   label: string;
   active: boolean;
   includeInMenu?: boolean;
+  available?: boolean;
   activate: () => void;
   deactivate: () => void;
 };
@@ -37,7 +38,7 @@ export function createModuleRegistry(shell: ShellApi): ModuleRegistry {
   }
 
   function render() {
-    shell.renderModuleList(Object.values(modules).filter((module) => module.includeInMenu !== false));
+    shell.renderModuleList(Object.values(modules).filter((module) => module.includeInMenu !== false && module.available !== false));
   }
 
   function activate(id: string) {
@@ -67,6 +68,7 @@ export function createModuleRegistry(shell: ShellApi): ModuleRegistry {
   function restoreFromStorage() {
     Object.values(modules).forEach((module) => {
       if (module.includeInMenu === false) return;
+      if (module.available === false) return;
       let saved = '';
       try { saved = localStorage.getItem(storageKey(module.id)) ?? ''; } catch {}
       if (saved === '1') activate(module.id);
