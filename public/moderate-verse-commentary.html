@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Publish Verse Commentary | ServeWell.Net</title>
+		<meta name="description" content="Moderator publish form for verse-level commentary" />
+		<style>
+			body {
+				margin: 2.25rem;
+				font-family: sans-serif;
+				font-size: large;
+			}
+			main {
+				max-width: 56rem;
+			}
+			.form-card {
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.85rem;
+				padding: 1rem;
+				background: var(--panel, #ffffff);
+			}
+			.form-group {
+				margin-top: 1rem;
+			}
+			.form-group h2 {
+				margin: 0;
+				font-size: 1.05rem;
+			}
+			.form-help {
+				margin: 0.35rem 0 0;
+				color: var(--muted, #666666);
+				font-size: 0.95rem;
+				line-height: 1.45;
+			}
+			textarea {
+				width: 100%;
+				min-height: 6rem;
+				margin-top: 0.45rem;
+				padding: 0.7rem 0.8rem;
+				font: inherit;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.65rem;
+				background: var(--bg, #ffffff);
+				color: var(--fg, #171717);
+				resize: vertical;
+			}
+			.actions {
+				display: flex;
+				gap: 0.75rem;
+				margin-top: 1rem;
+				flex-wrap: wrap;
+			}
+			button,
+			.action-link {
+				font: inherit;
+				padding: 0.6rem 0.9rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.55rem;
+				background: var(--bar, #f4f4f5);
+				color: var(--fg, #171717);
+				text-decoration: none;
+				cursor: pointer;
+			}
+			button:hover,
+			.action-link:hover {
+				background: var(--bg, #ffffff);
+			}
+			.status {
+				margin-top: 1rem;
+				padding: 0.85rem 1rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.75rem;
+				background: var(--bar, #f4f4f5);
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1 id="moderation-title">Publish Verse Commentary</h1>
+			<p>Edit the pending submission as needed, then publish it so it becomes visible to the public.</p>
+			<div id="moderation-status" class="status">Loading submission...</div>
+			<form id="moderation-form" class="form-card" hidden>
+				<div id="moderation-fields"></div>
+				<section class="form-group">
+					<h2>Moderation Notes</h2>
+					<p class="form-help">Optional internal notes for the author/moderation trail. Not shown publicly.</p>
+					<textarea id="moderation-notes" placeholder="Optional note"></textarea>
+				</section>
+				<div class="actions">
+					<button type="submit" id="publish-button">Publish</button>
+					<button type="button" id="reject-button">Reject</button>
+					<a class="action-link" href="/list-to-moderate">Back to list</a>
+				</div>
+			</form>
+		</main>
+		<script src="/js/servewell-app-shell.js"></script>
+		<script src="/js/moderation-item.js"></script>
+	</body>
+</html>

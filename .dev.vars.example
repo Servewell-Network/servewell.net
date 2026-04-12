@@ -1,0 +1,13 @@
+# Local-only development variables for wrangler dev
+# Copy this file to .dev.vars and fill in real values locally.
+# Do not commit .dev.vars.
+
+AUTH_FROM_EMAIL=noreply@example.com
+AUTH_ORIGIN=http://localhost:8787
+
+# Comma, space, or semicolon separated email lists
+AUTH_DEVELOPER_EMAILS=dev1@example.com,dev2@example.com
+AUTH_MODERATOR_EMAILS=moderator1@example.com,moderator2@example.com
+
+# Optional in local development when using dev magic links:
+# RESEND_API_KEY=

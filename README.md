@@ -58,6 +58,12 @@ Optional:
 
 - `AUTH_ORIGIN` as a Wrangler `vars` value when you want magic links to use an explicit canonical origin
 - `AUTH_DEVELOPER_EMAILS` as a Wrangler secret or var (comma/space-separated emails) for granting `developer` role at sign-in without hardcoding personal emails in source control
+- `AUTH_MODERATOR_EMAILS` as a Wrangler secret or var (comma/space-separated emails) for granting `moderator` role at sign-in without hardcoding moderation access in source control
+
+Local development (recommended):
+
+- Put local-only auth values in `.dev.vars` (already gitignored) so personal email lists are never committed.
+- Use `.dev.vars.example` as the template and keep real addresses only in your untracked `.dev.vars` file.
 
 Notes:
 
@@ -71,6 +77,7 @@ Suggested Cloudflare setup:
 npx wrangler d1 create servewell-auth
 npx wrangler secret put RESEND_API_KEY
 npx wrangler secret put AUTH_DEVELOPER_EMAILS
+npx wrangler secret put AUTH_MODERATOR_EMAILS
 ```
 
 Then update `wrangler.jsonc` with the returned D1 `database_id`, and add these vars:

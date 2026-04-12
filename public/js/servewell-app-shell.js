@@ -515,7 +515,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       <button type="button" class="app-auth-menu-toggle" data-auth-menu-toggle aria-haspopup="true" aria-expanded="false">Account</button>
       <div class="app-auth-menu" data-auth-menu hidden>
         <div class="app-auth-menu-status" data-auth-menu-status>Not signed in</div>
-        <div class="app-auth-menu-copy" data-auth-menu-copy>Signing in is a simplified process called magic-link that is the same simple step regardless of whether you have an account yet or not.</div>
+        <div class="app-auth-menu-copy" data-auth-menu-copy>Magic-link sign-in unlocks account features like role-based tools and contribution workflows, not just voting.</div>
         <div class="app-auth-menu-actions">
           <button type="button" class="app-auth-button" data-auth-button>Sign in</button>
         </div>
@@ -533,6 +533,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       <a class="app-sidepanel-link" href="/features">Features</a>
       <a class="app-sidepanel-link" href="/whats-next">What's Next</a>
       <a class="app-sidepanel-link" href="/about">About</a>
+      <a class="app-sidepanel-link" href="/list-to-moderate" data-moderation-link hidden>List to Moderate (0)</a>
     </section>
 
     <section>
@@ -663,10 +664,42 @@ body.app-panel-open #app-shell-root .app-overlay {
       });
     }
     let authState = { authenticated: false };
+    let moderatorModeEnabled = false;
+    let moderationQueueCount = 0;
     function dispatchAuthState() {
       window.dispatchEvent(new CustomEvent("servewell-auth-changed", {
         detail: { ...authState }
       }));
+    }
+    function hasModeratorRole() {
+      return Boolean(authState.authenticated && authState.roles?.includes("moderator"));
+    }
+    function syncModerationUi() {
+      const link = qs("[data-moderation-link]");
+      if (!link) return;
+      const visible = hasModeratorRole() && moderatorModeEnabled;
+      link.hidden = !visible;
+      if (visible) {
+        link.textContent = `List to Moderate (${moderationQueueCount})`;
+      }
+    }
+    async function refreshModerationQueueCount() {
+      if (!hasModeratorRole() || !moderatorModeEnabled) {
+        moderationQueueCount = 0;
+        syncModerationUi();
+        return;
+      }
+      try {
+        const response = await fetch("/api/moderation/verse-commentary/queue", {
+          headers: { Accept: "application/json" }
+        });
+        if (!response.ok) throw new Error("Could not load moderation queue");
+        const data = await response.json();
+        moderationQueueCount = typeof data.count === "number" && Number.isFinite(data.count) ? Math.max(0, Math.floor(data.count)) : 0;
+      } catch {
+        moderationQueueCount = 0;
+      }
+      syncModerationUi();
     }
     function syncAuthUi() {
       const statusText = authState.authenticated && authState.email ? `Signed in as ${authState.email}` : "Not signed in";
@@ -674,7 +707,7 @@ body.app-panel-open #app-shell-root .app-overlay {
         el.textContent = statusText;
       });
       qsa("[data-auth-menu-copy]").forEach((el) => {
-        el.textContent = authState.authenticated ? "Verified votes now count in the main total." : "Signing in is a simplified process called magic-link that is the same simple step regardless of whether you have an account yet or not.";
+        el.textContent = authState.authenticated ? "You are signed in and can use account features, including role-based tools and contribution workflows." : "Magic-link sign-in unlocks account features like role-based tools and contribution workflows, not just voting.";
       });
       qsa("[data-auth-panel-status]").forEach((el) => {
         el.textContent = statusText;
@@ -684,6 +717,7 @@ body.app-panel-open #app-shell-root .app-overlay {
         button.setAttribute("aria-label", authState.authenticated ? "Sign out" : "Sign in");
       });
       dispatchAuthState();
+      syncModerationUi();
     }
     async function refreshAuthState() {
       try {
@@ -703,6 +737,7 @@ body.app-panel-open #app-shell-root .app-overlay {
         authState = { authenticated: false, roles: [] };
       }
       syncAuthUi();
+      void refreshModerationQueueCount();
     }
     async function requestMagicLink() {
       const email = authEmailInput?.value.trim().toLowerCase() || "";
@@ -805,6 +840,13 @@ body.app-panel-open #app-shell-root .app-overlay {
         closeAuthMenu();
       }
     });
+    window.addEventListener("servewell-moderator-mode-changed", (event) => {
+      moderatorModeEnabled = Boolean(event.detail?.enabled);
+      void refreshModerationQueueCount();
+    });
+    window.addEventListener("servewell-moderation-queue-changed", () => {
+      void refreshModerationQueueCount();
+    });
     function appendDemoLine(text) {
       const output = qs("#demoOutput");
       if (!output) return;
@@ -897,13 +939,14 @@ body.app-panel-open #app-shell-root .app-overlay {
       } catch {
       }
     }
-    function deactivate(id) {
+    function deactivate(id, options) {
       const module = modules[id];
       if (!module) return;
       module.deactivate();
       shell.syncModuleInputs(id, false);
+      if (options?.persist === false) return;
       try {
-        localStorage.removeItem(storageKey(id));
+        localStorage.setItem(storageKey(id), "0");
       } catch {
       }
     }
@@ -923,6 +966,7 @@ body.app-panel-open #app-shell-root .app-overlay {
         } catch {
         }
         if (saved === "1") activate(module.id);
+        else if (!saved && module.defaultActive) activate(module.id);
       });
     }
     return { register, render, activate, deactivate, isActive, getAll, restoreFromStorage };
@@ -1676,6 +1720,12 @@ body.app-panel-open #app-shell-root .app-overlay {
   var STYLE_ID = "verse-number-popover-style";
   var POPOVER_ID = "verse-number-popover";
   var COPIED_POPOVER_ID = "verse-link-copied-popover";
+  var COMMENTARY_EDIT_BTN_ID = "verse-commentary-edit-btn";
+  var COMMENTARY_SAVE_BTN_ID = "verse-commentary-save-btn";
+  var COMMENTARY_CANCEL_BTN_ID = "verse-commentary-cancel-btn";
+  var COMMENTARY_REJECTED_DISMISS_BTN_ID = "verse-commentary-rejected-dismiss-btn";
+  var COMMENTARY_REJECTED_DISMISS_KEY_PREFIX = "servewell-commentary-rejected-dismissed-";
+  var dismissedRejectedNoticeIds = /* @__PURE__ */ new Set();
   var CSS2 = `
 #verse-number-popover,
 #verse-link-copied-popover {
@@ -1689,8 +1739,14 @@ body.app-panel-open #app-shell-root .app-overlay {
 }
 
 #verse-number-popover {
-  width: min(22rem, calc(100vw - 1.5rem));
-  padding: 0.8rem 0.9rem;
+  width: min(36rem, calc(100vw - 1.5rem));
+  min-width: min(18rem, calc(100vw - 1.5rem));
+  min-height: 12rem;
+  max-width: calc(100vw - 1.5rem);
+  max-height: calc(100vh - 1.5rem);
+  padding: 0.8rem 1rem 0.9rem 0.9rem;
+  resize: both;
+  overflow: auto;
   z-index: 75;
 }
 
@@ -1705,6 +1761,8 @@ body.app-panel-open #app-shell-root .app-overlay {
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 0.65rem;
+  cursor: move;
+  user-select: none;
 }
 
 .verse-number-popover-title {
@@ -1739,6 +1797,89 @@ body.app-panel-open #app-shell-root .app-overlay {
   line-height: 1.45;
 }
 
+.verse-number-popover-content {
+  max-height: min(64vh, 34rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.45rem;
+}
+
+.verse-number-commentary-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.65rem 0 0;
+}
+
+.verse-number-commentary-btn {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bar);
+  color: var(--fg);
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.verse-number-commentary-btn:hover {
+  background: var(--bg);
+}
+
+.verse-number-commentary-group {
+  margin-top: 0.7rem;
+}
+
+.verse-number-commentary-note {
+  margin: 0.35rem 0 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--bar);
+  color: var(--fg);
+  font-size: 0.9rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
+.verse-number-commentary-heading {
+  margin: 0;
+  color: var(--fg);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.verse-number-commentary-instructions {
+  margin: 0.28rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.verse-number-commentary-value {
+  margin: 0.35rem 0 0;
+  color: var(--fg);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.verse-number-commentary-textarea {
+  width: 100%;
+  margin-top: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.55rem;
+  min-height: 4.2rem;
+  resize: vertical;
+}
+
+.verse-num.verse-num-has-commentary {
+  font-weight: 700;
+}
+
 #verse-link-copied-popover {
   padding: 0.35rem 0.6rem;
   border-radius: 999px;
@@ -1753,10 +1894,88 @@ body.app-panel-open #app-shell-root .app-overlay {
   function escHtml2(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
+  function escAttr(s) {
+    return escHtml2(s).replace(/'/g, "&#39;");
+  }
+  function rejectedDismissKey(commentaryId) {
+    return `${COMMENTARY_REJECTED_DISMISS_KEY_PREFIX}${commentaryId}`;
+  }
+  function isRejectedNoticeDismissed(commentaryId) {
+    if (dismissedRejectedNoticeIds.has(commentaryId)) return true;
+    try {
+      return localStorage.getItem(rejectedDismissKey(commentaryId)) === "1";
+    } catch {
+      return false;
+    }
+  }
+  function dismissRejectedNotice(commentaryId) {
+    dismissedRejectedNoticeIds.add(commentaryId);
+    try {
+      localStorage.setItem(rejectedDismissKey(commentaryId), "1");
+    } catch {
+    }
+  }
+  var COMMENTARY_FIELDS = [
+    {
+      key: "godAndPlan",
+      heading: "God and God's Plan",
+      instructions: "Give a short summary of what this verse or snippet illuminates about God and God's Plan and why that's important."
+    },
+    {
+      key: "examplesOfSuccess",
+      heading: "Examples of Success",
+      instructions: "Give a short list of examples of how people can succeed in this part of God's plan."
+    },
+    {
+      key: "memoryHelps",
+      heading: "Memory Helps",
+      instructions: "Give a short summary of how this concept can be taught or remembered, such as concepts in the text that can be used as metaphors."
+    },
+    {
+      key: "relatedTexts",
+      heading: "Related Texts",
+      instructions: "Give, if possible, references to a few texts that make this one more clear and a few texts that are more clear if you know this one."
+    }
+  ];
+  var EMPTY_COMMENTARY_ENTRY = {
+    godAndPlan: "",
+    examplesOfSuccess: "",
+    memoryHelps: "",
+    relatedTexts: ""
+  };
+  function getEmptyCommentaryEntry() {
+    return { ...EMPTY_COMMENTARY_ENTRY };
+  }
+  function normalizeCommentaryEntry(raw) {
+    const source = raw && typeof raw === "object" ? raw : {};
+    return {
+      godAndPlan: typeof source.godAndPlan === "string" ? source.godAndPlan : "",
+      examplesOfSuccess: typeof source.examplesOfSuccess === "string" ? source.examplesOfSuccess : "",
+      memoryHelps: typeof source.memoryHelps === "string" ? source.memoryHelps : "",
+      relatedTexts: typeof source.relatedTexts === "string" ? source.relatedTexts : ""
+    };
+  }
+  function hasCommentary(entry) {
+    return COMMENTARY_FIELDS.some((field) => entry[field.key].trim().length > 0);
+  }
   function createVerseNumberPopoverModule(delegator) {
     let activeVerseLink = "";
+    let activeVerseButton = null;
+    let activeContext = null;
+    let activeRejectionNoticeId = "";
+    let commentaryEditing = false;
+    let manualPopoverPosition = null;
+    let authState = { authenticated: false };
     let copyToastTimer = 0;
     const disposers = [];
+    async function fetchJson(url, init) {
+      const response = await fetch(url, init);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `Request failed: ${response.status}`);
+      }
+      return data;
+    }
     function injectOnce() {
       if (!document.getElementById(STYLE_ID)) {
         const style = document.createElement("style");
@@ -1789,8 +2008,11 @@ body.app-panel-open #app-shell-root .app-overlay {
       url.hash = verse;
       return {
         verse,
+        book,
+        chapter,
         title: book && chapter ? `${book} ${chapter}:${verse}` : `Verse ${verse}`,
-        link: url.toString()
+        link: url.toString(),
+        commentaryId: book && chapter ? `${book}|${chapter}|${verse}` : `${url.pathname}|${verse}`
       };
     }
     function positionPopover(popover, anchor, preferAbove = false) {
@@ -1811,6 +2033,14 @@ body.app-panel-open #app-shell-root .app-overlay {
       }
       popover.style.left = `${Math.round(left)}px`;
       popover.style.top = `${Math.round(top)}px`;
+    }
+    function positionVersePopover(popover, anchor) {
+      if (manualPopoverPosition) {
+        popover.style.left = `${Math.round(manualPopoverPosition.left)}px`;
+        popover.style.top = `${Math.round(manualPopoverPosition.top)}px`;
+        return;
+      }
+      positionPopover(popover, anchor);
     }
     function hideCopyToast() {
       window.clearTimeout(copyToastTimer);
@@ -1856,22 +2086,142 @@ body.app-panel-open #app-shell-root .app-overlay {
         }
       }, 1200);
     }
-    function renderVersePopover(button) {
+    function buildCommentaryViewHtml(entry, includeEditButton) {
+      const sections = COMMENTARY_FIELDS.flatMap((field) => {
+        const value = entry[field.key].trim();
+        if (!value) return [];
+        return [`<section class="verse-number-commentary-group"><h4 class="verse-number-commentary-heading">${escHtml2(field.heading)}</h4><p class="verse-number-commentary-value">${escHtml2(value)}</p></section>`];
+      }).join("");
+      const actions = includeEditButton ? `<div class="verse-number-commentary-actions"><button type="button" id="${COMMENTARY_EDIT_BTN_ID}" class="verse-number-commentary-btn">Edit</button></div>` : "";
+      return `<div class="verse-number-popover-content">${sections}${actions}</div>`;
+    }
+    function buildCommentaryEditHtml(entry) {
+      const sections = COMMENTARY_FIELDS.map((field) => {
+        const instructionsHtml = field.instructions ? `<p class="verse-number-commentary-instructions">${escHtml2(field.instructions)}</p>` : "";
+        return `<section class="verse-number-commentary-group"><h4 class="verse-number-commentary-heading">${escHtml2(field.heading)}</h4>${instructionsHtml}<textarea class="verse-number-commentary-textarea" data-commentary-key="${escAttr(field.key)}">${escHtml2(entry[field.key])}</textarea></section>`;
+      }).join("");
+      return `<div class="verse-number-popover-content">${sections}<div class="verse-number-commentary-actions"><button type="button" id="${COMMENTARY_SAVE_BTN_ID}" class="verse-number-commentary-btn">Save</button><button type="button" id="${COMMENTARY_CANCEL_BTN_ID}" class="verse-number-commentary-btn">Cancel</button></div></div>`;
+    }
+    function buildStatusNotice(status, rejectionNoticeId, moderationNotes) {
+      if (status === "pending") {
+        return '<p class="verse-number-popover-body">Your saved commentary is pending moderation. Public display uses approved content only.</p>';
+      }
+      if (status === "rejected") {
+        if (isRejectedNoticeDismissed(rejectionNoticeId)) return "";
+        const note = moderationNotes.trim() ? moderationNotes.trim() : "No moderation notes were provided.";
+        return `<div class="verse-number-commentary-note"><strong>Rejected:</strong> ${escHtml2(note)}<div class="verse-number-commentary-actions"><button type="button" id="${COMMENTARY_REJECTED_DISMISS_BTN_ID}" class="verse-number-commentary-btn">Dismiss</button></div></div>`;
+      }
+      return "";
+    }
+    function buildPublicEmptyHtml() {
+      return '<p class="verse-number-popover-body">More content coming here soon.</p>';
+    }
+    function parseCommentaryForm(popover) {
+      const out = getEmptyCommentaryEntry();
+      popover.querySelectorAll("textarea[data-commentary-key]").forEach((textarea) => {
+        const key = textarea.dataset.commentaryKey;
+        if (!key || !(key in out)) return;
+        out[key] = textarea.value.trim();
+      });
+      return out;
+    }
+    async function loadVerseCommentary(context) {
+      const query = new URLSearchParams({ book: context.book, chapter: context.chapter, verse: context.verse }).toString();
+      const payload = await fetchJson(`/api/verse-commentary?${query}`);
+      return {
+        approved: payload.approved && payload.approved.entry ? {
+          entry: normalizeCommentaryEntry(payload.approved.entry),
+          status: payload.approved.status || "approved",
+          moderationNotes: typeof payload.approved.moderationNotes === "string" ? payload.approved.moderationNotes : "",
+          updatedAt: Number(payload.approved.updatedAt || 0) || 0
+        } : null,
+        mine: payload.mine && payload.mine.entry ? {
+          entry: normalizeCommentaryEntry(payload.mine.entry),
+          status: payload.mine.status || "",
+          moderationNotes: typeof payload.mine.moderationNotes === "string" ? payload.mine.moderationNotes : "",
+          updatedAt: Number(payload.mine.updatedAt || 0) || 0
+        } : null,
+        canEdit: Boolean(payload.canEdit)
+      };
+    }
+    async function syncVerseCommentaryMarkers() {
+      const main = qs4("main.chapter-page");
+      const book = main?.dataset.book || "";
+      const chapter = main?.dataset.chapter || "";
+      if (!book || !chapter) {
+        document.querySelectorAll("button.verse-num.verse-num-has-commentary").forEach((button) => {
+          button.classList.remove("verse-num-has-commentary");
+        });
+        return;
+      }
+      try {
+        const query = new URLSearchParams({ book, chapter }).toString();
+        const payload = await fetchJson(`/api/verse-commentary/chapter?${query}`);
+        const visibleVerses = /* @__PURE__ */ new Set([
+          ...Array.isArray(payload.approvedVerses) ? payload.approvedVerses : [],
+          ...authState.authenticated && Array.isArray(payload.mineVerses) ? payload.mineVerses : []
+        ]);
+        document.querySelectorAll("button.verse-num").forEach((button) => {
+          const row = button.closest(".snippet-row");
+          const verse = row?.id || button.textContent?.trim() || "";
+          button.classList.toggle("verse-num-has-commentary", Boolean(verse && visibleVerses.has(verse)));
+        });
+      } catch {
+        document.querySelectorAll("button.verse-num.verse-num-has-commentary").forEach((button) => {
+          button.classList.remove("verse-num-has-commentary");
+        });
+      }
+    }
+    async function renderVersePopover(button, options) {
       const popover = qs4(`#${POPOVER_ID}`);
       if (!popover) return;
       const context = getVerseContext(button);
       if (!context) return;
-      if (popover.matches(":popover-open") && activeVerseLink === context.link) {
+      if (!options?.forceRefresh && popover.matches(":popover-open") && activeVerseLink === context.link) {
         popover.hidePopover();
+        activeVerseButton = null;
+        activeContext = null;
+        commentaryEditing = false;
         return;
       }
       activeVerseLink = context.link;
-      popover.innerHTML = `<div class="verse-number-popover-header"><div class="verse-number-popover-title">${escHtml2(context.title)}</div></div><div class="verse-number-popover-actions"><button type="button" class="verse-number-popover-link-btn" data-verse-copy-link="${escHtml2(context.link)}">Link</button></div><p class="verse-number-popover-body">More content coming here soon</p>`;
+      activeVerseButton = button;
+      activeContext = context;
+      const header = `<div class="verse-number-popover-header"><div class="verse-number-popover-title">${escHtml2(context.title)}</div></div><div class="verse-number-popover-actions"><button type="button" class="verse-number-popover-link-btn" data-verse-copy-link="${escHtml2(context.link)}">Link</button></div>`;
+      popover.innerHTML = `${header}<div class="verse-number-popover-content"><p class="verse-number-popover-body">Loading commentary...</p></div>`;
       if (popover.matches(":popover-open")) {
         popover.hidePopover();
       }
       popover.showPopover();
-      positionPopover(popover, button);
+      positionVersePopover(popover, button);
+      try {
+        const payload = await loadVerseCommentary(context);
+        if (activeVerseLink !== context.link || activeVerseButton !== button) return;
+        const approvedEntry = payload.approved?.entry || getEmptyCommentaryEntry();
+        const mineEntry = payload.mine?.entry || getEmptyCommentaryEntry();
+        const mineStatus = payload.mine?.status || "";
+        const mineUpdatedAt = payload.mine?.updatedAt || 0;
+        const rejectionNoticeId = `${context.commentaryId}:${mineUpdatedAt}`;
+        activeRejectionNoticeId = rejectionNoticeId;
+        const showRejectedDraft = mineStatus === "rejected" && Boolean(payload.mine?.entry) && !isRejectedNoticeDismissed(rejectionNoticeId);
+        const visibleEntry = showRejectedDraft ? mineEntry : approvedEntry;
+        const editEntry = payload.mine?.entry ? mineEntry : approvedEntry;
+        let body = "";
+        if (!authState.authenticated) {
+          body = payload.approved && hasCommentary(payload.approved.entry) ? buildCommentaryViewHtml(payload.approved.entry, false) : buildPublicEmptyHtml();
+        } else if (commentaryEditing) {
+          body = buildCommentaryEditHtml(editEntry);
+        } else {
+          body = `${buildCommentaryViewHtml(visibleEntry, true)}${buildStatusNotice(mineStatus, rejectionNoticeId, payload.mine?.moderationNotes || "")}`;
+        }
+        button.classList.toggle("verse-num-has-commentary", hasCommentary(payload.approved?.entry || payload.mine?.entry || getEmptyCommentaryEntry()));
+        popover.innerHTML = `${header}${body}`;
+        positionVersePopover(popover, button);
+      } catch (error) {
+        if (activeVerseLink !== context.link || activeVerseButton !== button) return;
+        popover.innerHTML = `${header}<div class="verse-number-popover-content"><p class="verse-number-popover-body">${escHtml2(error instanceof Error ? error.message : "Could not load commentary")}</p></div>`;
+        positionVersePopover(popover, button);
+      }
     }
     return {
       id: "verse-number-popover",
@@ -1884,12 +2234,45 @@ body.app-panel-open #app-shell-root .app-overlay {
         injectOnce();
         disposers.push(
           delegator.registerSublistener({
+            eventName: "mousedown",
+            tagName: "DIV",
+            selector: ".verse-number-popover-header",
+            handle(header, event) {
+              const mouseEvent = event;
+              const popover = header.closest(`#${POPOVER_ID}`);
+              if (!popover || !popover.matches(":popover-open")) return;
+              const rect = popover.getBoundingClientRect();
+              const offsetX = mouseEvent.clientX - rect.left;
+              const offsetY = mouseEvent.clientY - rect.top;
+              mouseEvent.preventDefault();
+              const onMove = (moveEvent) => {
+                const margin = 10;
+                const maxLeft = Math.max(margin, window.innerWidth - popover.offsetWidth - margin);
+                const maxTop = Math.max(margin, window.innerHeight - popover.offsetHeight - margin);
+                const left = Math.min(maxLeft, Math.max(margin, moveEvent.clientX - offsetX));
+                const top = Math.min(maxTop, Math.max(margin, moveEvent.clientY - offsetY));
+                manualPopoverPosition = { left, top };
+                popover.style.left = `${Math.round(left)}px`;
+                popover.style.top = `${Math.round(top)}px`;
+              };
+              const onUp = () => {
+                window.removeEventListener("mousemove", onMove);
+                window.removeEventListener("mouseup", onUp);
+              };
+              window.addEventListener("mousemove", onMove);
+              window.addEventListener("mouseup", onUp);
+            }
+          })
+        );
+        disposers.push(
+          delegator.registerSublistener({
             eventName: "click",
             tagName: "BUTTON",
             selector: "button.verse-num",
             handle(button, event) {
               event.preventDefault();
-              renderVersePopover(button);
+              manualPopoverPosition = null;
+              void renderVersePopover(button);
             }
           })
         );
@@ -1906,6 +2289,94 @@ body.app-panel-open #app-shell-root .app-overlay {
             }
           })
         );
+        disposers.push(
+          delegator.registerSublistener({
+            eventName: "click",
+            tagName: "BUTTON",
+            selector: `#${COMMENTARY_REJECTED_DISMISS_BTN_ID}`,
+            handle(_button, event) {
+              event.preventDefault();
+              if (!activeContext || !activeVerseButton) return;
+              dismissRejectedNotice(activeRejectionNoticeId || activeContext.commentaryId);
+              void renderVersePopover(activeVerseButton, { forceRefresh: true });
+            }
+          })
+        );
+        disposers.push(
+          delegator.registerSublistener({
+            eventName: "click",
+            tagName: "BUTTON",
+            selector: `#${COMMENTARY_EDIT_BTN_ID}`,
+            handle(_button, event) {
+              event.preventDefault();
+              if (!activeVerseButton) return;
+              commentaryEditing = true;
+              void renderVersePopover(activeVerseButton, { forceRefresh: true });
+            }
+          })
+        );
+        disposers.push(
+          delegator.registerSublistener({
+            eventName: "click",
+            tagName: "BUTTON",
+            selector: `#${COMMENTARY_CANCEL_BTN_ID}`,
+            handle(_button, event) {
+              event.preventDefault();
+              if (!activeVerseButton) return;
+              commentaryEditing = false;
+              void renderVersePopover(activeVerseButton, { forceRefresh: true });
+            }
+          })
+        );
+        disposers.push(
+          delegator.registerSublistener({
+            eventName: "click",
+            tagName: "BUTTON",
+            selector: `#${COMMENTARY_SAVE_BTN_ID}`,
+            handle(_button, event) {
+              event.preventDefault();
+              const popover = qs4(`#${POPOVER_ID}`);
+              if (!popover || !activeContext || !activeVerseButton) return;
+              const entry = parseCommentaryForm(popover);
+              void fetchJson(`/api/verse-commentary`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  book: activeContext.book,
+                  chapter: activeContext.chapter,
+                  verse: activeContext.verse,
+                  entry
+                })
+              }).then(() => {
+                commentaryEditing = false;
+                void syncVerseCommentaryMarkers();
+                void renderVersePopover(activeVerseButton, { forceRefresh: true });
+              }).catch((error) => {
+                const body = popover.querySelector(".verse-number-popover-body");
+                if (body) {
+                  body.textContent = error instanceof Error ? error.message : "Could not save commentary";
+                }
+              });
+            }
+          })
+        );
+        const onAuthChanged = (event) => {
+          const detail = event.detail;
+          authState = {
+            authenticated: Boolean(detail?.authenticated),
+            userId: typeof detail?.userId === "string" ? detail.userId : void 0,
+            email: typeof detail?.email === "string" ? detail.email : void 0
+          };
+          void syncVerseCommentaryMarkers();
+          if (activeVerseButton && qs4(`#${POPOVER_ID}`)?.matches(":popover-open")) {
+            void renderVersePopover(activeVerseButton, { forceRefresh: true });
+          }
+        };
+        window.addEventListener("servewell-auth-changed", onAuthChanged);
+        disposers.push(() => window.removeEventListener("servewell-auth-changed", onAuthChanged));
+        window.setTimeout(() => {
+          void syncVerseCommentaryMarkers();
+        }, 0);
       },
       deactivate() {
         this.active = false;
@@ -1919,6 +2390,10 @@ body.app-panel-open #app-shell-root .app-overlay {
           popover.hidePopover();
         }
         activeVerseLink = "";
+        activeVerseButton = null;
+        activeContext = null;
+        commentaryEditing = false;
+        manualPopoverPosition = null;
       }
     };
   }
@@ -1944,6 +2419,34 @@ body.app-panel-open #app-shell-root .app-overlay {
         this.active = false;
         delete document.documentElement.dataset.developerMode;
         window.dispatchEvent(new CustomEvent("servewell-developer-mode-changed", {
+          detail: { enabled: false }
+        }));
+      }
+    };
+  }
+
+  // src/phasingScripts/phase2To3/createModeratorRoleModule.ts
+  function createModeratorRoleModule() {
+    return {
+      id: "moderator-role",
+      label: "Moderator role",
+      active: false,
+      defaultActive: true,
+      includeInMenu: true,
+      available: false,
+      activate() {
+        if (this.active) return;
+        this.active = true;
+        document.documentElement.dataset.moderatorMode = "1";
+        window.dispatchEvent(new CustomEvent("servewell-moderator-mode-changed", {
+          detail: { enabled: true }
+        }));
+      },
+      deactivate() {
+        if (!this.active) return;
+        this.active = false;
+        delete document.documentElement.dataset.moderatorMode;
+        window.dispatchEvent(new CustomEvent("servewell-moderator-mode-changed", {
           detail: { enabled: false }
         }));
       }
@@ -3173,12 +3676,14 @@ ${bodyText}` : prefix : bodyText;
     const shell = createShell();
     const theme = createTheme(shell);
     const modules = createModuleRegistry(shell);
+    const moderatorRoleModule = createModeratorRoleModule();
     const developerRoleModule = createDeveloperRoleModule();
     const devTimeModule = createDevTimeModule();
     const onDemoPage = typeof window !== "undefined" && isDemoRoute(window.location.pathname);
     if (onDemoPage) {
       modules.register(createDemoModule(delegator, shell));
     }
+    modules.register(moderatorRoleModule);
     modules.register(developerRoleModule);
     modules.register(devTimeModule);
     modules.register(createBibleNavModule(delegator));
@@ -3191,15 +3696,20 @@ ${bodyText}` : prefix : bodyText;
     modules.restoreFromStorage();
     function applyRoleAvailability(detail) {
       const roles = Array.isArray(detail?.roles) ? detail.roles.filter((role) => typeof role === "string") : [];
+      const hasModerator = roles.includes("moderator");
       const hasDeveloper = roles.includes("developer");
+      moderatorRoleModule.available = hasModerator;
+      if (!hasModerator && modules.isActive("moderator-role")) {
+        modules.deactivate("moderator-role", { persist: false });
+      }
       developerRoleModule.available = hasDeveloper;
       if (!hasDeveloper) {
-        if (modules.isActive("dev-time")) modules.deactivate("dev-time");
-        if (modules.isActive("developer-role")) modules.deactivate("developer-role");
+        if (modules.isActive("dev-time")) modules.deactivate("dev-time", { persist: false });
+        if (modules.isActive("developer-role")) modules.deactivate("developer-role", { persist: false });
         devTimeModule.available = false;
       }
       modules.render();
-      if (hasDeveloper) {
+      if (hasModerator || hasDeveloper) {
         modules.restoreFromStorage();
       }
     }

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Rejected Moderation Items | ServeWell.Net</title>
+		<meta name="description" content="Moderator review list for rejected verse commentary" />
+		<style>
+			body {
+				margin: 2.25rem;
+				font-family: sans-serif;
+				font-size: large;
+			}
+			main {
+				max-width: 56rem;
+			}
+			.status {
+				margin-top: 1rem;
+				padding: 0.85rem 1rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.75rem;
+				background: var(--bar, #f4f4f5);
+			}
+			.list {
+				display: grid;
+				gap: 0.8rem;
+				margin-top: 1rem;
+			}
+			.card {
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.75rem;
+				padding: 0.9rem 1rem;
+				background: var(--panel, #ffffff);
+			}
+			.card h2 {
+				margin: 0;
+				font-size: 1.05rem;
+			}
+			.rejected-link {
+				color: var(--fg, #171717);
+				font-weight: 700;
+				text-decoration: none;
+			}
+			.rejected-link:hover {
+				opacity: 0.8;
+			}
+			.meta {
+				margin: 0.4rem 0 0;
+				color: var(--muted, #666666);
+				font-size: 0.95rem;
+			}
+			.notes {
+				margin: 0.55rem 0 0;
+				white-space: pre-wrap;
+				font-size: 0.97rem;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>Rejected Moderation Items</h1>
+			<p>This page keeps rejected submissions and their moderation notes browseable to moderators.</p>
+			<p><a href="/list-to-moderate">Back to moderation queue</a></p>
+			<div id="rejected-status" class="status">Loading rejected items...</div>
+			<div id="rejected-list" class="list" hidden></div>
+		</main>
+		<script src="/js/servewell-app-shell.js"></script>
+		<script src="/js/moderation-rejected.js"></script>
+	</body>
+</html>

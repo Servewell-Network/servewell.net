@@ -39,6 +39,7 @@ import { createDemoModule } from './createDemoModule';
 import { createBibleNavModule } from './createBibleNavModule';
 import { createVerseNumberPopoverModule } from './createVerseNumberPopoverModule';
 import { createDeveloperRoleModule } from './createDeveloperRoleModule';
+import { createModeratorRoleModule } from './createModeratorRoleModule';
 import { createDevTimeModule } from './createDevTimeModule';
 import { createTransliterationModule } from './createTransliterationModule';
 import { createSelectionControlModule } from './createSelectionControlModule';
@@ -65,6 +66,7 @@ export function jsDomFramework() {
   const shell = createShell();
   const theme = createTheme(shell);
   const modules = createModuleRegistry(shell);
+  const moderatorRoleModule = createModeratorRoleModule();
   const developerRoleModule = createDeveloperRoleModule();
   const devTimeModule = createDevTimeModule();
   const onDemoPage = typeof window !== 'undefined' && isDemoRoute(window.location.pathname);
@@ -73,6 +75,7 @@ export function jsDomFramework() {
   if (onDemoPage) {
     modules.register(createDemoModule(delegator, shell));
   }
+  modules.register(moderatorRoleModule);
   modules.register(developerRoleModule);
   modules.register(devTimeModule);
   modules.register(createBibleNavModule(delegator));
@@ -90,15 +93,22 @@ export function jsDomFramework() {
     const roles = Array.isArray((detail as { roles?: unknown[] })?.roles)
       ? (detail as { roles?: unknown[] }).roles!.filter((role): role is string => typeof role === 'string')
       : [];
+    const hasModerator = roles.includes('moderator');
     const hasDeveloper = roles.includes('developer');
+
+    moderatorRoleModule.available = hasModerator;
+    if (!hasModerator && modules.isActive('moderator-role')) {
+      modules.deactivate('moderator-role', { persist: false });
+    }
+
     developerRoleModule.available = hasDeveloper;
     if (!hasDeveloper) {
-      if (modules.isActive('dev-time')) modules.deactivate('dev-time');
-      if (modules.isActive('developer-role')) modules.deactivate('developer-role');
+      if (modules.isActive('dev-time')) modules.deactivate('dev-time', { persist: false });
+      if (modules.isActive('developer-role')) modules.deactivate('developer-role', { persist: false });
       devTimeModule.available = false;
     }
     modules.render();
-    if (hasDeveloper) {
+    if (hasModerator || hasDeveloper) {
       modules.restoreFromStorage();
     }
   }

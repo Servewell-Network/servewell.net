@@ -10,6 +10,7 @@ type AuthDbEnv = Env & {
 	AUTH_ORIGIN?: string;
 	AUTH_FROM_EMAIL?: string;
 	AUTH_DEVELOPER_EMAILS?: string;
+	AUTH_MODERATOR_EMAILS?: string;
 	RESEND_API_KEY?: string;
 };
 
@@ -83,7 +84,31 @@ const TABLES_SQL = [
 		created_at INTEGER NOT NULL,
 		FOREIGN KEY (user_id) REFERENCES auth_users(id)
 	)`,
-	`CREATE INDEX IF NOT EXISTS idx_dev_time_entries_user_created ON dev_time_entries(user_id, created_at)`
+	`CREATE INDEX IF NOT EXISTS idx_dev_time_entries_user_created ON dev_time_entries(user_id, created_at)`,
+	`CREATE TABLE IF NOT EXISTS verse_commentary_submissions (
+		id TEXT PRIMARY KEY,
+		verse_key TEXT NOT NULL,
+		book TEXT NOT NULL,
+		chapter TEXT NOT NULL,
+		verse TEXT NOT NULL,
+		author_user_id TEXT NOT NULL,
+		god_and_plan TEXT NOT NULL DEFAULT '',
+		examples_of_success TEXT NOT NULL DEFAULT '',
+		memory_helps TEXT NOT NULL DEFAULT '',
+		related_texts TEXT NOT NULL DEFAULT '',
+		status TEXT NOT NULL,
+		moderator_user_id TEXT,
+		moderation_notes TEXT,
+		contributor_history_json TEXT NOT NULL DEFAULT '[]',
+		created_at INTEGER NOT NULL,
+		updated_at INTEGER NOT NULL,
+		submitted_at INTEGER NOT NULL,
+		approved_at INTEGER,
+		FOREIGN KEY (author_user_id) REFERENCES auth_users(id),
+		FOREIGN KEY (moderator_user_id) REFERENCES auth_users(id)
+	)`,
+	`CREATE INDEX IF NOT EXISTS idx_verse_commentary_verse_status ON verse_commentary_submissions(verse_key, status, updated_at)`,
+	`CREATE INDEX IF NOT EXISTS idx_verse_commentary_author_verse ON verse_commentary_submissions(author_user_id, verse_key, updated_at)`
 ];
 
 export default {
@@ -117,6 +142,30 @@ export default {
 		}
 		if (url.pathname === '/api/dev/time/summary' && method === 'GET') {
 			return handleDevTimeSummary(request, env as AuthDbEnv, url);
+		}
+		if (url.pathname === '/api/verse-commentary' && method === 'GET') {
+			return handleGetVerseCommentary(request, env as AuthDbEnv, url);
+		}
+		if (url.pathname === '/api/verse-commentary' && method === 'POST') {
+			return handleSaveVerseCommentary(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/verse-commentary/chapter' && method === 'GET') {
+			return handleGetChapterCommentaryMarkers(request, env as AuthDbEnv, url);
+		}
+		if (url.pathname === '/api/moderation/verse-commentary/queue' && method === 'GET') {
+			return handleGetModerationQueue(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/moderation/verse-commentary/item' && method === 'GET') {
+			return handleGetModerationItem(request, env as AuthDbEnv, url);
+		}
+		if (url.pathname === '/api/moderation/verse-commentary/publish' && method === 'POST') {
+			return handlePublishModerationItem(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/moderation/verse-commentary/reject' && method === 'POST') {
+			return handleRejectModerationItem(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/moderation/verse-commentary/rejected' && method === 'GET') {
+			return handleGetRejectedModerationItems(request, env as AuthDbEnv);
 		}
 
 		// Vote endpoints
@@ -377,8 +426,8 @@ function normalizeRole(value: string): string {
 	return value.trim().toLowerCase();
 }
 
-function getConfiguredDeveloperEmails(env: AuthDbEnv): Set<string> {
-	const raw = (env.AUTH_DEVELOPER_EMAILS || '').trim();
+function getConfiguredRoleEmails(rawValue: string | undefined): Set<string> {
+	const raw = (rawValue || '').trim();
 	if (!raw) return new Set();
 	return new Set(
 		raw
@@ -388,12 +437,29 @@ function getConfiguredDeveloperEmails(env: AuthDbEnv): Set<string> {
 	);
 }
 
+function getConfiguredDeveloperEmails(env: AuthDbEnv): Set<string> {
+	return getConfiguredRoleEmails(env.AUTH_DEVELOPER_EMAILS);
+}
+
+function getConfiguredModeratorEmails(env: AuthDbEnv): Set<string> {
+	return getConfiguredRoleEmails(env.AUTH_MODERATOR_EMAILS);
+}
+
 async function ensureConfiguredDeveloperRole(db: D1Database, env: AuthDbEnv, user: AuthUser): Promise<void> {
 	const emails = getConfiguredDeveloperEmails(env);
 	if (!emails.has(user.email)) return;
 	await db
 		.prepare('INSERT OR IGNORE INTO auth_user_roles (user_id, role, created_at) VALUES (?, ?, ?)')
 		.bind(user.id, 'developer', Date.now())
+		.run();
+}
+
+async function ensureConfiguredModeratorRole(db: D1Database, env: AuthDbEnv, user: AuthUser): Promise<void> {
+	const emails = getConfiguredModeratorEmails(env);
+	if (!emails.has(user.email)) return;
+	await db
+		.prepare('INSERT OR IGNORE INTO auth_user_roles (user_id, role, created_at) VALUES (?, ?, ?)')
+		.bind(user.id, 'moderator', Date.now())
 		.run();
 }
 
@@ -407,14 +473,21 @@ async function getUserRoles(db: D1Database, userId: string): Promise<string[]> {
 }
 
 async function requireDeveloperAuth(request: Request, env: AuthDbEnv): Promise<{ user: AuthUser; roles: string[] } | null> {
+	return requireRoleAuth(request, env, 'developer');
+}
+
+async function requireModeratorAuth(request: Request, env: AuthDbEnv): Promise<{ user: AuthUser; roles: string[] } | null> {
+	return requireRoleAuth(request, env, 'moderator');
+}
+
+async function requireRoleAuth(request: Request, env: AuthDbEnv, requiredRole: string): Promise<{ user: AuthUser; roles: string[] } | null> {
 	const db = env.AUTH_DB;
 	if (!db) return null;
 	await ensureAuthTables(db);
 	const user = await requireAuthUser(request, env);
 	if (!user) return null;
-	await ensureConfiguredDeveloperRole(db, env, user);
 	const roles = await getUserRoles(db, user.id);
-	if (!roles.includes('developer')) return null;
+	if (!roles.includes(requiredRole)) return null;
 	return { user, roles };
 }
 
@@ -564,8 +637,522 @@ function computeSummaryRanges(nowMs: number, tzOffsetMinutes: number): {
 
 type SummaryRow = { dev: number; adm: number; copy: number };
 
+type VerseCommentaryEntry = {
+	godAndPlan: string;
+	examplesOfSuccess: string;
+	memoryHelps: string;
+	relatedTexts: string;
+};
+
+type VerseCommentaryStatus = 'pending' | 'approved' | 'rejected';
+
+type ContributorHistoryEntry = {
+	userId: string;
+	at: number;
+	action: 'submitted' | 'published';
+};
+
 function emptySummaryRow(): SummaryRow {
 	return { dev: 0, adm: 0, copy: 0 };
+}
+
+function sanitizeSimpleSegment(value: unknown): string {
+	return typeof value === 'string' ? value.trim() : '';
+}
+
+function sanitizeCommentaryText(value: unknown): string {
+	if (typeof value !== 'string') return '';
+	return value.replace(/\r\n/g, '\n').trim().slice(0, 8000);
+}
+
+function sanitizeModerationNotes(value: unknown): string {
+	if (typeof value !== 'string') return '';
+	return value.replace(/\r\n/g, '\n').trim().slice(0, 2000);
+}
+
+function sanitizeVerseCommentaryEntry(value: unknown): VerseCommentaryEntry {
+	const raw = (value && typeof value === 'object' ? value : {}) as Record<string, unknown>;
+	return {
+		godAndPlan: sanitizeCommentaryText(raw.godAndPlan),
+		examplesOfSuccess: sanitizeCommentaryText(raw.examplesOfSuccess),
+		memoryHelps: sanitizeCommentaryText(raw.memoryHelps),
+		relatedTexts: sanitizeCommentaryText(raw.relatedTexts)
+	};
+}
+
+function hasVerseCommentaryContent(entry: VerseCommentaryEntry): boolean {
+	return Boolean(
+		entry.godAndPlan ||
+		entry.examplesOfSuccess ||
+		entry.memoryHelps ||
+		entry.relatedTexts
+	);
+}
+
+function makeVerseKey(book: string, chapter: string, verse: string): string {
+	return `${book}|${chapter}|${verse}`;
+}
+
+type VerseCommentaryRow = {
+	id: string;
+	verse_key: string;
+	book: string;
+	chapter: string;
+	verse: string;
+	author_user_id: string;
+	god_and_plan: string;
+	examples_of_success: string;
+	memory_helps: string;
+	related_texts: string;
+	moderation_notes?: string | null;
+	status: VerseCommentaryStatus;
+	contributor_history_json?: string | null;
+	created_at: number;
+	updated_at: number;
+	submitted_at: number;
+	approved_at: number | null;
+};
+
+function mapVerseCommentaryRow(row: VerseCommentaryRow | null | undefined) {
+	if (!row) return null;
+	return {
+		status: row.status,
+		entry: {
+			godAndPlan: row.god_and_plan || '',
+			examplesOfSuccess: row.examples_of_success || '',
+			memoryHelps: row.memory_helps || '',
+			relatedTexts: row.related_texts || ''
+		},
+		moderationNotes: row.moderation_notes || '',
+		updatedAt: row.updated_at,
+		approvedAt: row.approved_at
+	};
+}
+
+function parseContributorHistory(value: string | null | undefined): ContributorHistoryEntry[] {
+	if (!value) return [];
+	try {
+		const parsed = JSON.parse(value) as unknown;
+		if (!Array.isArray(parsed)) return [];
+		return parsed
+			.map((entry) => {
+				if (!entry || typeof entry !== 'object') return null;
+				const userId = typeof (entry as { userId?: unknown }).userId === 'string' ? (entry as { userId: string }).userId.trim() : '';
+				const at = Number((entry as { at?: unknown }).at || 0);
+				const action = (entry as { action?: unknown }).action;
+				if (!userId || !Number.isFinite(at) || at <= 0 || (action !== 'submitted' && action !== 'published')) {
+					return null;
+				}
+				return { userId, at, action } as ContributorHistoryEntry;
+			})
+			.filter((entry): entry is ContributorHistoryEntry => Boolean(entry));
+	} catch {
+		return [];
+	}
+}
+
+function serializeContributorHistory(entries: ContributorHistoryEntry[]): string {
+	return JSON.stringify(entries);
+}
+
+function ensureAuthorHistory(entries: ContributorHistoryEntry[], authorUserId: string, createdAt: number): ContributorHistoryEntry[] {
+	if (entries.some((entry) => entry.userId === authorUserId && entry.action === 'submitted')) {
+		return entries;
+	}
+	return [{ userId: authorUserId, at: createdAt, action: 'submitted' }, ...entries];
+}
+
+function appendContributorHistory(entries: ContributorHistoryEntry[], nextEntry: ContributorHistoryEntry): ContributorHistoryEntry[] {
+	return [...entries, nextEntry];
+}
+
+async function ensureVerseCommentarySchema(db: D1Database): Promise<void> {
+	const columns = await db.prepare('PRAGMA table_info(verse_commentary_submissions)').all<{ name: string }>();
+	const names = new Set((columns.results || []).map((column) => column.name));
+	if (!names.has('contributor_history_json')) {
+		await db.prepare("ALTER TABLE verse_commentary_submissions ADD COLUMN contributor_history_json TEXT NOT NULL DEFAULT '[]'").run();
+	}
+}
+
+async function getLatestVerseCommentaryByStatus(
+	db: D1Database,
+	verseKey: string,
+	status: VerseCommentaryStatus
+): Promise<VerseCommentaryRow | null> {
+	return db
+		.prepare(
+			`SELECT id, verse_key, book, chapter, verse, author_user_id, god_and_plan, examples_of_success, memory_helps, related_texts, moderation_notes, status,
+			        contributor_history_json, created_at, updated_at, submitted_at, approved_at
+			 FROM verse_commentary_submissions
+			 WHERE verse_key = ? AND status = ?
+			 ORDER BY updated_at DESC
+			 LIMIT 1`
+		)
+		.bind(verseKey, status)
+		.first<VerseCommentaryRow>();
+}
+
+async function getLatestUserVerseCommentary(
+	db: D1Database,
+	userId: string,
+	verseKey: string
+): Promise<VerseCommentaryRow | null> {
+	return db
+		.prepare(
+			`SELECT id, verse_key, book, chapter, verse, author_user_id, god_and_plan, examples_of_success, memory_helps, related_texts, moderation_notes, status,
+			        contributor_history_json, created_at, updated_at, submitted_at, approved_at
+			 FROM verse_commentary_submissions
+			 WHERE author_user_id = ? AND verse_key = ?
+			 ORDER BY updated_at DESC
+			 LIMIT 1`
+		)
+		.bind(userId, verseKey)
+		.first<VerseCommentaryRow>();
+}
+
+async function handleGetVerseCommentary(request: Request, env: AuthDbEnv, url: URL): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const book = sanitizeSimpleSegment(url.searchParams.get('book'));
+	const chapter = sanitizeSimpleSegment(url.searchParams.get('chapter'));
+	const verse = sanitizeSimpleSegment(url.searchParams.get('verse'));
+	if (!book || !chapter || !verse) {
+		return jsonResponse({ error: 'book, chapter, and verse are required' }, 400);
+	}
+
+	const verseKey = makeVerseKey(book, chapter, verse);
+	const user = await requireAuthUser(request, env);
+	const [approvedRow, myRow] = await Promise.all([
+		getLatestVerseCommentaryByStatus(db, verseKey, 'approved'),
+		user ? getLatestUserVerseCommentary(db, user.id, verseKey) : Promise.resolve(null)
+	]);
+
+	return jsonResponse({
+		approved: mapVerseCommentaryRow(approvedRow),
+		mine: user ? mapVerseCommentaryRow(myRow) : null,
+		canEdit: Boolean(user)
+	});
+}
+
+async function handleGetChapterCommentaryMarkers(request: Request, env: AuthDbEnv, url: URL): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const book = sanitizeSimpleSegment(url.searchParams.get('book'));
+	const chapter = sanitizeSimpleSegment(url.searchParams.get('chapter'));
+	if (!book || !chapter) {
+		return jsonResponse({ error: 'book and chapter are required' }, 400);
+	}
+
+	const user = await requireAuthUser(request, env);
+	const approvedRows = await db
+		.prepare(
+			`SELECT DISTINCT verse
+			 FROM verse_commentary_submissions
+			 WHERE book = ? AND chapter = ? AND status = 'approved'`
+		)
+		.bind(book, chapter)
+		.all<{ verse: string }>();
+
+	let mineRows: { verse: string }[] = [];
+	if (user) {
+		const mineResult = await db
+			.prepare(
+				`SELECT DISTINCT verse
+				 FROM verse_commentary_submissions
+				 WHERE book = ? AND chapter = ? AND author_user_id = ? AND status IN ('pending', 'approved')`
+			)
+			.bind(book, chapter, user.id)
+			.all<{ verse: string }>();
+		mineRows = mineResult.results || [];
+	}
+
+	return jsonResponse({
+		approvedVerses: (approvedRows.results || []).map((row) => row.verse).filter(Boolean),
+		mineVerses: mineRows.map((row) => row.verse).filter(Boolean)
+	});
+}
+
+async function handleSaveVerseCommentary(request: Request, env: AuthDbEnv): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const user = await requireAuthUser(request, env);
+	if (!user) return jsonResponse({ error: 'Sign-in required' }, 403);
+
+	const body = await parseBody(request);
+	const book = sanitizeSimpleSegment(body.book);
+	const chapter = sanitizeSimpleSegment(body.chapter);
+	const verse = sanitizeSimpleSegment(body.verse);
+	if (!book || !chapter || !verse) {
+		return jsonResponse({ error: 'book, chapter, and verse are required' }, 400);
+	}
+
+	const entry = sanitizeVerseCommentaryEntry(body.entry);
+	const verseKey = makeVerseKey(book, chapter, verse);
+
+	if (!hasVerseCommentaryContent(entry)) {
+		await db
+			.prepare(
+				`DELETE FROM verse_commentary_submissions
+				 WHERE author_user_id = ? AND verse_key = ? AND status = 'pending'`
+			)
+			.bind(user.id, verseKey)
+			.run();
+		return jsonResponse({ success: true, reset: true, status: 'pending' });
+	}
+
+	const now = Date.now();
+	const existingPending = await db
+		.prepare(`SELECT id, contributor_history_json, created_at FROM verse_commentary_submissions WHERE author_user_id = ? AND verse_key = ? AND status = 'pending' ORDER BY updated_at DESC LIMIT 1`)
+		.bind(user.id, verseKey)
+		.first<{ id: string; contributor_history_json?: string | null; created_at: number }>();
+
+	if (existingPending?.id) {
+		const history = ensureAuthorHistory(parseContributorHistory(existingPending.contributor_history_json), user.id, existingPending.created_at || now);
+		await db
+			.prepare(
+				`UPDATE verse_commentary_submissions
+				 SET god_and_plan = ?, examples_of_success = ?, memory_helps = ?, related_texts = ?, updated_at = ?, submitted_at = ?, moderation_notes = NULL, moderator_user_id = NULL, contributor_history_json = ?
+				 WHERE id = ?`
+			)
+			.bind(entry.godAndPlan, entry.examplesOfSuccess, entry.memoryHelps, entry.relatedTexts, now, now, serializeContributorHistory(history), existingPending.id)
+			.run();
+		return jsonResponse({ success: true, status: 'pending', id: existingPending.id });
+	}
+
+	const id = crypto.randomUUID();
+	const contributorHistory = serializeContributorHistory([{ userId: user.id, at: now, action: 'submitted' }]);
+	await db
+		.prepare(
+			`INSERT INTO verse_commentary_submissions
+				(id, verse_key, book, chapter, verse, author_user_id, god_and_plan, examples_of_success, memory_helps, related_texts, status, contributor_history_json, created_at, updated_at, submitted_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)`
+		)
+		.bind(id, verseKey, book, chapter, verse, user.id, entry.godAndPlan, entry.examplesOfSuccess, entry.memoryHelps, entry.relatedTexts, contributorHistory, now, now, now)
+		.run();
+
+	return jsonResponse({ success: true, status: 'pending', id });
+}
+
+async function handleGetModerationQueue(request: Request, env: AuthDbEnv): Promise<Response> {
+	const auth = await requireModeratorAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Moderator role required' }, 403);
+
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const rows = await db
+		.prepare(
+			`SELECT id, book, chapter, verse, submitted_at, updated_at
+			 FROM verse_commentary_submissions
+			 WHERE status = 'pending'
+			 ORDER BY submitted_at ASC, updated_at ASC`
+		)
+		.all<{ id: string; book: string; chapter: string; verse: string; submitted_at: number; updated_at: number }>();
+
+	const items = (rows.results || []).map((row) => ({
+		id: row.id,
+		book: row.book,
+		chapter: row.chapter,
+		verse: row.verse,
+		title: `${row.book} ${row.chapter}:${row.verse}`,
+		submittedAt: row.submitted_at,
+		updatedAt: row.updated_at,
+	}));
+
+	return jsonResponse({ count: items.length, items });
+}
+
+async function handleGetModerationItem(request: Request, env: AuthDbEnv, url: URL): Promise<Response> {
+	const auth = await requireModeratorAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Moderator role required' }, 403);
+
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const id = sanitizeSimpleSegment(url.searchParams.get('id'));
+	if (!id) return jsonResponse({ error: 'id is required' }, 400);
+
+	const row = await db
+		.prepare(
+			`SELECT id, verse_key, book, chapter, verse, author_user_id, god_and_plan, examples_of_success, memory_helps, related_texts, status,
+			        moderation_notes, contributor_history_json, created_at, updated_at, submitted_at, approved_at
+			 FROM verse_commentary_submissions
+			 WHERE id = ? AND status IN ('pending', 'rejected')
+			 LIMIT 1`
+		)
+		.bind(id)
+		.first<VerseCommentaryRow>();
+
+	if (!row) return jsonResponse({ error: 'Moderation item not found' }, 404);
+
+	return jsonResponse({
+		item: {
+			id: row.id,
+			status: row.status,
+			book: row.book,
+			chapter: row.chapter,
+			verse: row.verse,
+			title: `${row.book} ${row.chapter}:${row.verse}`,
+			entry: normalizeVerseCommentaryEntryFromRow(row),
+			moderationNotes: row.moderation_notes || '',
+			submittedAt: row.submitted_at,
+			updatedAt: row.updated_at,
+		}
+	});
+}
+
+function normalizeVerseCommentaryEntryFromRow(row: Pick<VerseCommentaryRow, 'god_and_plan' | 'examples_of_success' | 'memory_helps' | 'related_texts'>): VerseCommentaryEntry {
+	return {
+		godAndPlan: row.god_and_plan || '',
+		examplesOfSuccess: row.examples_of_success || '',
+		memoryHelps: row.memory_helps || '',
+		relatedTexts: row.related_texts || '',
+	};
+}
+
+async function handlePublishModerationItem(request: Request, env: AuthDbEnv): Promise<Response> {
+	const auth = await requireModeratorAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Moderator role required' }, 403);
+
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const body = await parseBody(request);
+	const id = sanitizeSimpleSegment(body.id);
+	if (!id) return jsonResponse({ error: 'id is required' }, 400);
+
+	const entry = sanitizeVerseCommentaryEntry(body.entry);
+	const moderationNotes = sanitizeModerationNotes(body.moderationNotes);
+	if (!hasVerseCommentaryContent(entry)) {
+		return jsonResponse({ error: 'Commentary content is required to publish' }, 400);
+	}
+
+	const row = await db
+		.prepare(
+			`SELECT id, verse_key, book, chapter, verse, author_user_id, god_and_plan, examples_of_success, memory_helps, related_texts, status,
+			        moderation_notes, contributor_history_json, created_at, updated_at, submitted_at, approved_at
+			 FROM verse_commentary_submissions
+			 WHERE id = ? AND status IN ('pending', 'rejected')
+			 LIMIT 1`
+		)
+		.bind(id)
+		.first<VerseCommentaryRow>();
+
+	if (!row) return jsonResponse({ error: 'Moderation item not found' }, 404);
+
+	const now = Date.now();
+	const history = appendContributorHistory(
+		ensureAuthorHistory(parseContributorHistory(row.contributor_history_json), row.author_user_id, row.created_at || row.submitted_at || now),
+		{ userId: auth.user.id, at: now, action: 'published' }
+	);
+
+	await db
+		.prepare(
+			`UPDATE verse_commentary_submissions
+			 SET god_and_plan = ?, examples_of_success = ?, memory_helps = ?, related_texts = ?, status = 'approved', moderator_user_id = ?, moderation_notes = ?, updated_at = ?, approved_at = ?, contributor_history_json = ?
+			 WHERE id = ?`
+		)
+		.bind(entry.godAndPlan, entry.examplesOfSuccess, entry.memoryHelps, entry.relatedTexts, auth.user.id, moderationNotes, now, now, serializeContributorHistory(history), id)
+		.run();
+
+	return jsonResponse({
+		success: true,
+		item: {
+			id,
+			book: row.book,
+			chapter: row.chapter,
+			verse: row.verse,
+			title: `${row.book} ${row.chapter}:${row.verse}`,
+			status: 'approved'
+		}
+	});
+}
+
+async function handleRejectModerationItem(request: Request, env: AuthDbEnv): Promise<Response> {
+	const auth = await requireModeratorAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Moderator role required' }, 403);
+
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const body = await parseBody(request);
+	const id = sanitizeSimpleSegment(body.id);
+	if (!id) return jsonResponse({ error: 'id is required' }, 400);
+	const moderationNotes = sanitizeModerationNotes(body.moderationNotes);
+
+	const row = await db
+		.prepare(
+			`SELECT id, book, chapter, verse
+			 FROM verse_commentary_submissions
+			 WHERE id = ? AND status = 'pending'
+			 LIMIT 1`
+		)
+		.bind(id)
+		.first<{ id: string; book: string; chapter: string; verse: string }>();
+
+	if (!row) return jsonResponse({ error: 'Moderation item not found' }, 404);
+
+	const now = Date.now();
+	await db
+		.prepare(
+			`UPDATE verse_commentary_submissions
+			 SET status = 'rejected', moderator_user_id = ?, moderation_notes = ?, updated_at = ?, approved_at = NULL
+			 WHERE id = ?`
+		)
+		.bind(auth.user.id, moderationNotes, now, id)
+		.run();
+
+	return jsonResponse({
+		success: true,
+		item: {
+			id,
+			book: row.book,
+			chapter: row.chapter,
+			verse: row.verse,
+			title: `${row.book} ${row.chapter}:${row.verse}`,
+			status: 'rejected'
+		}
+	});
+}
+
+async function handleGetRejectedModerationItems(request: Request, env: AuthDbEnv): Promise<Response> {
+	const auth = await requireModeratorAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Moderator role required' }, 403);
+
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const rows = await db
+		.prepare(
+			`SELECT id, book, chapter, verse, moderation_notes, updated_at
+			 FROM verse_commentary_submissions
+			 WHERE status = 'rejected'
+			 ORDER BY updated_at DESC`
+		)
+		.all<{ id: string; book: string; chapter: string; verse: string; moderation_notes: string | null; updated_at: number }>();
+
+	const items = (rows.results || []).map((row) => ({
+		id: row.id,
+		book: row.book,
+		chapter: row.chapter,
+		verse: row.verse,
+		title: `${row.book} ${row.chapter}:${row.verse}`,
+		moderationNotes: row.moderation_notes || '',
+		updatedAt: row.updated_at,
+	}));
+
+	return jsonResponse({ count: items.length, items });
 }
 
 async function readDurationByWorkType(
@@ -652,6 +1239,7 @@ async function requireAuthUser(request: Request, env: AuthDbEnv): Promise<AuthUs
 
 	const user = { id: row.user_id, email: row.email };
 	await ensureConfiguredDeveloperRole(db, env, user);
+	await ensureConfiguredModeratorRole(db, env, user);
 	return user;
 }
 
@@ -659,9 +1247,13 @@ async function ensureAuthTables(db: D1Database): Promise<void> {
 	for (const sql of TABLES_SQL) {
 		await db.prepare(sql).run();
 	}
+	await ensureVerseCommentarySchema(db);
 }
 
 function getAuthOrigin(url: URL, env: AuthDbEnv): string {
+	if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+		return url.origin;
+	}
 	const configured = (env.AUTH_ORIGIN || '').trim();
 	if (configured) return configured.replace(/\/$/, '');
 	return url.origin;

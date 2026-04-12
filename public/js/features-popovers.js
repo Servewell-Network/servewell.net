@@ -169,7 +169,7 @@
     },
     'need-logins': {
       title: 'Magic-link logins',
-      content: '<p><strong>Value</strong><br>Account sign-in now makes verified voting possible without requiring passwords, while leaving room to evolve the account model later if contribution workflows grow more complex.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Click Sign in in the top bar, enter your email, and use your magic link. Verified votes then appear in the main vote count.</p>'
+      content: '<p><strong>Value</strong><br>Account sign-in works without passwords and now unlocks more than voting, including contribution workflows and role-based tools such as moderation access where permitted.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Click Sign in in the top bar, enter your email, and open the magic link from your inbox to complete sign-in.</p>'
     },
     'need-new-feature-marker': {
       title: 'New feature marker',

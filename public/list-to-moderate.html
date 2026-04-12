@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>List to Moderate | ServeWell.Net</title>
+		<meta name="description" content="Moderator queue for verse-level commentary submissions" />
+		<style>
+			body {
+				margin: 2.25rem;
+				font-family: sans-serif;
+				font-size: large;
+			}
+			main {
+				max-width: 56rem;
+			}
+			.queue-list {
+				display: grid;
+				gap: 0.8rem;
+				margin-top: 1rem;
+			}
+			.queue-card {
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.75rem;
+				padding: 0.9rem 1rem;
+				background: var(--panel, #ffffff);
+			}
+			.queue-link {
+				color: var(--fg, #171717);
+				font-weight: 700;
+				text-decoration: none;
+			}
+			.queue-link:hover {
+				opacity: 0.8;
+			}
+			.queue-meta {
+				margin: 0.35rem 0 0;
+				color: var(--muted, #666666);
+				font-size: 0.95rem;
+			}
+			.queue-status {
+				margin-top: 1rem;
+				padding: 0.85rem 1rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.75rem;
+				background: var(--bar, #f4f4f5);
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>List to Moderate</h1>
+			<p>Pending verse-level commentary submissions appear here for moderators. Choose one to review and publish.</p>
+			<p><a href="/moderation-rejected">View rejected items</a></p>
+			<div id="moderation-status" class="queue-status">Loading moderation queue...</div>
+			<div id="moderation-list" class="queue-list" hidden></div>
+		</main>
+		<script src="/js/servewell-app-shell.js"></script>
+		<script src="/js/moderation-list.js"></script>
+	</body>
+</html>

@@ -5,6 +5,7 @@ export type AppModule = {
   label: string;
   infoHref?: string;
   active: boolean;
+  defaultActive?: boolean;
   includeInMenu?: boolean;
   available?: boolean;
   activate: () => void;
@@ -15,7 +16,7 @@ export type ModuleRegistry = {
   register: (module: AppModule) => void;
   render: () => void;
   activate: (id: string) => void;
-  deactivate: (id: string) => void;
+  deactivate: (id: string, options?: { persist?: boolean }) => void;
   isActive: (id: string) => boolean;
   getAll: () => AppModule[];
   restoreFromStorage: () => void;
@@ -50,12 +51,13 @@ export function createModuleRegistry(shell: ShellApi): ModuleRegistry {
     try { localStorage.setItem(storageKey(id), '1'); } catch {}
   }
 
-  function deactivate(id: string) {
+  function deactivate(id: string, options?: { persist?: boolean }) {
     const module = modules[id];
     if (!module) return;
     module.deactivate();
     shell.syncModuleInputs(id, false);
-    try { localStorage.removeItem(storageKey(id)); } catch {}
+    if (options?.persist === false) return;
+    try { localStorage.setItem(storageKey(id), '0'); } catch {}
   }
 
   function isActive(id: string): boolean {
@@ -73,6 +75,7 @@ export function createModuleRegistry(shell: ShellApi): ModuleRegistry {
       let saved = '';
       try { saved = localStorage.getItem(storageKey(module.id)) ?? ''; } catch {}
       if (saved === '1') activate(module.id);
+      else if (!saved && module.defaultActive) activate(module.id);
     });
   }
 

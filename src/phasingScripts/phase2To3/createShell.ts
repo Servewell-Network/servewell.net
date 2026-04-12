@@ -493,7 +493,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       <button type="button" class="app-auth-menu-toggle" data-auth-menu-toggle aria-haspopup="true" aria-expanded="false">Account</button>
       <div class="app-auth-menu" data-auth-menu hidden>
         <div class="app-auth-menu-status" data-auth-menu-status>Not signed in</div>
-        <div class="app-auth-menu-copy" data-auth-menu-copy>Signing in is a simplified process called magic-link that is the same simple step regardless of whether you have an account yet or not.</div>
+        <div class="app-auth-menu-copy" data-auth-menu-copy>Magic-link sign-in unlocks account features like role-based tools and contribution workflows, not just voting.</div>
         <div class="app-auth-menu-actions">
           <button type="button" class="app-auth-button" data-auth-button>Sign in</button>
         </div>
@@ -511,6 +511,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       <a class="app-sidepanel-link" href="/features">Features</a>
       <a class="app-sidepanel-link" href="/whats-next">What's Next</a>
       <a class="app-sidepanel-link" href="/about">About</a>
+      <a class="app-sidepanel-link" href="/list-to-moderate" data-moderation-link hidden>List to Moderate (0)</a>
     </section>
 
     <section>
@@ -662,11 +663,51 @@ body.app-panel-open #app-shell-root .app-overlay {
   };
 
   let authState: AuthState = { authenticated: false };
+  let moderatorModeEnabled = false;
+  let moderationQueueCount = 0;
 
   function dispatchAuthState() {
     window.dispatchEvent(new CustomEvent('servewell-auth-changed', {
       detail: { ...authState }
     }));
+  }
+
+  function hasModeratorRole(): boolean {
+    return Boolean(authState.authenticated && authState.roles?.includes('moderator'));
+  }
+
+  function syncModerationUi() {
+    const link = qs<HTMLAnchorElement>('[data-moderation-link]');
+    if (!link) return;
+
+    const visible = hasModeratorRole() && moderatorModeEnabled;
+    link.hidden = !visible;
+    if (visible) {
+      link.textContent = `List to Moderate (${moderationQueueCount})`;
+    }
+  }
+
+  async function refreshModerationQueueCount() {
+    if (!hasModeratorRole() || !moderatorModeEnabled) {
+      moderationQueueCount = 0;
+      syncModerationUi();
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/moderation/verse-commentary/queue', {
+        headers: { Accept: 'application/json' }
+      });
+      if (!response.ok) throw new Error('Could not load moderation queue');
+      const data = await response.json() as { count?: unknown };
+      moderationQueueCount = typeof data.count === 'number' && Number.isFinite(data.count)
+        ? Math.max(0, Math.floor(data.count))
+        : 0;
+    } catch {
+      moderationQueueCount = 0;
+    }
+
+    syncModerationUi();
   }
 
   function syncAuthUi() {
@@ -680,8 +721,8 @@ body.app-panel-open #app-shell-root .app-overlay {
 
     qsa<HTMLElement>('[data-auth-menu-copy]').forEach((el) => {
       el.textContent = authState.authenticated
-        ? 'Verified votes now count in the main total.'
-        : 'Signing in is a simplified process called magic-link that is the same simple step regardless of whether you have an account yet or not.';
+        ? 'You are signed in and can use account features, including role-based tools and contribution workflows.'
+        : 'Magic-link sign-in unlocks account features like role-based tools and contribution workflows, not just voting.';
     });
 
     qsa<HTMLElement>('[data-auth-panel-status]').forEach((el) => {
@@ -694,6 +735,7 @@ body.app-panel-open #app-shell-root .app-overlay {
     });
 
     dispatchAuthState();
+    syncModerationUi();
   }
 
   async function refreshAuthState() {
@@ -716,6 +758,7 @@ body.app-panel-open #app-shell-root .app-overlay {
     }
 
     syncAuthUi();
+    void refreshModerationQueueCount();
   }
 
   async function requestMagicLink() {
@@ -834,6 +877,15 @@ body.app-panel-open #app-shell-root .app-overlay {
     if (!target.closest('.app-auth-cluster')) {
       closeAuthMenu();
     }
+  });
+
+  window.addEventListener('servewell-moderator-mode-changed', (event) => {
+    moderatorModeEnabled = Boolean((event as CustomEvent).detail?.enabled);
+    void refreshModerationQueueCount();
+  });
+
+  window.addEventListener('servewell-moderation-queue-changed', () => {
+    void refreshModerationQueueCount();
   });
 
   function appendDemoLine(text: string) {
