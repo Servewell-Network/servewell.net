@@ -3,8 +3,12 @@
   "featuresPageIds": [
     "need-comparative-bible",
     "need-literal",
+    "need-word-popover-literal",
     "need-traditional",
+    "need-word-popover-traditional",
+    "need-interlinear",
     "need-bible-navigation",
+    "need-bookmarks",
     "need-dark-mode",
     "need-cc0-public-domain-license",
     "need-community-edits",
@@ -48,6 +52,7 @@
     "need-better-use-of-space",
     "need-bible-navigation",
     "need-bookmark-sync",
+    "need-bookmarks",
     "need-cc0-public-domain-license",
     "need-clarified-bible-column",
     "need-clarified-bible-snippets",
@@ -61,6 +66,7 @@
     "need-friend-list",
     "need-improve-page-load-performance",
     "need-inspire-equip",
+    "need-interlinear",
     "need-literal",
     "need-literal-consistency",
     "need-logins",
@@ -76,6 +82,8 @@
     "need-task-feature-voting",
     "need-topical-index",
     "need-traditional",
-    "need-wcag-aa"
+    "need-wcag-aa",
+    "need-word-popover-literal",
+    "need-word-popover-traditional"
   ]
 }
