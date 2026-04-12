@@ -438,6 +438,49 @@
   const userVotes = {}; // { [featureId]: 'up' | 'down' | null }
   let voteStorageKey = 'servewell-user-votes:anon';
 
+  function ensureVoteMarkerStyle() {
+    if (document.getElementById('vote-you-marker-style')) return;
+    const style = document.createElement('style');
+    style.id = 'vote-you-marker-style';
+    style.textContent = `.votes-you-marker { display: inline-block; width: 1.1em; margin-right: 0.35rem; text-align: center; font-weight: 700; line-height: 1; }
+      .votes-you-marker.up { color: #17823b; }
+      .votes-you-marker.down { color: #b3362f; }
+      .votes-you-marker.none { color: transparent; }`;
+    document.head.appendChild(style);
+  }
+
+  function updatePersonalVoteMarker(featureId) {
+    const cell = document.querySelector(`[data-feature-id="${featureId}"]`);
+    if (!cell) return;
+
+    const currentVote = userVotes[featureId] || null;
+    let marker = cell.querySelector('.votes-you-marker');
+
+    if (!marker) {
+      marker = document.createElement('span');
+      marker.className = 'votes-you-marker';
+      marker.setAttribute('aria-hidden', 'true');
+      cell.prepend(marker);
+    } else if (cell.firstElementChild !== marker) {
+      cell.prepend(marker);
+    }
+
+    marker.classList.toggle('up', currentVote === 'up');
+    marker.classList.toggle('down', currentVote === 'down');
+    marker.classList.toggle('none', !currentVote);
+    marker.textContent = currentVote === 'up' ? '✔' : currentVote === 'down' ? '×' : '\u00a0';
+    marker.title = currentVote === 'up' ? 'You upvoted this' : currentVote === 'down' ? 'You downvoted this' : '';
+  }
+
+  function renderPersonalVoteMarkers() {
+    ensureVoteMarkerStyle();
+    document.querySelectorAll('.votes-cell').forEach((cell) => {
+      const featureId = cell.getAttribute('data-feature-id');
+      if (!featureId) return;
+      updatePersonalVoteMarker(featureId);
+    });
+  }
+
   function loadStoredVotes() {
     Object.keys(userVotes).forEach(key => {
       delete userVotes[key];
@@ -449,6 +492,8 @@
     } catch (e) {
       console.warn('Could not load stored votes');
     }
+
+    renderPersonalVoteMarkers();
   }
 
   loadStoredVotes();
@@ -572,6 +617,7 @@
           userVotes[featureId] = data.direction;
         }
         saveVotes();
+        updatePersonalVoteMarker(featureId);
         
         closePopover();
         
@@ -636,10 +682,12 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       void refreshVoteAuthState();
+      renderPersonalVoteMarkers();
       loadVoteCounts();
     });
   } else {
     void refreshVoteAuthState();
+    renderPersonalVoteMarkers();
     loadVoteCounts();
   }
 
