@@ -148,7 +148,7 @@
       content: '<p><strong>Value</strong><br>Save your reading position and favorite passages across the Bible. Bookmarks survive page refreshes and browser restarts.</p><p><strong>Status</strong><br>Stable — sync across devices is on the <a href="/whats-next" style="color:var(--fg);text-decoration:underline;">roadmap</a>.</p><p><strong>Steps</strong><br>While reading any chapter, tap the bookmark icon to save it. Access saved bookmarks from the bookmarks menu in the top bar. Tap a bookmark to return to that passage.</p>'
     },
     'need-wcag-aa': {
-      title: 'WCAG AA compliance',
+      title: 'Accessibility compliance',
       content: '<p><strong>Value</strong><br>Ensures ServeWell.Net meets the WCAG 2.1 AA standard — a well-recognized benchmark that covers color contrast, keyboard access, screen-reader compatibility, and more. Passing it means a much wider range of people can use the site without workarounds.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Audit existing pages against WCAG 2.1 AA criteria, fix contrast ratios in light and dark themes, add proper ARIA labels and landmark roles, and verify with common screen readers and keyboard-only navigation.</p>'
     },
     'need-dark-mode': {
