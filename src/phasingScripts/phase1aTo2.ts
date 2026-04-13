@@ -490,20 +490,41 @@ function getSemiticSourceName(code: string): string {
 }
 
 function getGreekSourceName(source: string): string {
+  const raw = source.trim();
+  if (!raw) return raw;
+
+  // If a value is already prose, do not remap it.
+  if (raw.includes(' ')) return raw;
+
+  const normalized = raw
+    .replace(/\(o\)/g, '(O*)')
+    .replace(/\(k\)/g, '(K*)')
+    .replace(/\(n\)/g, '(N*)')
+    .replace(/o/g, 'O*')
+    .replace(/k/g, 'K*')
+    .replace(/n/g, 'N*')
+    .toUpperCase();
+
   const names: Record<string, string> = {
-    'NKO': 'identical in virtually all manuscripts',
+    NKO: 'identical in virtually all manuscripts',
+    N: 'found in Ancient manuscripts but not Traditional manuscripts',
+    K: 'found in Traditional manuscripts but not Ancient manuscripts',
+    NK: 'found in Ancient and Traditional manuscripts',
+    KO: 'found in Traditional and Other manuscripts but not Ancient manuscripts',
+    NO: 'found in Ancient and Other manuscripts but not Traditional manuscripts',
     'NK(O)': 'identical in Ancient and Traditional manuscripts, different in Other manuscripts',
-    'NK(o)': 'identical in Ancient and Traditional manuscripts, barely different in Other manuscripts',
+    'NK(O*)': 'identical in Ancient and Traditional manuscripts, barely different in Other manuscripts',
     'N(K)(O)': 'found in Ancient manuscripts, different in Traditional and Other manuscripts',
-    'N(k)(o)': 'found in Ancient manuscripts, barely different in Traditional and Other manuscripts',
+    'N(K*)(O*)': 'found in Ancient manuscripts, barely different in Traditional and Other manuscripts',
     'K(O)': 'found in Traditional but not Ancient manuscripts and different in Other manuscripts',
-    'K(o)': 'found in Traditional but not Ancient manuscripts and barely different in Other manuscripts',
+    'K(O*)': 'found in Traditional but not Ancient manuscripts and barely different in Other manuscripts',
     'N(O)': 'found in Ancient but not Traditional manuscripts and different in Other manuscripts',
-    'N(o)': 'found in Ancient but not Traditional manuscripts and barely different in Other manuscripts',
-    'O': 'not found in Ancient or Traditional manuscripts, only in Other manuscripts',
-    'o': 'not found in Ancient or Traditional manuscripts, only in Other manuscripts, and does not change the meaning',
+    'N(O*)': 'found in Ancient but not Traditional manuscripts and barely different in Other manuscripts',
+    O: 'not found in Ancient or Traditional manuscripts, only in Other manuscripts',
+    'O*': 'not found in Ancient or Traditional manuscripts, only in Other manuscripts, and does not change the meaning',
   };
-  const name = names[source] ?? source;
+
+  const name = names[normalized] ?? names[raw.toUpperCase()] ?? raw;
   return name;
 }
 

@@ -586,11 +586,14 @@ body.app-panel-open #app-shell-root .app-overlay {
       'Segment In Morpheme', 'Segments In Morpheme',
       'Grammar Code', 'Grammar Function'
     ]);
+
     sharedWordPopover.addEventListener('toggle', (event) => {
       if ((event as ToggleEvent).newState !== 'open') return;
       sharedWordPopover.querySelectorAll<HTMLElement>('.word-meta-row').forEach((row) => {
         const label = row.querySelector('.word-meta-label');
-        if (label && hiddenLabels.has(label.textContent || '')) row.remove();
+        if (label && hiddenLabels.has(label.textContent || '')) {
+          row.remove();
+        }
       });
     });
   }
