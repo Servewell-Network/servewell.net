@@ -207,6 +207,7 @@ type AuthState = {
   authenticated: boolean;
   userId?: string;
   email?: string;
+  roles?: string[];
 };
 
 function rejectedDismissKey(commentaryId: string): string {
@@ -276,6 +277,10 @@ function normalizeCommentaryEntry(raw: unknown): CommentaryEntry {
 
 function hasCommentary(entry: CommentaryEntry): boolean {
   return COMMENTARY_FIELDS.some((field) => entry[field.key].trim().length > 0);
+}
+
+function isModerator(auth: AuthState): boolean {
+  return Boolean(auth.authenticated && auth.roles?.includes('moderator'));
 }
 
 export function createVerseNumberPopoverModule(delegator: Delegator): AppModule {
@@ -464,7 +469,7 @@ export function createVerseNumberPopoverModule(delegator: Delegator): AppModule 
   }
 
   function buildPublicEmptyHtml(): string {
-    return '<p class="verse-number-popover-body">More content coming here soon.</p>';
+    return '<p class="verse-number-popover-body">More content is expected here in the future.</p>';
   }
 
   function parseCommentaryForm(popover: HTMLElement): CommentaryEntry {
@@ -585,9 +590,10 @@ export function createVerseNumberPopoverModule(delegator: Delegator): AppModule 
         && !isRejectedNoticeDismissed(rejectionNoticeId);
       const visibleEntry = showRejectedDraft ? mineEntry : approvedEntry;
       const editEntry = payload.mine?.entry ? mineEntry : approvedEntry;
+      const moderator = isModerator(authState);
 
       let body = '';
-      if (!authState.authenticated) {
+      if (!moderator) {
         body = payload.approved && hasCommentary(payload.approved.entry)
           ? buildCommentaryViewHtml(payload.approved.entry, false)
           : buildPublicEmptyHtml();
@@ -765,6 +771,9 @@ export function createVerseNumberPopoverModule(delegator: Delegator): AppModule 
           authenticated: Boolean(detail?.authenticated),
           userId: typeof detail?.userId === 'string' ? detail.userId : undefined,
           email: typeof detail?.email === 'string' ? detail.email : undefined,
+          roles: Array.isArray(detail?.roles)
+            ? detail.roles.filter((role): role is string => typeof role === 'string')
+            : [],
         };
         void syncVerseCommentaryMarkers();
         if (activeVerseButton && qs<HTMLElement>(`#${POPOVER_ID}`)?.matches(':popover-open')) {

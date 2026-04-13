@@ -70,7 +70,7 @@ test('verse number popover shows link action and copy feedback', async ({ page }
 
   const versePopover = page.locator('#verse-number-popover');
   await expect(versePopover).toBeVisible();
-  await expect(versePopover).toContainText('More content coming here soon');
+  await expect(versePopover).toContainText('More content is expected here in the future.');
 
   await versePopover.getByRole('button', { name: 'Link' }).click();
   await expect(page.locator('#verse-link-copied-popover')).toContainText('link copied');

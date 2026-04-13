@@ -1958,6 +1958,9 @@ body.app-panel-open #app-shell-root .app-overlay {
   function hasCommentary(entry) {
     return COMMENTARY_FIELDS.some((field) => entry[field.key].trim().length > 0);
   }
+  function isModerator(auth) {
+    return Boolean(auth.authenticated && auth.roles?.includes("moderator"));
+  }
   function createVerseNumberPopoverModule(delegator) {
     let activeVerseLink = "";
     let activeVerseButton = null;
@@ -2114,7 +2117,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       return "";
     }
     function buildPublicEmptyHtml() {
-      return '<p class="verse-number-popover-body">More content coming here soon.</p>';
+      return '<p class="verse-number-popover-body">More content is expected here in the future.</p>';
     }
     function parseCommentaryForm(popover) {
       const out = getEmptyCommentaryEntry();
@@ -2206,8 +2209,9 @@ body.app-panel-open #app-shell-root .app-overlay {
         const showRejectedDraft = mineStatus === "rejected" && Boolean(payload.mine?.entry) && !isRejectedNoticeDismissed(rejectionNoticeId);
         const visibleEntry = showRejectedDraft ? mineEntry : approvedEntry;
         const editEntry = payload.mine?.entry ? mineEntry : approvedEntry;
+        const moderator = isModerator(authState);
         let body = "";
-        if (!authState.authenticated) {
+        if (!moderator) {
           body = payload.approved && hasCommentary(payload.approved.entry) ? buildCommentaryViewHtml(payload.approved.entry, false) : buildPublicEmptyHtml();
         } else if (commentaryEditing) {
           body = buildCommentaryEditHtml(editEntry);
@@ -2365,7 +2369,8 @@ body.app-panel-open #app-shell-root .app-overlay {
           authState = {
             authenticated: Boolean(detail?.authenticated),
             userId: typeof detail?.userId === "string" ? detail.userId : void 0,
-            email: typeof detail?.email === "string" ? detail.email : void 0
+            email: typeof detail?.email === "string" ? detail.email : void 0,
+            roles: Array.isArray(detail?.roles) ? detail.roles.filter((role) => typeof role === "string") : []
           };
           void syncVerseCommentaryMarkers();
           if (activeVerseButton && qs4(`#${POPOVER_ID}`)?.matches(":popover-open")) {
