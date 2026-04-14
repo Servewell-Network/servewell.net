@@ -181,7 +181,7 @@
     },
     'need-basic-search': {
       title: 'Basic search',
-      content: '<p><strong>Value</strong><br>Simple, fast lookup that supports the immediate reading flow and validates search UX before advanced indexing.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Ship a scoped query mode first (book/chapter), then layer in highlighting, keyboard navigation, and relevance tuning.</p>'
+      content: `<p><strong>Value</strong><br>Simple, fast lookup that supports the immediate reading flow and validates search UX before advanced indexing.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Probably use the same infrastructure that's needed for literal consistency and work studies.</p>`
     },
     'need-settings-in-links': {
       title: 'Settings in links',
