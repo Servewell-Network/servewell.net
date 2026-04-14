@@ -81,6 +81,18 @@ a {
   gap: 0.65rem;
   align-items: stretch;
   margin-bottom: 0.35rem;
+  position: sticky;
+  top: 56px;
+  z-index: 40;
+  transition: none;
+  will-change: transform;
+  background: var(--page-bg);
+}
+.snippet-grid-header.is-scroll-aware {
+  transition: transform 220ms ease;
+}
+.snippet-grid-header.hidden {
+  transform: translateY(-110%);
 }
 .snippet-grid-header-card {
   display: inline-flex;
@@ -1004,6 +1016,66 @@ h1 {
 
   literalToggle.addEventListener("change", updateFromToggles);
   traditionalToggle.addEventListener("change", updateFromToggles);
+  // Sticky header behavior: hide on scroll down, show on scroll up.
+  const header = page.querySelector(".snippet-grid-header");
+  if (header instanceof HTMLElement) {
+    let lastY = window.scrollY;
+    let armY = window.scrollY;
+    let ticking = false;
+    const THRESH = 6;
+    const SHOW_ALWAYS_TOP = 96;
+    const ARM_DISTANCE = 120;
+    let hideShowEnabled = false;
+    function enableHideShow() {
+      if (hideShowEnabled) return;
+      hideShowEnabled = true;
+      header.classList.add("is-scroll-aware");
+      armY = window.scrollY;
+      lastY = window.scrollY;
+    }
+    window.addEventListener("wheel", enableHideShow, { passive: true, once: true });
+    window.addEventListener("touchmove", enableHideShow, { passive: true, once: true });
+    function onKeydown(event) {
+      const key = event.key;
+      if (key === "ArrowUp" || key === "ArrowDown" || key === "PageUp" || key === "PageDown" || key === "Home" || key === "End" || key === " ") {
+        enableHideShow();
+        window.removeEventListener("keydown", onKeydown, true);
+      }
+    }
+    window.addEventListener("keydown", onKeydown, true);
+    window.addEventListener("scroll", function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        const y = window.scrollY;
+        if (!hideShowEnabled) {
+          header.classList.remove("hidden");
+          lastY = y;
+          ticking = false;
+          return;
+        }
+        if (Math.abs(y - armY) < ARM_DISTANCE) {
+          header.classList.remove("hidden");
+          lastY = y;
+          ticking = false;
+          return;
+        }
+        if (y <= SHOW_ALWAYS_TOP) {
+          header.classList.remove("hidden");
+          lastY = y;
+          ticking = false;
+          return;
+        }
+        const dy = y - lastY;
+        if (Math.abs(dy) > THRESH) {
+          if (dy > 0) header.classList.add("hidden");
+          else header.classList.remove("hidden");
+          lastY = y;
+        }
+        ticking = false;
+      });
+    }, { passive: true });
+  }
 })();
 </script>
 <script>
