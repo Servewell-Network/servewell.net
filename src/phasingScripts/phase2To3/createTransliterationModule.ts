@@ -1,7 +1,7 @@
 import type { AppModule } from './createModuleRegistry';
 
 // 10 perceptually-distinct semi-transparent colors.
-// Same morpheme ID in both panes → same color, so cross-pane matching is visual.
+// Same morpheme ID in both panes ➔ same color, so cross-pane matching is visual.
 const TRANSLIT_COLORS = [
   'rgba(220,  60,  60, 0.28)',  // red
   'rgba(225, 140,  30, 0.30)',  // orange

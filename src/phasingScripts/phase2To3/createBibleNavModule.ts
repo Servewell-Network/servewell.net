@@ -604,7 +604,7 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
         },
       }));
 
-      // book button click → switch to chapter view
+      // book button click ➔ switch to chapter view
       disposers.push(delegator.registerSublistener({
         eventName: 'click',
         tagName: 'BUTTON',

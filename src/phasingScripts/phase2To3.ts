@@ -92,7 +92,7 @@ const BIBLE_NAV_SECTIONS: string[][] = [
   ['Heb','Jas','1Pe','2Pe','1Jn','2Jn','3Jn','Jud','Rev'],
 ];
 
-// Display abbreviation overrides: abbr2 → user-facing display abbreviation.
+// Display abbreviation overrides: abbr2 ➔ user-facing display abbreviation.
 const DISPLAY_ABBR_OVERRIDES: Record<string, string> = {
   'Jud': 'Jde', // Jude — 'Jud' too easily confused with Judges
 };

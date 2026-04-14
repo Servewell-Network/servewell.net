@@ -745,10 +745,10 @@ Update `package.json` scripts:
 ```
 
 **Usage for developers**:
-- Backend change to `src/index.ts` → `npm run test:api-only`
-- New phasing script logic → `npm run test:phasing`
-- Frontend markup change → `npm run test:e2e -- features.spec.ts`
-- Full pre-deploy validation → `npm run pre-deploy` (runs all phases)
+- Backend change to `src/index.ts` ➔ `npm run test:api-only`
+- New phasing script logic ➔ `npm run test:phasing`
+- Frontend markup change ➔ `npm run test:e2e -- features.spec.ts`
+- Full pre-deploy validation ➔ `npm run pre-deploy` (runs all phases)
 
 ---
 

@@ -333,12 +333,12 @@ class BeforeAfterGenerator {
         const afterArticle = afterData.articles[i];
 
         if (!beforeArticle && afterArticle) {
-          report += `- **Position ${afterArticle.position}** (NEW): "${afterArticle.word}" → ${afterArticle.matchedMorphId}\n`;
+          report += `- **Position ${afterArticle.position}** (NEW): "${afterArticle.word}" ➔ ${afterArticle.matchedMorphId}\n`;
           if (afterArticle.clusterInfo) {
             report += `  (Cluster #${afterArticle.clusterInfo.clusterNum}: ${afterArticle.clusterInfo.clusterMembers})\n`;
           }
         } else if (beforeArticle && !afterArticle) {
-          report += `- **Position ${beforeArticle.position}** (REMOVED): "${beforeArticle.word}" was → ${beforeArticle.matchedMorphId}\n`;
+          report += `- **Position ${beforeArticle.position}** (REMOVED): "${beforeArticle.word}" was ➔ ${beforeArticle.matchedMorphId}\n`;
         } else if (beforeArticle && afterArticle) {
           if (beforeArticle.matchedMorphId !== afterArticle.matchedMorphId) {
             report += `- **Position ${beforeArticle.position}** (CHANGED): "${beforeArticle.word}"\n`;
@@ -348,7 +348,7 @@ class BeforeAfterGenerator {
               report += `  (Cluster #${afterArticle.clusterInfo.clusterNum}: ${afterArticle.clusterInfo.clusterMembers})\n`;
             }
           } else {
-            report += `- Position ${beforeArticle.position}: "${beforeArticle.word}" → ${afterArticle.matchedMorphId} (unchanged)\n`;
+            report += `- Position ${beforeArticle.position}: "${beforeArticle.word}" ➔ ${afterArticle.matchedMorphId} (unchanged)\n`;
           }
         }
       }

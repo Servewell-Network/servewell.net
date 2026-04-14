@@ -8722,9 +8722,9 @@ declare abstract class Ai<AiModelList extends AiModelListType = AiModels> {
      * Use `env.AI.aiSearch` instead for better API design and new features.
      *
      * Migration guide:
-     * - `env.AI.autorag().list()` → `env.AI.aiSearch.list()`
-     * - `env.AI.autorag('id').search({ query: '...' })` → `env.AI.aiSearch.get('id').search({ messages: [{ role: 'user', content: '...' }] })`
-     * - `env.AI.autorag('id').aiSearch(...)` → `env.AI.aiSearch.get('id').chatCompletions(...)`
+     * - `env.AI.autorag().list()` ➔ `env.AI.aiSearch.list()`
+     * - `env.AI.autorag('id').search({ query: '...' })` ➔ `env.AI.aiSearch.get('id').search({ messages: [{ role: 'user', content: '...' }] })`
+     * - `env.AI.autorag('id').aiSearch(...)` ➔ `env.AI.aiSearch.get('id').chatCompletions(...)`
      *
      * Note: The old API continues to work for backwards compatibility, but new projects should use AI Search.
      *
@@ -8954,9 +8954,9 @@ type AutoRagAiSearchResponse = AutoRagSearchResponse & {
  * Use the new AI Search API instead: `env.AI.aiSearch`
  *
  * Migration guide:
- * - `env.AI.autorag().list()` → `env.AI.aiSearch.list()`
- * - `env.AI.autorag('id').search(...)` → `env.AI.aiSearch.get('id').search(...)`
- * - `env.AI.autorag('id').aiSearch(...)` → `env.AI.aiSearch.get('id').chatCompletions(...)`
+ * - `env.AI.autorag().list()` ➔ `env.AI.aiSearch.list()`
+ * - `env.AI.autorag('id').search(...)` ➔ `env.AI.aiSearch.get('id').search(...)`
+ * - `env.AI.autorag('id').aiSearch(...)` ➔ `env.AI.aiSearch.get('id').chatCompletions(...)`
  *
  * @see AiSearchAccountService
  * @see AiSearchInstanceService
