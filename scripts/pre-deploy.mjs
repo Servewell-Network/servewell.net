@@ -2,6 +2,8 @@
 import { spawn } from 'node:child_process';
 import net from 'node:net';
 import readline from 'node:readline';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const isYes = process.argv.includes('--yes');
 const skipE2E = process.argv.includes('--skip-e2e');
@@ -119,6 +121,13 @@ async function main() {
   try {
     console.log('Starting pre-deploy checks...');
 
+    const rerunPhasing = isYes || await askYesNo('Rerun phasing (p1a-2, p1b-2, p2-3, word pages)? (y/n): ');
+    if (rerunPhasing) {
+      await run('npm', ['run', 'phasing'], 'Run full phasing pipeline');
+    } else {
+      console.log('Skipping phasing.');
+    }
+
     await run('npm', ['run', 'generate:feature-inventory'], 'Generate feature inventory');
     await run('npm', ['run', 'generate:bible-spot-checks'], 'Generate Bible spot-check fixtures');
 
@@ -158,6 +167,34 @@ async function main() {
     }
 
     await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
+
+    // Warn if word pages need R2 sync.
+    // dist/.words-content-fingerprint is written by p2-words with a hash of word JSON content.
+    // dist/.words-r2-synced records the fingerprint that was current at last R2 sync.
+    // If they differ (or synced is missing), word pages have changed since the last R2 deploy.
+    const fingerprintFile = path.resolve('dist/.words-content-fingerprint');
+    const r2MarkerFile = path.resolve('dist/.words-r2-synced');
+    let needsR2Sync = false;
+    if (fs.existsSync(fingerprintFile)) {
+      const currentFingerprint = fs.readFileSync(fingerprintFile, 'utf8').trim();
+      const syncedFingerprint = fs.existsSync(r2MarkerFile)
+        ? fs.readFileSync(r2MarkerFile, 'utf8').trim()
+        : '';
+      needsR2Sync = currentFingerprint !== syncedFingerprint;
+    }
+
+    if (needsR2Sync) {
+      console.log('\n⚠️  Word pages in dist/words/ are newer than the last R2 sync.');
+      const deployWords = isYes || await askYesNo('Deploy word pages to R2 now? (y/n): ');
+      if (deployWords) {
+        await run('npm', ['run', 'deploy:words-r2'], 'Deploy word pages to R2');
+        // Touch marker file so next run knows R2 is up to date
+        fs.writeFileSync(r2MarkerFile, new Date().toISOString(), 'utf8');
+      } else {
+        console.log('Skipping R2 deploy. Run `npm run deploy:words-r2` when ready.');
+      }
+    }
+
     process.exit(0);
   } catch (error) {
     console.error('\nPre-deploy failed.');

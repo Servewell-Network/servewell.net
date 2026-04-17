@@ -33,7 +33,7 @@
  */
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { readFileSync, readdirSync, existsSync } from 'fs';
+import { readFileSync, readdirSync, existsSync, writeFileSync } from 'fs';
 import { join, relative, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -136,4 +136,9 @@ if (failed > 0) {
   process.exit(1);
 } else {
   console.log(`\nDone: ${uploaded} files uploaded to R2 in ${elapsed}s.`);
+  // Record the current content fingerprint so pre-deploy knows R2 is in sync.
+  const fingerprintFile = join(ROOT, 'dist', '.words-content-fingerprint');
+  const syncedFile = join(ROOT, 'dist', '.words-r2-synced');
+  const fingerprint = existsSync(fingerprintFile) ? readFileSync(fingerprintFile, 'utf8') : '';
+  writeFileSync(syncedFile, fingerprint, 'utf8');
 }

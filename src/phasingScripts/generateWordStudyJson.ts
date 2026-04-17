@@ -973,3 +973,16 @@ for (const filePath of allFiles) {
   }
 }
 console.log(`Annotated ${annotatedMorphemeCount} morphemes across ${annotatedFiles} chapter files`);
+
+// Write a content fingerprint so pre-deploy can detect if word pages need R2 sync.
+// Uses file count + total JSON bytes — changes whenever word content changes.
+// Compared against dist/.words-r2-synced-fingerprint written by deploy:words-r2.
+{
+  const jsonFiles = fs.readdirSync(OUT_DIR).filter(f => f.endsWith('.json'));
+  let totalBytes = 0;
+  for (const f of jsonFiles) totalBytes += fs.statSync(path.join(OUT_DIR, f)).size;
+  const fingerprint = `${jsonFiles.length}:${totalBytes}`;
+  const distDir = path.join(ROOT, 'dist');
+  if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+  fs.writeFileSync(path.join(distDir, '.words-content-fingerprint'), fingerprint, 'utf8');
+}

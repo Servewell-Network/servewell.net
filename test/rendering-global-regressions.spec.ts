@@ -70,4 +70,23 @@ describe('global rendered HTML regressions', () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it('word-token popover data includes OccurrencesFile (occ= key), confirming p2-words ran before p2-3', () => {
+    // If generateWordStudyJson ran after phase2To3, OccurrencesFile is never written back
+    // into the Phase 2 JSON in time, so no data-m attributes will contain occ=.
+    // Scan a sample of files (first 20 chapter pages alphabetically) and require that
+    // at least one word token per file has occ= in its data-m attribute.
+    const sampleFiles = htmlFiles.slice(0, 20);
+    const missing: string[] = [];
+
+    for (const file of sampleFiles) {
+      const html = fs.readFileSync(file, 'utf8');
+      // data-m attributes are URL-encoded; occ= will appear literally when present
+      if (!html.includes('occ=')) {
+        missing.push(toRelative(root, file));
+      }
+    }
+
+    expect(missing).toEqual([]);
+  });
 });
