@@ -161,14 +161,13 @@ async function main() {
       approved = await askYesNo('Ready to deploy now? (y/n): ');
     }
 
-    if (!approved) {
-      console.log('Deployment cancelled by user.');
-      process.exit(0);
+    if (approved) {
+      await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
+    } else {
+      console.log('Main deployment skipped.');
     }
 
-    await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
-
-    // Warn if word pages need R2 sync.
+    // Check word pages R2 sync regardless of whether the main deploy ran.
     // dist/.words-content-fingerprint is written by p2-words with a hash of word JSON content.
     // dist/.words-r2-synced records the fingerprint that was current at last R2 sync.
     // If they differ (or synced is missing), word pages have changed since the last R2 deploy.
@@ -188,11 +187,13 @@ async function main() {
       const deployWords = isYes || await askYesNo('Deploy word pages to R2 now? (y/n): ');
       if (deployWords) {
         await run('npm', ['run', 'deploy:words-r2'], 'Deploy word pages to R2');
-        // Touch marker file so next run knows R2 is up to date
-        fs.writeFileSync(r2MarkerFile, new Date().toISOString(), 'utf8');
       } else {
         console.log('Skipping R2 deploy. Run `npm run deploy:words-r2` when ready.');
       }
+    } else if (!fs.existsSync(fingerprintFile)) {
+      console.log('\nNo word pages fingerprint found — run phasing to generate word pages.');
+    } else {
+      console.log('\nWord pages are in sync with R2.');
     }
 
     process.exit(0);

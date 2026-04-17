@@ -54,7 +54,8 @@ function formatRef(ref: string): string {
   return `${bookName} ${m[2]}:${m[3]}`;
 }
 
-/** Build a /-/ chapter URL from a raw morpheme ref like "Exo4:1.2" → "/-/Exodus/4#1" */
+/** Build a /-/ chapter URL from a raw morpheme ref like "Exo4:1.2" → "https://servewell.net/-/Exodus/4#1"
+ *  Must be absolute because word pages are served from words.servewell.net (different origin). */
 function refToUrl(ref: string): string | null {
   const m = ref.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
   if (!m) return null;
@@ -63,7 +64,7 @@ function refToUrl(ref: string): string | null {
   const bookName = BOOK_TO_DISPLAY_NAME[canonAbbrev];
   if (!bookName) return null;
   const bookPath = bookName.replace(/\s+/g, '-');
-  return `/-/${bookPath}/${m[2]}#${m[3]}`;
+  return `https://servewell.net/-/${bookPath}/${m[2]}#${m[3]}`;
 }
 const SCRIPT_TAG = `<script src="/js/servewell-app-shell.js"></script>`;
 
