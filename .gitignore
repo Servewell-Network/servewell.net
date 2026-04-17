@@ -179,3 +179,4 @@ dist
 reports/
 src/json-Phase2/**/*
 public/words/
+public/-/
