@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+<title>to create</title>
+<meta name="description" content="Ancient word study: to create (Hebrew, H1254A)">
+<script>
+(function () {
+  try {
+    const savedTheme = localStorage.getItem('servewell-theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      document.documentElement.dataset.theme = savedTheme;
+    }
+  } catch (_error) {
+    // Ignore storage access failures (private mode, disabled storage).
+  }
+})();
+</script>
+<style>
+body {
+   font-family: sans-serif;
+	font-size: large;
+}
+details :not(summary) {
+   padding-left: 0.5rem;
+}
+
+:root {
+  color-scheme: light;
+  --page-bg: #f4f6f9;
+  --page-fg: #0f172a;
+  --muted: #475467;
+  --label-bg: #f8fafc;
+  --pane-bg: #ffffff;
+  --pane-border: #dbe3ea;
+  --link: #1d4ed8;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page-bg: #0b1220;
+  --page-fg: #e5edf7;
+  --muted: #a6b3c5;
+  --label-bg: #172235;
+  --pane-bg: #101a2a;
+  --pane-border: #2a3b52;
+  --link: #8ab4ff;
+}
+body {
+  background: var(--page-bg);
+  color: var(--page-fg);
+}
+a { color: var(--link); }
+.ws-meta { margin-bottom: 1.5rem; line-height: 1.6; }
+.ws-meta-lemma { font-size: 1.5em; font-family: serif; margin-right: 0.4rem; }
+.ws-meta-info {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.ws-meta-stats { font-size: 0.85rem; color: var(--muted); margin: 0.3rem 0 0; }
+.ws-title-sub {
+  font-size: 0.45em;
+  font-weight: normal;
+  font-variant: normal;
+  letter-spacing: normal;
+  color: var(--muted);
+  margin-left: 0.4em;
+}
+.ws-expand-btn {
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid var(--pane-border);
+  border-radius: 4px;
+  background: var(--label-bg);
+  color: var(--page-fg);
+  vertical-align: middle;
+}
+.ws-slot {
+  border-top: 2px solid var(--pane-border);
+  padding-top: 1rem;
+  margin-top: 1.75rem;
+}
+.ws-slot-highlighted { border-top-color: var(--link); }
+.ws-grammar-full {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+  color: var(--page-fg);
+}
+.ws-slot-stats { font-size: 0.85rem; color: var(--muted); margin: 0 0 0.75rem; }
+.ws-translation { margin: 0.8rem 0 0.8rem 0.5rem; }
+.ws-rendering {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.4rem;
+}
+.ws-count { font-weight: 400; font-variant: normal; color: var(--muted); font-size: 0.85em; }
+.ws-instance {
+  background: var(--pane-bg);
+  border-left: 3px solid var(--pane-border);
+  padding: 0.4rem 0.7rem;
+  margin: 0.3rem 0;
+  border-radius: 0 4px 4px 0;
+}
+.ws-ref {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+a.ws-ref {
+  color: var(--link);
+  text-decoration: none;
+}
+a.ws-ref:hover { text-decoration: underline; }
+.ws-trad { margin: 0 0 0.2rem; font-size: 0.9rem; }
+.ws-lit { margin: 0; font-size: 0.85rem; color: var(--muted); font-style: italic; }
+mark.ws-target { background: #fef08a; color: #1a1200; border-radius: 2px; padding: 0 1px; font-style: normal; }
+:root[data-theme="dark"] mark.ws-target { background: #5a3e00; color: #fde68a; }
+.ws-more summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--link);
+  padding: 0.2rem 0;
+  margin-top: 0.25rem;
+}
+.ws-overflow-note { font-size: 0.82rem; color: var(--muted); font-style: italic; margin: 0.4rem 0 0; }
+.ws-back-link { font-size: 0.9rem; margin-bottom: 0.75rem; display: block; }
+.ws-footer {
+  border-top: 2px solid var(--pane-border);
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.ws-footer section > h2 { font-size: 0.95rem; margin: 0 0 0.4rem; }
+.ws-footer section ul { margin: 0; padding-left: 1.25rem; }
+.ws-footer section li { font-size: 0.9rem; margin: 0.25rem 0; }
+
+</style>
+</head>
+<body>
+<h1>TO CREATE <span class="ws-title-sub">· ba.ra · בָּרָא · Hebrew · H1254A</span></h1>
+<p class="ws-meta-stats">53 total instances · 18 grammar slots <button id="ws-expand-all" class="ws-expand-btn">Expand all</button></p>
+<div id="ws-slots">
+<section class="ws-slot" data-grammar-code="HVqp3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) Third Singular Masculine</h2>
+<p class="ws-slot-stats">11 instances · 4 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE CREATED <span class="ws-count">(6 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/1#1">Genesis 1:1</a><p class="ws-trad">In the beginning God created the heavens and the earth.</p><p class="ws-lit">IN BEGINNING <mark class="ws-target">HE CREATED</mark> GOD &lt;OBJ.&gt; THE HEAVENS AND &lt;OBJ.&gt; THE EARTH</p></div>
+<details class="ws-more">
+<summary>5 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/1#27">Genesis 1:27</a><p class="ws-trad">So God created man in His [own] image; in the image of God <mark class="ws-target">He created</mark> him; male and female <mark class="ws-target">He created</mark> them.</p><p class="ws-lit">AND <mark class="ws-target">HE CREATED</mark> GOD &lt;OBJ.&gt; &lt;THE&gt; HUMANKIND IN OWN IMAGE HIS IN [THE] IMAGE OF GOD <mark class="ws-target">HE CREATED</mark> &lt;OBJ.&gt; IT MALE AND FEMALE <mark class="ws-target">HE CREATED</mark> &lt;OBJ.&gt; THEM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/1#27">Genesis 1:27</a><p class="ws-trad">So God created man in His [own] image; in the image of God <mark class="ws-target">He created</mark> him; male and female <mark class="ws-target">He created</mark> them.</p><p class="ws-lit">AND <mark class="ws-target">HE CREATED</mark> GOD &lt;OBJ.&gt; &lt;THE&gt; HUMANKIND IN OWN IMAGE HIS IN [THE] IMAGE OF GOD <mark class="ws-target">HE CREATED</mark> &lt;OBJ.&gt; IT MALE AND FEMALE <mark class="ws-target">HE CREATED</mark> &lt;OBJ.&gt; THEM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/5#2">Genesis 5:2</a><p class="ws-trad">Male and female <mark class="ws-target">He created</mark> them, and He blessed them. And in the day they were created, He called them “man.”</p><p class="ws-lit">MALE AND FEMALE <mark class="ws-target">HE CREATED</mark> THEM AND HE BLESSED &lt;OBJ.&gt; THEM AND HE CALLED &lt;OBJ.&gt; NAME THEIR HUMANKIND ON [THE] DAY WERE CREATED THEY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/4#32">Deuteronomy 4:32</a><p class="ws-trad">Indeed, ask now from one end of the heavens to [the other] about the days that long preceded you, from the day that God created man on earth: Has anything as great as this ever happened or been reported?</p><p class="ws-lit">THAT ASK PLEASE TO DAYS FORMER WHICH THEY WERE &lt;TO&gt; BEFORE YOU &lt;TO&gt; FROM THE DAY WHEN <mark class="ws-target">HE CREATED</mark> GOD HUMANKIND ON THE EARTH AND TO FROM [THE] END OF THE HEAVENS AND TO [THE] END OF THE HEAVENS ¿ HAS IT HAPPENED LIKE THE THING &lt;THE&gt; GREAT &lt;THE&gt; THIS OR ¿ HAS IT BEEN HEARD LIKE IT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/45#18">Isaiah 45:18</a><p class="ws-trad">For thus says the LORD, who created the heavens— He [is] God; He formed the earth and fashioned it; He established it; He did not create it to be empty, but formed it to be inhabited: “I am the LORD, and there is no other.</p><p class="ws-lit">FOR THUS HE SAYS YAHWEH [WHO] CREATED THE HEAVENS HE [IS] &lt;THE&gt; GOD [WHO] FORMED THE EARTH AND [WHO] MADE IT HE HE ESTABLISHED IT NOT A WASTELAND <mark class="ws-target">HE CREATED</mark> IT TO DWELL IN HE FORMED IT I [AM] YAHWEH AND THERE NOT [IS] YET</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">DID HE CREATE <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/40#26">Isaiah 40:26</a><p class="ws-trad">Lift up your eyes on high: Who created all these? He leads forth the starry host by number; He calls each one by name. Because of His great power and mighty strength, not one of them is missing.</p><p class="ws-lit">LIFT UP HEIGHT EYES YOUR AND SEE WHO? <mark class="ws-target">DID HE CREATE</mark> THESE THE [ONE WHO] BRINGS OUT BY NUMBER HOST THEIR &lt;TO&gt; ALL OF THEM BY NAME HE CALLS FROM GREATNESS OF STRENGTH&lt;S&gt; AND A STRONG [ONE] OF POWER ANY NOT IT IS MISSING</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Malachi/2#10">Malachi 2:10</a><p class="ws-trad">Do we not all have one Father? Did not one God create us? Why then do we break faith with one another so as to profane the covenant of our fathers?</p><p class="ws-lit">¿ NOT [DOES] A FATHER ONE [BELONG] TO ALL OF US ¿ NOT GOD ONE <mark class="ws-target">DID HE CREATE</mark> US WHY? DO WE DEAL TREACHEROUSLY EACH WITH BROTHER HIS TO PROFANE [THE] COVENANT OF ANCESTORS OUR</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE HAS CREATED <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/41#20">Isaiah 41:20</a><p class="ws-trad">so that all may see and know, may consider and understand, that the hand of the LORD has done this and the Holy One of Israel has created it.”</p><p class="ws-lit">SO THAT THEY MAY SEE SO THEY MAY KNOW SO THEY MAY SET SO THEY MAY HAVE INSIGHT ALL TOGETHER THAT [THE] HAND OF YAHWEH IT HAS DONE THIS AND [THE] HOLY [ONE] OF ISRAEL <mark class="ws-target">HE HAS CREATED</mark> IT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/31#22">Jeremiah 31:22</a><p class="ws-trad">How long will you wander, O faithless daughter? For the LORD has created a new thing in the land— a woman will shelter a man.”</p><p class="ws-lit">UNTIL WHEN? WILL YOU VACILLATE ! O DAUGHTER &lt;THE&gt; APOSTATE FOR <mark class="ws-target">HE HAS CREATED</mark> YAHWEH A NEW [THING] ON THE EARTH A FEMALE SHE WILL SURROUND A MAN</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE HAD CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/2#3">Genesis 2:3</a><p class="ws-trad">Then God blessed the seventh day and sanctified it, because on [that day] He rested from all the work of creation that [He] had accomplished.</p><p class="ws-lit">AND HE BLESSED GOD &lt;OBJ.&gt; [THE] DAY &lt;THE&gt; SEVENTH AND HE SET APART AS HOLY &lt;OBJ.&gt; IT FOR ON &lt;THE&gt; IT HE RESTED FROM ALL WORK HIS WHICH <mark class="ws-target">HE HAD CREATED</mark> GOD TO MAKE</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqrmsa">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Participle (Singular Masculine, Absolute)</h2>
+<p class="ws-slot-stats">10 instances · 3 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">CREATED <span class="ws-count">(4 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/40#28">Isaiah 40:28</a><p class="ws-trad">Do you not know? Have you not heard? The LORD is the everlasting God, the Creator of the ends of the earth. He will not grow tired or weary; His understanding is beyond searching out.</p><p class="ws-lit">¿ NOT DO YOU KNOW OR? NOT HAVE YOU HEARD [IS] A GOD OF PERPETUITY YAHWEH [THE ONE WHO] <mark class="ws-target">CREATED</mark> [THE] ENDS OF THE EARTH NOT HE GROWS WEARY AND NOT HE BECOMES WEARY THERE NOT [IS] INQUIRY TO UNDERSTANDING HIS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/42#5">Isaiah 42:5</a><p class="ws-trad">This is what God the LORD says— He who <mark class="ws-target">created</mark> the heavens and stretched them out, who spread out the earth and its offspring, who gives breath to the people on it and life to those who walk in it:</p><p class="ws-lit">THUS HE SAYS &lt;THE&gt; GOD YAHWEH [WHO] <mark class="ws-target">CREATED</mark> THE HEAVENS AND [WHO] STRETCHED OUT THEM [WHO] SPREAD OUT THE EARTH AND PRODUCE&lt;S&gt; ITS [WHO] GIVES BREATH TO THE PEOPLE ON IT AND SPIRIT TO &lt;THE&gt; [THOSE WHO] WALK ON IT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/45#18">Isaiah 45:18</a><p class="ws-trad">For thus says the LORD, who <mark class="ws-target">created</mark> the heavens— He [is] God; He formed the earth and fashioned it; He established it; He did not create it to be empty, but formed it to be inhabited: “I am the LORD, and there is no other.</p><p class="ws-lit">FOR THUS HE SAYS YAHWEH [WHO] <mark class="ws-target">CREATED</mark> THE HEAVENS HE [IS] &lt;THE&gt; GOD [WHO] FORMED THE EARTH AND [WHO] MADE IT HE HE ESTABLISHED IT NOT A WASTELAND HE <mark class="ws-target">CREATED</mark> IT TO DWELL IN HE FORMED IT I [AM] YAHWEH AND THERE NOT [IS] YET</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Amos/4#13">Amos 4:13</a><p class="ws-trad">For behold, He who forms the mountains, who creates the wind and reveals His thoughts to man who turns the dawn to darkness and strides on the heights of the earth— the LORD, the God of Hosts, is His name.”</p><p class="ws-lit">FOR HERE! [ONE WHO] FORMED MOUNTAINS AND [ONE WHO] <mark class="ws-target">CREATED</mark> WIND AND [ONE WHO] TELLS TO HUMANKIND WHAT? [IS] THOUGHT HIS [ONE WHO] MAKES &lt;OF&gt; DAWN DARKNESS AND [ONE WHO] TREADS ON [THE] HIGH PLACES OF [THE] EARTH [IS] YAHWEH GOD OF HOSTS NAME HIS</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">ABOUT TO CREATE <span class="ws-count">(4 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/57#19">Isaiah 57:19</a><p class="ws-trad">bringing praise to their lips. Peace, peace to those far and near,” says the LORD, “and I will heal them.”</p><p class="ws-lit">[I AM] <mark class="ws-target">ABOUT TO CREATE</mark> [THE] FRUIT LIPS PEACE PEACE TO &lt;THE&gt; DISTANT [PERSON] AND TO &lt;THE&gt; NEAR [PERSON] HE SAYS YAHWEH AND I WILL HEAL HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/65#17">Isaiah 65:17</a><p class="ws-trad">For behold, I will create new heavens and a new earth. The former things will not be remembered, nor will they come to mind.</p><p class="ws-lit">FOR HERE I [AM] <mark class="ws-target">ABOUT TO CREATE</mark> HEAVENS NEW AND AN EARTH NEW AND NOT THEY WILL BE REMEMBERED THE FORMER [THINGS] AND NOT THEY WILL COME UP ON A HEART</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/65#18">Isaiah 65:18</a><p class="ws-trad">But be glad and rejoice forever in what I create; for I will create Jerusalem to be a joy and its people to be a delight.</p><p class="ws-lit">THAT EXCEPT REJOICE AND BE GLAD UNTIL PERPETUITY [THAT] WHICH I [AM] <mark class="ws-target">ABOUT TO CREATE</mark> FOR HERE I [AM] <mark class="ws-target">ABOUT TO CREATE</mark> &lt;OBJ.&gt; JERUSALEM GLADNESS AND PEOPLE ITS REJOICING</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/65#18">Isaiah 65:18</a><p class="ws-trad">But be glad and rejoice forever in what I create; for I will create Jerusalem to be a joy and its people to be a delight.</p><p class="ws-lit">THAT EXCEPT REJOICE AND BE GLAD UNTIL PERPETUITY [THAT] WHICH I [AM] <mark class="ws-target">ABOUT TO CREATE</mark> FOR HERE I [AM] <mark class="ws-target">ABOUT TO CREATE</mark> &lt;OBJ.&gt; JERUSALEM GLADNESS AND PEOPLE ITS REJOICING</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">CREATES <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/45#7">Isaiah 45:7</a><p class="ws-trad">I form the light and create the darkness; I bring prosperity and create calamity. I, the LORD, do all these things.</p><p class="ws-lit">[WHO] FORMS LIGHT AND [WHO] <mark class="ws-target">CREATES</mark> DARKNESS [WHO] BRINGS ABOUT WELL-BEING AND [WHO] <mark class="ws-target">CREATES</mark> CALAMITY I [AM] YAHWEH [WHO] DOES ALL THESE [THINGS]</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/45#7">Isaiah 45:7</a><p class="ws-trad">I form the light and create the darkness; I bring prosperity and create calamity. I, the LORD, do all these things.</p><p class="ws-lit">[WHO] FORMS LIGHT AND [WHO] <mark class="ws-target">CREATES</mark> DARKNESS [WHO] BRINGS ABOUT WELL-BEING AND [WHO] <mark class="ws-target">CREATES</mark> CALAMITY I [AM] YAHWEH [WHO] DOES ALL THESE [THINGS]</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp1cs">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) First Singular Either gender</h2>
+<p class="ws-slot-stats">6 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">I CREATED <span class="ws-count">(5 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/6#7">Genesis 6:7</a><p class="ws-trad">So the LORD said, “I will blot out man, whom I have created, from the face of the earth— every man and beast and crawling creature and bird of the air— for I am grieved that I have made them.”</p><p class="ws-lit">AND HE SAID YAHWEH I WILL WIPE &lt;OBJ.&gt; &lt;THE&gt; HUMANKIND WHICH <mark class="ws-target">I CREATED</mark> FROM ON [THE] SURFACE OF THE GROUND FROM HUMANKIND UNTO ANIMAL[S] UNTO CREEPING THING[S] AND UNTO [THE] BIRD[S] OF THE HEAVENS FOR I REGRET THAT I HAVE MADE THEM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/43#7">Isaiah 43:7</a><p class="ws-trad">everyone called by My name and created for My glory, whom I have indeed formed [and] made.”</p><p class="ws-lit">EVERY &lt;THE&gt; [ONE WHO] IS CALLED BY NAME MY AND [WHOM] FOR GLORY MY <mark class="ws-target">I CREATED</mark> HIM [WHOM] I FORMED HIM ALSO I MADE HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/45#12">Isaiah 45:12</a><p class="ws-trad">It is I who made the earth and created man upon it. It was My hands that stretched out the heavens, and I ordained all their host.</p><p class="ws-lit">I I MADE [THE] EARTH AND HUMANKIND ON IT <mark class="ws-target">I CREATED</mark> I HANDS MY THEY STRETCHED OUT [THE] HEAVENS AND ALL HOST THEIR I COMMANDED</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/54#16">Isaiah 54:16</a><p class="ws-trad">Behold, I have created the craftsman who fans the coals into flame and forges a weapon fit for its task; and I have created the destroyer to wreak havoc.</p><p class="ws-lit">HERE! I <mark class="ws-target">I CREATED</mark> A CRAFTSMAN [WHO] BLOWS ON A FIRE OF CHARCOAL AND [WHO] PRODUCES A WEAPON FOR WORK ITS AND I <mark class="ws-target">I CREATED</mark> A DESTROYER TO RUIN</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/54#16">Isaiah 54:16</a><p class="ws-trad">Behold, I have created the craftsman who fans the coals into flame and forges a weapon fit for its task; and I have created the destroyer to wreak havoc.</p><p class="ws-lit">HERE! I <mark class="ws-target">I CREATED</mark> A CRAFTSMAN [WHO] BLOWS ON A FIRE OF CHARCOAL AND [WHO] PRODUCES A WEAPON FOR WORK ITS AND I <mark class="ws-target">I CREATED</mark> A DESTROYER TO RUIN</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">I HAVE CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/45#8">Isaiah 45:8</a><p class="ws-trad">Drip down, O heavens, from above, and let the skies pour down righteousness. Let the earth open up that salvation may sprout and righteousness spring up with it; I, the LORD, have created it.</p><p class="ws-lit">DRIP DOWN O HEAVEN &lt;FROM&gt; ABOVE AND CLOUDS LET THEM FLOW RIGHTEOUSNESS LET IT OPEN UP [THE] EARTH SO THEY MAY BEAR FRUIT SALVATION AND RIGHTEOUSNESS LET IT CAUSE TO SPROUT TOGETHER I YAHWEH <mark class="ws-target">I HAVE CREATED</mark> IT</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="VNcc">
+<h2 class="ws-grammar-full">Verb : Niphal (Simple, Passive) Infinitive Construct</h2>
+<p class="ws-slot-stats">4 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">WERE CREATED <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/2#4">Genesis 2:4</a><p class="ws-trad">This [is] the account of the heavens and the earth when they <mark class="ws-target">were created</mark>, in the day that the LORD God made [them].</p><p class="ws-lit">THESE [ARE] [THE] ACCOUNTS OF THE HEAVENS AND THE EARTH WHEN <mark class="ws-target">WERE CREATED</mark> THEY ON [THE] DAY MADE YAHWEH GOD EARTH AND HEAVEN</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/5#2">Genesis 5:2</a><p class="ws-trad">Male and female He created them, and He blessed them. And in the day they <mark class="ws-target">were created</mark>, He called them “man.”</p><p class="ws-lit">MALE AND FEMALE HE CREATED THEM AND HE BLESSED &lt;OBJ.&gt; THEM AND HE CALLED &lt;OBJ.&gt; NAME THEIR HUMANKIND ON [THE] DAY <mark class="ws-target">WERE CREATED</mark> THEY</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">ARE CREATED <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/28#13">Ezekiel 28:13</a><p class="ws-trad">You were in Eden, the garden of God. Every kind of precious stone adorned you: ruby, topaz, and diamond, beryl, onyx, and jasper, sapphire, turquoise, and emerald. Your mountings and settings were crafted in gold, prepared on the day of your creation.</p><p class="ws-lit">IN EDEN [THE] GARDEN OF GOD YOU WERE [WAS] EVERY STONE PRECIOUS COVERING YOUR RUBY TOPAZ AND EMERALD CHRYSOLITE ONYX AND JASPER SAPPHIRE TURQUOISE AND BERYL AND GOLD [THE] WORKMANSHIP OF TAMBOURINES YOUR AND SETTINGS YOUR ON YOU ON [THE] DAY <mark class="ws-target">ARE CREATED</mark> YOU THEY WERE PREPARED</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/28#15">Ezekiel 28:15</a><p class="ws-trad">From the day you were created you were blameless in your ways— until wickedness was found in you.</p><p class="ws-lit">[WERE] BLAMELESS YOU IN WAYS YOUR FROM [THE] DAY <mark class="ws-target">ARE CREATED</mark> YOU UNTIL IT WAS FOUND UNRIGHTEOUSNESS &lt;TOWARDS&gt; IN YOU</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVNp3cp">
+<h2 class="ws-grammar-full">Verb : Niphal (Simple, Passive) Perfect (Past/present Indicative) Third Plural Either gender</h2>
+<p class="ws-slot-stats">3 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">THEY HAVE BEEN CREATED <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Exodus/34#10">Exodus 34:10</a><p class="ws-trad">And [the LORD] said, “Behold, I am making a covenant. Before all your people I will perform wonders that have never been done in any nation in all the world. All the people among whom you live will see the LORD’s work, for it [is] an awesome [thing] that I am doing with you.</p><p class="ws-lit">AND HE SAID HERE! I [AM] ABOUT TO MAKE A COVENANT BEFORE ALL PEOPLE YOUR I WILL DO WONDERS WHICH NOT <mark class="ws-target">THEY HAVE BEEN CREATED</mark> IN ALL THE EARTH AND AMONG ALL THE NATIONS AND IT WILL SEE ALL THE PEOPLE WHICH YOU [ARE] IN MIDST ITS &lt;OBJ.&gt; [THE] WORK OF YAHWEH FOR [IS] AWESOME IT WHICH I [AM] ABOUT TO DO WITH YOU</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/48#7">Isaiah 48:7</a><p class="ws-trad">They are created now, and not long ago; you have not heard of them before today. So you cannot claim, ‘I already knew them!’</p><p class="ws-lit">NOW <mark class="ws-target">THEY HAVE BEEN CREATED</mark> AND NOT FROM THEN AND &lt;TO&gt; BEFORE A DAY AND NOT YOU HAD HEARD OF THEM LEST YOU SHOULD SAY HERE! I KNEW THEM</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">THEY WERE CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/148#5">Psalms 148:5</a><p class="ws-trad">Let them praise the name of the LORD, for He gave the command and <mark class="ws-target">they were created</mark>.</p><p class="ws-lit">LET THEM PRAISE &lt;OBJ.&gt; [THE] NAME OF YAHWEH FOR HE HE COMMANDED AND <mark class="ws-target">THEY WERE CREATED</mark></p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqrmsc">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Participle (Singular Masculine, Construct)</h2>
+<p class="ws-slot-stats">3 instances · 3 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">CREATOR S <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ecclesiastes/12#1">Ecclesiastes 12:1</a><p class="ws-trad">Remember your Creator in the days of your youth, before the days of adversity come and the years approach of which you will say, “I find no pleasure in them,”</p><p class="ws-lit">AND REMEMBER &lt;OBJ.&gt; CREATOR&lt;S&gt; YOUR IN [THE] DAYS OF YOUTH&lt;S&gt; YOUR UNTIL THAT NOT THEY WILL COME [THE] DAYS OF &lt;THE&gt; EVIL AND THEY WILL ARRIVE YEARS WHICH YOU WILL SAY NOT [BELONGS] TO &lt;THE&gt; ME IN &lt;THE&gt; THEM PLEASURE</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/43#1">Isaiah 43:1</a><p class="ws-trad">But now, this is what the LORD says— He who <mark class="ws-target">created</mark> you, O Jacob, and He who formed you, O Israel: “Do not fear, for I have redeemed you; I have called you by your name; you are Mine!</p><p class="ws-lit">AND NOW THUS HE SAYS YAHWEH [WHO] <mark class="ws-target">CREATED</mark> YOU O JACOB AND [WHO] FORMED YOU O ISRAEL MAY NOT YOU BE AFRAID FOR I HAVE REDEEMED YOU I HAVE CALLED [YOU] BY NAME YOUR [BELONG] TO &lt;THE&gt; ME YOU</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">CREATOR OF <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/43#15">Isaiah 43:15</a><p class="ws-trad">I am the LORD, your Holy One, the <mark class="ws-target">Creator of</mark> Israel, [and] your King.”</p><p class="ws-lit">I [AM] YAHWEH HOLY [ONE] YOUR [THE] <mark class="ws-target">CREATOR OF</mark> ISRAEL KING YOUR</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqw3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Consecutive Imperfect (Past/present Indicative) Third Singular Masculine</h2>
+<p class="ws-slot-stats">2 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE CREATED <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/1#21">Genesis 1:21</a><p class="ws-trad">So God created the great sea creatures and every living thing that moves, [with] which the waters teemed according to their kinds, and every winged bird after its kind. And God saw that [it was] good.</p><p class="ws-lit">AND <mark class="ws-target">HE CREATED</mark> GOD &lt;OBJ.&gt; THE SEA MONSTERS &lt;THE&gt; GREAT AND &lt;OBJ.&gt; EVERY CREATURE &lt;THE&gt; LIVING WHICH CREEPS WHICH THEY SWARMED THE WATERS TO KIND THEIR AND &lt;OBJ.&gt; EVERY BIRD OF WING TO KIND ITS AND HE SAW GOD THAT [IT WAS] GOOD</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/1#27">Genesis 1:27</a><p class="ws-trad">So God created man in His [own] image; in the image of God <mark class="ws-target">He created</mark> him; male and female <mark class="ws-target">He created</mark> them.</p><p class="ws-lit">AND <mark class="ws-target">HE CREATED</mark> GOD &lt;OBJ.&gt; &lt;THE&gt; HUMANKIND IN OWN IMAGE HIS IN [THE] IMAGE OF GOD <mark class="ws-target">HE CREATED</mark> &lt;OBJ.&gt; IT MALE AND FEMALE <mark class="ws-target">HE CREATED</mark> &lt;OBJ.&gt; THEM</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vpq2ms">
+<h2 class="ws-grammar-full">Verb : Piel (Intensive/resultive/transtive, Active) Consecutive Perfect (Future/present Indicative) Second Singular Masculine</h2>
+<p class="ws-slot-stats">2 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU WILL CUT DOWN <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Joshua/17#15">Joshua 17:15</a><p class="ws-trad">Joshua answered them, “If you have so many people that the hill country of Ephraim is too small for you, go to the forest and clear for yourself an area in the land of the Perizzites and the Rephaim.”</p><p class="ws-lit">AND HE SAID TO THEM JOSHUA IF [ARE] A PEOPLE NUMEROUS YOU GO UP FOR &lt;THE&gt; YOURSELF THE FOREST TOWARDS AND <mark class="ws-target">YOU WILL CUT DOWN</mark> FOR &lt;THE&gt; YOURSELF THERE IN [THE] LAND OF THE PERIZZITE[S] AND THE REPHAITES THAT IT IS NARROW FOR &lt;THE&gt; YOU [THE] HILL COUNTRY OF EPHRAIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Joshua/17#18">Joshua 17:18</a><p class="ws-trad">because the hill country will be yours as well. It is a forest; clear it, and its farthest limits will be yours. Although [the Canaanites] have iron chariots and although they are strong, you can drive [them] out</p><p class="ws-lit">FOR [THE] HILL COUNTRY IT WILL BELONG TO &lt;THE&gt; YOU FOR [IS] FOREST IT AND <mark class="ws-target">YOU WILL CUT DOWN</mark> IT AND IT WILL BELONG TO &lt;THE&gt; YOU EXTREMITIES ITS FOR YOU WILL DISPOSSESS &lt;OBJ.&gt; THE CANAANITE[S] FOR CHARIOTRY OF IRON [BELONGS] TO &lt;THE&gt; HIM THAT [IS] STRONG HE</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp2ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) Second Singular Masculine</h2>
+<p class="ws-slot-stats">2 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/89#12">Psalms 89:12</a><p class="ws-trad">North and south <mark class="ws-target">You created</mark>; Tabor and Hermon shout for joy at Your name.</p><p class="ws-lit">[THE] NORTH AND [THE] SOUTH YOU <mark class="ws-target">YOU CREATED</mark> THEM TABOR AND HERMON AT NAME YOUR THEY SHOUT FOR JOY</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">HAVE YOU CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/89#47">Psalms 89:47</a><p class="ws-trad">Remember the briefness of my lifespan! For what futility You have created all men!</p><p class="ws-lit">REMEMBER I WHAT? [IS] LIFESPAN CONCERNING WHAT? EMPTINESS <mark class="ws-target">HAVE YOU CREATED</mark> ALL [THE] CHILDREN OF HUMANKIND</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVpv2ms">
+<h2 class="ws-grammar-full">Verb : Piel (Intensive/resultive/transtive, Active) Imperative Second Singular Masculine</h2>
+<p class="ws-slot-stats">2 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">MAKE <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/21#19">Ezekiel 21:19</a><p class="ws-trad">“Now you, son of man, mark out two roads for the sword of the king of Babylon to take, both starting from the same land. And <mark class="ws-target">make</mark> a signpost where the road branches off to each city.</p><p class="ws-lit">AND YOU O SON OF HUMANKIND <mark class="ws-target">MAKE</mark> FOR YOURSELF TWO ROADS TO COME [THE] SWORD OF [THE] KING OF BABYLON FROM A LAND ONE THEY WILL GO OUT BOTH OF THEM AND A MONUMENT <mark class="ws-target">MAKE</mark> AT [THE] BEGINNING OF [THE] ROAD OF A CITY <mark class="ws-target">MAKE</mark> [IT]</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/21#19">Ezekiel 21:19</a><p class="ws-trad">“Now you, son of man, mark out two roads for the sword of the king of Babylon to take, both starting from the same land. And <mark class="ws-target">make</mark> a signpost where the road branches off to each city.</p><p class="ws-lit">AND YOU O SON OF HUMANKIND <mark class="ws-target">MAKE</mark> FOR YOURSELF TWO ROADS TO COME [THE] SWORD OF [THE] KING OF BABYLON FROM A LAND ONE THEY WILL GO OUT BOTH OF THEM AND A MONUMENT <mark class="ws-target">MAKE</mark> AT [THE] BEGINNING OF [THE] ROAD OF A CITY <mark class="ws-target">MAKE</mark> [IT]</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqcc">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Infinitive Construct</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/5#1">Genesis 5:1</a><p class="ws-trad">This [is] the book of the generations of Adam. In the day that God <mark class="ws-target">created</mark> man, He made him in His own likeness.</p><p class="ws-lit">THIS [IS] [THE] RECORD OF [THE] DESCENDANTS OF ADAM ON [THE] DAY <mark class="ws-target">CREATED</mark> GOD HUMANKIND IN [THE] LIKENESS OF GOD HE MADE &lt;OBJ.&gt; HIM</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqi3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperfect (Future/present Indicative/jussive) Third Singular Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE WILL CREATE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Numbers/16#30">Numbers 16:30</a><p class="ws-trad">But if the LORD brings about something unprecedented, and the earth opens its mouth and swallows them and all that belongs to them so that they go down alive into Sheol, then you will know that these men have treated the LORD {with contempt}.”</p><p class="ws-lit">AND IF A CREATION <mark class="ws-target">HE WILL CREATE</mark> YAHWEH AND IT WILL OPEN THE GROUND &lt;OBJ.&gt; MOUTH ITS AND IT WILL SWALLOW &lt;OBJ.&gt; THEM AND &lt;OBJ.&gt; ALL THAT [BELONGS] TO &lt;THE&gt; THEM AND THEY WILL GO DOWN ALIVE SHEOL TOWARDS AND YOU WILL KNOW THAT THEY HAVE SPURNED THE MEN &lt;THE&gt; THESE &lt;OBJ.&gt; YAHWEH</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqv2ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperative Second Singular Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">CREATE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/51#10">Psalms 51:10</a><p class="ws-trad"><mark class="ws-target">Create</mark> in me a clean heart, O God, and renew a right spirit within me.</p><p class="ws-lit">A HEART PURE <mark class="ws-target">CREATE</mark> FOR &lt;THE&gt; ME O GOD AND A SPIRIT STEADFAST RENEW IN INNER BEING MY</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVNrmsa">
+<h2 class="ws-grammar-full">Verb : Niphal (Simple, Passive) Participle (Singular Masculine, Absolute)</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">BE CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/102#18">Psalms 102:18</a><p class="ws-trad">Let this be written for the generation to come, so that a people not yet created may praise the LORD.</p><p class="ws-lit">LET IT BE WRITTEN THIS FOR A GENERATION LATER AND A PEOPLE [WHO WILL] <mark class="ws-target">BE CREATED</mark> IT WILL PRAISE YAHWEH</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVNi3mp">
+<h2 class="ws-grammar-full">Verb : Niphal (Simple, Passive) Imperfect (Future/present Indicative/jussive) Third Plural Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">THEY ARE CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/104#30">Psalms 104:30</a><p class="ws-trad">When You send Your Spirit, <mark class="ws-target">they are created</mark>, and You renew the face of the earth.</p><p class="ws-lit">YOU SEND FORTH SPIRIT YOUR <mark class="ws-target">THEY ARE CREATED</mark> ! AND YOU MAY RENEW [THE] SURFACE OF [THE] GROUND</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqq3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Consecutive Perfect (Future/present Indicative) Third Singular Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE WILL CREATE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/4#5">Isaiah 4:5</a><p class="ws-trad">Then the LORD will create over all of Mount Zion and over her assemblies a cloud of smoke by day and a glowing flame of fire by night. For over all the glory there will be a canopy,</p><p class="ws-lit">AND <mark class="ws-target">HE WILL CREATE</mark> YAHWEH OVER ALL [THE] PLACE OF [THE] MOUNTAIN OF ZION AND OVER CONVOCATIONS ITS A CLOUD BY DAY AND SMOKE AND BRIGHTNESS OF FIRE A FLAME NIGHT FOR [WILL BE] OVER ALL [THE] GLORY A CANOPY</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVNp2fs">
+<h2 class="ws-grammar-full">Verb : Niphal (Simple, Passive) Perfect (Past/present Indicative) Second Singular Feminine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU WERE CREATED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/21#30">Ezekiel 21:30</a><p class="ws-trad">Return [the sword] to its sheath! In the place where <mark class="ws-target">you were created</mark>, in the land of your origin, I will judge you.</p><p class="ws-lit">PUT BACK INTO SHEATH ITS IN [THE] PLACE &lt;OF&gt; WHERE <mark class="ws-target">YOU WERE CREATED</mark> IN [THE] LAND OF ORIGINS YOUR I WILL JUDGE &lt;OBJ.&gt; YOU</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vpcc">
+<h2 class="ws-grammar-full">Verb : Piel (Intensive/resultive/transtive, Active) Infinitive Construct</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">THEY WILL CUT DOWN <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/23#47">Ezekiel 23:47</a><p class="ws-trad">The mob will stone them and cut them down with their swords. They will kill their sons and daughters and burn down their houses.</p><p class="ws-lit">AND THEY WILL STONE ON THEM STONE[S] [THE] COMPANY AND <mark class="ws-target">THEY WILL CUT DOWN</mark> &lt;OBJ.&gt; THEM WITH SWORDS THEIR SONS THEIR AND DAUGHTERS THEIR THEY WILL KILL AND HOUSES THEIR WITH &lt;THE&gt; FIRE THEY WILL BURN</p></div>
+</div>
+</section>
+</div>
+<div class="ws-footer">
+<section class="ws-related"><h2>Related Files</h2><ul><li><a href="https://words.servewell.net/create_2">to create (Greek, G2936)</a></li></ul></section>
+</div>
+<script>
+(function () {
+  // Expand/collapse-all button
+  var allDetails = document.querySelectorAll('details.ws-more');
+  var btn = document.getElementById('ws-expand-all');
+  if (allDetails.length > 0 && btn) {
+    function updateBtn() {
+      var anyCollapsed = Array.prototype.some.call(allDetails, function (d) { return !d.open; });
+      btn.textContent = anyCollapsed ? 'Expand all' : 'Collapse most';
+    }
+    updateBtn();
+    allDetails.forEach(function (d) { d.addEventListener('toggle', updateBtn); });
+    btn.addEventListener('click', function () {
+      var anyCollapsed = Array.prototype.some.call(allDetails, function (d) { return !d.open; });
+      allDetails.forEach(function (d) { d.open = anyCollapsed; });
+      updateBtn();
+    });
+  } else if (btn) {
+    btn.hidden = true;
+  }
+
+  // Fragment-based slot priority:
+  //   #grammar=Vqw3ms  → move that slot element to top of #ws-slots
+  var hash = window.location.hash;
+  if (hash && typeof CSS !== 'undefined' && CSS.escape) {
+    var m = hash.match(/[#&?]grammar=([^&]+)/);
+    if (m) {
+      var code = decodeURIComponent(m[1]);
+      var container = document.getElementById('ws-slots');
+      if (container) {
+        var target = container.querySelector('[data-grammar-code="' + CSS.escape(code) + '"]');
+        if (target && target.parentNode === container) {
+          container.insertBefore(target, container.firstChild);
+          target.classList.add('ws-slot-highlighted');
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }
+  }
+}());
+</script>
+<script src="/js/servewell-app-shell.js"></script>
+</body>
+</html>

@@ -12,13 +12,13 @@ const SHARED_WORD_POPOVER_ID = 'word-popover-shared';
 const COLUMN_VISIBILITY_STORAGE_KEY = 'servewell-visible-columns';
 
 const METADATA_LABEL_TO_KEY: Record<string, string> = {
-  Pane: 'p',
+  'Version Type': 'p',
   Snippet: 'sn',
   'Word Position': 'wp',
   'Morpheme Gloss': 'mg',
   'Segment In Morpheme': 'sim',
   'Segments In Morpheme': 'smc',
-  'Morpheme ID': 'mid',
+  'Instance ID': 'mid',
   'Original Script': 'os',
   Transliteration: 'tr',
   'Grammar Code': 'gc',
@@ -27,12 +27,14 @@ const METADATA_LABEL_TO_KEY: Record<string, string> = {
   Language: 'lg',
   "Strong's Root": 'sr',
   'Root Script': 'rs',
-  'Root Translation': 'rt',
+  'Root Sound': 'rsnd',
+  'Root Idea': 'rt',
   Source: 'src',
   'Source Token': 'stok',
   'Token Segment': 'tseg',
   "Strong's ID": 'sid',
-  'Original Morpheme ID': 'omid'
+  'Original Morpheme ID': 'omid',
+  Occurrences: 'occ'
 };
 
 const METADATA_KEY_TO_LABEL = Object.fromEntries(
@@ -399,16 +401,19 @@ function renderLiteralPane(snippet: Snippet, idPrefix = ''): string {
         : `${snippetKey}-literal-${tokenOrdinal}`;
       const popoverId = `popover-${toSafeDomId(popoverSeed)}`;
       const metadataEntries: MetadataEntry[] = [
-        { label: 'Pane', value: 'Literal' },
-        { label: 'Morpheme ID', value: morpheme.MorphemeId },
+        { label: 'Version Type', value: 'Literal' },
+        { label: 'Instance ID', value: morpheme.MorphemeId },
         { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
         { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+        { label: 'Grammar Code', value: morpheme.OriginalMorphemeGrammarCode },
         { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
         { label: 'Language', value: morpheme.OriginalLanguage },
         { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
         { label: 'Root Script', value: morpheme.OriginalRootScript },
-        { label: 'Root Translation', value: morpheme.EnglishRootTranslation },
-        { label: 'Source', value: morpheme.Source }
+        { label: 'Root Sound', value: morpheme.OriginalRootTransliteration },
+        { label: 'Root Idea', value: morpheme.EnglishRootTranslation },
+        { label: 'Source', value: morpheme.Source },
+        { label: 'Occurrences', value: morpheme.OccurrencesFile }
       ];
 
       renderParts.push({
@@ -440,15 +445,18 @@ function renderTraditionalPane(snippet: Snippet, idPrefix = ''): string {
   for (const morpheme of snippet.OriginalMorphemes) {
     if (!morpheme.MorphemeId) continue;
     literalMetaByMorphemeId.set(morpheme.MorphemeId, [
-      { label: 'Morpheme ID', value: morpheme.MorphemeId },
+      { label: 'Instance ID', value: morpheme.MorphemeId },
       { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
       { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+      { label: 'Grammar Code', value: morpheme.OriginalMorphemeGrammarCode },
       { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
       { label: 'Language', value: morpheme.OriginalLanguage },
       { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
       { label: 'Root Script', value: morpheme.OriginalRootScript },
-      { label: 'Root Translation', value: morpheme.EnglishRootTranslation },
-      { label: 'Source', value: morpheme.Source }
+      { label: 'Root Sound', value: morpheme.OriginalRootTransliteration },
+      { label: 'Root Idea', value: morpheme.EnglishRootTranslation },
+      { label: 'Source', value: morpheme.Source },
+      { label: 'Occurrences', value: morpheme.OccurrencesFile }
     ]);
   }
 
@@ -616,9 +624,9 @@ function renderTraditionalParagraphTokens(
         : token.originalMorphemeId;
     const literalEntries = matchMorphemeId ? literalMetaByMorphemeId.get(matchMorphemeId) : undefined;
     const metadataEntries: MetadataEntry[] = literalEntries
-      ? [{ label: 'Pane', value: 'Traditional' }, ...literalEntries]
+      ? [{ label: 'Version Type', value: 'Traditional' }, ...literalEntries]
       : [
-          { label: 'Pane', value: 'Traditional' },
+          { label: 'Version Type', value: 'Traditional' },
           { label: '—', value: "There's no direct match for this word in the original." }
         ];
 
@@ -718,18 +726,27 @@ function renderWordToken(displayText: string, popoverId: string, metadataEntries
 function renderWordMetadata(metadataEntries: MetadataEntry[]): string {
   const rows = metadataEntries
     .map(({ label, value }) => ({ label, value: value === undefined ? '' : String(value).trim() }))
-    .filter(({ value }) => value.length > 0)
+    .filter(({ value }) => value.length > 0);
+  const grammarCode = rows.find(r => r.label === 'Grammar Code')?.value;
+  const rowsHtml = rows
     .map(
-      ({ label, value }) =>
-        `<span class="word-meta-row"><span class="word-meta-label">${escapeHtml(label)}</span><span class="word-meta-value">${escapeHtml(value)}</span></span>`
+      ({ label, value }) => {
+        let valueHtml: string;
+        if (label === 'Occurrences') {
+          const fragment = grammarCode ? `#grammar=${encodeURIComponent(grammarCode)}` : '';
+          valueHtml = `<a href="https://words.servewell.net/${escapeHtmlAttribute(value)}${escapeHtmlAttribute(fragment)}" class="word-meta-link">See all instances</a>`;
+        } else {
+          valueHtml = escapeHtml(value);
+        }
+        return `<span class="word-meta-row"><span class="word-meta-label">${escapeHtml(label)}</span><span class="word-meta-value">${valueHtml}</span></span>`;
+      }
     )
     .join('');
-
-  if (!rows) {
+  if (!rowsHtml) {
     return `<span class="word-meta-empty">No metadata available for this word.</span>`;
   }
 
-  return `<span class="word-meta-list">${rows}</span>`;
+  return `<span class="word-meta-list">${rowsHtml}</span>`;
 }
 
 function renderFootnoteMarker(footnoteRichHtml: string, footnoteId: string): string {
@@ -815,6 +832,8 @@ function renderSharedWordPopoverScript(): string {
     '',
     '  function renderMetadata(entries) {',
     '    metaList.textContent = "";',
+    '    var gcEntry = entries.find(function(e) { return e.label === "Grammar Code"; });',
+    '    var grammarCode = gcEntry ? gcEntry.value : null;',
     '    for (const entry of entries) {',
     '      const row = document.createElement("span");',
     '      row.className = "word-meta-row";',
@@ -823,7 +842,16 @@ function renderSharedWordPopoverScript(): string {
     '      label.textContent = entry.label;',
     '      const value = document.createElement("span");',
     '      value.className = "word-meta-value";',
-    '      value.textContent = entry.value;',
+    '      if (entry.label === "Occurrences") {',
+    '        const link = document.createElement("a");',
+    '        var fragment = grammarCode ? "#grammar=" + encodeURIComponent(grammarCode) : "";',
+    '        link.href = "https://words.servewell.net/" + encodeURIComponent(entry.value) + fragment;',
+    '        link.textContent = "See all instances";',
+    '        link.className = "word-meta-link";',
+    '        value.appendChild(link);',
+    '      } else {',
+    '        value.textContent = entry.value;',
+    '      }',
     '      row.append(label, value);',
     '      metaList.appendChild(row);',
     '    }',

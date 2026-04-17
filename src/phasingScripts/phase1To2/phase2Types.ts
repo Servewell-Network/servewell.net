@@ -32,6 +32,7 @@ export interface Morpheme { // unit of meaning = word or part of word
   "EnglishMorphemeOrdinal"?: number; // where it's needed for English
   "Indentations"?: number; // -1 means no new line
   "Source"?: string; // e.g., L for Leningrad Codex
+  "OccurrencesFile"?: string; // file name under /words/ for Strongs ID occurrences (set by generateWordStudyJson)
   "MeaningVariants"?: string[];
 }
 export interface EnglishWordInfo {

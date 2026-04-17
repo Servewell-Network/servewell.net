@@ -178,3 +178,4 @@ dist
 # specific to this project
 reports/
 src/json-Phase2/**/*
+public/words/

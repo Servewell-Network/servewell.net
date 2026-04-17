@@ -13,6 +13,34 @@ const __dirname = dirname(__filename);
 
 const pathToPhase1a = path.join(__dirname, '../step-Phase1a/');
 const pathToPhase2 = path.join(__dirname, '../json-Phase2/');
+
+// ---------------------------------------------------------------------------
+// Lexicon transliteration lookup (TBESH / TBESG)
+// ---------------------------------------------------------------------------
+function buildLexiconTranslitMap(filePath: string): Map<string, string> {
+  const map = new Map<string, string>();
+  try {
+    const lines = fs.readFileSync(filePath, 'utf8').split('\n');
+    for (const line of lines) {
+      const cols = line.split('\t');
+      if (cols.length < 5) continue;
+      const id = cols[0].trim().toUpperCase();
+      const translit = cols[4].trim();
+      if (!id || !translit || !/^[HG]\d+/.test(id)) continue;
+      if (!map.has(id)) map.set(id, translit);
+    }
+  } catch { /* file absent — silent */ }
+  return map;
+}
+const _tbeshTranslit = buildLexiconTranslitMap(path.join(pathToPhase1a, 'TBESH - Translators Brief lexicon of Extended Strongs for Hebrew - STEPBible.org CC BY.txt'));
+const _tbesgTranslit = buildLexiconTranslitMap(path.join(pathToPhase1a, 'TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt'));
+function lexiconRootTranslit(strongsId: string): string | undefined {
+  const map = strongsId.startsWith('H') ? _tbeshTranslit : _tbesgTranslit;
+  if (map.has(strongsId)) return map.get(strongsId);
+  const base = strongsId.replace(/[A-Z]+$/, '').replace(/\+.*$/, '');
+  return base !== strongsId ? map.get(base) : undefined;
+}
+
 const file1 = 'TAHOT Gen-Deu - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 const file2 = 'TAHOT Jos-Est - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
 const file3 = 'TAHOT Job-Sng - Translators Amalgamated Hebrew OT - STEPBible.org CC BY.txt';
@@ -185,6 +213,7 @@ function processGreekWord(currentChapter: Partial<Chapter>, currentSnippet: Snip
   const engMorpheme = normalizeLiteralGlossForOutput(fields[GreekWord.EnglishTranslation].trim());
   const [origRoot, engRoot] = fields[GreekWord.DictionaryFormAndGloss].split('=');
   const [origScript, translit] = fields[GreekWord.Greek].replace(')', '').split(' (');
+  const rootTranslit = lexiconRootTranslit(strongs);
   const morpheme: Morpheme = {
     MorphemeId: `${currentSnippet.SnippetId}.${wordIdx}`,
     OriginalMorphemeScript: origScript,
@@ -195,6 +224,7 @@ function processGreekWord(currentChapter: Partial<Chapter>, currentSnippet: Snip
     OriginalMorphemeTransliteration: translit,
     OriginalRootScript: origRoot,
     EnglishRootTranslation: engRoot,
+    ...(rootTranslit ? { OriginalRootTransliteration: rootTranslit } : {}),
   };
   applyMorphologyDefinition(morpheme, grammarCode, greekMorphologyDefinitions, 'Greek');
 
@@ -272,6 +302,10 @@ function createMorphemeFromSemiticWord(
   }
   if (engRoot) {
     returnable.EnglishRootTranslation = engRoot;
+  }
+  const rootTranslit = lexiconRootTranslit(strongs);
+  if (rootTranslit) {
+    returnable.OriginalRootTransliteration = rootTranslit;
   }
   if (substitutionInfo) {
     returnable.EnglishSubstitutionInfo = substitutionInfo;

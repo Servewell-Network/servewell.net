@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+<title>to love</title>
+<meta name="description" content="Ancient word study: to love (Hebrew, H0157G)">
+<script>
+(function () {
+  try {
+    const savedTheme = localStorage.getItem('servewell-theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      document.documentElement.dataset.theme = savedTheme;
+    }
+  } catch (_error) {
+    // Ignore storage access failures (private mode, disabled storage).
+  }
+})();
+</script>
+<style>
+body {
+   font-family: sans-serif;
+	font-size: large;
+}
+details :not(summary) {
+   padding-left: 0.5rem;
+}
+
+:root {
+  color-scheme: light;
+  --page-bg: #f4f6f9;
+  --page-fg: #0f172a;
+  --muted: #475467;
+  --label-bg: #f8fafc;
+  --pane-bg: #ffffff;
+  --pane-border: #dbe3ea;
+  --link: #1d4ed8;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page-bg: #0b1220;
+  --page-fg: #e5edf7;
+  --muted: #a6b3c5;
+  --label-bg: #172235;
+  --pane-bg: #101a2a;
+  --pane-border: #2a3b52;
+  --link: #8ab4ff;
+}
+body {
+  background: var(--page-bg);
+  color: var(--page-fg);
+}
+a { color: var(--link); }
+.ws-meta { margin-bottom: 1.5rem; line-height: 1.6; }
+.ws-meta-lemma { font-size: 1.5em; font-family: serif; margin-right: 0.4rem; }
+.ws-meta-info {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.ws-meta-stats { font-size: 0.85rem; color: var(--muted); margin: 0.3rem 0 0; }
+.ws-title-sub {
+  font-size: 0.45em;
+  font-weight: normal;
+  font-variant: normal;
+  letter-spacing: normal;
+  color: var(--muted);
+  margin-left: 0.4em;
+}
+.ws-expand-btn {
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid var(--pane-border);
+  border-radius: 4px;
+  background: var(--label-bg);
+  color: var(--page-fg);
+  vertical-align: middle;
+}
+.ws-slot {
+  border-top: 2px solid var(--pane-border);
+  padding-top: 1rem;
+  margin-top: 1.75rem;
+}
+.ws-slot-highlighted { border-top-color: var(--link); }
+.ws-grammar-full {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+  color: var(--page-fg);
+}
+.ws-slot-stats { font-size: 0.85rem; color: var(--muted); margin: 0 0 0.75rem; }
+.ws-translation { margin: 0.8rem 0 0.8rem 0.5rem; }
+.ws-rendering {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.4rem;
+}
+.ws-count { font-weight: 400; font-variant: normal; color: var(--muted); font-size: 0.85em; }
+.ws-instance {
+  background: var(--pane-bg);
+  border-left: 3px solid var(--pane-border);
+  padding: 0.4rem 0.7rem;
+  margin: 0.3rem 0;
+  border-radius: 0 4px 4px 0;
+}
+.ws-ref {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+a.ws-ref {
+  color: var(--link);
+  text-decoration: none;
+}
+a.ws-ref:hover { text-decoration: underline; }
+.ws-trad { margin: 0 0 0.2rem; font-size: 0.9rem; }
+.ws-lit { margin: 0; font-size: 0.85rem; color: var(--muted); font-style: italic; }
+mark.ws-target { background: #fef08a; color: #1a1200; border-radius: 2px; padding: 0 1px; font-style: normal; }
+:root[data-theme="dark"] mark.ws-target { background: #5a3e00; color: #fde68a; }
+.ws-more summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--link);
+  padding: 0.2rem 0;
+  margin-top: 0.25rem;
+}
+.ws-overflow-note { font-size: 0.82rem; color: var(--muted); font-style: italic; margin: 0.4rem 0 0; }
+.ws-back-link { font-size: 0.9rem; margin-bottom: 0.75rem; display: block; }
+.ws-footer {
+  border-top: 2px solid var(--pane-border);
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.ws-footer section > h2 { font-size: 0.95rem; margin: 0 0 0.4rem; }
+.ws-footer section ul { margin: 0; padding-left: 1.25rem; }
+.ws-footer section li { font-size: 0.9rem; margin: 0.25rem 0; }
+
+</style>
+</head>
+<body>
+<h1>TO LOVE <span class="ws-title-sub">· a.hav · אָהֵב · Hebrew · H0157G</span></h1>
+<p class="ws-meta-stats">198 total instances · 34 grammar slots <button id="ws-expand-all" class="ws-expand-btn">Expand all</button></p>
+<div id="ws-slots">
+<section class="ws-slot" data-grammar-code="Vqrmsa">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Participle (Singular Masculine, Absolute)</h2>
+<p class="ws-slot-stats">25 instances · 3 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVING <span class="ws-count">(15 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/10#18">Deuteronomy 10:18</a><p class="ws-trad">He executes justice for the fatherless and widow, and He loves the foreigner, giving him food and clothing.</p><p class="ws-lit">[HE IS] BRINGING ABOUT JUDGMENT OF A FATHERLESS ONE AND A WIDOW AND [HE IS] <mark class="ws-target">LOVING</mark> A SOJOURNER TO GIVE TO &lt;THE&gt; HIM FOOD AND CLOTHING</p></div>
+<details class="ws-more">
+<summary>14 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Samuel/18#16">1 Samuel 18:16</a><p class="ws-trad">But all Israel and Judah loved David, because he was leading them out to battle and back.</p><p class="ws-lit">AND ALL ISRAEL AND JUDAH [WERE] <mark class="ws-target">LOVING</mark> &lt;OBJ.&gt; DAVID FOR HE [WAS] GOING OUT AND [WAS] COMING &lt;TO&gt; BEFORE THEM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Samuel/13#4">2 Samuel 13:4</a><p class="ws-trad">and he asked [Amnon], “Why are you, the son of the king, so depressed morning after morning? Won’t you tell me?” Amnon replied “I am in love with Tamar, my brother Absalom’s sister.”</p><p class="ws-lit">AND HE SAID TO &lt;THE&gt; HIM WHY? [ARE] YOU THUS WEAK O SON OF THE KING IN THE MORNING IN THE MORNING ¿ NOT WILL YOU TELL TO &lt;THE&gt; ME AND HE SAID TO &lt;THE&gt; HIM AMNON &lt;OBJ.&gt; TAMAR [THE] SISTER OF ABSALOM BROTHER MY I [AM] <mark class="ws-target">LOVING</mark></p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Chronicles/26#10">2 Chronicles 26:10</a><p class="ws-trad">Since he had much livestock in the foothills and in the plain, he built towers in the desert and dug many cisterns. And since he was a lover of the soil, he had farmers and vinedressers in the hill country and in the fertile fields.</p><p class="ws-lit">AND HE BUILT TOWERS IN THE WILDERNESS AND HE DUG WELLS MANY FOR LIVESTOCK MUCH IT BELONGED TO &lt;THE&gt; HIM AND IN THE SHEPHELAH AND IN THE PLAIN FARMERS AND VINEDRESSERS IN THE MOUNTAINS AND IN THE ORCHARDS FOR <mark class="ws-target">LOVING</mark> [THE] GROUND HE WAS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/33#5">Psalms 33:5</a><p class="ws-trad">[The LORD] loves righteousness and justice; the earth is full of [His] <mark class="ws-target">loving</mark> devotion.</p><p class="ws-lit">[HE IS] <mark class="ws-target">LOVING</mark> RIGHTEOUSNESS AND JUSTICE [THE] COVENANT LOYALTY OF YAHWEH IT IS FULL THE EARTH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/37#28">Psalms 37:28</a><p class="ws-trad">For the LORD loves justice and will not forsake His saints. They are preserved forever, but the offspring of the wicked will be cut off.</p><p class="ws-lit">FOR YAHWEH [IS] <mark class="ws-target">LOVING</mark> JUSTICE AND NOT HE WILL ABANDON &lt;OBJ.&gt; FAITHFUL [PEOPLE] HIS FOR EVER THEY ARE PRESERVED AND [THE] OFFSPRING OF WICKED [PEOPLE] IT IS CUT OFF</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/87#2">Psalms 87:2</a><p class="ws-trad">The LORD loves the gates of Zion more than all the dwellings of Jacob.</p><p class="ws-lit">[IS] <mark class="ws-target">LOVING</mark> YAHWEH [THE] GATES OF ZION MORE THAN ALL [THE] DWELLING PLACES OF JACOB</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/146#8">Psalms 146:8</a><p class="ws-trad">the LORD opens [the eyes of] the blind, the LORD lifts those who are weighed down, the LORD loves the righteous.</p><p class="ws-lit">YAHWEH [IS] OPENING BLIND [PEOPLE] YAHWEH [IS] RAISING UP [THOSE WHO] ARE BENT DOWN YAHWEH [IS] <mark class="ws-target">LOVING</mark> RIGHTEOUS [PEOPLE]</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/12#1">Proverbs 12:1</a><p class="ws-trad">Whoever loves discipline loves knowledge, but he who hates correction is stupid.</p><p class="ws-lit">[ONE WHO] LOVES DISCIPLINE [IS] <mark class="ws-target">LOVING</mark> KNOWLEDGE AND [ONE WHO] HATES REBUKE [IS] STUPID</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/17#17">Proverbs 17:17</a><p class="ws-trad">A friend loves at all times, and a brother is born for adversity.</p><p class="ws-lit">AT EVERY TIME [IS] <mark class="ws-target">LOVING</mark> THE FRIEND AND A BROTHER FOR ADVERSITY HE IS BORN</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/17#19">Proverbs 17:19</a><p class="ws-trad">He who loves transgression loves strife; he who builds his gate high invites destruction.</p><p class="ws-lit">[ONE WHO] LOVES TRANSGRESSION [IS] <mark class="ws-target">LOVING</mark> CONTENTION [ONE WHO] MAKES HIGH ENTRANCE HIS [IS] SEEKING RUIN</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/19#8">Proverbs 19:8</a><p class="ws-trad">He who acquires wisdom loves himself; one who safeguards understanding will find success.</p><p class="ws-lit">[ONE WHO] ACQUIRES HEART [IS] <mark class="ws-target">LOVING</mark> OWN SELF HIS [ONE WHO] KEEPS UNDERSTANDING [IS] TO FIND GOOD</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ecclesiastes/5#10">Ecclesiastes 5:10</a><p class="ws-trad">He who loves money is never satisfied by money, and he who loves wealth is never [satisfied] by income. This too is futile.</p><p class="ws-lit">[ONE WHO] LOVES SILVER NOT HE WILL BE SATISFIED SILVER AND WHOEVER [IS] <mark class="ws-target">LOVING</mark> &lt;IN&gt; &lt;THE&gt; WEALTH NOT INCOME ALSO THIS [IS] FUTILITY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/1#23">Isaiah 1:23</a><p class="ws-trad">Your rulers are rebels, friends of thieves. They all love bribes and chasing after rewards. They do not defend the fatherless, and the plea of the widow never comes before them.</p><p class="ws-lit">LEADERS YOUR [ARE] REBELS AND COMPANIONS OF THIEVES ALL OF IT [IS] <mark class="ws-target">LOVING</mark> A BRIBE AND [IS] PURSUING REWARDS [THE] FATHERLESS NOT THEY VINDICATE AND [THE] LAWSUIT OF A WIDOW NOT IT COMES TO THEM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/61#8">Isaiah 61:8</a><p class="ws-trad">For I, the LORD, love justice; I hate robbery and iniquity; in My faithfulness I will give them their recompense and make an everlasting covenant with them.</p><p class="ws-lit">FOR I YAHWEH [AM] <mark class="ws-target">LOVING</mark> JUSTICE [I AM] HATING ROBBERY WITH INJUSTICE AND I WILL GIVE RECOMPENSE THEIR IN FAITHFULNESS AND A COVENANT OF PERPETUITY I WILL MAKE TO THEM</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVES <span class="ws-count">(9 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/34#12">Psalms 34:12</a><p class="ws-trad">Who is the man who delights in life, who desires to see good days?</p><p class="ws-lit">WHO? [IS] THE PERSON &lt;THE&gt; DESIRING LIFE [WHO] <mark class="ws-target">LOVES</mark>? DAYS TO SEE GOOD</p></div>
+<details class="ws-more">
+<summary>8 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/88#18">Psalms 88:18</a><p class="ws-trad">You have removed my beloved and my friend; darkness is my closest companion.</p><p class="ws-lit">YOU HAVE REMOVED FAR AWAY FROM ME [ONE WHO] <mark class="ws-target">LOVES</mark> AND A FRIEND ACQUAINTANCES MY DARKNESS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/12#1">Proverbs 12:1</a><p class="ws-trad">Whoever <mark class="ws-target">loves</mark> discipline <mark class="ws-target">loves</mark> knowledge, but he who hates correction is stupid.</p><p class="ws-lit">[ONE WHO] <mark class="ws-target">LOVES</mark> DISCIPLINE [IS] LOVING KNOWLEDGE AND [ONE WHO] HATES REBUKE [IS] STUPID</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/17#19">Proverbs 17:19</a><p class="ws-trad">He who <mark class="ws-target">loves</mark> transgression <mark class="ws-target">loves</mark> strife; he who builds his gate high invites destruction.</p><p class="ws-lit">[ONE WHO] <mark class="ws-target">LOVES</mark> TRANSGRESSION [IS] LOVING CONTENTION [ONE WHO] MAKES HIGH ENTRANCE HIS [IS] SEEKING RUIN</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/21#17">Proverbs 21:17</a><p class="ws-trad">He who <mark class="ws-target">loves</mark> pleasure will become poor; the one who <mark class="ws-target">loves</mark> wine and oil will never be rich.</p><p class="ws-lit">[WILL BE] A PERSON OF POVERTY [ONE WHO] <mark class="ws-target">LOVES</mark> PLEASURE [ONE WHO] <mark class="ws-target">LOVES</mark> WINE AND OIL NOT HE WILL GAIN RICHES</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/21#17">Proverbs 21:17</a><p class="ws-trad">He who <mark class="ws-target">loves</mark> pleasure will become poor; the one who <mark class="ws-target">loves</mark> wine and oil will never be rich.</p><p class="ws-lit">[WILL BE] A PERSON OF POVERTY [ONE WHO] <mark class="ws-target">LOVES</mark> PLEASURE [ONE WHO] <mark class="ws-target">LOVES</mark> WINE AND OIL NOT HE WILL GAIN RICHES</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/22#11">Proverbs 22:11</a><p class="ws-trad">He who <mark class="ws-target">loves</mark> a pure heart and gracious lips [will have] the king for a friend.</p><p class="ws-lit">[ONE WHO] <mark class="ws-target">LOVES</mark> PURE OF HEART [THE] GRACE OF LIPS HIS [IS] FRIEND HIS A KING</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/29#3">Proverbs 29:3</a><p class="ws-trad">A man who <mark class="ws-target">loves</mark> wisdom brings joy to his father, but a companion of prostitutes squanders his wealth.</p><p class="ws-lit">A PERSON [WHO] <mark class="ws-target">LOVES</mark> WISDOM HE MAKES GLAD FATHER HIS AND [ONE WHO] ASSOCIATES WITH PROSTITUTES HE DESTROYS WEALTH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ecclesiastes/5#10">Ecclesiastes 5:10</a><p class="ws-trad">He who <mark class="ws-target">loves</mark> money is never satisfied by money, and he who <mark class="ws-target">loves</mark> wealth is never [satisfied] by income. This too is futile.</p><p class="ws-lit">[ONE WHO] <mark class="ws-target">LOVES</mark> SILVER NOT HE WILL BE SATISFIED SILVER AND WHOEVER [IS] LOVING &lt;IN&gt; &lt;THE&gt; WEALTH NOT INCOME ALSO THIS [IS] FUTILITY</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">A FRIEND <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Kings/5#1">1 Kings 5:1</a><p class="ws-trad">Now when Hiram king of Tyre heard that [Solomon] had been anointed king in his father’s place, he sent envoys to Solomon; for Hiram had always been <mark class="ws-target">a friend</mark> of David.</p><p class="ws-lit">AND HE SENT HIRAM [THE] KING OF TYRE &lt;OBJ.&gt; SERVANTS HIS TO SOLOMON FOR HE HAD HEARD THAT &lt;OBJ.&gt; HIM PEOPLE HAD ANOINTED TO KING IN PLACE OF FATHER HIS FOR <mark class="ws-target">A FRIEND</mark> HE HAD BEEN HIRAM OF DAVID ALL THE DAYS</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqrmpc">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Participle (Plural Masculine, Construct)</h2>
+<p class="ws-slot-stats">23 instances · 5 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVE <span class="ws-count">(19 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Exodus/20#6">Exodus 20:6</a><p class="ws-trad">but showing loving devotion to a thousand [generations] of those who <mark class="ws-target">love</mark> Me and keep My commandments.</p><p class="ws-lit">AND DOING COVENANT LOYALTY TO THOUSANDS TO [THOSE WHO] <mark class="ws-target">LOVE</mark> ME AND TO [THOSE WHO] KEEP COMMANDMENTS MY</p></div>
+<details class="ws-more">
+<summary>18 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/5#10">Deuteronomy 5:10</a><p class="ws-trad">but showing loving devotion to a thousand [generations] of those who <mark class="ws-target">love</mark> Me and keep My commandments.</p><p class="ws-lit">AND [WHO] DOES COVENANT LOYALTY TO THOUSANDS OF [THOSE WHO] <mark class="ws-target">LOVE</mark> ME AND OF [THOSE WHO] KEEP COMMANDMENTS MY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/7#9">Deuteronomy 7:9</a><p class="ws-trad">Know therefore that the LORD your God is God, the faithful God who keeps His covenant of loving devotion for a thousand generations of those who <mark class="ws-target">love</mark> Him and keep His commandments.</p><p class="ws-lit">AND YOU WILL KNOW THAT YAHWEH GOD YOUR HE [IS] &lt;THE&gt; GOD THE GOD &lt;THE&gt; FAITHFUL [WHO] KEEPS THE COVENANT AND &lt;THE&gt; COVENANT LOYALTY TO [THOSE WHO] <mark class="ws-target">LOVE</mark> HIM AND TO [THOSE WHO] KEEP COMMANDMENTS HIS TO A THOUSAND GENERATION[S]</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Nehemiah/1#5">Nehemiah 1:5</a><p class="ws-trad">Then I said: “O LORD, God of heaven, the great and awesome God who keeps His covenant of loving devotion with those who <mark class="ws-target">love</mark> Him and keep His commandments,</p><p class="ws-lit">AND I SAID I BEG YOU O YAHWEH [THE] GOD OF THE HEAVENS THE GOD &lt;THE&gt; GREAT AND &lt;THE&gt; AWESOME [WHO] KEEPS THE COVENANT AND COVENANT LOYALTY TO [THOSE WHO] <mark class="ws-target">LOVE</mark> HIM AND TO [THOSE WHO] KEEP &lt;OF&gt; COMMANDMENTS HIS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/69#36">Psalms 69:36</a><p class="ws-trad">The descendants of His servants will inherit it, and those who <mark class="ws-target">love</mark> His name will settle in it.</p><p class="ws-lit">AND [THE] OFFSPRING OF SERVANTS HIS THEY WILL INHERIT IT AND [THOSE WHO] <mark class="ws-target">LOVE</mark> &lt;OF&gt; NAME HIS THEY WILL DWELL IN IT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#132">Psalms 119:132</a><p class="ws-trad">Turn to me and show me mercy, as You do to those who <mark class="ws-target">love</mark> Your name.</p><p class="ws-lit">TURN TO ME AND SHOW FAVOR TO ME ACCORDING TO CUSTOM TO [THOSE WHO] <mark class="ws-target">LOVE</mark> &lt;OF&gt; NAME YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#165">Psalms 119:165</a><p class="ws-trad">Abundant peace belongs to those who <mark class="ws-target">love</mark> Your law; nothing can make them stumble.</p><p class="ws-lit">PEACE GREAT [BELONGS] TO [THOSE WHO] <mark class="ws-target">LOVE</mark> &lt;OF&gt; LAW YOUR AND NOT [BELONGS] TO THEM A STUMBLING BLOCK</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/18#21">Proverbs 18:21</a><p class="ws-trad">Life and death are in the power of the tongue, and those who <mark class="ws-target">love</mark> [it] will eat its fruit.</p><p class="ws-lit">DEATH AND LIFE [ARE] IN [THE] HAND OF [THE] TONGUE AND [THOSE WHO] <mark class="ws-target">LOVE</mark> IT HE WILL EAT FRUIT ITS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Daniel/9#4">Daniel 9:4</a><p class="ws-trad">And I prayed to the LORD my God and confessed, “O, Lord, the great and awesome God, who keeps His covenant of loving devotion to those who <mark class="ws-target">love</mark> Him and keep His commandments,</p><p class="ws-lit">AND I PRAYED ! TO YAHWEH GOD MY AND I CONFESSED AND I SAID ! I BEG YOU O LORD &lt;THE&gt; GOD &lt;THE&gt; GREAT AND &lt;THE&gt; AWESOME [WHO] KEEPS THE COVENANT AND &lt;THE&gt; COVENANT LOYALTY TO [THOSE WHO] <mark class="ws-target">LOVE</mark> HIM AND TO [THOSE WHO] KEEP &lt;OF&gt; COMMANDMENTS HIS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Samuel/19#6">2 Samuel 19:6</a><p class="ws-trad">You <mark class="ws-target">love</mark> those who hate you and hate those who <mark class="ws-target">love</mark> you! For you have made it clear today that the commanders and soldiers mean nothing to you. I know today that if Absalom were alive and all of us were dead, it would have pleased you!</p><p class="ws-lit">BY LOVING &lt;OBJ.&gt; [THOSE WHO] HATE YOU AND BY HATING &lt;OBJ.&gt; [THOSE WHO] <mark class="ws-target">LOVE</mark> YOU THAT YOU HAVE MADE KNOWN THIS DAY THAT NOT [ARE] TO &lt;THE&gt; YOU COMMANDERS AND SERVANTS THAT I KNOW THIS DAY THAT IF ABSALOM [WERE] ALIVE AND ALL OF US THIS DAY [WERE] DEAD THAT THEN [IT WOULD BE] RIGHT IN VIEW YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/5#11">Psalms 5:11</a><p class="ws-trad">But let all who take refuge in You rejoice; let them ever shout for joy. May You shelter them, that those who <mark class="ws-target">love</mark> Your name may rejoice in You.</p><p class="ws-lit">AND LET THEM REJOICE ALL [THOSE WHO] SEEK REFUGE IN YOU FOR EVER LET THEM SHOUT FOR JOY AND YOU MAY COVER OVER THEM AND LET THEM EXULT IN YOU [THOSE WHO] <mark class="ws-target">LOVE</mark> &lt;OF&gt; NAME YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/40#16">Psalms 40:16</a><p class="ws-trad">May all who seek You rejoice and be glad in You; may those who <mark class="ws-target">love</mark> Your salvation always say, “The LORD be magnified!”</p><p class="ws-lit">MAY THEY EXULT AND THEY MAY REJOICE IN YOU ALL [THOSE WHO] SEEK YOU MAY THEY SAY CONTINUALLY HE IS GREAT YAHWEH [THOSE WHO] <mark class="ws-target">LOVE</mark> &lt;OF&gt; SALVATION YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/70#4">Psalms 70:4</a><p class="ws-trad">May all who seek You rejoice and be glad in You; may those who <mark class="ws-target">love</mark> Your salvation always say, “Let God be magnified!”</p><p class="ws-lit">MAY THEY EXULT AND THEY MAY REJOICE IN YOU ALL [THOSE WHO] SEEK YOU AND THEY MAY SAY CONTINUALLY MAY HE BE GREAT GOD [THOSE WHO] <mark class="ws-target">LOVE</mark> &lt;OF&gt; SALVATION YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/122#6">Psalms 122:6</a><p class="ws-trad">Pray for the peace of Jerusalem: “May those who <mark class="ws-target">love</mark> you prosper.</p><p class="ws-lit">ASK FOR [THE] PEACE OF JERUSALEM MAY THEY BE AT EASE [THOSE WHO] <mark class="ws-target">LOVE</mark> YOU</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/145#20">Psalms 145:20</a><p class="ws-trad">The LORD preserves all who <mark class="ws-target">love</mark> Him, but all the wicked He will destroy.</p><p class="ws-lit">[IS] PROTECTING YAHWEH &lt;OBJ.&gt; ALL [THOSE WHO] <mark class="ws-target">LOVE</mark> HIM AND &lt;OBJ.&gt; ALL THE WICKED [PEOPLE] HE WILL DESTROY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/8#17">Proverbs 8:17</a><p class="ws-trad">I <mark class="ws-target">love</mark> those who <mark class="ws-target">love</mark> me, and those who seek me early shall find me.</p><p class="ws-lit">I [THOSE WHO] <mark class="ws-target">LOVE</mark> ME I <mark class="ws-target">LOVE</mark> AND [THOSE WHO] EARNESTLY SEEK ME THEY FIND ME</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/8#21">Proverbs 8:21</a><p class="ws-trad">bestowing wealth on those who <mark class="ws-target">love</mark> me and making their treasuries {full}.</p><p class="ws-lit">TO GIVE AS AN INHERITANCE [THOSE WHO] <mark class="ws-target">LOVE</mark> ME SUBSTANCE AND TREASURIES THEIR I FILL</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/56#10">Isaiah 56:10</a><p class="ws-trad">[Israel’s] watchmen are blind, they are all oblivious; they are all mute dogs, they cannot bark; they are dreamers lying around, loving to slumber.</p><p class="ws-lit">WATCHMEN ITS [ARE] BLIND ALL OF THEM NOT THEY KNOW ALL OF THEM [ARE] DOGS DUMB NOT THEY ARE ABLE TO BARK [THEY] DREAM [THEY] LIE DOWN [THEY] <mark class="ws-target">LOVE</mark> &lt;OF&gt; TO SLUMBER</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/66#10">Isaiah 66:10</a><p class="ws-trad">Be glad for Jerusalem and rejoice over her, all who <mark class="ws-target">love</mark> her. Rejoice greatly with her, all who mourn over her,</p><p class="ws-lit">REJOICE WITH JERUSALEM AND BE GLAD IN IT O ALL [THOSE WHO] <mark class="ws-target">LOVE</mark> IT EXULT WITH IT EXULTATION O ALL THOSE [WHO] MOURN ON IT</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVING <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/3#1">Hosea 3:1</a><p class="ws-trad">Then the LORD said to me, “Go show love to your wife again, though she is loved by another and is an adulteress. Love her as the LORD [loves] the Israelites, though they turn to other gods and love to offer raisin cakes [to idols].</p><p class="ws-lit">AND HE SAID YAHWEH TO ME AGAIN GO LOVE A WOMAN [WHO] IS LOVED OF A COMPANION AND [WHO] COMMITS ADULTERY AS LOVES YAHWEH &lt;OBJ.&gt; [THE] PEOPLE OF ISRAEL AND THEY [ARE] TURNING TO GODS OTHER AND [ARE] <mark class="ws-target">LOVING</mark> &lt;OF&gt; CAKES OF GRAPES</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVERS OF <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Micah/3#2">Micah 3:2</a><p class="ws-trad">You hate good and love evil. You tear the skin from my people and strip the flesh from their bones.</p><p class="ws-lit">HATERS OF GOOD AND <mark class="ws-target">LOVERS OF</mark> EVIL TEARERS AWAY OF SKIN THEIR FROM ON &lt;THE&gt; THEM AND FLESH THEIR FROM ON BONES THEIR</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">O LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/97#10">Psalms 97:10</a><p class="ws-trad">Hate evil, O you who love the LORD! He preserves the souls of His saints; He delivers them from the hand of the wicked.</p><p class="ws-lit">O [YOU WHO] LOVE &lt;OF&gt; YAHWEH HATE EVIL [HE IS] PROTECTING [THE] LIVES OF FAITHFUL [PEOPLE] HIS FROM [THE] HAND OF WICKED [PEOPLE] HE DELIVERS THEM</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVERS <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Lamentations/1#2">Lamentations 1:2</a><p class="ws-trad">She weeps aloud in the night, with tears upon her cheeks. Among all her <mark class="ws-target">lovers</mark> there is no one to comfort [her]. All her friends have betrayed her; they have become her enemies.</p><p class="ws-lit">BITTERLY &lt;WEEP&gt; SHE WEEPS IN THE NIGHT AND TEAR[S] HER [ARE] ON CHEEK HER NOT [BELONGS] TO HER A COMFORTER FROM ALL <mark class="ws-target">LOVERS</mark> HER ALL FRIENDS HER THEY HAVE DEALT TREACHEROUSLY WITH HER THEY HAVE BECOME OF HER &lt;INTO&gt; ENEMIES</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) Third Singular Masculine</h2>
+<p class="ws-slot-stats">21 instances · 3 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE LOVED <span class="ws-count">(11 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/27#14">Genesis 27:14</a><p class="ws-trad">So [Jacob] went and got [two goats] and brought them to his mother, who made the tasty food his father loved.</p><p class="ws-lit">AND HE WENT AND HE FETCHED [THEM] AND HE BROUGHT [THEM] TO MOTHER HIS AND SHE PREPARED MOTHER HIS SAVORY FOOD&lt;S&gt; JUST AS <mark class="ws-target">HE LOVED</mark> FATHER HIS</p></div>
+<details class="ws-more">
+<summary>10 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/37#3">Genesis 37:3</a><p class="ws-trad">Now Israel loved Joseph more than his other sons, because Joseph had been born to him in his old age; so he made him a robe of many colors.</p><p class="ws-lit">AND ISRAEL <mark class="ws-target">HE LOVED</mark> &lt;OBJ.&gt; JOSEPH MORE THAN ALL SONS HIS FOR [WAS] A SON OF OLD AGE&lt;S&gt; HE FOR &lt;THE&gt; HIM AND HE MADE FOR &lt;THE&gt; HIM A LONG GARMENT OF PALMS AND SOLES</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/37#4">Genesis 37:4</a><p class="ws-trad">When [Joseph’s] brothers saw that their father loved him more than any [of them], they hated him and could not speak a kind word to him.</p><p class="ws-lit">AND THEY SAW BROTHERS HIS THAT &lt;OBJ.&gt; HIM <mark class="ws-target">HE LOVED</mark> FATHER THEIR MORE THAN ALL BROTHERS HIS AND THEY HATED &lt;OBJ.&gt; HIM AND NOT THEY WERE ABLE TO SPEAK TO HIM TO WELFARE</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/4#37">Deuteronomy 4:37</a><p class="ws-trad">Because <mark class="ws-target">He loved</mark> your fathers, He chose their descendants after them and brought you out of Egypt by His presence and great power,</p><p class="ws-lit">AND BECAUSE THAT <mark class="ws-target">HE LOVED</mark> &lt;OBJ.&gt; ANCESTORS YOUR AND HE CHOSE &lt;IN&gt; OFFSPRING HIS AFTER HIM AND HE BROUGHT OUT YOU BY OWN PRESENCE HIS BY POWER HIS &lt;THE&gt; GREAT FROM EGYPT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/23#5">Deuteronomy 23:5</a><p class="ws-trad">Yet the LORD your God would not listen to Balaam, and the LORD your God turned the curse into a blessing for you, because the LORD your God loves you.</p><p class="ws-lit">AND NOT HE WAS WILLING YAHWEH GOD YOUR TO LISTEN TO BALAAM AND HE TURNED YAHWEH GOD YOUR FOR &lt;THE&gt; YOU &lt;OBJ.&gt; THE CURSE INTO BLESSING FOR <mark class="ws-target">HE LOVED</mark> YOU YAHWEH GOD YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Samuel/1#5">1 Samuel 1:5</a><p class="ws-trad">But to Hannah he would give a double portion, for <mark class="ws-target">he loved</mark> her even though the LORD had closed her womb.</p><p class="ws-lit">AND TO HANNAH HE GAVE A PORTION ONE DOUBLE FOR &lt;OBJ.&gt; HANNAH <mark class="ws-target">HE LOVED</mark> AND YAHWEH HE HAD CLOSED WOMB HER</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Samuel/20#17">1 Samuel 20:17</a><p class="ws-trad">And Jonathan had David reaffirm his vow out of love for him, for [Jonathan] loved [David] as <mark class="ws-target">he loved</mark> himself.</p><p class="ws-lit">AND HE REPEATED JONATHAN TO MAKE SWEAR AN OATH &lt;OBJ.&gt; DAVID IN LOVE HIS &lt;OBJ.&gt; HIM FOR [THE] LOVE OF OWN SELF HIS <mark class="ws-target">HE LOVED</mark> HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Samuel/12#24">2 Samuel 12:24</a><p class="ws-trad">Then David comforted his wife Bathsheba, and he went to her and lay with her. So she gave birth to a son, and they named him Solomon. Now the LORD loved [the child]</p><p class="ws-lit">AND HE COMFORTED DAVID &lt;OBJ.&gt; BATH- -SHEBA WIFE HIS AND HE WENT INTO HER AND HE LAY WITH HER AND SHE BORE A SON AND SHE CALLED &lt;OBJ.&gt; NAME HIS SOLOMON AND YAHWEH <mark class="ws-target">HE LOVED</mark> HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Kings/11#1">1 Kings 11:1</a><p class="ws-trad">King Solomon, however, loved many foreign women along with the daughter of Pharaoh— women of Moab, Ammon, Edom, and Sidon, as well as Hittite women.</p><p class="ws-lit">AND THE KING SOLOMON <mark class="ws-target">HE LOVED</mark> WOMEN FOREIGN MANY AND &lt;OBJ.&gt; [THE] DAUGHTER OF PHARAOH MOABITE [WOMEN] AMMONITE [WOMEN] EDOMITE [WOMEN] SIDONIAN [WOMEN] HITTITE [WOMEN]</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/47#4">Psalms 47:4</a><p class="ws-trad">He chooses our inheritance for us, the pride of Jacob, whom He loves. Selah</p><p class="ws-lit">HE CHOOSES FOR US &lt;OBJ.&gt; INHERITANCE OUR &lt;OBJ.&gt; [THE] PRIDE OF JACOB WHOM <mark class="ws-target">HE LOVED</mark> SELAH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/78#68">Psalms 78:68</a><p class="ws-trad">But He chose the tribe of Judah, Mount Zion, which <mark class="ws-target">He loved</mark>.</p><p class="ws-lit">AND HE CHOSE &lt;OBJ.&gt; [THE] TRIBE OF JUDAH &lt;OBJ.&gt; [THE] MOUNTAIN OF ZION WHICH <mark class="ws-target">HE LOVED</mark></p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE LOVES <span class="ws-count">(9 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/27#9">Genesis 27:9</a><p class="ws-trad">Go out to the flock and bring me two choice young goats, so that I can make them into a tasty dish for your father— the kind <mark class="ws-target">he loves</mark>.</p><p class="ws-lit">GO PLEASE TO THE FLOCK AND FETCH FOR &lt;THE&gt; ME FROM THERE TWO KIDS OF GOATS GOOD SO I MAY PREPARE &lt;OBJ.&gt; THEM SAVORY FOOD&lt;S&gt; FOR FATHER YOUR JUST AS <mark class="ws-target">HE LOVES</mark></p></div>
+<details class="ws-more">
+<summary>8 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/44#20">Genesis 44:20</a><p class="ws-trad">And we answered, ‘We have an elderly father and a younger brother, the child of his old age. The boy’s brother is dead. He is the only one of his mother’s sons left, and his father loves him.’</p><p class="ws-lit">AND WE SAID TO LORD MY THERE [BELONGS] TO US A FATHER OLD AND A CHILD OF OLD AGE&lt;S&gt; YOUNG AND BROTHER HIS HE DIED AND HE WAS LEFT HE TO ONLY HIM TO MOTHER HIS AND FATHER HIS <mark class="ws-target">HE LOVES</mark> HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/15#16">Deuteronomy 15:16</a><p class="ws-trad">But if your servant says to you, ‘I do not want to leave you,’ because <mark class="ws-target">he loves</mark> you and your household and is well off with you,</p><p class="ws-lit">AND IT WILL BE THAT HE WILL SAY TO YOU NOT I WILL GO OUT FROM WITH &lt;THE&gt; YOU FOR <mark class="ws-target">HE LOVES</mark> YOU AND &lt;OBJ.&gt; HOUSEHOLD YOUR FOR IT HAS BEEN GOOD FOR &lt;THE&gt; HIM WITH YOU</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/11#7">Psalms 11:7</a><p class="ws-trad">For the LORD is righteous; <mark class="ws-target">He loves</mark> justice. The upright will see His face.</p><p class="ws-lit">FOR [IS] RIGHTEOUS YAHWEH RIGHTEOUSNESS&lt;ES&gt; <mark class="ws-target">HE LOVES</mark> [THE] UPRIGHT THEY WILL SEE FACES THEIR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/99#4">Psalms 99:4</a><p class="ws-trad">The mighty King loves justice. You have established equity; You have exercised justice and righteousness in Jacob.</p><p class="ws-lit">AND [THE] STRENGTH OF A KING JUSTICE <mark class="ws-target">HE LOVES</mark> YOU YOU HAVE ESTABLISHED UPRIGHTNESS&lt;ES&gt; JUSTICE AND RIGHTEOUSNESS IN JACOB YOU YOU HAVE DONE</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#140">Psalms 119:140</a><p class="ws-trad">Your promise is completely pure; therefore Your servant loves it.</p><p class="ws-lit">[HAS BEEN] REFINED WORD YOUR EXCEEDINGLY AND SERVANT YOUR <mark class="ws-target">HE LOVES</mark> IT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/48#14">Isaiah 48:14</a><p class="ws-trad">Come together, all of you, and listen: Which [of the idols] has foretold these things? The LORD’s chosen ally will carry out His desire against Babylon, and His arm will be against the Chaldeans.</p><p class="ws-lit">GATHER TOGETHER ALL OF YOU AND LISTEN WHO? AMONG THEM HAS HE DECLARED &lt;OBJ.&gt; THESE [THINGS] YAHWEH <mark class="ws-target">HE LOVES</mark> HIM HE WILL EXECUTE PLEASURE HIS ON BABYLON AND ARM HIS [THE] CHALDEANS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/12#7">Hosea 12:7</a><p class="ws-trad">A merchant loves to defraud with dishonest scales in his hands.</p><p class="ws-lit">CANAAN [WHO ARE] IN HAND HIS SCALES OF DECEIT TO DEFRAUD <mark class="ws-target">HE LOVES</mark></p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Malachi/2#11">Malachi 2:11</a><p class="ws-trad">Judah has broken faith; an abomination has been committed in Israel and in Jerusalem. For Judah has profaned the LORD’s beloved sanctuary by marrying the daughter of a foreign god.</p><p class="ws-lit">IT HAS ACTED TREACHEROUSLY JUDAH AND AN ABOMINATION IT HAS BEEN DONE IN ISRAEL AND IN JERUSALEM FOR IT HAS PROFANED JUDAH [THE] SANCTUARY OF YAHWEH WHICH <mark class="ws-target">HE LOVES</mark> AND IT HAS MARRIED A DAUGHTER OF A GOD OF FOREIGNNESS</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE HAD LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Samuel/13#15">2 Samuel 13:15</a><p class="ws-trad">Then Amnon hated [Tamar] with such intensity that his hatred was greater than the love he previously had. “Get up!” he said to her “Be gone!”</p><p class="ws-lit">AND HE HATED HER AMNON HATRED GREAT VERY THAT [WAS] GREAT THE HATRED WHICH HE HATED HER MORE THAN [THE] LOVE WHICH <mark class="ws-target">HE HAD LOVED</mark> HER AND HE SAID TO &lt;THE&gt; HER AMNON GET UP GO</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp1cs">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) First Singular Either gender</h2>
+<p class="ws-slot-stats">18 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">I LOVE <span class="ws-count">(16 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/27#4">Genesis 27:4</a><p class="ws-trad">Then prepare a tasty dish that <mark class="ws-target">I love</mark> and bring it to me to eat, so that I may bless you before I die.”</p><p class="ws-lit">AND PREPARE FOR &lt;THE&gt; ME SAVORY FOOD&lt;S&gt; JUST AS <mark class="ws-target">I LOVE</mark> AND BRING [IT] ! TO &lt;THE&gt; ME SO LET ME EAT [IT] IN ORDER THAT IT MAY BLESS YOU SELF MY &lt;IN&gt; BEFORE I WILL DIE</p></div>
+<details class="ws-more">
+<summary>15 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Exodus/21#5">Exodus 21:5</a><p class="ws-trad">But if the servant declares, ‘<mark class="ws-target">I love</mark> my master and my wife and children; I do not want to go free,’</p><p class="ws-lit">AND IF CAREFULLY &lt;TO SAY&gt; HE WILL SAY THE SLAVE <mark class="ws-target">I LOVE</mark> &lt;OBJ.&gt; MASTER MY &lt;OBJ.&gt; WIFE MY AND &lt;OBJ.&gt; CHILDREN MY NOT I WILL GO OUT A FREE [PERSON]</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Judges/16#15">Judges 16:15</a><p class="ws-trad">“How can you say, ‘<mark class="ws-target">I love</mark> you,’” she asked, “when your heart is not with me? This is the third time you have mocked me and failed to reveal to me the source of your great strength</p><p class="ws-lit">AND SHE SAID TO HIM HOW? WILL YOU SAY <mark class="ws-target">I LOVE</mark> YOU AND HEART YOUR NOT [IS] WITH ME THIS THREE TIMES YOU HAVE DECEIVED &lt;IN&gt; &lt;THE&gt; ME AND NOT YOU HAVE TOLD TO &lt;THE&gt; ME &lt;IN&gt; HOW? [IS] STRENGTH YOUR GREAT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Job/19#19">Job 19:19</a><p class="ws-trad">All my best friends despise me, and those <mark class="ws-target">I love</mark> have turned against me.</p><p class="ws-lit">THEY ABHOR ME ALL [THE] MEN OF COUNCIL MY AND WHOM <mark class="ws-target">I LOVE</mark> THEY HAVE TURNED AGAINST ME</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/26#8">Psalms 26:8</a><p class="ws-trad">O LORD, <mark class="ws-target">I love</mark> the house where You dwell, the place where Your glory resides.</p><p class="ws-lit">O YAHWEH <mark class="ws-target">I LOVE</mark> [THE] HABITATION OF HOUSE YOUR AND [THE] PLACE OF [THE] DWELLING OF GLORY YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/116#1">Psalms 116:1</a><p class="ws-trad"><mark class="ws-target">I love</mark> the LORD, for He has heard my voice— my appeal for mercy.</p><p class="ws-lit"><mark class="ws-target">I LOVE</mark> FOR HE HAS HEARD YAHWEH &lt;OBJ.&gt; VOICE MY SUPPLICATIONS MY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#47">Psalms 119:47</a><p class="ws-trad">I delight in Your commandments because <mark class="ws-target">I love</mark> them.</p><p class="ws-lit">AND I MAY DELIGHT MYSELF IN COMMANDMENTS YOUR WHICH <mark class="ws-target">I LOVE</mark></p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#48">Psalms 119:48</a><p class="ws-trad">I lift up my hands to Your commandments, which <mark class="ws-target">I love</mark>, and I meditate on Your statutes.</p><p class="ws-lit">AND I MAY LIFT UP HANDS MY TO COMMANDMENTS YOUR WHICH <mark class="ws-target">I LOVE</mark> AND I WILL MEDITATE ON DECREES YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#97">Psalms 119:97</a><p class="ws-trad">Oh, how <mark class="ws-target">I love</mark> Your law! All day long it is my meditation.</p><p class="ws-lit">HOW! <mark class="ws-target">I LOVE</mark> LAW YOUR ALL THE DAY IT [IS] MEDITATION MY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#113">Psalms 119:113</a><p class="ws-trad">The double-minded I despise, but Your law <mark class="ws-target">I love</mark>.</p><p class="ws-lit">HALF-HEARTED PEOPLE I HATE AND LAW YOUR <mark class="ws-target">I LOVE</mark></p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#119">Psalms 119:119</a><p class="ws-trad">All the wicked on earth You discard like dross; therefore <mark class="ws-target">I love</mark> Your testimonies.</p><p class="ws-lit">DROSS&lt;ES&gt; YOU CAUSE TO CEASE ALL [THE] WICKED [PEOPLE] OF [THE] EARTH &lt;TO&gt; THEREFORE <mark class="ws-target">I LOVE</mark> TESTIMONIES YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#127">Psalms 119:127</a><p class="ws-trad">Therefore <mark class="ws-target">I love</mark> Your commandments more than gold, even the purest gold.</p><p class="ws-lit">THERE- -FORE <mark class="ws-target">I LOVE</mark> COMMANDMENTS YOUR MORE THAN GOLD AND MORE THAN PURE GOLD</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#159">Psalms 119:159</a><p class="ws-trad">Consider how <mark class="ws-target">I love</mark> Your precepts, O LORD; give me life according to Your loving devotion.</p><p class="ws-lit">SEE THAT PRECEPTS YOUR <mark class="ws-target">I LOVE</mark> O YAHWEH ACCORDING TO COVENANT LOYALTY YOUR PRESERVE ALIVE ME</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#163">Psalms 119:163</a><p class="ws-trad">I hate and abhor falsehood, [but] Your law <mark class="ws-target">I love</mark>.</p><p class="ws-lit">FALSEHOOD I HATE AND I ABHOR LAW YOUR <mark class="ws-target">I LOVE</mark></p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/43#4">Isaiah 43:4</a><p class="ws-trad">Because you are precious and honored in My sight, and [because] <mark class="ws-target">I love</mark> you, I will give men in exchange for you and nations in place of your life.</p><p class="ws-lit">&lt;FROM&gt; BECAUSE YOU ARE PRECIOUS IN VIEW MY YOU ARE HONORED AND I <mark class="ws-target">I LOVE</mark> YOU AND I MAY GIVE HUMANKIND IN PLACE OF YOU AND PEOPLES IN PLACE OF LIFE YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/2#25">Jeremiah 2:25</a><p class="ws-trad">You should have kept your feet from going bare and your throat from being thirsty. But you said, ‘It is hopeless! For <mark class="ws-target">I love</mark> foreign [gods], and I must go after them.’</p><p class="ws-lit">RESTRAIN FOOT YOUR FROM BAREFOOT AND THROAT YOUR FROM THIRST AND YOU SAID DESPAIRING IN- DEED <mark class="ws-target">I LOVE</mark> STRANGE [GODS] AND AFTER THEM I WILL WALK</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">I HAVE LOVED <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/31#3">Jeremiah 31:3</a><p class="ws-trad">The LORD appeared to us in the past, [saying]: “<mark class="ws-target">I have loved</mark> you with an everlasting love; therefore I have drawn you with loving devotion.</p><p class="ws-lit">FROM A DISTANCE YAHWEH HE APPEARED TO &lt;THE&gt; ME AND A LOVE OF PERPETUITY <mark class="ws-target">I HAVE LOVED</mark> YOU THERE- -FORE I HAVE PROLONGED TO YOU COVENANT LOYALTY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Malachi/1#2">Malachi 1:2</a><p class="ws-trad">“<mark class="ws-target">I have loved</mark> you,” says the LORD. But you ask, “How have You loved us?” “Was not Esau Jacob’s brother?” declares the LORD. “Yet Jacob <mark class="ws-target">I have loved</mark></p><p class="ws-lit"><mark class="ws-target">I HAVE LOVED</mark> &lt;OBJ.&gt; YOU HE SAYS YAHWEH AND YOU SAY &lt;IN&gt; HOW? HAVE YOU LOVED US ¿ NOT [DID] A BROTHER ESAU [BELONG] TO JACOB [THE] UTTERANCE OF YAHWEH AND I LOVED &lt;OBJ.&gt; JACOB</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqcc">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Infinitive Construct</h2>
+<p class="ws-slot-stats">17 instances · 5 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVE <span class="ws-count">(11 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/10#12">Deuteronomy 10:12</a><p class="ws-trad">And now, O Israel, what does the LORD your God ask of you but to fear the LORD your God by walking in all His ways, to <mark class="ws-target">love</mark> Him to serve the LORD your God with all your heart and with all your soul,</p><p class="ws-lit">AND NOW O ISRAEL WHAT? [IS] YAHWEH GOD YOUR ASKING FROM WITH &lt;THE&gt; YOU THAT EXCEPT TO FEAR &lt;OBJ.&gt; YAHWEH GOD YOUR TO WALK IN ALL WAYS HIS AND TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; HIM AND TO SERVE &lt;OBJ.&gt; YAHWEH GOD YOUR WITH ALL HEART YOUR AND WITH ALL BEING YOUR</p></div>
+<details class="ws-more">
+<summary>10 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/10#15">Deuteronomy 10:15</a><p class="ws-trad">Yet the LORD has set His affection on your fathers and loved them. And He has chosen you, their descendants after them, above all the peoples, even to this day.</p><p class="ws-lit">ONLY &lt;IN&gt; ANCESTORS YOUR HE LOVED YAHWEH TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; THEM AND HE CHOSE &lt;IN&gt; OFFSPRING THEIR AFTER THEM &lt;IN&gt; &lt;THE&gt; YOU FROM ALL THE PEOPLES AS THE DAY &lt;THE&gt; THIS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/11#13">Deuteronomy 11:13</a><p class="ws-trad">So if you carefully obey the commandments I am giving you today to <mark class="ws-target">love</mark> the LORD your God and to serve Him with all your heart and with all your soul,</p><p class="ws-lit">AND IT WILL BE &lt;IF&gt; CERTAINLY [IF] &lt;TO OBEY&gt; YOU WILL OBEY &lt;TO&gt; COMMANDMENTS MY WHICH I [AM] COMMANDING &lt;OBJ.&gt; YOU THIS DAY TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR AND TO SERVE HIM WITH ALL HEART YOUR AND WITH ALL BEING YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/11#22">Deuteronomy 11:22</a><p class="ws-trad">For if you carefully keep all these commandments I am giving you to follow— to <mark class="ws-target">love</mark> the LORD your God, to walk in all His ways, and to hold fast to Him—</p><p class="ws-lit">THAT EXCEPT CERTAINLY &lt;TO KEEP&gt; YOU WILL KEEP ! &lt;OBJ.&gt; ALL THE COMMANDMENT &lt;THE&gt; THIS WHICH I [AM] COMMANDING &lt;OBJ.&gt; YOU TO DO IT TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR TO WALK IN ALL WAYS HIS AND TO CLEAVE TO HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/19#9">Deuteronomy 19:9</a><p class="ws-trad">and if you carefully keep all these commandments I am giving you today, loving the LORD your God and walking in His ways at all times, then you are to add three more cities to these three.</p><p class="ws-lit">IF YOU WILL KEEP &lt;OBJ.&gt; ALL THE COMMANDMENT &lt;THE&gt; THIS TO DO IT WHICH I [AM] COMMANDING YOU THIS DAY TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR AND TO WALK IN WAYS HIS ALL THE DAYS AND YOU WILL ADD FOR &lt;THE&gt; YOURSELF AGAIN THREE CITIES TO THE THREE [CITIES] &lt;THE&gt; THESE</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/30#6">Deuteronomy 30:6</a><p class="ws-trad">The LORD your God will circumcise your hearts and the hearts of your descendants, and you will <mark class="ws-target">love</mark> Him with all your heart and with all your soul, so that you may live.</p><p class="ws-lit">AND HE WILL CIRCUMCISE YAHWEH GOD YOUR &lt;OBJ.&gt; HEART YOUR AND &lt;OBJ.&gt; [THE] HEART OF OFFSPRING YOUR TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR WITH ALL HEART YOUR AND WITH ALL BEING YOUR FOR [THE] SAKE OF LIFE YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/30#16">Deuteronomy 30:16</a><p class="ws-trad">For I am commanding you today to <mark class="ws-target">love</mark> the LORD your God, to walk in His ways, and to keep His commandments, statutes, and ordinances, so that you may live and increase, and the LORD your God may bless you in the land that you are entering to possess.</p><p class="ws-lit">IF YOU WILL LISTEN TO [THE] COMMANDMENTS OF YAHWEH GOD YOUR WHICH I [AM] COMMANDING YOU THIS DAY TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR TO WALK IN WAYS HIS AND TO KEEP COMMANDMENTS HIS AND STATUTES HIS AND JUDGMENTS HIS AND YOU WILL LIVE AND YOU WILL INCREASE AND HE WILL BLESS YOU YAHWEH GOD YOUR IN THE LAND WHERE YOU [ARE] ABOUT TO GO THERE TOWARDS TO TAKE POSSESSION OF IT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Joshua/22#5">Joshua 22:5</a><p class="ws-trad">But be very careful to observe the commandment and the law that Moses the servant of the LORD gave you: to <mark class="ws-target">love</mark> the LORD your God, to walk in all His ways, to keep His commandments, to hold fast to Him, and to serve Him with all your heart and with all your soul.”</p><p class="ws-lit">ONLY TAKE CARE EXCEEDINGLY TO DO &lt;OBJ.&gt; THE COMMANDMENT AND &lt;OBJ.&gt; THE LAW WHICH HE COMMANDED &lt;OBJ.&gt; YOU MOSES [THE] SERVANT OF YAHWEH TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR AND TO WALK IN ALL WAYS HIS AND TO KEEP COMMANDMENTS HIS AND TO CLEAVE TO HIM AND TO SERVE HIM WITH ALL HEART YOUR AND WITH ALL BEING YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Joshua/23#11">Joshua 23:11</a><p class="ws-trad">Therefore watch yourselves carefully, that you <mark class="ws-target">love</mark> the LORD your God.</p><p class="ws-lit">AND YOU WILL TAKE HEED EXCEEDINGLY TO SELVES YOUR TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ecclesiastes/3#8">Ecclesiastes 3:8</a><p class="ws-trad">a time to <mark class="ws-target">love</mark> and a time to hate, a time for war and a time for peace.</p><p class="ws-lit">A TIME TO <mark class="ws-target">LOVE</mark> AND A TIME TO HATE A TIME OF WARFARE AND A TIME OF PEACE</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/56#6">Isaiah 56:6</a><p class="ws-trad">And the foreigners who join themselves to the LORD to minister to Him, to <mark class="ws-target">love</mark> the name of the LORD, and to be His servants— all who keep the Sabbath without profaning it and who hold fast to My covenant—</p><p class="ws-lit">AND [THE] SONS OF &lt;THE&gt; FOREIGNNESS WHO JOIN THEMSELVES TO YAHWEH TO SERVE HIM AND TO <mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; [THE] NAME OF YAHWEH TO BECOME OF HIM &lt;INTO&gt; SERVANTS EVERY [ONE WHO] KEEPS [THE] SABBATH FROM PROFANING IT AND [THOSE WHO] KEEP HOLD ON COVENANT MY</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVING <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/30#20">Deuteronomy 30:20</a><p class="ws-trad">and that you may love the LORD your God, obey Him, and hold fast to Him. For He [is] your life, and He will prolong your life in the land that the LORD swore to give to your fathers, to Abraham, Isaac, and Jacob.”</p><p class="ws-lit">BY <mark class="ws-target">LOVING</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR BY LISTENING TO VOICE HIS AND BY CLEAVING TO HIM FOR HE [IS] LIFE YOUR AND [THE] LENGTH OF DAYS YOUR TO DWELL ON THE LAND WHICH HE SWORE YAHWEH TO ANCESTORS YOUR TO ABRAHAM TO ISAAC AND TO JACOB TO GIVE TO &lt;THE&gt; THEM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Samuel/19#6">2 Samuel 19:6</a><p class="ws-trad">You love those who hate you and hate those who love you! For you have made it clear today that the commanders and soldiers mean nothing to you. I know today that if Absalom were alive and all of us were dead, it would have pleased you!</p><p class="ws-lit">BY <mark class="ws-target">LOVING</mark> &lt;OBJ.&gt; [THOSE WHO] HATE YOU AND BY HATING &lt;OBJ.&gt; [THOSE WHO] LOVE YOU THAT YOU HAVE MADE KNOWN THIS DAY THAT NOT [ARE] TO &lt;THE&gt; YOU COMMANDERS AND SERVANTS THAT I KNOW THIS DAY THAT IF ABSALOM [WERE] ALIVE AND ALL OF US THIS DAY [WERE] DEAD THAT THEN [IT WOULD BE] RIGHT IN VIEW YOUR</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVES <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Kings/10#9">1 Kings 10:9</a><p class="ws-trad">Blessed be the LORD your God, who has delighted in you to set you on the throne of Israel. Because of the LORD’s eternal love for Israel, He has made you king to carry out justice and righteousness.”</p><p class="ws-lit">MAY HE BE YAHWEH GOD YOUR BLESSED WHO HE DELIGHTS IN YOU TO PUT YOU ON [THE] THRONE OF ISRAEL BECAUSE <mark class="ws-target">LOVES</mark> YAHWEH &lt;OBJ.&gt; ISRAEL FOR EVER AND HE HAS APPOINTED YOU TO KING TO DO JUSTICE AND RIGHTEOUSNESS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Chronicles/9#8">2 Chronicles 9:8</a><p class="ws-trad">Blessed be the LORD your God, who has delighted in you to set you on His throne [to be] king for the LORD your God. Because your God loved Israel enough to establish them forever, He has made you king over them to carry out justice and righteousness.”</p><p class="ws-lit">MAY HE BE YAHWEH GOD YOUR BLESSED WHO HE HAS DELIGHTED IN YOU TO PUT YOU ON THRONE HIS TO KING FOR YAHWEH GOD YOUR BECAUSE <mark class="ws-target">LOVES</mark> GOD YOUR &lt;OBJ.&gt; ISRAEL TO MAKE STAND IT FOR EVER AND HE HAS APPOINTED YOU OVER THEM TO KING TO DO JUSTICE AND RIGHTEOUSNESS</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/9#10">Hosea 9:10</a><p class="ws-trad">I found Israel like grapes in the wilderness. I saw your fathers as the firstfruits of the fig tree in its first season. But they went to Baal-peor, and consecrated themselves to Shame; so they became as detestable as the thing they <mark class="ws-target">loved</mark>.</p><p class="ws-lit">LIKE GRAPES IN THE WILDERNESS I FOUND ISRAEL LIKE EARLY FIG[S] ON A FIG TREE AT BEGINNING ITS I SAW ANCESTORS YOUR THEY THEY CAME BAAL PEOR AND THEY DEVOTED THEMSELVES TO &lt;THE&gt; SHAME AND THEY WERE DETESTABLE THINGS AS <mark class="ws-target">LOVED</mark> THEY</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">TO LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Micah/6#8">Micah 6:8</a><p class="ws-trad">He has shown you, O man, what [is] good. And what does the LORD require of you but to act justly, <mark class="ws-target">to love</mark> mercy, and to walk humbly with your God?</p><p class="ws-lit">HE HAS TOLD TO YOU O HUMANKIND WHAT? [IS] GOOD AND WHAT? [IS] YAHWEH REQUIRING FROM YOU THAT EXCEPT TO DO JUSTICE AND <mark class="ws-target">TO LOVE</mark> COVENANT LOYALTY AND TO BE MODEST TO WALK WITH GOD YOUR</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVprmpc">
+<h2 class="ws-grammar-full">Verb : Piel (Intensive/resultive/transtive, Active) Participle (Plural Masculine, Construct)</h2>
+<p class="ws-slot-stats">15 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVERS <span class="ws-count">(15 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/22#20">Jeremiah 22:20</a><p class="ws-trad">Go up to Lebanon and cry out; raise your voice in Bashan; cry out from Abarim, for all your <mark class="ws-target">lovers</mark> have been crushed.</p><p class="ws-lit">GO UP &lt;THE&gt; LEBANON AND CRY OUT AND IN &lt;THE&gt; BASHAN GIVE FORTH VOICE YOUR AND CRY OUT FROM ABARIM FOR THEY HAVE BEEN BROKEN ALL <mark class="ws-target">LOVERS</mark> YOUR</p></div>
+<details class="ws-more">
+<summary>14 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/30#14">Jeremiah 30:14</a><p class="ws-trad">All your <mark class="ws-target">lovers</mark> have forgotten you; they no longer seek you, for I have struck you as an enemy would, with the discipline of someone cruel, because of your great iniquity and your numerous sins.</p><p class="ws-lit">ALL <mark class="ws-target">LOVERS</mark> YOUR THEY HAVE FORGOTTEN YOU &lt;OBJ.&gt; YOU NOT THEY CARE FOR FOR [THE] BLOW OF AN ENEMY I HAVE STRUCK DOWN YOU [THE] CORRECTION OF A CRUEL [ONE] ON [THE] GREATNESS OF INIQUITY YOUR THEY ARE NUMEROUS SINS YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/16#33">Ezekiel 16:33</a><p class="ws-trad">Men give gifts to all [their] prostitutes, but you gave gifts to all your <mark class="ws-target">lovers</mark>. You bribed them to come to you from everywhere for your illicit favors.</p><p class="ws-lit">TO ALL PROSTITUTES MEN GIVE A GIFT AND YOU YOU HAVE GIVEN &lt;OBJ.&gt; GIFT YOUR TO ALL <mark class="ws-target">LOVERS</mark> YOUR AND YOU HAVE BRIBED &lt;OBJ.&gt; THEM TO COME TO YOU FROM ROUND ABOUT BY PROSTITUTION&lt;S&gt; YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/16#36">Ezekiel 16:36</a><p class="ws-trad">This is what the Lord GOD says: Because you poured out your wealth and exposed your nakedness in your promiscuity with your <mark class="ws-target">lovers</mark> and with all your detestable idols, and because of the blood of your children which you gave to them,</p><p class="ws-lit">THUS HE SAYS [THE] LORD YAHWEH BECAUSE WAS POURED OUT LUST YOUR AND IT WAS UNCOVERED NAKEDNESS YOUR IN PROSTITUTION&lt;S&gt; YOUR WITH <mark class="ws-target">LOVERS</mark> YOUR AND ON ALL [THE] IDOLS OF ABOMINATIONS YOUR AND ACCORDING TO [THE] BLOOD&lt;S&gt; OF CHILDREN YOUR WHICH YOU GAVE TO THEM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/16#37">Ezekiel 16:37</a><p class="ws-trad">therefore I will surely gather all the <mark class="ws-target">lovers</mark> with whom you found pleasure, all those you loved and all those you hated. I will gather them against you from all around and expose [you] before them, and they will see you completely naked.</p><p class="ws-lit">&lt;TO&gt; THEREFORE HERE I [AM] ABOUT TO GATHER &lt;OBJ.&gt; ALL <mark class="ws-target">LOVERS</mark> YOUR WHOM YOU WERE PLEASING TO THEM AND &lt;OBJ.&gt; ALL [THOSE] WHOM YOU LOVED TO ALL [THOSE] WHOM YOU HATED AND I WILL GATHER &lt;OBJ.&gt; THEM ON YOU FROM ROUND ABOUT AND I WILL UNCOVER NAKEDNESS YOUR TO THEM AND THEY WILL SEE &lt;OBJ.&gt; ALL NAKEDNESS YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/23#5">Ezekiel 23:5</a><p class="ws-trad">Oholah prostituted herself while she was still Mine. She lusted after her <mark class="ws-target">lovers</mark>, the Assyrians— warriors</p><p class="ws-lit">AND SHE ACTED AS A PROSTITUTE OHOLAH UNDER ME AND SHE LUSTED ON <mark class="ws-target">LOVERS</mark> HER TO ASSYRIA [WERE] WARRIORS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/23#9">Ezekiel 23:9</a><p class="ws-trad">Therefore I delivered her into the hands of her <mark class="ws-target">lovers</mark>, the Assyrians for whom she lusted</p><p class="ws-lit">&lt;TO&gt; THEREFORE I GAVE HER IN [THE] HAND OF <mark class="ws-target">LOVERS</mark> HER IN [THE] HAND OF [THE] PEOPLE OF ASSYRIA WHOM SHE HAD LUSTED ON THEM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/23#22">Ezekiel 23:22</a><p class="ws-trad">Therefore, Oholibah, this is what the Lord GOD says: ‘I will incite your <mark class="ws-target">lovers</mark> against you, those from whom you turned away in disgust. And I will bring them against you from every side—</p><p class="ws-lit">&lt;TO&gt; THEREFORE O OHOLIBAH THUS HE SAYS [THE] LORD YAHWEH HERE I [AM] ABOUT TO ROUSE &lt;OBJ.&gt; <mark class="ws-target">LOVERS</mark> YOUR ON YOU &lt;OBJ.&gt; [THOSE] WHOM IT WAS ALIENATED SELF YOUR FROM THEM AND I WILL BRING THEM ON YOU FROM ROUND ABOUT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/2#5">Hosea 2:5</a><p class="ws-trad">For their mother has played the harlot and has conceived them in disgrace. For she thought, ‘I will go after my <mark class="ws-target">lovers</mark>, who give me bread and water, wool and linen, oil and drink.’</p><p class="ws-lit">FOR SHE HAS PROSTITUTED HERSELF MOTHER THEIR SHE HAS ACTED SHAMEFULLY [THE] [ONE WHO] CONCEIVED THEM FOR SHE SAID I WILL GO AFTER <mark class="ws-target">LOVERS</mark> MY [WHO] GIVE &lt;OF&gt; FOOD MY AND WATER MY WOOL MY AND FLAX MY OIL MY AND DRINKS MY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/2#7">Hosea 2:7</a><p class="ws-trad">She will pursue her <mark class="ws-target">lovers</mark> but not catch them; she will seek them but not find them. Then she will say, ‘I will return to my first husband, for then I was better off than now.’</p><p class="ws-lit">AND SHE WILL PURSUE &lt;OBJ.&gt; <mark class="ws-target">LOVERS</mark> HER AND NOT SHE WILL OVERTAKE &lt;OBJ.&gt; THEM AND SHE WILL SEEK THEM AND NOT SHE WILL FIND [THEM] AND SHE WILL SAY I WILL GO AND I WILL RETURN TO HUSBAND MY &lt;THE&gt; FORMER FOR IT WAS GOOD FOR ME THEN MORE THAN NOW</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/2#10">Hosea 2:10</a><p class="ws-trad">And then I will expose her lewdness in the sight of her <mark class="ws-target">lovers</mark>, and no one will deliver her out of My hands.</p><p class="ws-lit">AND NOW I WILL UNCOVER &lt;OBJ.&gt; LEWDNESS HER TO [THE] EYES OF <mark class="ws-target">LOVERS</mark> HER AND ANYONE NOT HE WILL DELIVER HER FROM HAND MY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/2#12">Hosea 2:12</a><p class="ws-trad">I will destroy her vines and fig trees, which she thinks are the wages paid by her <mark class="ws-target">lovers</mark>. So I will make them into a thicket, and the beasts of the field will devour them.</p><p class="ws-lit">AND I WILL DEVASTATE VINE[S] HER AND FIG TREE[S] HER WHICH SHE SAID [ARE] WAGE[S] THEY OF ME WHICH THEY GAVE TO ME <mark class="ws-target">LOVERS</mark> MY AND I WILL MAKE THEM INTO A THICKET AND IT WILL CONSUME THEM [THE] ANIMAL[S] OF THE FIELD</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/2#13">Hosea 2:13</a><p class="ws-trad">I will punish her for the days of the Baals when she burned incense to them, when she adorned herself with rings and jewelry, and went after her <mark class="ws-target">lovers</mark>. But Me she forgot,” declares the LORD.</p><p class="ws-lit">AND I WILL VISIT ON HER &lt;OBJ.&gt; [THE] DAYS OF THE BAALS WHEN SHE MADE SMOKE TO THEM AND SHE ORNAMENTED HERSELF RING[S] HER AND JEWELRY HER AND SHE WENT AFTER <mark class="ws-target">LOVERS</mark> HER AND &lt;OBJ.&gt; ME SHE FORGOT [THE] UTTERANCE OF YAHWEH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/22#22">Jeremiah 22:22</a><p class="ws-trad">The wind will drive away all your shepherds, and your <mark class="ws-target">lovers</mark> will go into captivity. Then you will be ashamed and humiliated because of all your wickedness.</p><p class="ws-lit">ALL SHEPHERDS YOUR IT WILL SHEPHERD A WIND AND <mark class="ws-target">LOVERS</mark> YOUR IN &lt;THE&gt; CAPTIVITY THEY WILL GO FOR THEN YOU WILL BE ASHAMED AND YOU WILL BE HUMILIATED FROM ALL WICKEDNESS YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Lamentations/1#19">Lamentations 1:19</a><p class="ws-trad">I called out to my <mark class="ws-target">lovers</mark>, but they have betrayed me. My priests and elders perished in the city while they searched for food to keep themselves alive.</p><p class="ws-lit">I CALLED TO &lt;THE&gt; <mark class="ws-target">LOVERS</mark> MY THEY THEY DECEIVED ME PRIESTS MY AND ELDERS MY IN THE CITY THEY PERISHED FOR THEY SOUGHT FOOD FOR THEMSELVES SO THEY MAY BE RESTORED &lt;OBJ.&gt; LIFE THEIR</p></div>
+
+</details>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqw3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Consecutive Imperfect (Past/present Indicative) Third Singular Masculine</h2>
+<p class="ws-slot-stats">13 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE LOVED <span class="ws-count">(13 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/24#67">Genesis 24:67</a><p class="ws-trad">And Isaac brought her into the tent of his mother Sarah and took Rebekah as his wife. And Isaac loved her and was comforted after his mother’s death.</p><p class="ws-lit">AND HE BROUGHT HER ISAAC THE TENT OF TOWARDS SARAH MOTHER HIS AND HE TOOK &lt;OBJ.&gt; REBEKAH AND SHE BECAME OF HIM &lt;INTO&gt; A WIFE AND <mark class="ws-target">HE LOVED</mark> HER AND HE WAS COMFORTED ISAAC AFTER MOTHER HIS</p></div>
+<details class="ws-more">
+<summary>12 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/25#28">Genesis 25:28</a><p class="ws-trad">Because Isaac had a taste for wild game, <mark class="ws-target">he loved</mark> Esau; but Rebekah loved Jacob.</p><p class="ws-lit">AND <mark class="ws-target">HE LOVED</mark> ISAAC &lt;OBJ.&gt; ESAU FOR WILD GAME [WAS] IN MOUTH HIS AND REBEKAH [WAS] LOVING &lt;OBJ.&gt; JACOB</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/29#18">Genesis 29:18</a><p class="ws-trad">Since Jacob loved Rachel, he answered, “I will serve you seven years for your younger daughter Rachel.”</p><p class="ws-lit">AND <mark class="ws-target">HE LOVED</mark> JACOB &lt;OBJ.&gt; RACHEL AND HE SAID I WILL SERVE YOU SEVEN YEARS FOR RACHEL DAUGHTER YOUR &lt;THE&gt; YOUNG</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/29#30">Genesis 29:30</a><p class="ws-trad">Jacob slept with Rachel as well, and indeed, <mark class="ws-target">he loved</mark> Rachel more than Leah. So he worked for Laban another seven years.</p><p class="ws-lit">AND HE WENT ALSO INTO RACHEL AND <mark class="ws-target">HE LOVED</mark> ALSO &lt;OBJ.&gt; RACHEL MORE THAN LEAH AND HE SERVED WITH HIM AGAIN SEVEN YEARS ANOTHER</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/34#3">Genesis 34:3</a><p class="ws-trad">And his soul was drawn to Dinah, the daughter of Jacob. <mark class="ws-target">He loved</mark> the young girl and spoke to her tenderly.</p><p class="ws-lit">AND IT CLEAVED SELF HIS TO DINAH [THE] DAUGHTER OF JACOB AND <mark class="ws-target">HE LOVED</mark> &lt;OBJ.&gt; THE GIRL AND HE SPOKE TO [THE] HEART OF THE GIRL</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Judges/16#4">Judges 16:4</a><p class="ws-trad">Some time later, [Samson] fell in love with a woman in the Valley of Sorek, whose name was Delilah.</p><p class="ws-lit">AND IT WAS AFTER THUS AND <mark class="ws-target">HE LOVED</mark> A WOMAN IN [THE] VALLEY OF SOREK AND NAME HER [WAS] DELILAH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Samuel/16#21">1 Samuel 16:21</a><p class="ws-trad">When David came to Saul and entered his service, Saul loved him very much, and David became his armor-bearer.</p><p class="ws-lit">AND HE CAME DAVID TO SAUL AND HE STOOD &lt;TO&gt; BEFORE HIM AND <mark class="ws-target">HE LOVED</mark> HIM EXCEEDINGLY AND HE WAS OF HIM BEARER OF ARMOR&lt;S&gt;</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Samuel/18#1">1 Samuel 18:1</a><p class="ws-trad">After David had finished speaking with Saul, the souls of Jonathan and David were knit together, and Jonathan loved him as himself.</p><p class="ws-lit">AND IT WAS WHEN FINISHED HE TO SPEAK TO SAUL AND [THE] SELF OF JONATHAN IT WAS BOUND WITH [THE] SELF OF DAVID AND <mark class="ws-target">HE LOVED</mark> HIM JONATHAN LIKE OWN SELF HIS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Samuel/13#1">2 Samuel 13:1</a><p class="ws-trad">After some time, David’s son Amnon fell in love with Tamar, the beautiful sister of David’s son Absalom.</p><p class="ws-lit">AND IT WAS AFTER THUS AND [BELONGED] TO ABSALOM [THE] SON OF DAVID A SISTER A BEAUTIFUL AND NAME HER [WAS] TAMAR AND <mark class="ws-target">HE LOVED</mark> HER AMNON [THE] SON OF DAVID</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Kings/3#3">1 Kings 3:3</a><p class="ws-trad">And Solomon loved the LORD [and] walked in the statutes of his father David, except that he sacrificed and burned incense on the high places.</p><p class="ws-lit">AND <mark class="ws-target">HE LOVED</mark> SOLOMON &lt;OBJ.&gt; YAHWEH TO WALK IN [THE] STATUTES OF DAVID FATHER HIS ONLY AT THE HIGH PLACES HE [WAS] SACRIFICING AND MAKING SMOKE</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Chronicles/11#21">2 Chronicles 11:21</a><p class="ws-trad">Rehoboam loved Maacah daughter of Absalom more than all his wives and concubines. In all, he had eighteen wives and sixty concubines, and he was the father of twenty-eight sons and sixty daughters.</p><p class="ws-lit">AND <mark class="ws-target">HE LOVED</mark> REHOBOAM &lt;OBJ.&gt; MAACAH [THE] DAUGHTER OF ABSALOM MORE THAN ALL WIVES HIS AND CONCUBINES HIS FOR WIVES EIGHT- TEEN HE HAD TAKEN AND CONCUBINES SIXTY AND HE FATHERED TWENTY AND EIGHT SONS AND SIXTY DAUGHTERS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Esther/2#17">Esther 2:17</a><p class="ws-trad">And the king loved Esther more than all the [other] women, and she found grace and favor in his sight more than all of the other virgins. So he placed the royal crown upon her head and made her queen in place of Vashti.</p><p class="ws-lit">AND <mark class="ws-target">HE LOVED</mark> THE KING &lt;OBJ.&gt; ESTHER MORE THAN ALL THE WOMEN AND SHE BORE FAVOR AND FAVOR &lt;TO&gt; BEFORE HIM MORE THAN ALL THE VIRGINS AND HE PUT A CROWN OF ROYALTY ON HEAD HER AND HE MADE QUEEN HER IN PLACE OF VASHTI</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/109#17">Psalms 109:17</a><p class="ws-trad">The cursing [that] <mark class="ws-target">he loved</mark>, may it fall on him; the blessing [in which] he refused to delight, may it be far from him.</p><p class="ws-lit">AND <mark class="ws-target">HE LOVED</mark> A CURSE AND IT CAME TO HIM AND NOT HE DELIGHTED IN BLESSING AND IT WAS FAR FROM HIM</p></div>
+
+</details>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp2ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) Second Singular Masculine</h2>
+<p class="ws-slot-stats">8 instances · 3 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU LOVE <span class="ws-count">(5 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/22#2">Genesis 22:2</a><p class="ws-trad">“Take your son,” [God] said, “your only son Isaac, whom <mark class="ws-target">you love</mark>, and go to the land of Moriah. Offer him there as a burnt offering on one of the mountains, which I will show you.”</p><p class="ws-lit">AND HE SAID TAKE PLEASE &lt;OBJ.&gt; SON YOUR &lt;OBJ.&gt; ONLY [SON] YOUR WHOM <mark class="ws-target">YOU LOVE</mark> &lt;OBJ.&gt; ISAAC AND GO FOR &lt;THE&gt; YOURSELF TO [THE] LAND OF &lt;THE&gt; MORIAH AND OFFER UP HIM THERE TO A BURNT OFFERING ON ONE OF THE MOUNTAINS WHICH I WILL TELL TO YOU</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Judges/14#16">Judges 14:16</a><p class="ws-trad">Then Samson’s wife came to him, weeping, and said, “You hate me! You do not really love me! You have posed to my people a riddle, but have not explained it to me.” “Look,” he said “I have not even explained it to my father or mother, so why should I explain it to you?”</p><p class="ws-lit">AND SHE WEPT [THE] WIFE OF SAMSON OVER HIM AND SHE SAID ONLY YOU HATE ME AND NOT <mark class="ws-target">YOU LOVE</mark> ME THE RIDDLE YOU HAVE ASKED [THE] RIDDLE TO [THE] SONS OF PEOPLE MY AND TO &lt;THE&gt; ME NOT YOU HAVE TOLD AND HE SAID TO &lt;THE&gt; HER HERE! TO FATHER MY AND TO MOTHER MY NOT I HAVE TOLD AND TO &lt;THE&gt; [WHY] YOU WILL I TELL?</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/52#3">Psalms 52:3</a><p class="ws-trad"><mark class="ws-target">You love</mark> evil more than good, falsehood more than speaking truth. Selah</p><p class="ws-lit"><mark class="ws-target">YOU LOVE</mark> EVIL MORE THAN GOOD FALSEHOOD MORE THAN SPEAKING RIGHTEOUSNESS SELAH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/52#4">Psalms 52:4</a><p class="ws-trad"><mark class="ws-target">You love</mark> every word that devours, O deceitful tongue.</p><p class="ws-lit"><mark class="ws-target">YOU LOVE</mark> ALL WORDS OF SWALLOWING A TONGUE OF DECEIT</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ecclesiastes/9#9">Ecclesiastes 9:9</a><p class="ws-trad">Enjoy life with your beloved wife all the days of the fleeting life that [God] has given you under the sun— all your fleeting days. For this is your portion in life and in your labor. under the sun.</p><p class="ws-lit">SEE LIFE WITH A WIFE WHOM <mark class="ws-target">YOU LOVE</mark> ALL [THE] DAYS OF [THE] LIFE OF FUTILITY YOUR WHICH HE HAS GIVEN TO &lt;THE&gt; YOU UNDER THE SUN ALL [THE] DAYS OF FUTILITY YOUR FOR THAT [IS] PORTION YOUR IN &lt;THE&gt; LIFE AND IN TOIL YOUR WHICH YOU [ARE] A LABORER UNDER THE SUN</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU HAVE LOVED <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/45#7">Psalms 45:7</a><p class="ws-trad"><mark class="ws-target">You have loved</mark> righteousness and hated wickedness; therefore God, your God, has anointed you above your companions with the oil of joy.</p><p class="ws-lit"><mark class="ws-target">YOU HAVE LOVED</mark> RIGHTEOUSNESS AND YOU HAVE HATED WICKEDNESS THERE- -FORE HE HAS ANOINTED YOU GOD GOD YOUR [THE] OIL OF JOY MORE THAN COMPANIONS YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/9#1">Hosea 9:1</a><p class="ws-trad">Do not rejoice, O Israel, with exultation like the nations, for you have played the harlot against your God; you have made love [for] hire on every threshing floor.</p><p class="ws-lit">MAY NOT YOU REJOICE O ISRAEL TO REJOICING LIKE THE PEOPLES FOR YOU HAVE PROSTITUTED YOURSELF FROM WITH GOD YOUR <mark class="ws-target">YOU HAVE LOVED</mark> [THE] HIRE OF A PROSTITUTE ON ALL THRESHING FLOORS OF GRAIN</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">HAVE YOU LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Malachi/1#2">Malachi 1:2</a><p class="ws-trad">“I have loved you,” says the LORD. But you ask, “How <mark class="ws-target">have You loved</mark> us?” “Was not Esau Jacob’s brother?” declares the LORD. “Yet Jacob I have loved</p><p class="ws-lit">I HAVE LOVED &lt;OBJ.&gt; YOU HE SAYS YAHWEH AND YOU SAY &lt;IN&gt; HOW? <mark class="ws-target">HAVE YOU LOVED</mark> US ¿ NOT [DID] A BROTHER ESAU [BELONG] TO JACOB [THE] UTTERANCE OF YAHWEH AND I LOVED &lt;OBJ.&gt; JACOB</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp3cp">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) Third Plural Either gender</h2>
+<p class="ws-slot-stats">8 instances · 3 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">THEY LOVE <span class="ws-count">(4 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Samuel/18#22">1 Samuel 18:22</a><p class="ws-trad">Then Saul ordered his servants, “Speak to David privately and tell him, ‘Behold, the king is pleased with you, and all his servants love you. Now therefore, become his son-in-law.’”</p><p class="ws-lit">AND HE COMMANDED SAUL &lt;OBJ.&gt; SERVANTS HIS SPEAK TO DAVID IN &lt;THE&gt; SECRECY &lt;TO&gt; SAYING HERE! HE DELIGHTS IN &lt;THE&gt; YOU THE KING AND ALL SERVANTS HIS <mark class="ws-target">THEY LOVE</mark> YOU AND THEREFORE BE SON-IN-LAW TO THE KING</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/8#36">Proverbs 8:36</a><p class="ws-trad">But he who fails to find me harms himself; all who hate me love death.”</p><p class="ws-lit">AND [ONE WHO] MISSES ME [IS] DOING WRONG TO SELF HIS ALL [THOSE WHO] HATE ME <mark class="ws-target">THEY LOVE</mark> DEATH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Song-of-Songs/1#3">Song of Songs 1:3</a><p class="ws-trad">The fragrance of your perfume is pleasing; your name is like perfume poured out. No wonder the maidens adore you.</p><p class="ws-lit">TO ODOR OILS YOUR [ARE] GOOD [IS] OIL [WHICH] IT IS POURED OUT NAME YOUR THERE- -FORE YOUNG WOMEN <mark class="ws-target">THEY LOVE</mark> YOU</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Song-of-Songs/1#4">Song of Songs 1:4</a><p class="ws-trad">Take me away with you— let us hurry! May the king bring me to his chambers. We will rejoice and delight in you; we will praise your love more than wine. It is only right that they adore you.</p><p class="ws-lit">DRAW ME AFTER YOU LET US RUN HE HAS BROUGHT ME THE KING CHAMBERS HIS LET US REJOICE AND LET US BE GLAD IN YOU LET US BRING TO REMEMBRANCE LOVE&lt;S&gt; YOUR MORE THAN WINE UPRIGHTNESS&lt;ES&gt; <mark class="ws-target">THEY LOVE</mark> YOU</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">THEY HAVE LOVED <span class="ws-count">(3 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/5#31">Jeremiah 5:31</a><p class="ws-trad">The prophets prophesy falsely, and the priests rule by their own authority. My people love it so, but what will you do in the end?</p><p class="ws-lit">THE PROPHETS THEY HAVE PROPHESIED WITH &lt;THE&gt; FALSEHOOD AND THE PRIESTS THEY ARE RULING ON HANDS THEIR AND PEOPLE MY <mark class="ws-target">THEY HAVE LOVED</mark> THUS AND WHAT? WILL YOU DO TO END ITS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/14#10">Jeremiah 14:10</a><p class="ws-trad">This is what the LORD says about this people: “Truly they love to wander; they have not restrained their feet. So the LORD does not accept them; He will now remember their iniquity and punish them for their sins.”</p><p class="ws-lit">THUS HE SAYS YAHWEH OF THE PEOPLE &lt;THE&gt; THIS THUS <mark class="ws-target">THEY HAVE LOVED</mark> TO WANDER FEET THEIR NOT THEY HAVE RESTRAINED AND YAHWEH NOT HE HAS ACCEPTED THEM NOW HE WILL REMEMBER INIQUITY THEIR SO HE MAY PUNISH SINS THEIR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/4#18">Hosea 4:18</a><p class="ws-trad">When their liquor is gone, they turn to prostitution; their rulers dearly love disgrace.</p><p class="ws-lit">IT HAS COME TO AN END DRINK THEIR CERTAINLY &lt;TO PROSTITUTE THEMSELVES&gt; THEY HAVE PROSTITUTED THEMSELVES <mark class="ws-target">THEY HAVE LOVED</mark> LOVE SHAME SHIELDS ITS</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">THEY LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jeremiah/8#2">Jeremiah 8:2</a><p class="ws-trad">They will be exposed to the sun and moon, and to all the host of heaven which they have loved, served, followed consulted, and worshiped Their bones will not be gathered up [or] buried, but will become like dung lying on the ground.</p><p class="ws-lit">AND THEY WILL SPREAD OUT THEM TO THE SUN AND TO THE MOON AND TO ALL [THE] HOST OF THE HEAVENS WHICH <mark class="ws-target">THEY LOVED</mark> THEM AND WHICH THEY SERVED THEM AND WHICH THEY WALKED AFTER THEM AND WHICH THEY CONSULTED THEM AND WHICH THEY BOWED DOWN TO &lt;THE&gt; THEM NOT THEY WILL BE GATHERED AND NOT THEY WILL BE BURIED &lt;INTO&gt; DUNG ON [THE] SURFACE OF THE GROUND THEY WILL BECOME</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp3fs">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) Third Singular Feminine</h2>
+<p class="ws-slot-stats">7 instances · 3 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">IT LOVES <span class="ws-count">(5 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Song-of-Songs/1#7">Song of Songs 1:7</a><p class="ws-trad">Tell me, O one I love, where do you pasture your sheep? Where do you rest them at midday? Why should I be like a veiled woman beside the flocks of your companions?</p><p class="ws-lit">TELL ! TO ME [O] WHOM <mark class="ws-target">IT LOVES</mark> SELF MY WHERE? WILL YOU GRAZE WHERE? WILL YOU MAKE [THEM] LIE DOWN AT &lt;THE&gt; NOON&lt;S&gt; WHICH TO WHY? WILL I BE LIKE A VEILED [WOMAN] WITH [THE] FLOCKS OF COMPANIONS YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Song-of-Songs/3#1">Song of Songs 3:1</a><p class="ws-trad">On my bed at night I sought the one I love; I sought him, but did not find him.</p><p class="ws-lit">ON BED MY IN THE NIGHTS I SOUGHT &lt;OBJ.&gt; WHOM <mark class="ws-target">IT LOVES</mark> SELF MY I SOUGHT HIM AND NOT I FOUND HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Song-of-Songs/3#2">Song of Songs 3:2</a><p class="ws-trad">I will arise now and go about the city, through the streets and squares. I will seek the one I love. So I sought him but did not find him.</p><p class="ws-lit">I WILL ARISE PLEASE AND I WILL GO AROUND IN THE CITY IN THE STREETS AND IN THE OPEN PLACES I WILL SEEK &lt;OBJ.&gt; WHOM <mark class="ws-target">IT LOVES</mark> SELF MY I SOUGHT HIM AND NOT I FOUND HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Song-of-Songs/3#3">Song of Songs 3:3</a><p class="ws-trad">I encountered the watchmen on their rounds of the city: “Have you seen [the one] I love?”</p><p class="ws-lit">THEY FOUND ME THE WATCHMEN WHO GO AROUND IN THE CITY &lt;OBJ.&gt; WHOM <mark class="ws-target">IT LOVES</mark> SELF MY HAVE YOU SEEN?</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Song-of-Songs/3#4">Song of Songs 3:4</a><p class="ws-trad">I had just passed them when I found the one I love. I held him and would not let go until I had brought him to my mother’s house, to the chamber of the one who conceived me.</p><p class="ws-lit">LIKE A LITTLE THAT I HAD PASSED AWAY FROM THEM UNTIL THAT I FOUND &lt;OBJ.&gt; WHOM <mark class="ws-target">IT LOVES</mark> SELF MY I GRASPED HIM AND NOT I LET GO HIM UNTIL THAT I HAD BROUGHT HIM TO [THE] HOUSE OF MOTHER MY AND TO [THE] ROOM OF [THE ONE WHO] CONCEIVED ME</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">SHE LOVES <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ruth/4#15">Ruth 4:15</a><p class="ws-trad">He will renew your life and sustain you in your old age. For your daughter-in-law, who loves you and is better to you than seven sons, has given him birth</p><p class="ws-lit">AND HE WILL BECOME FOR &lt;THE&gt; YOU &lt;INTO&gt; [ONE WHO] RESTORES LIFE AND TO SUSTAIN &lt;OBJ.&gt; OLD AGE YOUR FOR DAUGHTER-IN-LAW YOUR WHO <mark class="ws-target">SHE LOVES</mark> YOU SHE HAS GIVEN BIRTH TO HIM WHO SHE [IS] GOOD TO &lt;THE&gt; YOU MORE THAN SEVEN SONS</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">SHE LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Samuel/18#28">1 Samuel 18:28</a><p class="ws-trad">When Saul realized that the LORD was with David and that his daughter Michal loved [David],</p><p class="ws-lit">AND HE SAW SAUL AND HE KNEW THAT YAHWEH [WAS] WITH DAVID AND MICHAL [THE] DAUGHTER OF SAUL <mark class="ws-target">SHE LOVED</mark> HIM</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqi3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperfect (Future/present Indicative/jussive) Third Singular Masculine</h2>
+<p class="ws-slot-stats">5 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE LOVES <span class="ws-count">(4 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/3#12">Proverbs 3:12</a><p class="ws-trad">for the LORD disciplines the one <mark class="ws-target">He loves</mark>, as [does] a father the son [in whom] he delights.</p><p class="ws-lit">FOR &lt;OBJ.&gt; [THE ONE] WHOM <mark class="ws-target">HE LOVES</mark> YAHWEH HE REPROVES AND LIKE A FATHER &lt;OBJ.&gt; A SON [WHOM] HE IS PLEASED WITH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/15#9">Proverbs 15:9</a><p class="ws-trad">The LORD detests the way of the wicked, but <mark class="ws-target">He loves</mark> those who pursue righteousness.</p><p class="ws-lit">[IS] [THE] ABOMINATION OF YAHWEH [THE] WAY OF A WICKED [PERSON] AND [ONE WHO] PURSUES RIGHTEOUSNESS <mark class="ws-target">HE LOVES</mark></p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/15#12">Proverbs 15:12</a><p class="ws-trad">A mocker does not love to be reproved, nor will he consult the wise.</p><p class="ws-lit">NOT <mark class="ws-target">HE LOVES</mark> A MOCKER REPROOF TO HIM TO WISE [PEOPLE] NOT HE GOES</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/16#13">Proverbs 16:13</a><p class="ws-trad">Righteous lips are a king’s delight, and he who speaks honestly is beloved.</p><p class="ws-lit">[ARE THE] DELIGHT OF KINGS LIPS OF RIGHTEOUSNESS AND [ONE WHO] SPEAKS UPRIGHT [THINGS] <mark class="ws-target">HE LOVES</mark></p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE WILL LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/29#32">Genesis 29:32</a><p class="ws-trad">And Leah conceived and gave birth to a son, and she named him Reuben, for she said, “The LORD has seen my affliction. Surely my husband will love me now.”</p><p class="ws-lit">AND SHE CONCEIVED LEAH AND SHE BORE A SON AND SHE CALLED NAME HIS REUBEN FOR SHE SAID THAT HE HAS LOOKED YAHWEH ON AFFLICTION MY FOR NOW <mark class="ws-target">HE WILL LOVE</mark> ME HUSBAND MY</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqq2ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Consecutive Perfect (Future/present Indicative) Second Singular Masculine</h2>
+<p class="ws-slot-stats">4 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU WILL LOVE <span class="ws-count">(4 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Leviticus/19#18">Leviticus 19:18</a><p class="ws-trad">Do not seek revenge or bear a grudge against any of your people, but love your neighbor as yourself. I am the LORD.</p><p class="ws-lit">NOT YOU WILL AVENGE YOURSELF AND NOT YOU WILL KEEP &lt;OBJ.&gt; [THE] SONS OF PEOPLE YOUR AND <mark class="ws-target">YOU WILL LOVE</mark> &lt;TO&gt; NEIGHBOR YOUR LIKE YOURSELF I [AM] YAHWEH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Leviticus/19#34">Leviticus 19:34</a><p class="ws-trad">You must treat the foreigner living among you as native-born and love him as yourself, for you were foreigners in the land of Egypt. I am the LORD your God.</p><p class="ws-lit">LIKE [THE] NATIVE-BORN FROM &lt;THE&gt; YOU HE WILL BE TO &lt;THE&gt; YOU THE SOJOURNER WHO SOJOURNS WITH YOU AND <mark class="ws-target">YOU WILL LOVE</mark> &lt;TO&gt; &lt;THE&gt; HIM LIKE YOURSELF FOR SOJOURNERS YOU WERE IN [THE] LAND OF EGYPT I [AM] YAHWEH GOD YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/6#5">Deuteronomy 6:5</a><p class="ws-trad">And you shall love the LORD your God with all your heart and with all your soul and with all your strength.</p><p class="ws-lit">AND <mark class="ws-target">YOU WILL LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR WITH ALL HEART YOUR AND WITH ALL BEING YOUR AND WITH ALL STRENGTH YOUR</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/11#1">Deuteronomy 11:1</a><p class="ws-trad">You shall therefore love the LORD your God and always keep His charge, His statutes, His ordinances, and His commandments.</p><p class="ws-lit">AND <mark class="ws-target">YOU WILL LOVE</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR AND YOU WILL KEEP COMMAND HIS AND STATUTES HIS AND JUDGMENTS HIS AND COMMANDMENTS HIS ALL THE DAYS</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqv2mp">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperative Second Plural Masculine</h2>
+<p class="ws-slot-stats">4 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVE <span class="ws-count">(4 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/31#23">Psalms 31:23</a><p class="ws-trad"><mark class="ws-target">Love</mark> the LORD, all His saints. The LORD preserves the faithful, but fully repays the arrogant.</p><p class="ws-lit"><mark class="ws-target">LOVE</mark> &lt;OBJ.&gt; YAHWEH O ALL FAITHFUL [PEOPLE] HIS FAITHFUL [PEOPLE] [IS] PRESERVING YAHWEH AND [IS] REPAYING ON EXCESS [ONE WHO] DOES &lt;OF&gt; PRIDE</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/4#18">Hosea 4:18</a><p class="ws-trad">When their liquor is gone, they turn to prostitution; their rulers dearly <mark class="ws-target">love</mark> disgrace.</p><p class="ws-lit">IT HAS COME TO AN END DRINK THEIR CERTAINLY &lt;TO PROSTITUTE THEMSELVES&gt; THEY HAVE PROSTITUTED THEMSELVES THEY HAVE LOVED <mark class="ws-target">LOVE</mark> SHAME SHIELDS ITS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Zechariah/8#19">Zechariah 8:19</a><p class="ws-trad">“This is what the LORD of Hosts says: The fasts of the fourth, the fifth, the seventh, and the tenth [months] will become times of joy and gladness, cheerful feasts for the house of Judah. Therefore you are to <mark class="ws-target">love</mark> [both] truth and peace.”</p><p class="ws-lit">THUS HE SAYS YAHWEH OF HOSTS [THE] FAST OF THE FOURTH [MONTH] AND [THE] FAST OF THE FIFTH [MONTH] AND [THE] FAST OF THE SEVENTH [MONTH] AND [THE] FAST OF THE TENTH [MONTH] IT WILL BECOME FOR [THE] HOUSE OF JUDAH &lt;INTO&gt; JOY AND &lt;INTO&gt; GLADNESS AND &lt;INTO&gt; APPOINTED FEASTS GOOD AND &lt;THE&gt; TRUTH AND &lt;THE&gt; PEACE <mark class="ws-target">LOVE</mark></p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Amos/5#15">Amos 5:15</a><p class="ws-trad">Hate evil and <mark class="ws-target">love</mark> good; establish justice in the gate. Perhaps the LORD, the God of Hosts, will be gracious to the remnant of Joseph.”</p><p class="ws-lit">HATE EVIL AND <mark class="ws-target">LOVE</mark> GOOD AND SET UP IN THE GATE JUSTICE PERHAPS HE WILL SHOW FAVOR TO YAHWEH GOD OF HOSTS [THE] REMNANT OF JOSEPH</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqsfsa">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Passive) Participle passive (Singular Feminine, Absolute)</h2>
+<p class="ws-slot-stats">3 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVED <span class="ws-count">(3 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/21#15">Deuteronomy 21:15</a><p class="ws-trad">If a man has two wives, one beloved and the other unloved, and [both] bear him sons, but the unloved wife has the firstborn son,</p><p class="ws-lit">IF THEY WILL BELONG TO A MAN TWO WIVES THE ONE [IS] <mark class="ws-target">LOVED</mark> AND THE ONE [IS] HATED AND THEY WILL BEAR TO &lt;THE&gt; HIM SONS THE <mark class="ws-target">LOVED</mark> [ONE] AND THE HATED [ONE] AND HE WILL BELONG THE SON THE FIRSTBORN TO THE HATED [WIFE]</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/21#15">Deuteronomy 21:15</a><p class="ws-trad">If a man has two wives, one beloved and the other unloved, and [both] bear him sons, but the unloved wife has the firstborn son,</p><p class="ws-lit">IF THEY WILL BELONG TO A MAN TWO WIVES THE ONE [IS] <mark class="ws-target">LOVED</mark> AND THE ONE [IS] HATED AND THEY WILL BEAR TO &lt;THE&gt; HIM SONS THE <mark class="ws-target">LOVED</mark> [ONE] AND THE HATED [ONE] AND HE WILL BELONG THE SON THE FIRSTBORN TO THE HATED [WIFE]</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/21#16">Deuteronomy 21:16</a><p class="ws-trad">when that man assigns his inheritance to his sons he must not appoint the son of the beloved wife as the firstborn over [the son] of the unloved wife.</p><p class="ws-lit">AND IT WILL BE ON [THE] DAY CAUSES TO INHERIT HE &lt;OBJ.&gt; SONS HIS &lt;OBJ.&gt; [THAT] WHICH IT WILL BELONG TO &lt;THE&gt; HIM NOT HE WILL BE ABLE TO TREAT AS FIRSTBORN &lt;OBJ.&gt; [THE] SON THE <mark class="ws-target">LOVED</mark> [ONE] ON [THE] FACE OF [THE] SON OF THE HATED [ONE] THE FIRSTBORN</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqw1cs">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Consecutive Imperfect (Past/present Indicative) First Singular Either gender</h2>
+<p class="ws-slot-stats">3 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">I LOVED <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/11#1">Hosea 11:1</a><p class="ws-trad">When Israel was a child, <mark class="ws-target">I loved</mark> him, and out of Egypt I called My son.</p><p class="ws-lit">IF [WAS] A YOUTH ISRAEL AND <mark class="ws-target">I LOVED</mark> HIM AND FROM EGYPT I SUMMONED &lt;TO&gt; SON MY</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Malachi/1#2">Malachi 1:2</a><p class="ws-trad">“I have loved you,” says the LORD. But you ask, “How have You loved us?” “Was not Esau Jacob’s brother?” declares the LORD. “Yet Jacob I have loved</p><p class="ws-lit">I HAVE LOVED &lt;OBJ.&gt; YOU HE SAYS YAHWEH AND YOU SAY &lt;IN&gt; HOW? HAVE YOU LOVED US ¿ NOT [DID] A BROTHER ESAU [BELONG] TO JACOB [THE] UTTERANCE OF YAHWEH AND <mark class="ws-target">I LOVED</mark> &lt;OBJ.&gt; JACOB</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">I HAVE LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/119#167">Psalms 119:167</a><p class="ws-trad">I obey Your testimonies and love them greatly.</p><p class="ws-lit">IT KEEPS SELF MY TESTIMONIES YOUR AND <mark class="ws-target">I HAVE LOVED</mark> THEM EXCEEDINGLY</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqi2mp">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperfect (Future/present Indicative/jussive) Second Plural Masculine</h2>
+<p class="ws-slot-stats">2 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">WILL YOU LOVE <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/4#2">Psalms 4:2</a><p class="ws-trad">How long, O men, will my honor be maligned? How long <mark class="ws-target">will you love</mark> vanity and seek after lies Selah</p><p class="ws-lit">O SONS OF MAN UNTIL WHEN? [WILL] HONOR MY [BECOME] &lt;INTO&gt; IGNOMINY <mark class="ws-target">WILL YOU LOVE</mark>? ! VANITY WILL YOU SEEK? FALSEHOOD SELAH</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/1#22">Proverbs 1:22</a><p class="ws-trad">“How long, O simple ones, <mark class="ws-target">will you love</mark> your simple [ways]? How long will scoffers delight in their scorn and fools hate knowledge?</p><p class="ws-lit">UNTIL WHEN? O NAIVE PEOPLE <mark class="ws-target">WILL YOU LOVE</mark> NAIVETE AND MOCKERS MOCKERY DO THEY DELIGHT IN? &lt;FOR&gt; THEMSELVES AND FOOLS WILL THEY HATE? KNOWLEDGE</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqrmsc">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Participle (Singular Masculine, Construct)</h2>
+<p class="ws-slot-stats">2 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVES <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Psalms/11#5">Psalms 11:5</a><p class="ws-trad">The LORD tests the righteous and the wicked; His soul hates the lover of violence.</p><p class="ws-lit">YAHWEH [THE] RIGHTEOUS HE TESTS AND [THE] WICKED AND [ONE WHO] <mark class="ws-target">LOVES</mark> VIOLENCE IT HATES SELF HIS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/13#24">Proverbs 13:24</a><p class="ws-trad">He who spares the rod hates his son, but he who <mark class="ws-target">loves</mark> him disciplines him diligently.</p><p class="ws-lit">[ONE WHO] RESTRAINS ROD HIS [IS] HATING SON HIS AND [ONE WHO] <mark class="ws-target">LOVES</mark> HIM HE SEEKS EARLY HIM DISCIPLINE</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqv2ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperative Second Singular Masculine</h2>
+<p class="ws-slot-stats">2 instances · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVE <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/4#6">Proverbs 4:6</a><p class="ws-trad">Do not forsake [wisdom], and she will preserve you; <mark class="ws-target">love</mark> her, and she will guard you.</p><p class="ws-lit">MAY NOT YOU ABANDON HER AND SHE WILL KEEP YOU <mark class="ws-target">LOVE</mark> HER AND SHE WILL GUARD YOU</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/3#1">Hosea 3:1</a><p class="ws-trad">Then the LORD said to me, “Go show <mark class="ws-target">love</mark> to your wife again, though she is loved by another and is an adulteress. <mark class="ws-target">Love</mark> her as the LORD [loves] the Israelites, though they turn to other gods and <mark class="ws-target">love</mark> to offer raisin cakes [to idols].</p><p class="ws-lit">AND HE SAID YAHWEH TO ME AGAIN GO <mark class="ws-target">LOVE</mark> A WOMAN [WHO] IS LOVED OF A COMPANION AND [WHO] COMMITS ADULTERY AS LOVES YAHWEH &lt;OBJ.&gt; [THE] PEOPLE OF ISRAEL AND THEY [ARE] TURNING TO GODS OTHER AND [ARE] LOVING &lt;OF&gt; CAKES OF GRAPES</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqi1cs">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperfect (Future/present Indicative/cohortative) First Singular Either gender</h2>
+<p class="ws-slot-stats">2 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">I LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/8#17">Proverbs 8:17</a><p class="ws-trad"><mark class="ws-target">I love</mark> those who love me, and those who seek me early shall find me.</p><p class="ws-lit">I [THOSE WHO] LOVE ME <mark class="ws-target">I LOVE</mark> AND [THOSE WHO] EARNESTLY SEEK ME THEY FIND ME</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">I WILL LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/14#4">Hosea 14:4</a><p class="ws-trad">I will heal their apostasy; I will freely love them, for My anger has turned away from them.</p><p class="ws-lit">I WILL HEAL APOSTASY THEIR <mark class="ws-target">I WILL LOVE</mark> THEM VOLUNTARINESS FOR IT HAS TURNED AWAY ANGER MY FROM HIM</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp2fs">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) Second Singular Feminine</h2>
+<p class="ws-slot-stats">2 instances · 2 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU HAVE LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Isaiah/57#8">Isaiah 57:8</a><p class="ws-trad">Behind the door and doorpost you have set up your memorial. Forsaking Me, you uncovered your bed; you climbed up and opened it wide. And you have made a pact with those whose bed <mark class="ws-target">you have loved</mark>; you have gazed upon their nakedness.</p><p class="ws-lit">AND BEHIND THE DOOR AND THE DOORPOST YOU HAVE SET UP MEMORIAL YOUR FOR FROM WITH &lt;THE&gt; ME YOU HAVE UNCOVERED AND YOU HAVE GONE UP YOU HAVE MADE WIDE BED YOUR AND YOU HAVE CUT OFF FOR &lt;THE&gt; YOURSELF FROM &lt;THE&gt; THEM <mark class="ws-target">YOU HAVE LOVED</mark> BED THEIR A HAND YOU HAVE SEEN</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ezekiel/16#37">Ezekiel 16:37</a><p class="ws-trad">therefore I will surely gather all the lovers with whom you found pleasure, all those <mark class="ws-target">you loved</mark> and all those you hated. I will gather them against you from all around and expose [you] before them, and they will see you completely naked.</p><p class="ws-lit">&lt;TO&gt; THEREFORE HERE I [AM] ABOUT TO GATHER &lt;OBJ.&gt; ALL LOVERS YOUR WHOM YOU WERE PLEASING TO THEM AND &lt;OBJ.&gt; ALL [THOSE] WHOM <mark class="ws-target">YOU LOVED</mark> TO ALL [THOSE] WHOM YOU HATED AND I WILL GATHER &lt;OBJ.&gt; THEM ON YOU FROM ROUND ABOUT AND I WILL UNCOVER NAKEDNESS YOUR TO THEM AND THEY WILL SEE &lt;OBJ.&gt; ALL NAKEDNESS YOUR</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqrfsa">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Participle (Singular Feminine, Absolute)</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVING <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Genesis/25#28">Genesis 25:28</a><p class="ws-trad">Because Isaac had a taste for wild game, he loved Esau; but Rebekah loved Jacob.</p><p class="ws-lit">AND HE LOVED ISAAC &lt;OBJ.&gt; ESAU FOR WILD GAME [WAS] IN MOUTH HIS AND REBEKAH [WAS] <mark class="ws-target">LOVING</mark> &lt;OBJ.&gt; JACOB</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqq3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Consecutive Perfect (Future/present Indicative) Third Singular Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE WILL LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/7#13">Deuteronomy 7:13</a><p class="ws-trad"><mark class="ws-target">He will love</mark> you and bless you and multiply you. He will bless the fruit of your womb and the produce of your land— your grain, new wine, and oil, the young of your herds and the lambs of your flocks— in the land that He swore to your fathers to give you.</p><p class="ws-lit">AND <mark class="ws-target">HE WILL LOVE</mark> YOU AND HE WILL BLESS YOU AND HE WILL INCREASE YOU AND HE WILL BLESS [THE] FRUIT OF WOMB YOUR AND [THE] FRUIT OF GROUND YOUR GRAIN YOUR AND NEW WINE YOUR AND FRESH OIL YOUR [THE] YOUNG OF CATTLE&lt;S&gt; YOUR AND [THE] YOUNG ONES OF FLOCK YOUR ON THE LAND WHICH HE SWORE TO ANCESTORS YOUR TO GIVE TO &lt;THE&gt; YOU</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqq2mp">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Consecutive Perfect (Future/present Indicative) Second Plural Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU WILL LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/10#19">Deuteronomy 10:19</a><p class="ws-trad">So you also must love the foreigner, since you yourselves were foreigners in the land of Egypt.</p><p class="ws-lit">AND <mark class="ws-target">YOU WILL LOVE</mark> &lt;OBJ.&gt; THE SOJOURNER FOR SOJOURNERS YOU WERE IN [THE] LAND OF EGYPT</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqrmpa">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Participle (Plural Masculine, Absolute)</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVING <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Deuteronomy/13#3">Deuteronomy 13:3</a><p class="ws-trad">you must not listen to the words of that prophet or dreamer. For the LORD your God is testing you to find out whether you love [Him] with all your heart and with all your soul.</p><p class="ws-lit">NOT YOU WILL LISTEN TO [THE] WORDS OF THE PROPHET &lt;THE&gt; THAT OR TO [THE] DREAMER OF THE DREAM &lt;THE&gt; THAT FOR [IS] PUTTING TO [THE] TEST YAHWEH GOD YOUR &lt;OBJ.&gt; YOU TO KNOW ¿ [ARE] THERE YOU <mark class="ws-target">LOVING</mark> &lt;OBJ.&gt; YAHWEH GOD YOUR WITH ALL HEART YOUR AND WITH ALL BEING YOUR</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqw3fs">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Consecutive Imperfect (Past/present Indicative) Third Singular Feminine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">SHE LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Samuel/18#20">1 Samuel 18:20</a><p class="ws-trad">Now Saul’s daughter Michal loved David, and when this was reported to Saul, it pleased him.</p><p class="ws-lit">AND <mark class="ws-target">SHE LOVED</mark> MICHAL [THE] DAUGHTER OF SAUL &lt;OBJ.&gt; DAVID AND PEOPLE TOLD TO SAUL AND IT WAS PLEASING THE MATTER IN VIEW HIS</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="VNrmpa">
+<h2 class="ws-grammar-full">Verb : Niphal (Simple, Passive) Participle (Plural Masculine, Absolute)</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVABLE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Samuel/1#23">2 Samuel 1:23</a><p class="ws-trad">Saul and Jonathan, beloved and delightful in life, were not divided in death. They were swifter than eagles; they were stronger than lions.</p><p class="ws-lit">SAUL AND JONATHAN &lt;THE&gt; <mark class="ws-target">LOVABLE</mark> AND &lt;THE&gt; PLEASANT IN LIVES THEIR AND IN DEATH THEIR NOT THEY WERE SEPARATED MORE THAN EAGLES THEY WERE SWIFT MORE THAN LIONS THEY WERE STRONG</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqi2ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperfect (Future/present Indicative/jussive) Second Singular Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">WILL YOU LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Chronicles/19#2">2 Chronicles 19:2</a><p class="ws-trad">Jehu son of Hanani the seer went out to confront him and said to King Jehoshaphat, “Should you help the wicked and love those who hate the LORD? Because of this, the wrath of the LORD [is] upon you.</p><p class="ws-lit">AND HE WENT OUT TO FACE HIS JEHU [THE] SON OF HANANI THE SEER AND HE SAID TO THE KING JEHOSHAPHAT ¿ &lt;TO&gt; THE WICKED TO HELP AND &lt;TO&gt; [THOSE WHO] HATE &lt;OF&gt; YAHWEH <mark class="ws-target">WILL YOU LOVE</mark>? AND BY THIS [IS] TOWARDS YOU WRATH FROM TO BEFORE YAHWEH</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqsmsa">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Passive) Participle passive (Singular Masculine, Absolute)</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Nehemiah/13#26">Nehemiah 13:26</a><p class="ws-trad">Did not King Solomon of Israel sin in matters like this? There was not a king like him among many nations, and he was <mark class="ws-target">loved</mark> by his God, [who] made him king over all Israel— yet foreign women drew him into sin.</p><p class="ws-lit">¿ NOT ON THESE DID HE SIN SOLOMON [THE] KING OF ISRAEL AND AMONG THE NATIONS &lt;THE&gt; MANY NOT HE WAS A KING LIKE HIM AND <mark class="ws-target">LOVED</mark> BY GOD HIS HE WAS AND HE MADE HIM GOD KING OVER ALL ISRAEL ALSO &lt;OBJ.&gt; HIM THEY CAUSED TO SIN THE WIVES &lt;THE&gt; FOREIGN</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="Vqu3ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Conjunction+Imperfect (Future/present Indicative) Third Singular Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">HE WILL LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/9#8">Proverbs 9:8</a><p class="ws-trad">Do not rebuke a mocker, or he will hate you; rebuke a wise [man], and <mark class="ws-target">he will love</mark> you.</p><p class="ws-lit">MAY NOT YOU REPROVE A MOCKER LEST HE SHOULD HATE YOU REPROVE &lt;TO&gt; A WISE [PERSON] AND <mark class="ws-target">HE WILL LOVE</mark> YOU</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqj2ms">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperfect (Future/present Jussive) Second Singular Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Proverbs/20#13">Proverbs 20:13</a><p class="ws-trad">Do not love sleep, or you will grow poor; open your eyes, [and] you will have plenty of food.</p><p class="ws-lit">MAY NOT <mark class="ws-target">YOU LOVE</mark> SLEEP LEST YOU SHOULD BECOME IMPOVERISHED OPEN EYES YOUR BE SATISFIED FOOD</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqsfsc">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Passive) Participle passive (Singular Feminine, Construct)</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">IS LOVED OF <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/3#1">Hosea 3:1</a><p class="ws-trad">Then the LORD said to me, “Go show love to your wife again, though she is loved by another and is an adulteress. Love her as the LORD [loves] the Israelites, though they turn to other gods and love to offer raisin cakes [to idols].</p><p class="ws-lit">AND HE SAID YAHWEH TO ME AGAIN GO LOVE A WOMAN [WHO] <mark class="ws-target">IS LOVED OF</mark> A COMPANION AND [WHO] COMMITS ADULTERY AS LOVES YAHWEH &lt;OBJ.&gt; [THE] PEOPLE OF ISRAEL AND THEY [ARE] TURNING TO GODS OTHER AND [ARE] LOVING &lt;OF&gt; CAKES OF GRAPES</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqrfsc">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Participle (Singular Feminine, Construct)</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">LOVED <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hosea/10#11">Hosea 10:11</a><p class="ws-trad">Ephraim is a well-trained heifer that loves to thresh; but I will place a yoke on her fair neck. I will harness Ephraim, Judah will plow, [and] Jacob will break the hard ground</p><p class="ws-lit">AND EPHRAIM [WAS] A HEIFER TRAINED [WHICH] <mark class="ws-target">LOVED</mark> TO THRESH AND I I PASSED OVER [THE] GOODNESS OF NECK ITS I WILL CAUSE TO DRAW EPHRAIM IT WILL PLOW JUDAH IT WILL HARROW &lt;FOR&gt; ITSELF JACOB</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqp2mp">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Perfect (Past/present Indicative) Second Plural Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Amos/4#5">Amos 4:5</a><p class="ws-trad">Offer leavened bread as a thank offering, and loudly proclaim your freewill offerings. For that is what [you] children of Israel love to do,” declares the Lord GOD.</p><p class="ws-lit">AND MAKE SMOKE FROM A THING LEAVENED A THANK-OFFERING AND PROCLAIM FREEWILL OFFERINGS MAKE [THEM] HEARD FOR THUS <mark class="ws-target">YOU LOVE</mark> O PEOPLE OF ISRAEL [THE] UTTERANCE OF [THE] LORD YAHWEH</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="HVqj2mp">
+<h2 class="ws-grammar-full">Verb : Qal (Simple, Active) Imperfect (Future/present Jussive) Second Plural Masculine</h2>
+<p class="ws-slot-stats">1 instance · 1 translation</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">YOU LOVE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Zechariah/8#17">Zechariah 8:17</a><p class="ws-trad">do not plot evil in your hearts against your neighbor, and do not love to swear falsely, for I hate all these things,” declares the LORD.</p><p class="ws-lit">AND EACH &lt;OBJ.&gt; [THE] HARM OF NEIGHBOR HIS MAY NOT YOU PLAN IN HEART YOUR AND AN OATH OF FALSEHOOD MAY NOT <mark class="ws-target">YOU LOVE</mark> FOR &lt;OBJ.&gt; ALL THESE [ARE THINGS] WHICH I HATE [THE] UTTERANCE OF YAHWEH</p></div>
+</div>
+</section>
+</div>
+<div class="ws-footer">
+<section class="ws-related"><h2>Related Files</h2><ul><li><a href="https://words.servewell.net/love_2">love (Hebrew, H0160)</a></li>
+<li><a href="https://words.servewell.net/love_3">to love (Hebrew, H2245)</a></li>
+<li><a href="https://words.servewell.net/love_4">to love (Unknown, H0157H)</a></li>
+<li><a href="https://words.servewell.net/love_5">love (Unknown, H3039B)</a></li>
+<li><a href="https://words.servewell.net/love_6">to love (Greek, G0025)</a></li>
+<li><a href="https://words.servewell.net/love_7">to love (Greek, G5368)</a></li>
+<li><a href="https://words.servewell.net/love_8">love (Greek, G0026)</a></li>
+<li><a href="https://words.servewell.net/love_9">love of dispute (Greek, G5379)</a></li>
+<li><a href="https://words.servewell.net/love_10">love of money (Greek, G5365)</a></li>
+<li><a href="https://words.servewell.net/love_11">to love to be first (Greek, G5383)</a></li></ul></section>
+</div>
+<script>
+(function () {
+  // Expand/collapse-all button
+  var allDetails = document.querySelectorAll('details.ws-more');
+  var btn = document.getElementById('ws-expand-all');
+  if (allDetails.length > 0 && btn) {
+    function updateBtn() {
+      var anyCollapsed = Array.prototype.some.call(allDetails, function (d) { return !d.open; });
+      btn.textContent = anyCollapsed ? 'Expand all' : 'Collapse most';
+    }
+    updateBtn();
+    allDetails.forEach(function (d) { d.addEventListener('toggle', updateBtn); });
+    btn.addEventListener('click', function () {
+      var anyCollapsed = Array.prototype.some.call(allDetails, function (d) { return !d.open; });
+      allDetails.forEach(function (d) { d.open = anyCollapsed; });
+      updateBtn();
+    });
+  } else if (btn) {
+    btn.hidden = true;
+  }
+
+  // Fragment-based slot priority:
+  //   #grammar=Vqw3ms  → move that slot element to top of #ws-slots
+  var hash = window.location.hash;
+  if (hash && typeof CSS !== 'undefined' && CSS.escape) {
+    var m = hash.match(/[#&?]grammar=([^&]+)/);
+    if (m) {
+      var code = decodeURIComponent(m[1]);
+      var container = document.getElementById('ws-slots');
+      if (container) {
+        var target = container.querySelector('[data-grammar-code="' + CSS.escape(code) + '"]');
+        if (target && target.parentNode === container) {
+          container.insertBefore(target, container.firstChild);
+          target.classList.add('ws-slot-highlighted');
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }
+  }
+}());
+</script>
+<script src="/js/servewell-app-shell.js"></script>
+</body>
+</html>

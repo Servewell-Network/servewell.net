@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+<title>grace</title>
+<meta name="description" content="Ancient word study: grace (Greek, G5485)">
+<script>
+(function () {
+  try {
+    const savedTheme = localStorage.getItem('servewell-theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      document.documentElement.dataset.theme = savedTheme;
+    }
+  } catch (_error) {
+    // Ignore storage access failures (private mode, disabled storage).
+  }
+})();
+</script>
+<style>
+body {
+   font-family: sans-serif;
+	font-size: large;
+}
+details :not(summary) {
+   padding-left: 0.5rem;
+}
+
+:root {
+  color-scheme: light;
+  --page-bg: #f4f6f9;
+  --page-fg: #0f172a;
+  --muted: #475467;
+  --label-bg: #f8fafc;
+  --pane-bg: #ffffff;
+  --pane-border: #dbe3ea;
+  --link: #1d4ed8;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page-bg: #0b1220;
+  --page-fg: #e5edf7;
+  --muted: #a6b3c5;
+  --label-bg: #172235;
+  --pane-bg: #101a2a;
+  --pane-border: #2a3b52;
+  --link: #8ab4ff;
+}
+body {
+  background: var(--page-bg);
+  color: var(--page-fg);
+}
+a { color: var(--link); }
+.ws-meta { margin-bottom: 1.5rem; line-height: 1.6; }
+.ws-meta-lemma { font-size: 1.5em; font-family: serif; margin-right: 0.4rem; }
+.ws-meta-info {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.ws-meta-stats { font-size: 0.85rem; color: var(--muted); margin: 0.3rem 0 0; }
+.ws-title-sub {
+  font-size: 0.45em;
+  font-weight: normal;
+  font-variant: normal;
+  letter-spacing: normal;
+  color: var(--muted);
+  margin-left: 0.4em;
+}
+.ws-expand-btn {
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid var(--pane-border);
+  border-radius: 4px;
+  background: var(--label-bg);
+  color: var(--page-fg);
+  vertical-align: middle;
+}
+.ws-slot {
+  border-top: 2px solid var(--pane-border);
+  padding-top: 1rem;
+  margin-top: 1.75rem;
+}
+.ws-slot-highlighted { border-top-color: var(--link); }
+.ws-grammar-full {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+  color: var(--page-fg);
+}
+.ws-slot-stats { font-size: 0.85rem; color: var(--muted); margin: 0 0 0.75rem; }
+.ws-translation { margin: 0.8rem 0 0.8rem 0.5rem; }
+.ws-rendering {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.4rem;
+}
+.ws-count { font-weight: 400; font-variant: normal; color: var(--muted); font-size: 0.85em; }
+.ws-instance {
+  background: var(--pane-bg);
+  border-left: 3px solid var(--pane-border);
+  padding: 0.4rem 0.7rem;
+  margin: 0.3rem 0;
+  border-radius: 0 4px 4px 0;
+}
+.ws-ref {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+a.ws-ref {
+  color: var(--link);
+  text-decoration: none;
+}
+a.ws-ref:hover { text-decoration: underline; }
+.ws-trad { margin: 0 0 0.2rem; font-size: 0.9rem; }
+.ws-lit { margin: 0; font-size: 0.85rem; color: var(--muted); font-style: italic; }
+mark.ws-target { background: #fef08a; color: #1a1200; border-radius: 2px; padding: 0 1px; font-style: normal; }
+:root[data-theme="dark"] mark.ws-target { background: #5a3e00; color: #fde68a; }
+.ws-more summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--link);
+  padding: 0.2rem 0;
+  margin-top: 0.25rem;
+}
+.ws-overflow-note { font-size: 0.82rem; color: var(--muted); font-style: italic; margin: 0.4rem 0 0; }
+.ws-back-link { font-size: 0.9rem; margin-bottom: 0.75rem; display: block; }
+.ws-footer {
+  border-top: 2px solid var(--pane-border);
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.ws-footer section > h2 { font-size: 0.95rem; margin: 0 0 0.4rem; }
+.ws-footer section ul { margin: 0; padding-left: 1.25rem; }
+.ws-footer section li { font-size: 0.9rem; margin: 0.25rem 0; }
+
+</style>
+</head>
+<body>
+<h1>GRACE <span class="ws-title-sub">· charis · χάρις · Greek · G5485</span></h1>
+<p class="ws-meta-stats">157 total instances · 4 grammar slots <button id="ws-expand-all" class="ws-expand-btn">Expand all</button></p>
+<div id="ws-slots">
+<section class="ws-slot" data-grammar-code="N-NSF">
+<h2 class="ws-grammar-full">Noun Nominative Singular Feminine</h2>
+<p class="ws-slot-stats">62 instances · 5 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">GRACE <span class="ws-count">(51 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Luke/2#40">Luke 2:40</a><p class="ws-trad">And the Child grew and became strong. He was filled with wisdom, and [the] <mark class="ws-target">grace</mark> of God was upon Him.</p><p class="ws-lit">&lt;THE&gt; AND THE CHILD WAS CONTINUING TO GROW AND HE WAS BEING STRENGTHENED IN SPIRIT BEING FILLED WITH WISDOM, AND [THE] <mark class="ws-target">GRACE</mark> OF GOD WAS UPON HIM.</p></div>
+<details class="ws-more">
+<summary>50 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/John/1#17">John 1:17</a><p class="ws-trad">For the law was given through Moses; <mark class="ws-target">grace</mark> and truth came through Jesus Christ.</p><p class="ws-lit">FOR THE LAW THROUGH MOSES WAS GIVEN, &lt;THE&gt; <mark class="ws-target">GRACE</mark> AND &lt;THE&gt; TRUTH THROUGH JESUS CHRIST CAME.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/4#33">Acts 4:33</a><p class="ws-trad">[With] great power the apostles continued to give [their] testimony about the resurrection of the Lord Jesus. And abundant <mark class="ws-target">grace</mark> was upon them all.</p><p class="ws-lit">AND [WITH] POWER GREAT WERE GIVING &lt;THE&gt; TESTIMONY THE APOSTLES OF THE RESURRECTION OF THE LORD JESUS <mark class="ws-target">GRACE</mark> THEN ABUNDANT WAS UPON ALL THEM.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/1#7">Romans 1:7</a><p class="ws-trad">To all in Rome who are loved by God [and] called to be saints: <mark class="ws-target">Grace</mark> and peace to you from God our Father and [the] Lord Jesus Christ.</p><p class="ws-lit">TO ALL THOSE BEING IN ROME BELOVED OF GOD TO [THOSE] CALLED SAINTS: <mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD [THE] FATHER OF US AND [THE] LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/5#15">Romans 5:15</a><p class="ws-trad">But the gift [is] not like the trespass. For if the many died by the trespass of the one [man], how much more {did} God’s <mark class="ws-target">grace</mark> and the gift that came by [the] <mark class="ws-target">grace</mark> of the one man, Jesus Christ, abound to the many!</p><p class="ws-lit">BUT [IS] NOT LIKE THE TRESPASS SO ALSO THE GIFT. IF FOR BY THE OF THE ONE TRESPASS THE MANY DIED, HOW MUCH MORE THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD AND THE GIFT IN <mark class="ws-target">GRACE</mark> WHICH [IS] OF THE ONE MAN JESUS CHRIST TO THE MANY DID ABOUND!</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/5#20">Romans 5:20</a><p class="ws-trad">[The] law came in so that the trespass would increase; but where sin increased, <mark class="ws-target">grace</mark> increased all the more,</p><p class="ws-lit">[THE] LAW NOW ENTERED, SO THAT MAY ABOUND THE TRESPASS; WHERE HOWEVER ABOUNDED &lt;THE&gt; SIN, OVERABOUNDED &lt;THE&gt; <mark class="ws-target">GRACE</mark>,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/5#21">Romans 5:21</a><p class="ws-trad">so that, just as sin reigned in death, so also <mark class="ws-target">grace</mark> might reign through righteousness to bring eternal life through Jesus Christ our Lord.</p><p class="ws-lit">SO THAT JUST AS REIGNED THE SIN IN &lt;THE&gt; DEATH, SO ALSO &lt;THE&gt; <mark class="ws-target">GRACE</mark> MAY REIGN THROUGH RIGHTEOUSNESS UNTO LIFE ETERNAL THROUGH JESUS CHRIST THE LORD OF US.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/6#1">Romans 6:1</a><p class="ws-trad">What then shall we say? Shall we continue in sin so that <mark class="ws-target">grace</mark> may increase?</p><p class="ws-lit">WHAT THEN WILL WE SAY? SHALL WE CONTINUE &lt;THE&gt; IN SIN THAT &lt;THE&gt; <mark class="ws-target">GRACE</mark> MAY ABOUND?</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/11#6">Romans 11:6</a><p class="ws-trad">And if [it is] by <mark class="ws-target">grace</mark>, [then it is] no longer by works. Otherwise, <mark class="ws-target">grace</mark> {would} no longer be <mark class="ws-target">grace</mark>.</p><p class="ws-lit">IF NOW BY <mark class="ws-target">GRACE</mark> NO LONGER FROM WORKS, OTHERWISE &lt;THE&gt; <mark class="ws-target">GRACE</mark> NO LONGER WOULD BE <mark class="ws-target">GRACE</mark> IF NOW FROM WORKS NO LONGER IS <mark class="ws-target">GRACE</mark> SINCE THE WORK NO LONGER IS WORK.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/11#6">Romans 11:6</a><p class="ws-trad">And if [it is] by <mark class="ws-target">grace</mark>, [then it is] no longer by works. Otherwise, <mark class="ws-target">grace</mark> {would} no longer be <mark class="ws-target">grace</mark>.</p><p class="ws-lit">IF NOW BY <mark class="ws-target">GRACE</mark> NO LONGER FROM WORKS, OTHERWISE &lt;THE&gt; <mark class="ws-target">GRACE</mark> NO LONGER WOULD BE <mark class="ws-target">GRACE</mark> IF NOW FROM WORKS NO LONGER IS <mark class="ws-target">GRACE</mark> SINCE THE WORK NO LONGER IS WORK.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/11#6">Romans 11:6</a><p class="ws-trad">And if [it is] by <mark class="ws-target">grace</mark>, [then it is] no longer by works. Otherwise, <mark class="ws-target">grace</mark> {would} no longer be <mark class="ws-target">grace</mark>.</p><p class="ws-lit">IF NOW BY <mark class="ws-target">GRACE</mark> NO LONGER FROM WORKS, OTHERWISE &lt;THE&gt; <mark class="ws-target">GRACE</mark> NO LONGER WOULD BE <mark class="ws-target">GRACE</mark> IF NOW FROM WORKS NO LONGER IS <mark class="ws-target">GRACE</mark> SINCE THE WORK NO LONGER IS WORK.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/16#20">Romans 16:20</a><p class="ws-trad">The God of peace will soon crush Satan under your feet. The <mark class="ws-target">grace</mark> of our Lord Jesus Christ [be] with you.</p><p class="ws-lit">THE NOW GOD &lt;THE&gt; OF PEACE WILL CRUSH &lt;THE&gt; SATAN UNDER THE FEET OF YOU WITH SPEED. THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST [BE] WITH YOU.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/16#24">Romans 16:24</a><p class="ws-trad"></p><p class="ws-lit">THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST WITH ALL OF YOU. AMEN.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/1#3">1 Corinthians 1:3</a><p class="ws-trad"><mark class="ws-target">Grace</mark> and peace to you from God our Father and [the] Lord Jesus Christ.</p><p class="ws-lit"><mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD FATHER OF US AND [THE] LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/15#10">1 Corinthians 15:10</a><p class="ws-trad">But [by the] <mark class="ws-target">grace</mark> of God I am what I am, and His <mark class="ws-target">grace</mark> to me was not in vain. No, I worked harder than all of them— yet not I, but the <mark class="ws-target">grace</mark> of God that [was] with me.</p><p class="ws-lit">BY [THE] <mark class="ws-target">GRACE</mark> HOWEVER OF GOD I AM WHAT I AM, AND THE <mark class="ws-target">GRACE</mark> OF HIM &lt;THE&gt; TOWARD ME MYSELF NOT VOID HAS BEEN, RATHER MORE EXCESSIVE THAN THEM ALL I TOILED, NOT I MYSELF HOWEVER, BUT THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD THAT [WAS] WITH ME MYSELF.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/15#10">1 Corinthians 15:10</a><p class="ws-trad">But [by the] <mark class="ws-target">grace</mark> of God I am what I am, and His <mark class="ws-target">grace</mark> to me was not in vain. No, I worked harder than all of them— yet not I, but the <mark class="ws-target">grace</mark> of God that [was] with me.</p><p class="ws-lit">BY [THE] <mark class="ws-target">GRACE</mark> HOWEVER OF GOD I AM WHAT I AM, AND THE <mark class="ws-target">GRACE</mark> OF HIM &lt;THE&gt; TOWARD ME MYSELF NOT VOID HAS BEEN, RATHER MORE EXCESSIVE THAN THEM ALL I TOILED, NOT I MYSELF HOWEVER, BUT THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD THAT [WAS] WITH ME MYSELF.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/16#23">1 Corinthians 16:23</a><p class="ws-trad">The <mark class="ws-target">grace</mark> of the Lord Jesus [be] with you.</p><p class="ws-lit">THE <mark class="ws-target">GRACE</mark> OF THE LORD JESUS CHRIST [BE] WITH YOU.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/1#2">2 Corinthians 1:2</a><p class="ws-trad"><mark class="ws-target">Grace</mark> and peace to you from God our Father and [the] Lord Jesus Christ.</p><p class="ws-lit"><mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD [THE] FATHER OF US AND [THE] LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/4#15">2 Corinthians 4:15</a><p class="ws-trad">All this [is] for your benefit, so that the <mark class="ws-target">grace</mark> that is extending to more and more [people] may cause thanksgiving to overflow, to the glory of God.</p><p class="ws-lit">&lt;THE&gt; FOR ALL THINGS [ARE] FOR THE SAKE OF YOU, SO THAT THE <mark class="ws-target">GRACE</mark> HAVING ABOUNDED THROUGH &lt;THE&gt; MORE AND MORE THE THANKSGIVING MAY INCREASE TO THE GLORY &lt;THE&gt; OF GOD.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/12#9">2 Corinthians 12:9</a><p class="ws-trad">But He said to me, “My <mark class="ws-target">grace</mark> is sufficient for you, for [My] power is perfected in weakness. Therefore I will boast all the more gladly in my weaknesses, so that the power of Christ may rest on me.</p><p class="ws-lit">AND HE HAS SAID TO ME; SUFFICES YOU THE <mark class="ws-target">GRACE</mark> OF MINE; THE FOR POWER OF MINE IN WEAKNESS IS FINISHED. MOST GLADLY THEREFORE RATHER WILL I BOAST IN THE WEAKNESSES OF MINE, SO THAT MAY REST UPON ME MYSELF THE POWER &lt;THE&gt; OF CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/13#13">2 Corinthians 13:13</a><p class="ws-trad">All the saints send you greetings.</p><p class="ws-lit">[14] THE <mark class="ws-target">GRACE</mark> OF THE LORD JESUS CHRIST AND THE LOVE &lt;THE&gt; OF GOD AND THE FELLOWSHIP OF THE HOLY SPIRIT [BE] WITH ALL OF YOU AMEN TO CORINTHIANS SECOND IT WAS WRITTEN FROM PHILIPPI &lt;THE&gt; OF MACEDONIA THROUGH OF TITUS AND LUKE.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Galatians/1#3">Galatians 1:3</a><p class="ws-trad"><mark class="ws-target">Grace</mark> and peace to you from God our Father and the Lord Jesus Christ,</p><p class="ws-lit"><mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD FATHER OF US AND OF [THE] LORD JESUS CHRIST,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Galatians/6#18">Galatians 6:18</a><p class="ws-trad">The <mark class="ws-target">grace</mark> of our Lord Jesus Christ [be] with your spirit, brothers. Amen.</p><p class="ws-lit">THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST [BE] WITH THE SPIRIT OF YOU, BROTHERS. AMEN. TO GALATIANS IT WAS WRITTEN FROM ROME.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/1#2">Ephesians 1:2</a><p class="ws-trad"><mark class="ws-target">Grace</mark> and peace to you from God our Father and [the] Lord Jesus Christ.</p><p class="ws-lit"><mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD [THE] FATHER OF US AND [THE] LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/3#8">Ephesians 3:8</a><p class="ws-trad">[Though I am] less than the least of all [the] saints, this <mark class="ws-target">grace</mark> was given me: to preach to the Gentiles the unsearchable riches of Christ,</p><p class="ws-lit">TO ME MYSELF THE VERY LEAST OF ALL OF THE SAINTS WAS GIVEN &lt;THE&gt; <mark class="ws-target">GRACE</mark> THIS, AMONG THE GENTILES TO EVANGELISE THE UNSEARCHABLE RICHES &lt;THE&gt; OF CHRIST</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/4#7">Ephesians 4:7</a><p class="ws-trad">Now to each one of us <mark class="ws-target">grace</mark> has been given according to the measure of the gift of Christ.</p><p class="ws-lit">ONE NOW TO EACH OF US HAS BEEN GIVEN &lt;THE&gt; <mark class="ws-target">GRACE</mark> ACCORDING TO THE MEASURE OF THE GIFT &lt;THE&gt; OF CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/6#24">Ephesians 6:24</a><p class="ws-trad"><mark class="ws-target">Grace</mark> to all who love our Lord Jesus Christ with an undying [love].</p><p class="ws-lit">&lt;THE&gt; <mark class="ws-target">GRACE</mark> [BE] WITH ALL THOSE LOVING THE LORD OF US JESUS CHRIST IN INCORRUPTIBILITY AMEN. TO EPHESIAN IT WAS WRITTEN FROM ROME THROUGH TYCHICUS.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Philippians/1#2">Philippians 1:2</a><p class="ws-trad"><mark class="ws-target">Grace</mark> and peace to you from God our Father and [the] Lord Jesus Christ.</p><p class="ws-lit"><mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD FATHER OF US AND [THE] LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Philippians/4#23">Philippians 4:23</a><p class="ws-trad">The <mark class="ws-target">grace</mark> of the Lord Jesus Christ [be] with your spirit.</p><p class="ws-lit">THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST [BE] WITH THE SPIRIT OF YOU. AMEN. TO PHILIPPI IT WAS WRITTEN FROM ROME THROUGH EPAPHRODITUS.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Colossians/1#2">Colossians 1:2</a><p class="ws-trad">To the saints and faithful brothers in Christ at Colossae: <mark class="ws-target">Grace</mark> and peace to you from God our Father.</p><p class="ws-lit">TO THOSE IN COLOSSAE SAINTS AND FAITHFUL BROTHERS IN CHRIST: <mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD [THE] FATHER OF US AND LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Colossians/4#18">Colossians 4:18</a><p class="ws-trad">This greeting [is in my] own hand— Paul. Remember my chains. <mark class="ws-target">Grace</mark> [be] with you.</p><p class="ws-lit">THE GREETING &lt;THE&gt; IN MY OWN HAND — BY PAUL. DO REMEMBER MY &lt;THE&gt; CHAINS. &lt;THE&gt; <mark class="ws-target">GRACE</mark> [BE] WITH YOU AMEN. TO COLOSSIAN IT WAS WRITTEN FROM ROME THROUGH TYCHICUS AND ONESIMUS.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Thessalonians/1#1">1 Thessalonians 1:1</a><p class="ws-trad">Paul, Silvanus, and Timothy, To the church of the Thessalonians in God [the] Father and [the] Lord Jesus Christ: <mark class="ws-target">Grace</mark> and peace to you.</p><p class="ws-lit">PAUL AND SILVANUS AND TIMOTHY TO THE CHURCH OF THE THESSALONIANS IN GOD [THE] FATHER AND IN [THE] LORD JESUS CHRIST: <mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM OF GOD FATHER OF US AND LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Thessalonians/5#28">1 Thessalonians 5:28</a><p class="ws-trad">The <mark class="ws-target">grace</mark> of our Lord Jesus Christ [be] with you.</p><p class="ws-lit">THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST [BE] WITH YOU. AMEN. TO THESSALONICA FIRST IT WAS WRITTEN FROM ATHENS.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Thessalonians/1#2">2 Thessalonians 1:2</a><p class="ws-trad"><mark class="ws-target">Grace</mark> and peace to you from God our Father and the Lord Jesus Christ.</p><p class="ws-lit"><mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD [THE] FATHER OF US AND [THE] LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Thessalonians/3#18">2 Thessalonians 3:18</a><p class="ws-trad">The <mark class="ws-target">grace</mark> of our Lord Jesus Christ [be] with all of you.</p><p class="ws-lit">THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST [BE] WITH ALL OF YOU AMEN. TO THESSALONICA SECOND IT WAS WRITTEN FROM ATHENS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Timothy/1#2">1 Timothy 1:2</a><p class="ws-trad">To Timothy, [my] true child in [the] faith: <mark class="ws-target">Grace</mark>, mercy, [and] peace from God [the] Father and Christ Jesus our Lord.</p><p class="ws-lit">TO TIMOTHY [MY] TRUE CHILD IN [THE] FAITH: <mark class="ws-target">GRACE</mark>, MERCY, [AND] PEACE FROM GOD [THE] FATHER OF US AND CHRIST JESUS THE LORD OF US.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Timothy/1#14">1 Timothy 1:14</a><p class="ws-trad">And the <mark class="ws-target">grace</mark> of our Lord overflowed [to me], along with [the] faith and love that [are] in Christ Jesus.</p><p class="ws-lit">SURPASSINGLY INCREASED THEN THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US WITH [THE] FAITH AND LOVE THAT [ARE] IN CHRIST JESUS.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Timothy/6#21">1 Timothy 6:21</a><p class="ws-trad">which some have professed and [thus] swerved away from the faith. <mark class="ws-target">Grace</mark> [be] with you all.</p><p class="ws-lit">WHICH SOME PROFESSING FROM THE FAITH WENT ASTRAY. {22} &lt;THE&gt; <mark class="ws-target">GRACE</mark> [BE] WITH YOU [ALL] AMEN. TO TIMOTHY FIRST IT WAS WRITTEN FROM LAODICEA WHICH IS CAPITAL OF PHRYGIA &lt;THE&gt; OF PACATIANA.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Timothy/1#2">2 Timothy 1:2</a><p class="ws-trad">To Timothy, [my] beloved child: <mark class="ws-target">Grace</mark>, mercy, [and] peace from God [the] Father and Christ Jesus our Lord.</p><p class="ws-lit">TO TIMOTHY [MY] BELOVED CHILD: <mark class="ws-target">GRACE</mark>, MERCY, [AND] PEACE FROM GOD [THE] FATHER AND CHRIST JESUS THE LORD OF US.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Timothy/4#22">2 Timothy 4:22</a><p class="ws-trad">The Lord [be] with your spirit. <mark class="ws-target">Grace</mark> [be] with you all.</p><p class="ws-lit">THE LORD JESUS CHRIST [BE] WITH THE SPIRIT OF YOU. &lt;THE&gt; <mark class="ws-target">GRACE</mark> [BE] WITH YOU ALL AMEN. TO TIMOTHY SECOND [EPISTLE] OF THE EPHESIAN CHURCH FIRST OVERSEER HAVING BEEN CHOSEN IT WAS WRITTEN FROM ROME WHEN FROM SECOND TIME STOOD PAUL &lt;THE&gt; BEFORE CAESAR NERO</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Titus/1#4">Titus 1:4</a><p class="ws-trad">To Titus, [my] true child in [our] common faith: <mark class="ws-target">Grace</mark> and peace from God [the] Father and Christ Jesus our Savior.</p><p class="ws-lit">TO TITUS [MY] TRUE CHILD ACCORDING TO [OUR] COMMON FAITH: <mark class="ws-target">GRACE</mark> AND PEACE FROM GOD [THE] FATHER AND LORD CHRIST JESUS THE SAVIOR OF US.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Titus/2#11">Titus 2:11</a><p class="ws-trad">For the <mark class="ws-target">grace</mark> of God has appeared, bringing salvation to everyone.</p><p class="ws-lit">HAS APPEARED FOR THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD &lt;THE&gt; [BRINGING] SALVATION TO ALL MEN</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Titus/3#15">Titus 3:15</a><p class="ws-trad">All who [are] with me send you greetings. Greet those who love us in [the] faith. <mark class="ws-target">Grace</mark> [be] with all of you.</p><p class="ws-lit">GREET YOU THOSE WITH ME ALL. DO GREET THOSE LOVING US IN [THE] FAITH. &lt;THE&gt; <mark class="ws-target">GRACE</mark> [BE] WITH ALL OF YOU AMEN. TO TITUS OF THE CRETAN CHURCH FIRST OVERSEER HAVING BEEN CHOSEN IT WAS WRITTEN FROM NICOPOLIS &lt;THE&gt; OF MACEDONIA.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Philemon/1#3">Philemon 1:3</a><p class="ws-trad"><mark class="ws-target">Grace</mark> and peace to you from God our Father and [the] Lord Jesus Christ.</p><p class="ws-lit"><mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM GOD FATHER OF US AND [THE] LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Philemon/1#25">Philemon 1:25</a><p class="ws-trad">The <mark class="ws-target">grace</mark> of the Lord Jesus Christ [be] with your spirit.</p><p class="ws-lit">THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST [BE] WITH THE SPIRIT OF YOU. AMEN. TO TO PHILEMON IT WAS WRITTEN FROM ROME THROUGH ONESIMUS SERVANT.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hebrews/13#25">Hebrews 13:25</a><p class="ws-trad"><mark class="ws-target">Grace</mark> [be] with all of you.</p><p class="ws-lit">&lt;THE&gt; <mark class="ws-target">GRACE</mark> [BE] WITH ALL OF YOU. AMEN. TO HEBREWS IT WAS WRITTEN FROM &lt;THE&gt; ITALY THROUGH TIMOTHY.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/1#2">1 Peter 1:2</a><p class="ws-trad">according to [the] foreknowledge of God [the] Father [and] sanctified by [the] Spirit for obedience to Jesus Christ and sprinkling by [His] blood: <mark class="ws-target">Grace</mark> and peace be yours in abundance.</p><p class="ws-lit">ACCORDING TO [THE] FOREKNOWLEDGE OF GOD [THE] FATHER BY [THE] SANCTIFICATION OF [THE] SPIRIT UNTO [THE] OBEDIENCE AND SPRINKLING OF [THE] BLOOD OF JESUS CHRIST: <mark class="ws-target">GRACE</mark> TO YOU AND PEACE WOULD BE MULTIPLIED.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Peter/1#2">2 Peter 1:2</a><p class="ws-trad"><mark class="ws-target">Grace</mark> and peace be multiplied to you through [the] knowledge of God and of Jesus our Lord.</p><p class="ws-lit"><mark class="ws-target">GRACE</mark> TO YOU AND PEACE WOULD BE MULTIPLIED IN [THE] KNOWLEDGE &lt;THE&gt; OF GOD AND OF JESUS THE LORD OF US.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-John/1#3">2 John 1:3</a><p class="ws-trad"><mark class="ws-target">Grace</mark>, mercy, [and] peace from God [the] Father and from Jesus Christ, the Son of the Father, will be with us in truth and love.</p><p class="ws-lit">WILL BE WITH US <mark class="ws-target">GRACE</mark> MERCY [AND] PEACE FROM GOD [THE] FATHER AND FROM LORD JESUS CHRIST THE SON OF THE FATHER IN TRUTH AND LOVE.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Revelation/1#4">Revelation 1:4</a><p class="ws-trad">John, To the seven churches in [the province of] Asia: <mark class="ws-target">Grace</mark> and peace to you from Him who is and was and is to come, and from the seven spirits before His throne,</p><p class="ws-lit">JOHN TO THE SEVEN CHURCHES &lt;THE&gt; IN &lt;THE&gt; ASIA: <mark class="ws-target">GRACE</mark> TO YOU AND PEACE FROM HIM WHO IS AND WHO WAS AND WHO IS COMING AND FROM THE SEVEN SPIRITS WHO IS BEFORE THE THRONE OF HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Revelation/22#21">Revelation 22:21</a><p class="ws-trad">The <mark class="ws-target">grace</mark> of the Lord Jesus [be] with all the saints. Amen.</p><p class="ws-lit">THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST [BE] WITH ALL &lt;THE&gt; OF YOU AMEN.</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">THANKS <span class="ws-count">(6 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/6#17">Romans 6:17</a><p class="ws-trad">But <mark class="ws-target">thanks</mark> [be] to God that, though you once were slaves to sin, you wholeheartedly obeyed the form of teaching to which you were committed.</p><p class="ws-lit"><mark class="ws-target">THANKS</mark> [BE] HOWEVER &lt;THE&gt; TO GOD THAT YOU WERE SLAVES &lt;THE&gt; OF SIN, YOU HAVE BECOME OBEDIENT NOW FROM [THE] HEART TO WHICH YOU WERE HANDED OVER TO THE FORM OF TEACHING.</p></div>
+<details class="ws-more">
+<summary>5 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/7#25">Romans 7:25</a><p class="ws-trad"><mark class="ws-target">Thanks</mark> [be] to God, through Jesus Christ our Lord! So then, with [my] mind I serve [the] law of God, but [with my] flesh [I serve the] law of sin.</p><p class="ws-lit"><mark class="ws-target">THANKS</mark> [BE] THEN &lt;THE&gt; TO GOD THROUGH JESUS CHRIST THE LORD OF US! THEN SO MYSELF I MYSELF WITH THE INDEED MIND SERVE LAW OF GOD &lt;THE&gt; BUT [WITH] THE FLESH [THE] LAW OF SIN.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/15#57">1 Corinthians 15:57</a><p class="ws-trad">But <mark class="ws-target">thanks</mark> [be] to God, who gives us the victory through our Lord Jesus Christ!</p><p class="ws-lit">&lt;THE&gt; HOWEVER TO GOD [BE] <mark class="ws-target">THANKS</mark> WHO IS GIVING US THE VICTORY THROUGH THE LORD OF US JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/2#14">2 Corinthians 2:14</a><p class="ws-trad">But <mark class="ws-target">thanks</mark> [be] to God, who always leads us triumphantly as captives in Christ and through us spreads everywhere the fragrance of [the] knowledge of Him.</p><p class="ws-lit">&lt;THE&gt; HOWEVER TO GOD [BE] <mark class="ws-target">THANKS</mark> TO THE [ONE] ALWAYS LEADING IN TRIUMPH US IN &lt;THE&gt; CHRIST AND THE FRAGRANCE OF THE KNOWLEDGE OF HIM MAKING MANIFEST THROUGH US IN EVERY PLACE,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/8#16">2 Corinthians 8:16</a><p class="ws-trad">But <mark class="ws-target">thanks</mark> [be] to God, who put into the heart of Titus the same devotion [I have] for you.</p><p class="ws-lit"><mark class="ws-target">THANKS</mark> HOWEVER &lt;THE&gt; TO GOD THE [ONE] GAVE THE SAME EARNESTNESS FOR YOU INTO THE HEART OF TITUS,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/9#15">2 Corinthians 9:15</a><p class="ws-trad"><mark class="ws-target">Thanks</mark> [be] to God for His indescribable gift!</p><p class="ws-lit"><mark class="ws-target">THANKS</mark> [BE] NOW &lt;THE&gt; TO GOD FOR THE INDESCRIBABLE OF HIM GIFT!</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">CREDIT <span class="ws-count">(3 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Luke/6#32">Luke 6:32</a><p class="ws-trad">If you love those who love you, what <mark class="ws-target">credit</mark> is that to you? Even sinners love those who love them.</p><p class="ws-lit">AND IF YOU LOVE THOSE LOVING YOU, WHAT TO YOU <mark class="ws-target">CREDIT</mark> IS IT? EVEN FOR &lt;THE&gt; SINNERS THOSE LOVING THEM LOVE.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Luke/6#33">Luke 6:33</a><p class="ws-trad">If you do good to those who do good to you, what <mark class="ws-target">credit</mark> is that to you? Even sinners do the same.</p><p class="ws-lit">AND FOR IF YOU SHALL DO GOOD TO THOSE DOING GOOD TO YOU, WHAT TO YOU <mark class="ws-target">CREDIT</mark> IS IT? FOR EVEN FOR &lt;THE&gt; SINNERS THE SAME PERFORM.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Luke/6#34">Luke 6:34</a><p class="ws-trad">And if you lend [to those] from whom you expect repayment, what <mark class="ws-target">credit</mark> is that to you? Even sinners lend to sinners, expecting to be repaid in full.</p><p class="ws-lit">AND IF YOU SHALL LEND [TO THOSE] FROM WHOM YOU EXPECT TO RECEIVE , WHAT TO YOU <mark class="ws-target">CREDIT</mark> IS IT? EVEN FOR &lt;THE&gt; SINNERS TO SINNERS LEND THAT THEY MAY RECEIVE THE SAME AMOUNT.</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">ACCEPTABLE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/2#19">1 Peter 2:19</a><p class="ws-trad">For if anyone endures the pain of unjust suffering because he is conscious of God, this is to be commended.</p><p class="ws-lit">THIS FOR [IS] <mark class="ws-target">ACCEPTABLE</mark>, IF FOR SAKE OF CONSCIENCE TOWARD GOD ENDURES ANYONE GRIEFS SUFFERING UNJUSTLY.</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">COMMENDABLE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/2#20">1 Peter 2:20</a><p class="ws-trad">How is it to your credit if you are beaten for doing wrong and you endure [it]? But if you suffer for doing good [and] you endure [it], this [is] <mark class="ws-target">commendable</mark> before God.</p><p class="ws-lit">WHAT KIND OF FOR CREDIT [IS IT] IF SINNING AND BEING STRUCK YOU WILL ENDURE? BUT IF DOING GOOD AND SUFFERING YOU WILL ENDURE, THIS [IS] <mark class="ws-target">COMMENDABLE</mark> BEFORE GOD.</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="N-ASF">
+<h2 class="ws-grammar-full">Noun Accusative Singular Feminine</h2>
+<p class="ws-slot-stats">44 instances · 6 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">GRACE <span class="ws-count">(33 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/John/1#16">John 1:16</a><p class="ws-trad">From His fullness we {have} all received <mark class="ws-target">grace</mark> upon <mark class="ws-target">grace</mark>.</p><p class="ws-lit">FOR FROM THE FULLNESS OF HIM WE OURSELVES ALL HAVE RECEIVED THEN <mark class="ws-target">GRACE</mark> FOR <mark class="ws-target">GRACE</mark>.</p></div>
+<details class="ws-more">
+<summary>32 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/11#23">Acts 11:23</a><p class="ws-trad">[When] he arrived and saw the <mark class="ws-target">grace</mark> of God, he rejoiced and encouraged them all to abide in the Lord with all their hearts.</p><p class="ws-lit">WHO HAVING COME AND HAVING SEEN THE <mark class="ws-target">GRACE</mark> WHICH [IS] &lt;THE&gt; OF GOD HE REJOICED AND HE WAS EXHORTING ALL &lt;THE&gt; WITH RESOLUTE PURPOSE &lt;THE&gt; OF HEART TO ABIDE IN THE LORD;</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/1#5">Romans 1:5</a><p class="ws-trad">Through [Him] [and] on behalf of His name, we received <mark class="ws-target">grace</mark> and apostleship to call all [those] among the Gentiles [to the] obedience that comes from faith.</p><p class="ws-lit">THROUGH WHOM WE HAVE RECEIVED <mark class="ws-target">GRACE</mark> AND APOSTLESHIP UNTO OBEDIENCE OF FAITH AMONG ALL THE GENTILES ON BEHALF OF THE NAME OF HIM,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/4#4">Romans 4:4</a><p class="ws-trad">Now the wages of [the] worker are not credited as a gift, but as an obligation.</p><p class="ws-lit">TO THE [ONE] NOW WORKING THE REWARD NOT IS RECKONED ACCORDING TO <mark class="ws-target">GRACE</mark> BUT ACCORDING TO &lt;THE&gt; DEBT;</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/4#16">Romans 4:16</a><p class="ws-trad">Therefore, [the promise comes] by faith, so that [it] may rest on <mark class="ws-target">grace</mark> [and] may be guaranteed to all [Abraham’s] offspring— not only to those who are of the law, but also to those who are of [the] faith of Abraham. [He] is [the] father of us all.</p><p class="ws-lit">THEREFORE IT [IS] OF FAITH, THAT [IT MAY BE] ACCORDING TO <mark class="ws-target">GRACE</mark>, FOR &lt;THE&gt; TO BE SURE THE PROMISE TO ALL THE SEED, NOT TO THAT OF THE LAW ONLY BUT ALSO TO THAT OF [THE] FAITH OF ABRAHAM, WHO IS [THE] FATHER OF ALL OF US —</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/5#2">Romans 5:2</a><p class="ws-trad">through whom we have gained access by faith into this <mark class="ws-target">grace</mark> in which we stand. And we rejoice in [the] hope of the glory of God.</p><p class="ws-lit">THROUGH WHOM ALSO &lt;THE&gt; ACCESS WE HAVE HAD &lt;THE&gt; BY FAITH INTO &lt;THE&gt; <mark class="ws-target">GRACE</mark> THIS IN WHICH WE HAVE STOOD, AND WE BOAST IN HOPE OF THE GLORY &lt;THE&gt; OF GOD.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/6#14">Romans 6:14</a><p class="ws-trad">For sin shall not be your master, because you are not under law, but under <mark class="ws-target">grace</mark>.</p><p class="ws-lit">SIN FOR YOU NOT WILL RULE OVER; NOT FOR YOU ARE UNDER LAW BUT UNDER <mark class="ws-target">GRACE</mark>.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/6#15">Romans 6:15</a><p class="ws-trad">What then? Shall we sin because we are not under law, but under <mark class="ws-target">grace</mark>? Certainly not!</p><p class="ws-lit">WHAT THEN? SHALL WE SIN BECAUSE NOT WE ARE UNDER LAW BUT UNDER <mark class="ws-target">GRACE</mark>? NEVER WOULD IT BE!</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/12#6">Romans 12:6</a><p class="ws-trad">We have different gifts according to the <mark class="ws-target">grace</mark> given us. If [one’s gift is] prophecy, [let him use] it in proportion to [his] faith;</p><p class="ws-lit">WE ARE HAVING HOWEVER GIFTS ACCORDING TO THE <mark class="ws-target">GRACE</mark> WHICH HAVING BEEN GIVEN TO US DIFFERENT, IF PROPHECY ACCORDING TO THE PROPORTION OF THE FAITH,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/15#15">Romans 15:15</a><p class="ws-trad">However, I have written you a bold reminder on some points, because of the <mark class="ws-target">grace</mark> God has given me</p><p class="ws-lit">MORE BOLDLY HOWEVER I HAVE WRITTEN TO YOU BROTHERS IN PART AS REMINDING YOU BECAUSE OF THE <mark class="ws-target">GRACE</mark> WHICH HAVING BEEN GIVEN TO ME BY &lt;THE&gt; GOD</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/3#10">1 Corinthians 3:10</a><p class="ws-trad">By the <mark class="ws-target">grace</mark> God has given me, I laid [a] foundation as an expert builder, and someone else is building on [it]. But each one must be careful how he builds.</p><p class="ws-lit">ACCORDING TO THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD WHICH HAVING BEEN GIVEN TO ME AS A WISE MASTER BUILDER [THE] FOUNDATION I  LAID, ANOTHER HOWEVER IS BUILDING UPON [IT]. EACH ONE HOWEVER SHOULD TAKE HEED HOW HE BUILDS UPON [IT].</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/1#15">2 Corinthians 1:15</a><p class="ws-trad">Confident of this, I planned to visit you first, so that you might receive a double blessing.</p><p class="ws-lit">AND WITH THIS &lt;THE&gt; CONFIDENCE I WAS PLANNING &lt;THE&gt; PREVIOUSLY TO YOU TO COME SO THAT SECONDLY <mark class="ws-target">GRACE</mark> YOU MAY HAVE</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/6#1">2 Corinthians 6:1</a><p class="ws-trad">[As] [God’s] fellow workers, then, we urge you not to receive God’s <mark class="ws-target">grace</mark> in vain.</p><p class="ws-lit">WORKING TOGETHER NOW ALSO WE EXHORT NOT IN VAIN THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD TO RECEIVE YOU;</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/8#1">2 Corinthians 8:1</a><p class="ws-trad">Now, brothers, we want you to know about the <mark class="ws-target">grace</mark> [that] God has given the churches of Macedonia.</p><p class="ws-lit">WE MAKE KNOWN NOW TO YOU, BROTHERS, THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD WHICH BESTOWED AMONG THE CHURCHES &lt;THE&gt; OF MACEDONIA</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/8#4">2 Corinthians 8:4</a><p class="ws-trad">they earnestly pleaded with us for the privilege of sharing in [this] service to the saints.</p><p class="ws-lit">WITH MUCH ENTREATY IMPLORING OF US FOR THE <mark class="ws-target">GRACE</mark> AND THE FELLOWSHIP OF THE SERVICE &lt;THE&gt; AMONG THE SAINTS TO RECEIVE US,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/8#6">2 Corinthians 8:6</a><p class="ws-trad">So we urged Titus to help complete your [act of] <mark class="ws-target">grace</mark>, just as he had started [it].</p><p class="ws-lit">ACCORDINGLY &lt;THE&gt; EXHORTING WE TITUS, THAT EVEN AS HE HAD BEGUN SO ALSO HE MAY COMPLETE WITH YOU AS WELL &lt;THE&gt; <mark class="ws-target">GRACE</mark> THIS.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/8#9">2 Corinthians 8:9</a><p class="ws-trad">For you know the <mark class="ws-target">grace</mark> of our Lord Jesus Christ, that [though] He was rich, yet for your sake He became poor, so that you through [His] poverty might become rich.</p><p class="ws-lit">YOU KNOW FOR THE <mark class="ws-target">GRACE</mark> OF THE LORD OF US JESUS CHRIST THAT FOR THE SAKE OF YOU HE BECAME POOR RICH BEING, SO THAT YOU YOURSELVES &lt;THE&gt; THROUGH THAT POVERTY MAY BE ENRICHED.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/9#8">2 Corinthians 9:8</a><p class="ws-trad">And God [is] able {to make} all <mark class="ws-target">grace</mark> abound to you, so that in all things, at all times, having all that you need, you will abound in every good work.</p><p class="ws-lit">IS ABLE NOW &lt;THE&gt; GOD ALL <mark class="ws-target">GRACE</mark> TO MAKE ABOUND TO YOU, SO THAT IN EVERY [WAY] ALWAYS ALL SUFFICIENCY HAVING YOU MAY ABOUND IN EVERY WORK GOOD</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/9#14">2 Corinthians 9:14</a><p class="ws-trad">And their prayers for you will express their affection for you, because of the surpassing <mark class="ws-target">grace</mark> God [has given] you.</p><p class="ws-lit">AND BY THEIR SUPPLICATION FOR YOU A LONGING FOR YOU ON ACCOUNT OF THE SURPASSING <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD UPON YOU.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Galatians/2#9">Galatians 2:9</a><p class="ws-trad">And recognizing the <mark class="ws-target">grace</mark> [that] I had been given, James Cephas, and John— those reputed to be pillars— gave me and Barnabas [the] right hand of fellowship, so that we should go to the Gentiles, and they to the circumcised.</p><p class="ws-lit">AND HAVING KNOWN THE <mark class="ws-target">GRACE</mark> WHICH HAVING BEEN GIVEN TO ME, JAMES AND CEPHAS AND JOHN, THOSE ESTEEMED PILLARS TO BE, [THE] RIGHT HANDS GAVE TO ME MYSELF AND TO BARNABAS OF FELLOWSHIP, THAT WE OURSELVES [SHOULD GO] INDEED TO THE GENTILES, THEY HOWEVER TO THE CIRCUMCISION,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Galatians/2#21">Galatians 2:21</a><p class="ws-trad">I do not set aside the <mark class="ws-target">grace</mark> of God. For if righteousness [comes] through the law, then Christ died for nothing.</p><p class="ws-lit">NOT I DO SET ASIDE THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD; IF FOR THROUGH [THE] LAW RIGHTEOUSNESS [IS], THEN CHRIST FOR NAUGHT DIED.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/4#29">Ephesians 4:29</a><p class="ws-trad">{Let} no unwholesome talk come out of your mouths, but only what is helpful for building up the [one] in need [and] bringing <mark class="ws-target">grace</mark> to those who listen.</p><p class="ws-lit">ANY WORD UNWHOLESOME OUT OF THE MOUTH OF YOU NOT SHOULD GO FORTH BUT IF ANY GOOD FOR EDIFICATION OF THE NEED, SO THAT IT SHALL GIVE <mark class="ws-target">GRACE</mark> TO THOSE HEARING.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Colossians/1#6">Colossians 1:6</a><p class="ws-trad">that has come to you. All over the world [this gospel] is bearing fruit and growing, just as [it has been doing] among you since the day you heard [it] and truly understood the <mark class="ws-target">grace</mark> of God.</p><p class="ws-lit">WHICH IS BEING PRESENT UNTO YOU, EVEN AS ALSO IN ALL THE WORLD AND IT IS BEARING FRUIT AND INCREASING EVEN AS ALSO AMONG YOU FROM THE DAY YOU HEARD AND YOU KNEW THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD IN TRUTH,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Thessalonians/1#12">2 Thessalonians 1:12</a><p class="ws-trad">so that the name of our Lord Jesus will be glorified in you, and you in Him, according to the <mark class="ws-target">grace</mark> of our God and of [the] Lord Jesus Christ.</p><p class="ws-lit">SO THAT MAY BE GLORIFIED THE NAME OF THE LORD OF US JESUS CHRIST IN YOU AND YOU IN HIM ACCORDING TO THE <mark class="ws-target">GRACE</mark> OF THE GOD OF US AND [THE] LORD JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Timothy/1#9">2 Timothy 1:9</a><p class="ws-trad">[He] has saved us and called [us] to a holy calling, not because of our works, but by His own purpose and [by the] <mark class="ws-target">grace</mark> He granted us in Christ Jesus before time began.</p><p class="ws-lit">THE [ONE WHO] HAVING SAVED US AND HAVING CALLED [US] WITH A CALLING HOLY, NOT ACCORDING TO THE WORKS OF US BUT ACCORDING TO [HIS] OWN PURPOSE AND <mark class="ws-target">GRACE</mark> WHICH HAVING BEEN GIVEN US IN CHRIST JESUS BEFORE TIME ETERNAL,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hebrews/4#16">Hebrews 4:16</a><p class="ws-trad">Let us then approach the throne of <mark class="ws-target">grace</mark> with confidence, so that we may receive mercy and find <mark class="ws-target">grace</mark> to help [us] in [our] time of need.</p><p class="ws-lit">WE MAY COME THEREFORE WITH BOLDNESS TO THE THRONE &lt;THE&gt; OF <mark class="ws-target">GRACE</mark>, SO THAT WE MAY RECEIVE MERCY AND <mark class="ws-target">GRACE</mark> MAY FIND FOR IN TIME OF NEED HELP.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hebrews/12#28">Hebrews 12:28</a><p class="ws-trad">Therefore, [since] we are receiving an unshakable kingdom, let us be filled with gratitude, [and so] worship God acceptably with reverence and awe.</p><p class="ws-lit">THEREFORE A KINGDOM NOT TO BE SHAKEN RECEIVING WE MAY HAVE <mark class="ws-target">GRACE</mark> THROUGH WHICH WE MAY SERVE WELL PLEASINGLY &lt;THE&gt; GOD WITH REVERENCE AND FEAR;</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/James/4#6">James 4:6</a><p class="ws-trad">But He gives [us] more <mark class="ws-target">grace</mark>. This is why it says: God opposes [the] proud, but gives <mark class="ws-target">grace</mark> to [the] humble.”</p><p class="ws-lit">GREATER HOWEVER HE GIVES <mark class="ws-target">GRACE</mark>; THEREFORE IT SAYS: &lt;THE&gt; GOD [THE] PROUD OPPOSES, TO [THE] HUMBLE HOWEVER GIVES <mark class="ws-target">GRACE</mark>.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/James/4#6">James 4:6</a><p class="ws-trad">But He gives [us] more <mark class="ws-target">grace</mark>. This is why it says: God opposes [the] proud, but gives <mark class="ws-target">grace</mark> to [the] humble.”</p><p class="ws-lit">GREATER HOWEVER HE GIVES <mark class="ws-target">GRACE</mark>; THEREFORE IT SAYS: &lt;THE&gt; GOD [THE] PROUD OPPOSES, TO [THE] HUMBLE HOWEVER GIVES <mark class="ws-target">GRACE</mark>.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/1#13">1 Peter 1:13</a><p class="ws-trad">Therefore prepare your minds {for action}. Be sober-minded. Set [your] hope fully on the <mark class="ws-target">grace</mark> to be given you at [the] revelation of Jesus Christ.</p><p class="ws-lit">THEREFORE HAVING GIRDED UP THE LOINS OF THE MIND OF YOU, BEING SOBER-MINDED, FULLY DO SET [YOUR] HOPE UPON WHICH IS BEING BROUGHT TO YOU <mark class="ws-target">GRACE</mark> IN [THE] REVELATION OF JESUS CHRIST.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/5#5">1 Peter 5:5</a><p class="ws-trad">Young men, in the same way, submit yourselves to [your] elders. And all [of you], clothe yourselves with humility toward one another, because, God opposes [the] proud, but gives <mark class="ws-target">grace</mark> to [the] humble.”</p><p class="ws-lit">LIKEWISE YOUNGER [ONES], DO BE SUBJECTED TO [YOUR] ELDERS, ALL NOW TO ONE ANOTHER BE SUBMITTING YOURSELVES &lt;THE&gt; HUMILITY DO GIRD ON, BECAUSE &lt;THE&gt; GOD [THE] PROUD OPPOSES, TO [THE] HUMBLE HOWEVER HE GIVES <mark class="ws-target">GRACE</mark>.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/5#12">1 Peter 5:12</a><p class="ws-trad">Through Silvanus, [whom] I regard as a faithful brother, I have written to you briefly, encouraging [you] and testifying [that] this is [the] true <mark class="ws-target">grace</mark> of God. Stand firm in [it].</p><p class="ws-lit">THROUGH SILVANUS TO YOU THE FAITHFUL BROTHER AS I REGARD [HIM], THROUGH FEW [WORDS] I HAVE WRITTEN EXHORTING AND TESTIFYING THIS TO BE [THE] TRUE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD, IN WHICH DO STAND FIRM.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Jude/1#4">Jude 1:4</a><p class="ws-trad">For certain men have crept in [among you] unnoticed— ungodly [ones] who were designated long ago for condemnation. They turn the <mark class="ws-target">grace</mark> of our God into a license for immorality, and they deny our only Master and Lord, Jesus Christ.</p><p class="ws-lit">CAME IN STEALTHILY FOR CERTAIN MEN, THOSE LONG AGO DESIGNATED UNTO THIS &lt;THE&gt; CONDEMNATION, UNGODLY [ONES], THE OF THE GOD OF US <mark class="ws-target">GRACE</mark> CHANGING INTO SENSUALITY AND THE ONLY MASTER GOD AND LORD OF US JESUS CHRIST DENYING.</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">FAVOR <span class="ws-count">(5 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Luke/1#30">Luke 1:30</a><p class="ws-trad">So the angel told her, “{Do} not be afraid, Mary, for you have found <mark class="ws-target">favor</mark> with God.</p><p class="ws-lit">AND SAID THE ANGEL TO HER; NOT DO FEAR MARY, YOU HAVE FOUND FOR <mark class="ws-target">FAVOR</mark> WITH &lt;THE&gt; GOD.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/2#47">Acts 2:47</a><p class="ws-trad">praising God and enjoying [the] <mark class="ws-target">favor</mark> of all the people. And the Lord added to their number daily those who were being saved.</p><p class="ws-lit">PRAISING &lt;THE&gt; GOD AND HAVING <mark class="ws-target">FAVOR</mark> WITH ALL THE PEOPLE. &lt;THE&gt; AND THE LORD WAS ADDING THOSE WHO WERE BEING SAVED EVERY DAY TO &lt;THE&gt; THEM.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/7#10">Acts 7:10</a><p class="ws-trad">and rescued him from all his troubles. [He] granted [Joseph] <mark class="ws-target">favor</mark> and wisdom in the sight of Pharaoh king of Egypt, [who] appointed him ruler over Egypt and all his household.</p><p class="ws-lit">AND RESCUED HIM OUT OF ALL THE TRIBULATIONS OF HIM AND GAVE TO HIM <mark class="ws-target">FAVOR</mark> AND WISDOM BEFORE PHARAOH KING OF EGYPT AND HE APPOINTED HIM RULER OVER EGYPT AND OVER ALL THE HOUSE OF HIM.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/7#46">Acts 7:46</a><p class="ws-trad">who found <mark class="ws-target">favor</mark> in the sight of God and asked to provide a dwelling place for the God of Jacob.</p><p class="ws-lit">WHO FOUND <mark class="ws-target">FAVOR</mark> BEFORE &lt;THE&gt; GOD AND ASKED TO FIND A DWELLING PLACE FOR THE HOUSE OF JACOB.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/24#27">Acts 24:27</a><p class="ws-trad">[After] two years had passed, Felix was succeeded by Porcius Festus. And wishing to do the Jews a <mark class="ws-target">favor</mark> Felix left Paul in prison.</p><p class="ws-lit">WHEN TWO YEARS HOWEVER HAVING BEEN COMPLETED HE RECEIVED [AS] SUCCESSOR &lt;THE&gt; FELIX PORCIUS FESTUS, WISHING THEN <mark class="ws-target">FAVOR</mark> TO ACQUIRE FOR HIMSELF WITH THE JEWS &lt;THE&gt; FELIX LEFT &lt;THE&gt; PAUL IMPRISONED.</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">THANKFUL <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Luke/17#9">Luke 17:9</a><p class="ws-trad">Does he thank the servant because he did what he was told?</p><p class="ws-lit">NOT IS HE <mark class="ws-target">THANKFUL</mark> TO THE SERVANT THAT [ONE] BECAUSE HE DID THE [THINGS] HAVING BEEN COMMANDED TO HIM NOT I THINK?</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Timothy/1#3">2 Timothy 1:3</a><p class="ws-trad">I thank God, whom I serve with a clear conscience as did [my] forefathers, as I constantly remember you night and day in my prayers.</p><p class="ws-lit"><mark class="ws-target">THANKFUL</mark> I AM &lt;THE&gt; TO GOD, WHOM I SERVE FROM [MY] FOREFATHERS WITH A PURE CONSCIENCE, AS UNCEASINGLY I HAVE THE OF YOU REMEMBRANCE IN THE PRAYERS OF MINE NIGHT AND DAY</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">A FAVOR <span class="ws-count">(2 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/25#3">Acts 25:3</a><p class="ws-trad">to grant them a concession against [Paul] by summoning him to Jerusalem, because they were preparing an ambush to kill him along the way.</p><p class="ws-lit">ASKING <mark class="ws-target">A FAVOR</mark> AGAINST HIM, THAT HE MAY SUMMON HIM TO JERUSALEM, AN AMBUSH FORMING TO EXECUTE HIM ON THE WAY.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/25#9">Acts 25:9</a><p class="ws-trad">But Festus, wishing to do the Jews <mark class="ws-target">a favor</mark> said to Paul, “Are you willing to go up to Jerusalem to stand trial before me on these [charges]?</p><p class="ws-lit">&lt;THE&gt; FESTUS HOWEVER WISHING FROM THE JEWS <mark class="ws-target">A FAVOR</mark> TO LAY, ANSWERING &lt;THE&gt; PAUL SAID; ARE YOU WILLING TO JERUSALEM HAVING GONE UP THERE CONCERNING THESE THINGS TO BE JUDGED BEFORE ME?</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">BOUNTY <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/16#3">1 Corinthians 16:3</a><p class="ws-trad">Then, on my arrival, I will send letters with those you recommend to carry your gift to Jerusalem.</p><p class="ws-lit">WHEN THEN I MAY HAVE ARRIVED, WHOMEVER MAYBE YOU SHALL APPROVE, WITH LETTERS THESE I WILL SEND TO CARRY THE <mark class="ws-target">BOUNTY</mark> OF YOU TO JERUSALEM;</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">THANKFULNESS <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Timothy/1#12">1 Timothy 1:12</a><p class="ws-trad">I thank Christ Jesus our Lord, who has strengthened me, that He considered me faithful [and] appointed [me] to service.</p><p class="ws-lit">AND <mark class="ws-target">THANKFULNESS</mark> I HAVE FOR THE [ONE] HAVING STRENGTHENED ME FOR CHRIST JESUS THE LORD OF US THAT FAITHFUL ME HE ESTEEMED HAVING APPOINTED [ME] TO SERVICE,</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="N-GSF">
+<h2 class="ws-grammar-full">Noun Genitive Singular Feminine</h2>
+<p class="ws-slot-stats">27 instances · 3 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">GRACE <span class="ws-count">(17 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Luke/4#22">Luke 4:22</a><p class="ws-trad">All spoke well of Him and marveled at the gracious words that came from His lips. “Isn’t this the son of Joseph? they asked.</p><p class="ws-lit">AND ALL WERE BEARING WITNESS TO HIM AND THEY WERE MARVELING AT THE WORDS OF THE <mark class="ws-target">GRACE</mark> WHICH ARE PROCEEDING OUT OF THE MOUTH OF HIM AND THEY WERE SAYING; SURELY [THE] SON IS &lt;THE&gt; OF JOSEPH THIS?</p></div>
+<details class="ws-more">
+<summary>16 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/John/1#16">John 1:16</a><p class="ws-trad">From His fullness we {have} all received <mark class="ws-target">grace</mark> upon <mark class="ws-target">grace</mark>.</p><p class="ws-lit">FOR FROM THE FULLNESS OF HIM WE OURSELVES ALL HAVE RECEIVED THEN <mark class="ws-target">GRACE</mark> FOR <mark class="ws-target">GRACE</mark>.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/14#3">Acts 14:3</a><p class="ws-trad">So [Paul and Barnabas] spent considerable time {there}, speaking boldly for the Lord, who affirmed the message of His <mark class="ws-target">grace</mark> by enabling them to perform signs and wonders.</p><p class="ws-lit">A LONG INDEED THEREFORE TIME THEY STAYED SPEAKING BOLDLY ABOUT THE LORD WHO IS BEARING WITNESS TO THE WORD OF THE <mark class="ws-target">GRACE</mark> OF HIM, AND GRANTING SIGNS AND WONDERS TO BE DONE THROUGH THE HANDS OF THEM.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/15#11">Acts 15:11</a><p class="ws-trad">On the contrary, we believe [it is] through the <mark class="ws-target">grace</mark> of [the] Lord Jesus [that] we are saved, just as they [are].</p><p class="ws-lit">BUT THROUGH THE <mark class="ws-target">GRACE</mark> OF THE LORD JESUS CHRIST WE BELIEVE TO BE SAVED IN [THE] SAME MANNER [AS] THEY ALSO.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/18#27">Acts 18:27</a><p class="ws-trad">[When] [Apollos] resolved to cross over to Achaia, the brothers encouraged [him] [and] wrote to the disciples [there] to welcome him. On his arrival, he {was a} great help to those who by <mark class="ws-target">grace</mark> had believed.</p><p class="ws-lit">WHEN IS RESOLVING THEN HE TO PASS THROUGH INTO &lt;THE&gt; ACHAIA, HAVING ENCOURAGED [HIM] THE BROTHERS WROTE TO THE DISCIPLES TO WELCOME HIM; WHO HAVING ARRIVED HE HELPED GREATLY THOSE HAVING BELIEVED THROUGH &lt;THE&gt; <mark class="ws-target">GRACE</mark>;</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/20#24">Acts 20:24</a><p class="ws-trad">But I consider my life of no value to me, if only I may finish my course and complete the ministry I have received from the Lord Jesus— the ministry of testifying to the good news of God’s <mark class="ws-target">grace</mark>.</p><p class="ws-lit">BUT NOT OF ANY ACCOUNT I MAKE NOR I HAVE THE LIFE OF MINE DEAR TO MYSELF, SO AS TO FINISH THE COURSE OF MINE WITH JOY AND THE MINISTRY THAT I RECEIVED FROM THE LORD JESUS, TO TESTIFY FULLY THE GOSPEL OF THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/20#32">Acts 20:32</a><p class="ws-trad">And now I commit you to God and to the word of His <mark class="ws-target">grace</mark>, which can build [you] up and give you an inheritance among all who are sanctified.</p><p class="ws-lit">AND &lt;THE&gt; NOW I COMMIT YOU BROTHERS &lt;THE&gt; TO GOD AND TO THE WORD OF THE <mark class="ws-target">GRACE</mark> OF HIM, WHO IS BEING ABLE TO BUILD [IT] AND TO GIVE TO YOU THE INHERITANCE AMONG THOSE SANCTIFIED ALL.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/12#3">Romans 12:3</a><p class="ws-trad">For by the <mark class="ws-target">grace</mark> given me I say to every one of you: Do not think of yourself more highly than you ought but think of yourself with sober judgment, according to [the] measure of faith God has given [you].</p><p class="ws-lit">I SAY FOR THROUGH THE <mark class="ws-target">GRACE</mark> WHICH HAVING BEEN GIVEN TO ME TO EVERYONE WHO IS BEING AMONG YOU, NOT TO BE HIGH-MINDED ABOVE WHAT IT BEHOOVES [YOU] TO THINK, BUT TO THINK SO AS &lt;THE&gt; TO BE SOBER-MINDED, TO EACH AS &lt;THE&gt; GOD HAS ALLOTTED A MEASURE OF FAITH.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Galatians/1#15">Galatians 1:15</a><p class="ws-trad">But when God, who set me apart from my mother’s womb and called [me] by His <mark class="ws-target">grace</mark>, was pleased</p><p class="ws-lit">WHEN HOWEVER WAS PLEASED &lt;THE&gt; GOD THE [ONE] HAVING SELECTED ME FROM [THE] WOMB OF MOTHER OF MINE AND HAVING CALLED [ME] THROUGH THE <mark class="ws-target">GRACE</mark> OF HIM</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/1#7">Ephesians 1:7</a><p class="ws-trad">In [Him] we have redemption through His blood, the forgiveness of our trespasses, according to the riches of His <mark class="ws-target">grace</mark></p><p class="ws-lit">IN WHOM WE HAVE &lt;THE&gt; REDEMPTION THROUGH THE BLOOD OF HIM, THE FORGIVENESS &lt;THE&gt; OF TRESPASSES, ACCORDING TO THE RICHES OF THE <mark class="ws-target">GRACE</mark> OF HIM,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/2#7">Ephesians 2:7</a><p class="ws-trad">in order that in the coming ages He might display the surpassing riches of His <mark class="ws-target">grace</mark>, [demonstrated] by [His] kindness to us in Christ Jesus.</p><p class="ws-lit">IN ORDER THAT HE MAY SHOW IN THE AGES THAT [ARE] COMING THE SURPASSING RICHES OF THE <mark class="ws-target">GRACE</mark> OF HIM IN KINDNESS TOWARD US IN CHRIST JESUS.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/3#2">Ephesians 3:2</a><p class="ws-trad">Surely you have heard about the stewardship of God’s <mark class="ws-target">grace</mark> that was given to me for you,</p><p class="ws-lit">IF INDEED YOU HAVE HEARD OF THE ADMINISTRATION OF THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD WHICH HAVING BEEN GIVEN TO ME TOWARD YOU</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/3#7">Ephesians 3:7</a><p class="ws-trad">I became a servant of [this gospel] by the gift of God’s <mark class="ws-target">grace</mark>, given me through the working of His power.</p><p class="ws-lit">OF WHICH I WOULD BE SERVANT ACCORDING TO THE GIFT OF THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD WHICH HAVING BEEN GIVEN TO ME ACCORDING TO THE WORKING OF THE POWER OF HIM.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hebrews/12#15">Hebrews 12:15</a><p class="ws-trad">See to it that no one falls short of the <mark class="ws-target">grace</mark> of God, [and] that no root of bitterness springs up to cause trouble and defile many.</p><p class="ws-lit">OBSERVING LEST ANY BE FAILING OF THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD, LEST ANY ROOT OF BITTERNESS UP SPRINGING MAY TROUBLE [YOU], AND THROUGH THIS MAY BE DEFILED &lt;THE&gt; MANY;</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/1#10">1 Peter 1:10</a><p class="ws-trad">Concerning this salvation, [the] prophets who foretold the <mark class="ws-target">grace</mark> to come to you searched and investigated carefully,</p><p class="ws-lit">CONCERNING THIS SALVATION SOUGHT OUT AND SEARCHED OUT DILIGENTLY [THE] PROPHETS &lt;THE&gt; OF THE TOWARD YOU <mark class="ws-target">GRACE</mark> HAVING PROPHESIED,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/4#10">1 Peter 4:10</a><p class="ws-trad">As good stewards of [the] manifold <mark class="ws-target">grace</mark> of God, each [of you] [should use] whatever gift he has received to serve one another.</p><p class="ws-lit">EACH EVEN AS HAS RECEIVED A GIFT TO EACH OTHER THEM SERVING AS GOOD STEWARDS OF [THE] MANIFOLD <mark class="ws-target">GRACE</mark> OF GOD:</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/5#10">1 Peter 5:10</a><p class="ws-trad">And [after you] have suffered for a little while, the God of all <mark class="ws-target">grace</mark>, who has called you to His eternal glory in Christ, will Himself restore [you], secure [you], strengthen [you], [and] establish [you].</p><p class="ws-lit">THE NOW GOD OF ALL <mark class="ws-target">GRACE</mark> THE [ONE] HAVING CALLED YOU TO THE ETERNAL OF HIM GLORY IN CHRIST JESUS A LITTLE WHILE [OF YOU] HAVING SUFFERED HE HIMSELF WILL PERFECT YOU HE WILL CONFIRM [YOU], HE WILL STRENGTHEN [YOU], [AND] HE WILL ESTABLISH [YOU].</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">OF GRACE <span class="ws-count">(9 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/John/1#14">John 1:14</a><p class="ws-trad">The Word became flesh and made His dwelling among us. We have seen His glory, [the] glory of [the] one and only [Son] from [the] Father, full <mark class="ws-target">of grace</mark> and truth.</p><p class="ws-lit">AND THE WORD FLESH BECAME AND HE DWELT AMONG US, AND WE BEHELD THE GLORY OF HIM, A GLORY AS OF AN ONLY BEGOTTEN FROM [THE] FATHER, FULL <mark class="ws-target">OF GRACE</mark> AND TRUTH.</p></div>
+<details class="ws-more">
+<summary>8 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/6#8">Acts 6:8</a><p class="ws-trad">Now Stephen, [who was] full <mark class="ws-target">of grace</mark> and power, was performing great wonders and signs among the people.</p><p class="ws-lit">STEPHEN NOW FULL <mark class="ws-target">OF GRACE</mark> AND POWER WAS PERFORMING WONDERS AND SIGNS GREAT AMONG THE PEOPLE.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/5#17">Romans 5:17</a><p class="ws-trad">For if, by the trespass of the one [man], death reigned through [that] one [man], how much more {will} those who receive the abundance <mark class="ws-target">of grace</mark> and of the gift of righteousness reign in life through the one man, Jesus Christ!</p><p class="ws-lit">IF FOR BY THE OF THE ONE TRESPASS &lt;THE&gt; DEATH REIGNED THROUGH THE ONE, HOW MUCH MORE THOSE THE EXCESS &lt;THE&gt; <mark class="ws-target">OF GRACE</mark> AND OF THE GIFT &lt;THE&gt; OF RIGHTEOUSNESS RECEIVING IN LIFE WILL REIGN THROUGH THE ONE JESUS CHRIST!</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/11#5">Romans 11:5</a><p class="ws-trad">In the same way, at the present time there is a remnant chosen by grace.</p><p class="ws-lit">THUS THEN ALSO IN THE PRESENT TIME A REMNANT ACCORDING TO [THE] ELECTION <mark class="ws-target">OF GRACE</mark> THERE HAS BEEN.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/1#6">Ephesians 1:6</a><p class="ws-trad">to [the] praise of His glorious grace, which He has freely given us in the Beloved [One].</p><p class="ws-lit">TO [THE] PRAISE OF [THE] GLORY OF THE <mark class="ws-target">OF GRACE</mark> OF HIM, IN WHICH HE HAS FREELY GIVEN US IN THE BELOVED [ONE],</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Philippians/1#7">Philippians 1:7</a><p class="ws-trad">It is right for me to feel this way about all of you, since I have you in [my] heart. [For] in my chains and in [my] defense and confirmation of the gospel, you are all partners in grace with me.</p><p class="ws-lit">EVEN AS IT IS RIGHT FOR ME MYSELF THIS TO FEEL ABOUT ALL OF YOU SINCE &lt;THE&gt; HAVING I IN THE HEART YOU, IN BOTH THE CHAINS OF MINE AND IN THE DEFENSE AND IN CONFIRMATION OF THE GOSPEL FELLOW PARTAKERS WITH ME &lt;THE&gt; <mark class="ws-target">OF GRACE</mark> ALL YOU ARE.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hebrews/4#16">Hebrews 4:16</a><p class="ws-trad">Let us then approach the throne <mark class="ws-target">of grace</mark> with confidence, so that we may receive mercy and find grace to help [us] in [our] time of need.</p><p class="ws-lit">WE MAY COME THEREFORE WITH BOLDNESS TO THE THRONE &lt;THE&gt; <mark class="ws-target">OF GRACE</mark>, SO THAT WE MAY RECEIVE MERCY AND GRACE MAY FIND FOR IN TIME OF NEED HELP.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hebrews/10#29">Hebrews 10:29</a><p class="ws-trad">How much more severely do you think one deserves to be punished [who] has trampled on the Son of God, profaned the blood of the covenant that sanctified him, and insulted the Spirit <mark class="ws-target">of grace</mark>?</p><p class="ws-lit">HOW MUCH THINK YOU WORSE WILL HE DESERVE PUNISHMENT THE [ONE] THE SON &lt;THE&gt; OF GOD HAVING TRAMPLED UPON AND THE BLOOD OF THE COVENANT ORDINARY HAVING ESTEEMED BY WHICH HE WAS SANCTIFIED AND THE SPIRIT &lt;THE&gt; <mark class="ws-target">OF GRACE</mark> HAVING INSULTED?</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Peter/3#7">1 Peter 3:7</a><p class="ws-trad">Husbands, in the same way, treat [your] wives {with} consideration as a delicate vessel, and {with} honor as fellow heirs of [the] gracious gift of life, so that your prayers will not be hindered.</p><p class="ws-lit">YOU WHO [ARE] HUSBANDS LIKEWISE, DWELLING WITH [THEM] ACCORDING TO KNOWLEDGE AS WITH A WEAKER VESSEL WITH THE FEMALE RENDERING HONOR SINCE [THEY ARE] ALSO JOINT-HEIRS OF [THE] GRACE OF LIFE SO AS THIS NOT [CAUSE TO] BE IMPEDED THE PRAYERS OF YOU.</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">FROM GRACE <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Galatians/5#4">Galatians 5:4</a><p class="ws-trad">{You} who are [trying] to be justified by [the] law have been severed from Christ; you have fallen away <mark class="ws-target">from grace</mark>.</p><p class="ws-lit">YOU ARE SEVERED FROM &lt;THE&gt; CHRIST WHOEVER IN [THE] LAW ARE BEING JUSTIFIED, &lt;THE&gt; <mark class="ws-target">FROM GRACE</mark> YOU HAVE FALLEN AWAY.</p></div>
+</div>
+</section>
+<section class="ws-slot" data-grammar-code="N-DSF">
+<h2 class="ws-grammar-full">Noun Dative Singular Feminine</h2>
+<p class="ws-slot-stats">24 instances · 4 translations</p>
+<div class="ws-translation">
+<h3 class="ws-rendering">GRACE <span class="ws-count">(16 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/13#43">Acts 13:43</a><p class="ws-trad">[After] the synagogue was dismissed, many of the Jews and devout converts to Judaism followed Paul and Barnabas, who spoke to them [and] urged them to continue in the <mark class="ws-target">grace</mark> of God.</p><p class="ws-lit">WHEN WAS RELEASING THEN THE SYNAGOGUE FOLLOWED MANY OF THE JEWS AND OF THE WORSHIPPING CONVERTS &lt;THE&gt; AFTER PAUL AND &lt;THE&gt; AFTER BARNABAS, WHO SPEAKING TO THEM WERE PERSUADING THEM TO CONTINUE IN THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD.</p></div>
+<details class="ws-more">
+<summary>15 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/14#26">Acts 14:26</a><p class="ws-trad">From [Attalia] they sailed to Antioch, where they had been commended to the <mark class="ws-target">grace</mark> of God for the work they had just completed.</p><p class="ws-lit">AND FROM THERE THEY SAILED TO ANTIOCH, FROM WHERE THEY HAD COMMITTED TO THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD FOR THE WORK THAT THEY HAD FULFILLED.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Acts/15#40">Acts 15:40</a><p class="ws-trad">but Paul chose Silas [and] left, commended by the brothers to the <mark class="ws-target">grace</mark> of the Lord.</p><p class="ws-lit">PAUL HOWEVER HAVING CHOSEN SILAS WENT FORTH HAVING BEEN COMMITTED TO THE <mark class="ws-target">GRACE</mark> OF THE LORD BY THE BROTHERS.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/3#24">Romans 3:24</a><p class="ws-trad">[and are] justified freely by His <mark class="ws-target">grace</mark> through the redemption that [is] in Christ Jesus.</p><p class="ws-lit">BEING JUSTIFIED FREELY BY THE OF HIM <mark class="ws-target">GRACE</mark> THROUGH THE REDEMPTION THAT [IS] IN CHRIST JESUS,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/5#15">Romans 5:15</a><p class="ws-trad">But the gift [is] not like the trespass. For if the many died by the trespass of the one [man], how much more {did} God’s <mark class="ws-target">grace</mark> and the gift that came by [the] <mark class="ws-target">grace</mark> of the one man, Jesus Christ, abound to the many!</p><p class="ws-lit">BUT [IS] NOT LIKE THE TRESPASS SO ALSO THE GIFT. IF FOR BY THE OF THE ONE TRESPASS THE MANY DIED, HOW MUCH MORE THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD AND THE GIFT IN <mark class="ws-target">GRACE</mark> WHICH [IS] OF THE ONE MAN JESUS CHRIST TO THE MANY DID ABOUND!</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/1#4">1 Corinthians 1:4</a><p class="ws-trad">I always thank my God for you because of the <mark class="ws-target">grace</mark> [He] has given you in Christ Jesus.</p><p class="ws-lit">I THANK THE GOD OF MINE ALWAYS CONCERNING YOU FOR THE <mark class="ws-target">GRACE</mark> &lt;THE&gt; OF GOD WHICH HAVING BEEN GIVEN YOU IN CHRIST JESUS</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/1#12">2 Corinthians 1:12</a><p class="ws-trad">For this is our boast: Our conscience testifies that we have conducted ourselves in the world, and especially in relation to you, in [the] holiness and sincerity that [are from] God— not in worldly wisdom, but in [the] <mark class="ws-target">grace</mark> of God.</p><p class="ws-lit">&lt;THE&gt; FOR BOASTING OF US THIS IS, THE TESTIMONY OF THE CONSCIENCE OF US, THAT IN OPENNESS AND SINCERITY &lt;THE&gt; OF GOD, AND NOT IN WISDOM FLESHLY BUT IN [THE] <mark class="ws-target">GRACE</mark> OF GOD WE HAVE CONDUCTED OURSELVES IN THE WORLD, MORE ABUNDANTLY NOW TOWARD YOU.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/8#7">2 Corinthians 8:7</a><p class="ws-trad">But just as you excel in everything— in faith, in speech, in knowledge, in complete earnestness, and in the love we [inspired] in you [see] that you also excel in this <mark class="ws-target">grace</mark> of giving.</p><p class="ws-lit">BUT EVEN AS IN EVERY [WAY] YOU ABOUND, IN FAITH AND IN SPEECH AND IN KNOWLEDGE AND IN ALL EARNESTNESS AND IN THE FROM OF US IN YOU LOVE, THAT ALSO IN THIS &lt;THE&gt; <mark class="ws-target">GRACE</mark> YOU MAY ABOUND.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Corinthians/8#19">2 Corinthians 8:19</a><p class="ws-trad">More than that, [this brother] was chosen by the churches to accompany us with the gracious offering we administer to honor the Lord Himself and [to show] our eagerness [to help].</p><p class="ws-lit">NOT ONLY NOW, BUT ALSO HAVING BEEN CHOSEN BY THE CHURCHES FELLOW TRAVELER OF US WITH &lt;THE&gt; <mark class="ws-target">GRACE</mark> THIS THAT [IS] BEING ADMINISTERED BY US TOWARD THE HIMSELF OF THE LORD GLORY AND READINESS OF US.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Galatians/1#6">Galatians 1:6</a><p class="ws-trad">I am amazed how quickly you are deserting the [One who] called you by [the] <mark class="ws-target">grace</mark> of Christ [and are turning] to a different gospel—</p><p class="ws-lit">I AM ASTONISHED THAT SO SOON YOU ARE DESERTING FROM THE [ONE WHO] HAVING CALLED YOU IN [THE] <mark class="ws-target">GRACE</mark> OF CHRIST TO A DIFFERENT GOSPEL</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Colossians/3#16">Colossians 3:16</a><p class="ws-trad">{Let} the word of Christ richly dwell within you as you teach and admonish one another with all wisdom, [and] as you sing psalms, hymns, [and] spiritual songs with gratitude in your hearts to God.</p><p class="ws-lit">THE WORD &lt;THE&gt; OF CHRIST SHOULD DWELL IN YOU RICHLY, IN ALL WISDOM TEACHING AND ADMONISHING YOURSELVES IN PSALMS, AND IN HYMNS, AND IN SONGS SPIRITUAL WITH &lt;THE&gt; <mark class="ws-target">GRACE</mark> SINGING IN THE HEARTS OF YOU &lt;THE&gt; TO GOD;</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Colossians/4#6">Colossians 4:6</a><p class="ws-trad">[Let] your speech always [be] gracious, seasoned with salt, so that you may know how to answer everyone.</p><p class="ws-lit">[LET] THE SPEECH OF YOU [BE] ALWAYS IN <mark class="ws-target">GRACE</mark>, WITH SALT SEASONED, TO  KNOW HOW IT BEHOOVES YOU ONE EACH TO ANSWER.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Thessalonians/2#16">2 Thessalonians 2:16</a><p class="ws-trad">Now {may} our Lord Jesus Christ Himself and God our Father, who by <mark class="ws-target">grace</mark> has loved us and given [us] eternal comfort and good hope,</p><p class="ws-lit">HIMSELF NOW THE LORD OF US JESUS CHRIST AND &lt;THE&gt; GOD THE FATHER OF US, THE [ONE] HAVING LOVED US AND HAVING GIVEN [US] COMFORT ETERNAL AND HOPE GOOD BY <mark class="ws-target">GRACE</mark>,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Timothy/2#1">2 Timothy 2:1</a><p class="ws-trad">You therefore, my child, be strong in the <mark class="ws-target">grace</mark> that [is] in Christ Jesus.</p><p class="ws-lit">YOU YOURSELF THEREFORE, CHILD OF MINE, DO BE STRONG IN THE <mark class="ws-target">GRACE</mark> THAT [IS] IN CHRIST JESUS,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Titus/3#7">Titus 3:7</a><p class="ws-trad">so that, having been justified by [His] <mark class="ws-target">grace</mark>, we would become heirs with [the] hope of eternal life.</p><p class="ws-lit">SO THAT HAVING BEEN JUSTIFIED &lt;THE&gt; BY THAT <mark class="ws-target">GRACE</mark> HEIRS WE MAY BECOME ACCORDING TO [THE] HOPE OF LIFE ETERNAL.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/2-Peter/3#18">2 Peter 3:18</a><p class="ws-trad">But grow in [the] <mark class="ws-target">grace</mark> and knowledge of our Lord and Savior Jesus Christ. To Him [be] the glory both now and to [the] day of eternity. Amen.</p><p class="ws-lit">DO GROW HOWEVER IN <mark class="ws-target">GRACE</mark> AND IN KNOWLEDGE OF THE LORD OF US AND SAVIOR JESUS CHRIST. TO HIM [BE] THE GLORY BOTH NOW AND TO [THE] DAY OF ETERNITY, AMEN.</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">BY GRACE <span class="ws-count">(6 instances)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Romans/11#6">Romans 11:6</a><p class="ws-trad">And if [it is] <mark class="ws-target">by grace</mark>, [then it is] no longer by works. Otherwise, grace {would} no longer be grace.</p><p class="ws-lit">IF NOW <mark class="ws-target">BY GRACE</mark> NO LONGER FROM WORKS, OTHERWISE &lt;THE&gt; GRACE NO LONGER WOULD BE GRACE IF NOW FROM WORKS NO LONGER IS GRACE SINCE THE WORK NO LONGER IS WORK.</p></div>
+<details class="ws-more">
+<summary>5 more instances</summary>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/15#10">1 Corinthians 15:10</a><p class="ws-trad">But [by the] grace of God I am what I am, and His grace to me was not in vain. No, I worked harder than all of them— yet not I, but the grace of God that [was] with me.</p><p class="ws-lit">BY [THE] GRACE HOWEVER OF GOD I AM WHAT I AM, AND THE GRACE OF HIM &lt;THE&gt; TOWARD ME MYSELF NOT VOID HAS BEEN, RATHER MORE EXCESSIVE THAN THEM ALL I TOILED, NOT I MYSELF HOWEVER, BUT THE GRACE &lt;THE&gt; OF GOD THAT [WAS] WITH ME MYSELF.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/2#5">Ephesians 2:5</a><p class="ws-trad">made [us] alive with Christ even when we were dead in our trespasses. [It is] <mark class="ws-target">by grace</mark> you have been saved!</p><p class="ws-lit">EVEN BEING WE DEAD &lt;THE&gt; IN TRESPASSES MADE [US] ALIVE WITH &lt;THE&gt; CHRIST — <mark class="ws-target">BY GRACE</mark> YOU ARE SAVED —.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Ephesians/2#8">Ephesians 2:8</a><p class="ws-trad">For [it is] <mark class="ws-target">by grace</mark> you have been saved through faith, and this not from yourselves; [it is] the gift of God,</p><p class="ws-lit">&lt;THE&gt; FOR <mark class="ws-target">BY GRACE</mark> YOU ARE SAVED THROUGH &lt;THE&gt; FAITH, AND THIS NOT OF YOURSELVES, [IT IS] OF GOD THE GIFT,</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hebrews/2#9">Hebrews 2:9</a><p class="ws-trad">But we see Jesus, who was made a little lower than [the] angels, now crowned with glory and honor because He suffered death, so that by [the] grace of God He might taste death for everyone.</p><p class="ws-lit">WHO HOWEVER A LITTLE ONE THAN [THE] ANGELS MADE LOWER WE SEE JESUS BECAUSE OF THE SUFFERING &lt;THE&gt; OF DEATH WITH GLORY AND WITH HONOR CROWNED, SO THAT BY [THE] GRACE OF GOD FOR EVERYONE HE MAY TASTE DEATH.</p></div>
+<div class="ws-instance"><a class="ws-ref" href="/-/Hebrews/13#9">Hebrews 13:9</a><p class="ws-trad">{Do} not be carried away [by] all kinds [of] strange teachings, for [it is] good for the heart to be strengthened <mark class="ws-target">by grace</mark> [and] not by foods of no value to those devoted to [them].</p><p class="ws-lit">BY TEACHINGS VARIOUS AND STRANGE NOT DO BE TAKEN AWAY; [IT IS] GOOD FOR <mark class="ws-target">BY GRACE</mark> TO BE STRENGTHENED FOR THE HEART NOT BY FOODS IN WHICH NOT THEY PROFITED THOSE BEING DEVOTED.</p></div>
+
+</details>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">IN FAVOR <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/Luke/2#52">Luke 2:52</a><p class="ws-trad">And Jesus grew in wisdom and stature, and <mark class="ws-target">in favor</mark> with God and man.</p><p class="ws-lit">AND JESUS WAS CONTINUING TO ADVANCE IN &lt;THE&gt; WISDOM AND STATURE AND <mark class="ws-target">IN FAVOR</mark> WITH GOD AND MEN.</p></div>
+</div>
+<div class="ws-translation">
+<h3 class="ws-rendering">WITH THANKFULNESS <span class="ws-count">(1 instance)</span></h3>
+<div class="ws-instance"><a class="ws-ref" href="/-/1-Corinthians/10#30">1 Corinthians 10:30</a><p class="ws-trad">If I partake [in the meal] <mark class="ws-target">with thankfulness</mark>, why am I denounced because of that for which I give thanks?</p><p class="ws-lit">IF NOW I MYSELF <mark class="ws-target">WITH THANKFULNESS</mark> PARTAKE, WHY AM I DENIGRATED FOR THAT WHICH I MYSELF GIVE THANKS?</p></div>
+</div>
+</section>
+</div>
+<div class="ws-footer">
+<section class="ws-related"><h2>Related Files</h2><ul><li><a href="https://words.servewell.net/grace_2">to give grace (Greek, G5483)</a></li></ul></section>
+</div>
+<script>
+(function () {
+  // Expand/collapse-all button
+  var allDetails = document.querySelectorAll('details.ws-more');
+  var btn = document.getElementById('ws-expand-all');
+  if (allDetails.length > 0 && btn) {
+    function updateBtn() {
+      var anyCollapsed = Array.prototype.some.call(allDetails, function (d) { return !d.open; });
+      btn.textContent = anyCollapsed ? 'Expand all' : 'Collapse most';
+    }
+    updateBtn();
+    allDetails.forEach(function (d) { d.addEventListener('toggle', updateBtn); });
+    btn.addEventListener('click', function () {
+      var anyCollapsed = Array.prototype.some.call(allDetails, function (d) { return !d.open; });
+      allDetails.forEach(function (d) { d.open = anyCollapsed; });
+      updateBtn();
+    });
+  } else if (btn) {
+    btn.hidden = true;
+  }
+
+  // Fragment-based slot priority:
+  //   #grammar=Vqw3ms  → move that slot element to top of #ws-slots
+  var hash = window.location.hash;
+  if (hash && typeof CSS !== 'undefined' && CSS.escape) {
+    var m = hash.match(/[#&?]grammar=([^&]+)/);
+    if (m) {
+      var code = decodeURIComponent(m[1]);
+      var container = document.getElementById('ws-slots');
+      if (container) {
+        var target = container.querySelector('[data-grammar-code="' + CSS.escape(code) + '"]');
+        if (target && target.parentNode === container) {
+          container.insertBefore(target, container.firstChild);
+          target.classList.add('ws-slot-highlighted');
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }
+  }
+}());
+</script>
+<script src="/js/servewell-app-shell.js"></script>
+</body>
+</html>

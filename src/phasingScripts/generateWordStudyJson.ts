@@ -40,10 +40,52 @@ const winkLemmatizer = _require('wink-lemmatizer') as {
 // ---------------------------------------------------------------------------
 const ROOT = path.resolve(process.cwd());
 const SRC_DIR = path.join(ROOT, 'src/json-Phase2/docs');
-const OUT_DIR = path.join(ROOT, 'reports/tmp/words');
+const OUT_DIR = path.join(ROOT, 'src/json-Phase2/words');
 
 /** True-total instances above which book-level overflow sub-documents are generated. */
 const OVERFLOW_THRESHOLD = 1000;
+
+// ---------------------------------------------------------------------------
+// Lexicon transliteration lookup (TBESH / TBESG)
+// ---------------------------------------------------------------------------
+// Builds a Map<strongsId, transliteration> from the STEPBible brief lexicons.
+// These give the canonical lemma (dictionary) form, unlike the per-morpheme
+// OriginalMorphemeTransliteration which reflects the specific inflected form
+// used in whichever verse is encountered first (e.g. "charin" instead of "charis").
+// Fallback: for disambiguated IDs (e.g. H5653G, H0157G) strip the trailing
+// uppercase letter(s) or + suffix and try again.
+interface LexiconEntry { translit: string; script: string; }
+function buildLexiconMap(filePath: string): Map<string, LexiconEntry> {
+  const map = new Map<string, LexiconEntry>();
+  try {
+    const lines = fs.readFileSync(filePath, 'utf8').split('\n');
+    for (const line of lines) {
+      const cols = line.split('\t');
+      if (cols.length < 5) continue;
+      const id = cols[0].trim().toUpperCase(); // normalize: TBESH uses H1254a, data uses H1254A
+      const script = cols[3].trim();
+      const translit = cols[4].trim();
+      if (!id || !translit || !/^[HG]\d+/.test(id)) continue;
+      if (!map.has(id)) map.set(id, { translit, script });
+    }
+  } catch { /* file not present — silent, falls back gracefully */ }
+  return map;
+}
+const TSTEP_DIR = path.join(ROOT, 'src/step-Phase1a');
+const _tbesh = buildLexiconMap(path.join(TSTEP_DIR, 'TBESH - Translators Brief lexicon of Extended Strongs for Hebrew - STEPBible.org CC BY.txt'));
+const _tbesg = buildLexiconMap(path.join(TSTEP_DIR, 'TBESG - Translators Brief lexicon of Extended Strongs for Greek - STEPBible.org CC BY.txt'));
+
+function lexiconEntry(strongsId: string): LexiconEntry | undefined {
+  const map = strongsId.startsWith('H') ? _tbesh : _tbesg;
+  if (map.has(strongsId)) return map.get(strongsId);
+  // Fallback: strip trailing uppercase letter suffix or + content (disambiguated IDs)
+  const base = strongsId.replace(/[A-Z]+$/, '').replace(/\+.*$/, '');
+  return base !== strongsId ? map.get(base) : undefined;
+}
+
+function lexiconTranslit(strongsId: string): string | undefined {
+  return lexiconEntry(strongsId)?.translit;
+}
 
 const BOOK_ORDER = [
   'Gen', 'Exo', 'Lev', 'Num', 'Deu',
@@ -199,6 +241,7 @@ const WORD_CROSS_REFS: Record<string, string[]> = {
 interface Morpheme {
   MorphemeId?: string;
   OriginalMorphemeScript: string;
+  OriginalMorphemeTransliteration?: string;
   OriginalLexemeScript?: string;
   OriginalRootScript?: string;
   OriginalRootStrongsID: string;
@@ -246,6 +289,7 @@ interface WordFileAcc {
   lemmaScript: string;  // original-script lemma form
   lang: string;
   rootTranslation?: string;
+  transliteration?: string;
   slots: Map<string, SlotAcc>; // grammarCode → SlotAcc
 }
 
@@ -520,12 +564,14 @@ for (const filePath of allFiles) {
       }
 
       if (!wordFileData.has(fileName)) {
+        const lex = lexiconEntry(strongsId);
         wordFileData.set(fileName, {
           wordKey: lemma,
           strongsId,
-          lemmaScript: getLemma(morph),
+          lemmaScript: lex?.script || getLemma(morph),
           lang: morph.OriginalLanguage ?? 'Unknown',
           rootTranslation: morph.EnglishRootTranslation?.trim(),
+          transliteration: lex?.translit ?? (morph.OriginalMorphemeTransliteration?.trim() || undefined),
           slots: new Map(),
         });
       }
@@ -813,6 +859,7 @@ for (const [fileName, data] of wordFileData) {
             lang: data.lang,
             lemma: data.lemmaScript,
             ...(data.rootTranslation ? { rootTranslation: data.rootTranslation } : {}),
+            ...(data.transliteration ? { transliteration: data.transliteration } : {}),
             totalInstances: bk.total,
             totalSlots: Object.keys(bk.slots).length,
           },
@@ -839,6 +886,7 @@ for (const [fileName, data] of wordFileData) {
         lang: data.lang,
         lemma: data.lemmaScript,
         ...(data.rootTranslation ? { rootTranslation: data.rootTranslation } : {}),
+        ...(data.transliteration ? { transliteration: data.transliteration } : {}),
         totalInstances: fileTotalInstances,
         totalSlots: data.slots.size,
       },
@@ -868,3 +916,60 @@ console.log(`Wrote ${fileCount} word files (+${overflowFileCount} overflow)`);
 console.log(`_word_index.json: ${Object.keys(wordIndex).length} multi-file words`);
 console.log(`_strongs_index.json: ${Object.keys(strongsIndex).length} Strongs mappings`);
 console.log(`Total instance references: ${totalInstances}`);
+
+// Report Strongs IDs with no lexicon coverage (not even via base-strip fallback)
+{
+  const noLexicon: string[] = [];
+  for (const [fileName, data] of wordFileData) {
+    if (!lexiconTranslit(data.strongsId)) noLexicon.push(`${data.strongsId} (${fileName})`);
+  }
+  if (noLexicon.length > 0) {
+    console.log(`\nStrongs IDs with no lexicon transliteration (${noLexicon.length}); morpheme fallback used:`);
+    console.log('  ' + noLexicon.slice(0, 20).join(', ') + (noLexicon.length > 20 ? `, ... +${noLexicon.length - 20} more` : ''));
+  } else {
+    console.log('All Strongs IDs resolved via lexicon transliteration.');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Annotate Phase 2 chapter morphemes with OccurrencesFile
+// ---------------------------------------------------------------------------
+console.log('Annotating Phase 2 chapter morphemes with OccurrencesFile...');
+let annotatedFiles = 0;
+let annotatedMorphemeCount = 0;
+
+for (const filePath of allFiles) {
+  let rawObj: Record<string, unknown>;
+  try {
+    rawObj = JSON.parse(fs.readFileSync(filePath, 'utf8')) as Record<string, unknown>;
+  } catch { continue; }
+
+  // Handle optional .default wrapper (matches readChapter logic)
+  const chapterTarget =
+    (rawObj['default'] as Record<string, unknown> | undefined) ?? rawObj;
+  const snips = chapterTarget['SnippetsAndExplanations'];
+  if (!Array.isArray(snips)) continue;
+
+  let changed = false;
+  for (const snippet of snips as Record<string, unknown>[]) {
+    const morphemes = snippet['OriginalMorphemes'];
+    if (!Array.isArray(morphemes)) continue;
+    for (const morph of morphemes as Record<string, unknown>[]) {
+      const sid = morph['OriginalRootStrongsID'] as string | undefined;
+      if (!sid) continue;
+      const fn = strongsToFile.get(sid);
+      if (!fn) continue;
+      if (morph['OccurrencesFile'] !== fn) {
+        morph['OccurrencesFile'] = fn;
+        changed = true;
+        annotatedMorphemeCount++;
+      }
+    }
+  }
+
+  if (changed) {
+    fs.writeFileSync(filePath, JSON.stringify(rawObj, null, 2), 'utf8');
+    annotatedFiles++;
+  }
+}
+console.log(`Annotated ${annotatedMorphemeCount} morphemes across ${annotatedFiles} chapter files`);

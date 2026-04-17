@@ -240,7 +240,14 @@
 				{ type: 'action', title: 'Action: Show literal popover (Revelation 22:2)', selector: '.snippet-row[id="2"] .literal-pane .word-token', event: 'click' },
 				{ type: 'action', title: 'Action: Show traditional popover (Revelation 22:2)', selector: '.snippet-row[id="2"] .traditional-pane .word-token', event: 'click' },
 				{ type: 'action', title: 'Action: Open Bible nav widget', selector: '#bible-nav-btns .nav-ref-btn', event: 'click' },
-				{ type: 'action', title: 'Action: Choose a Bible book', selector: 'button[data-nav-pick-book]', event: 'click' }
+				{ type: 'action', title: 'Action: Choose a Bible book', selector: 'button[data-nav-pick-book]', event: 'click' },
+
+				// Word study sample pages (served from public/test-r2/ — mirrors R2/words.servewell.net layout)
+				{ type: 'page', title: 'Word Study: aaron (Hebrew proper noun, merged slots)', path: '/test-r2/aaron', width: 1220, height: 600 },
+				{ type: 'page', title: 'Word Study: love (common word, multiple slots)', path: '/test-r2/love', width: 1220, height: 600 },
+				{ type: 'page', title: 'Word Study: grace (Greek NT word)', path: '/test-r2/grace', width: 1220, height: 600 },
+				{ type: 'page', title: 'Word Study: create (Hebrew verb, overflow)', path: '/test-r2/create', width: 1220, height: 600 },
+				{ type: 'page', title: 'Word Study: aaron - Narrow', path: '/test-r2/aaron', width: 375, height: 600 }
 			];
 
 			const slides = [];
