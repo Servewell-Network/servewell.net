@@ -7,6 +7,7 @@ import path from 'node:path';
 
 const isYes = process.argv.includes('--yes');
 const skipE2E = process.argv.includes('--skip-e2e');
+const forceReupload = process.argv.includes('--force');
 
 function run(command, args, label) {
   return new Promise((resolve, reject) => {
@@ -159,6 +160,54 @@ async function smokeTestChapterPages() {
   console.log('  All chapter page checks passed.');
 }
 
+function stampChapterFiles() {
+  const stamp = `<!-- deploy: ${new Date().toISOString()} -->`;
+  const stampRe = /<!--\s*(?:generated|deploy):[^-]*-->/;
+  let htmlCount = 0;
+  const htmlDir = path.resolve('public/-');
+  if (fs.existsSync(htmlDir)) {
+    function walkHtml(dirPath) {
+      for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+        const full = path.join(dirPath, entry.name);
+        if (entry.isDirectory()) {
+          walkHtml(full);
+        } else if (entry.isFile() && entry.name.endsWith('.html')) {
+          let content = fs.readFileSync(full, 'utf8');
+          if (stampRe.test(content)) {
+            content = content.replace(stampRe, stamp);
+          } else {
+            content = content.trimEnd() + `\n${stamp}\n`;
+          }
+          fs.writeFileSync(full, content);
+          htmlCount++;
+        }
+      }
+    }
+    walkHtml(htmlDir);
+    console.log(`  Stamped ${htmlCount} chapter HTML files.`);
+  }
+
+  const jsStamp = `// deploy: ${new Date().toISOString()}`;
+  const jsStampRe = /\/\/ deploy: [^\n]*/;
+  const jsDir = path.resolve('public/js');
+  let jsCount = 0;
+  if (fs.existsSync(jsDir)) {
+    for (const entry of fs.readdirSync(jsDir, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.endsWith('.js')) continue;
+      const full = path.join(jsDir, entry.name);
+      let content = fs.readFileSync(full, 'utf8');
+      if (jsStampRe.test(content)) {
+        content = content.replace(jsStampRe, jsStamp);
+      } else {
+        content = content.trimEnd() + `\n${jsStamp}\n`;
+      }
+      fs.writeFileSync(full, content);
+      jsCount++;
+    }
+    console.log(`  Stamped ${jsCount} JS files.`);
+  }
+}
+
 async function main() {
   try {
     console.log('Starting pre-deploy checks...');
@@ -214,7 +263,20 @@ async function main() {
         console.log('  Fixing public/.assetsignore (was missing or wrong — restoring to prevent /-/ 404s)');
         fs.writeFileSync(assetsIgnorePath, expectedContent);
       }
+      if (forceReupload) {
+        console.log('  --force: stamping all public assets to force Cloudflare re-upload.');
+        stampChapterFiles();
+      }
       await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
+      // Record that chapter files from this phasing run are now deployed.
+      // On the next deploy (if no phasing ran), stampChapterFiles will stamp HTML files.
+      const phasedFile = path.resolve('dist/.chapter-pages-phased');
+      const deployedFile = path.resolve('dist/.chapter-pages-deployed');
+      if (fs.existsSync(phasedFile)) {
+        fs.writeFileSync(deployedFile, fs.readFileSync(phasedFile, 'utf8'));
+      } else {
+        fs.writeFileSync(deployedFile, new Date().toISOString());
+      }
       await smokeTestChapterPages();
     } else {
       console.log('Main deployment skipped.');

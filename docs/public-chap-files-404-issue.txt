@@ -40,8 +40,13 @@ Okay, after about an hour after I think a deploy fixed it,
     it suddenly went down for no reason.
 
 
-all else fails, adding a separate deploy line to pre-deploy that points 
+maybe adding a separate deploy line to pre-deploy that points 
     specifically to public/-/ could cause wrangler/cloudflare to ignore the .gitignore
+    update: I tried npx wrangler deploy --assets public/-/
+        still had similar problem
+        wrangler 4.83.0
+        Read 1256 files...
+        No updated asset files to upload.
 cloudflare could be caching the rule to not serve the chapter pages it has, 
     causing the logs to say 'Read 1284' and '1210 already uploaded' but then not serve those files
 the cache can perhaps be cleared in the cloudflare dashboard or 
@@ -302,3 +307,129 @@ Restart the monitor and watch from here. The key test is the ~1-hour mark:
 
 404s never come back → the problem was stale cached 404 responses, and you're clean now
 404s return after ~1 hour → confirms the asset blob TTL theory, and the timestamp-stamp fix in pre-deploy.mjs is the right next step
+
+
+Okay so I let Claude add timestamps to pre-deploy.mjs
+
+
+Ready to deploy now? (y/n): y
+  Stamped 1190 chapter files with deploy timestamp.
+
+== Deploy to production ==
+
+ ⛅️ wrangler 4.83.0
+───────────────────
+🌀 Building list of assets...
+✨ Read 1284 files from the assets directory /Users/mreese/Documents/servewell.net/public
+🌀 Starting asset upload...
+🌀 Found 1190 new or modified static assets to upload. Proceeding with upload...
++ /-/hey.html
++ /-/Psalms/131.html
++ /-/Psalms/100.html
++ /-/Psalms/93.html
++ /-/Psalms/121.html
++ /-/Psalms/128.html
++ /-/Psalms/124.html
++ /-/Psalms/67.html
++ /-/Psalms/1.html
++ /-/Psalms/82.html
++ /-/Psalms/113.html
++ /-/Psalms/87.html
++ /-/Psalms/14.html
++ /-/Psalms/43.html
++ /-/Psalms/137.html
++ /-/Psalms/99.html
++ /-/Psalms/8.html
++ /-/Psalms/98.html
++ /-/Psalms/146.html
++ /-/Psalms/24.html
++ /-/Malachi/4.html
++ /-/Jeremiah/45.html
++ /-/Psalms/101.html
++ /-/Psalms/46.html
++ /-/Psalms/28.html
++ /-/Psalms/63.html
++ /-/Psalms/16.html
++ /-/Psalms/58.html
++ /-/Psalms/96.html
++ /-/Ezekiel/15.html
++ /-/Psalms/84.html
++ /-/Psalms/32.html
++ /-/Psalms/5.html
++ /-/Psalms/65.html
++ /-/Leviticus/12.html
++ /-/Psalms/115.html
++ /-/Psalms/39.html
++ /-/Psalms/81.html
++ /-/Jeremiah/47.html
++ /-/Psalms/42.html
++ /-/Psalms/91.html
++ /-/Psalms/144.html
++ /-/1-Chronicles/20.html
++ /-/1-Timothy/2.html
++ /-/Zechariah/3.html
++ /-/Psalms/86.html
++ /-/Job/18.html
++ /-/Psalms/27.html
++ /-/Psalms/88.html
++ /-/Ezekiel/2.html
++ /-/Proverbs/2.html
++ /-/Psalms/49.html
++ /-/2-John/1.html
++ /-/Psalms/25.html
++ /-/Psalms/17.html
++ /-/Psalms/80.html
++ /-/Psalms/10.html
++ /-/Joshua/20.html
++ /-/Hosea/1.html
++ /-/Psalms/38.html
++ /-/Song-of-Songs/2.html
++ /-/Psalms/9.html
++ /-/3-John/1.html
++ /-/Hosea/8.html
++ /-/Psalms/94.html
++ /-/Titus/3.html
++ /-/Numbers/12.html
++ /-/Jeremiah/24.html
++ /-/1-Timothy/3.html
++ /-/2-Timothy/3.html
++ /-/Hebrews/5.html
++ /-/1-Timothy/4.html
++ /-/1-Chronicles/10.html
++ /-/1-Thessalonians/3.html
++ /-/Job/10.html
++ /-/Song-of-Songs/8.html
++ /-/Ezra/1.html
++ /-/Amos/6.html
++ /-/Acts/6.html
++ /-/Job/14.html
++ /-/Isaiah/61.html
++ /-/Isaiah/16.html
++ /-/Romans/13.html
++ /-/Job/29.html
++ /-/Ecclesiastes/10.html
++ /-/Job/32.html
++ /-/Ezekiel/35.html
++ /-/Micah/2.html
++ /-/1-Chronicles/13.html
++ /-/Ezekiel/9.html
++ /-/Ecclesiastes/4.html
++ /-/Numbers/36.html
++ /-/Isaiah/27.html
++ /-/Isaiah/50.html
++ /-/James/4.html
++ /-/Galatians/6.html
++ /-/2-Thessalonians/3.html
++ /-/Judges/17.html
++ /-/1-Samuel/29.html
++ /-/Isaiah/21.html
+   (truncating changed assets log, set `WRANGLER_LOG=debug` environment variable to see full diff)
+Uploaded 120 of 1190 assets
+Uploaded 240 of 1190 assets
+Uploaded 359 of 1190 assets
+Uploaded 440 of 1190 assets
+Uploaded 513 of 1190 assets
+Uploaded 581 of 1190 assets
+
+npm run pre-deploy -- --force is there when you hit the stale-edge problem again.
+
