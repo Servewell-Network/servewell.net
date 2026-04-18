@@ -15,7 +15,16 @@ import {
 // URL constants
 // ---------------------------------------------------------------------------
 
-export const WORD_INDEX_URL = 'https://servewell.net/_word_index.json';
+// Use a relative URL when running on servewell.net or localhost (avoids CORS).
+// Fall back to the absolute URL on other origins (e.g. words.servewell.net),
+// which is covered by the Access-Control-Allow-Origin header on _word_index.json.
+export const WORD_INDEX_URL: string = (() => {
+  if (typeof location === 'undefined') return 'https://servewell.net/_word_index.json';
+  const h = location.hostname;
+  return (h === 'servewell.net' || h === 'localhost' || h === '127.0.0.1')
+    ? '/_word_index.json'
+    : 'https://servewell.net/_word_index.json';
+})();
 export const WORDS_BASE_URL = 'https://words.servewell.net';
 
 // ---------------------------------------------------------------------------
@@ -44,6 +53,10 @@ export interface LoadedWordData {
   crossRefFileNames: string[];
   /** verse-level ref (e.g. "Gen22:2") → first matching rendering in this file */
   byVerse: Map<string, string>;
+  /** verse-level ref → literal verse text (plain string) */
+  litByVerse: Map<string, string>;
+  /** verse-level ref → traditional verse text (plain string) */
+  tradByVerse: Map<string, string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -106,11 +119,15 @@ export function fetchWordFile(fileName: string): Promise<LoadedWordData | null> 
       if (!json?.ancientWord) return null;
       const { _meta, slots, overflow } = json.ancientWord;
       const byVerse = new Map<string, string>();
+      const litByVerse = new Map<string, string>();
+      const tradByVerse = new Map<string, string>();
       for (const slot of Object.values(slots)) {
         for (const [rendering, trans] of Object.entries(slot.translations)) {
           for (const inst of trans.instances) {
             const vr = extractVerseRef(inst.ref);
             if (!byVerse.has(vr)) byVerse.set(vr, rendering);
+            if (!litByVerse.has(vr)) litByVerse.set(vr, inst.lit);
+            if (!tradByVerse.has(vr)) tradByVerse.set(vr, inst.trad);
           }
         }
       }
@@ -121,6 +138,8 @@ export function fetchWordFile(fileName: string): Promise<LoadedWordData | null> 
         hasOverflow: !!(overflow && Object.keys(overflow).length > 0),
         crossRefFileNames: json.crossRefs?.map(c => c.fileName) ?? [],
         byVerse,
+        litByVerse,
+        tradByVerse,
       };
     })
     .catch(() => null);
@@ -135,6 +154,8 @@ export async function fetchLemmaFiles(lemma: string, idx: WordIndex): Promise<{
   totalInstances: number;
   hasOverflow: boolean;
   sampleByVerse: Map<string, string>;
+  litByVerse: Map<string, string>;
+  tradByVerse: Map<string, string>;
 }> {
   const names = getFileNamesForLemma(lemma, idx);
   // Fetch sibling files; crossRef file names come from the first file's metadata
@@ -148,6 +169,8 @@ export async function fetchLemmaFiles(lemma: string, idx: WordIndex): Promise<{
   }
   const verseSet = new Set<string>();
   const sampleByVerse = new Map<string, string>();
+  const litByVerse = new Map<string, string>();
+  const tradByVerse = new Map<string, string>();
   let totalInstances = 0;
   let hasOverflow = false;
   for (const r of allResults) {
@@ -158,6 +181,12 @@ export async function fetchLemmaFiles(lemma: string, idx: WordIndex): Promise<{
       verseSet.add(vr);
       if (!sampleByVerse.has(vr)) sampleByVerse.set(vr, rendering);
     }
+    for (const [vr, lit] of r.litByVerse) {
+      if (!litByVerse.has(vr)) litByVerse.set(vr, lit);
+    }
+    for (const [vr, trad] of r.tradByVerse) {
+      if (!tradByVerse.has(vr)) tradByVerse.set(vr, trad);
+    }
   }
-  return { verseSet, totalInstances, hasOverflow, sampleByVerse };
+  return { verseSet, totalInstances, hasOverflow, sampleByVerse, litByVerse, tradByVerse };
 }

@@ -25,7 +25,7 @@ const INPUT_ID          = 'ws-search-input';
 const RESULTS_ID        = 'ws-search-results';
 const TOPBAR_BTN_ID     = 'ws-search-topbar-btn';
 const BOTTOMBAR_BTN_ID  = 'ws-search-bottombar-btn';
-const MAX_DISPLAYED     = 10;
+const MAX_DISPLAYED     = 50;
 
 // ---------------------------------------------------------------------------
 // Book-code → display name (mirrors wordPageEntry.ts)
@@ -50,6 +50,17 @@ const BOOK_DISPLAY: Record<string, string> = {
   '1Jn': '1 John', '2Jn': '2 John', '3Jn': '3 John', Jud: 'Jude', Rev: 'Revelation',
 };
 const BOOK_ALIASES: Record<string, string> = { Ezk: 'Eze', Jol: 'Joe', Sng: 'Sol', Nam: 'Nah' };
+const BOOK_ORDER: Record<string, number> = Object.fromEntries(Object.keys(BOOK_DISPLAY).map((k, i) => [k, i]));
+
+function sortCanonical(refs: string[]): string[] {
+  return [...refs].sort((a, b) => {
+    const ma = a.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
+    const mb = b.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
+    const ai = ma ? (BOOK_ORDER[BOOK_ALIASES[ma[1]] ?? ma[1]] ?? 999) : 999;
+    const bi = mb ? (BOOK_ORDER[BOOK_ALIASES[mb[1]] ?? mb[1]] ?? 999) : 999;
+    return (ai - bi) || (parseInt(ma?.[2] ?? '0') - parseInt(mb?.[2] ?? '0')) || (parseInt(ma?.[3] ?? '0') - parseInt(mb?.[3] ?? '0'));
+  });
+}
 
 function formatVerseRef(ref: string): string {
   const m = ref.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
@@ -87,6 +98,19 @@ const STYLES = `
   left: 0.75rem;
   width: min(calc(100vw - 1.5rem), 380px);
   box-sizing: border-box;
+}
+@media (min-width: 540px) {
+  #ws-search-popover {
+    left: auto;
+  }
+  #ws-search-input { font-size: 1.05rem; }
+  #ws-search-status { font-size: 0.88rem; }
+  .ws-sr-verse-link { font-size: 0.97rem; }
+  .ws-sr-word-link { font-size: 1rem; }
+  #ws-see-text-bar { font-size: 0.85rem; }
+  .ws-sr-verse-text { font-size: 0.84rem; }
+}
+#ws-search-popover {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   background: var(--panel);
@@ -146,15 +170,6 @@ const STYLES = `
   border-radius: 0.3rem;
 }
 .ws-sr-ref { font-weight: 600; white-space: nowrap; }
-.ws-sr-rendering {
-  font-size: 0.78em;
-  color: var(--muted);
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 50%;
-}
 .ws-sr-hint {
   font-size: 0.78rem;
   color: var(--muted);
@@ -175,6 +190,32 @@ const STYLES = `
   font-size: 0.78em;
   color: var(--muted);
   margin-left: 0.35em;
+}
+#ws-see-text-bar {
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 0.15rem 0.1rem 0;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+#ws-see-text-bar label { cursor: pointer; user-select: none; }
+.ws-sr-verse-text {
+  font-size: 0.76rem;
+  padding: 0.15rem 0.4rem 0.3rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.ws-sr-trad { font-size: 0.9rem; }
+.ws-sr-verse-text mark {
+  background: #ffe08a;
+  color: #1a1a1a;
+  border-radius: 0.1em;
+  padding: 0 0.1em;
+}
+:root[data-theme="dark"] .ws-sr-verse-text mark {
+  background: #7a5f00;
+  color: #f5e6a3;
 }
 `;
 
@@ -201,8 +242,7 @@ function injectOnce(): void {
     popover.setAttribute('popover', '');
     popover.innerHTML = `
 <input id="${INPUT_ID}" type="search" placeholder="Search Bible words…" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search Bible words">
-<div id="ws-search-status" aria-live="polite"></div>
-<ul id="${RESULTS_ID}" role="list" aria-label="Search results"></ul>`;
+<div id="ws-search-status" aria-live="polite"></div><div id="ws-see-text-bar">Show: <label>Lit <input type="checkbox" id="ws-show-lit"></label> <label>Trad <input type="checkbox" id="ws-show-trad"></label></div><ul id="${RESULTS_ID}" role="list" aria-label="Search results"></ul>`;
     document.body.appendChild(popover);
   }
 
@@ -226,6 +266,9 @@ function injectOnce(): void {
   document.getElementById(INPUT_ID)?.addEventListener('input', (e) => {
     handleInput((e.target as HTMLInputElement).value);
   });
+  for (const id of ['ws-show-lit', 'ws-show-trad']) {
+    document.getElementById(id)?.addEventListener('change', () => { void updateVerseText(); });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -241,6 +284,13 @@ function clearDisplay(): void {
   const ul = document.getElementById(RESULTS_ID);
   if (ul) ul.innerHTML = '';
   setStatus('');
+  currentAllRenderingsByVerse = new Map();
+  currentLitByVerse = new Map();
+  currentTradByVerse = new Map();
+  for (const id of ['ws-show-lit', 'ws-show-trad']) {
+    const cb = document.getElementById(id) as HTMLInputElement | null;
+    if (cb) cb.checked = false;
+  }
 }
 
 /** Fallback: show word-index entry links when no verse data. */
@@ -258,7 +308,6 @@ function showWordLinks(matches: string[], idx: WordIndex): void {
 /** Render verse result rows. */
 function showVerseResults(
   verseRefs: string[],
-  sampleByVerse: Map<string, string>,
   primaryLemma: string,
   resolvedCount: number,
   hasOverflow: boolean,
@@ -270,13 +319,10 @@ function showVerseResults(
   const items = slice.map((vr) => {
     const display = formatVerseRef(vr);
     const url = verseUrl(vr);
-    const rendering = sampleByVerse.get(vr) ?? '';
-    const renderHtml = rendering
-      ? `<span class="ws-sr-rendering">${esc(rendering.toLowerCase())}</span>`
-      : '';
+    const textDivs = `<div class="ws-sr-verse-text ws-sr-lit" hidden></div><div class="ws-sr-verse-text ws-sr-trad" hidden></div>`;
     return url
-      ? `<li><a class="ws-sr-verse-link" href="${esc(url)}"><span class="ws-sr-ref">${esc(display)}</span>${renderHtml}</a></li>`
-      : `<li><span class="ws-sr-verse-link"><span class="ws-sr-ref">${esc(display)}</span>${renderHtml}</span></li>`;
+      ? `<li data-vr="${esc(vr)}"><a class="ws-sr-verse-link" href="${esc(url)}"><span class="ws-sr-ref">${esc(display)}</span></a>${textDivs}</li>`
+      : `<li data-vr="${esc(vr)}"><span class="ws-sr-verse-link"><span class="ws-sr-ref">${esc(display)}</span></span>${textDivs}</li>`;
   }).join('');
 
   const overflow = hasOverflow ? '+' : '';
@@ -286,12 +332,15 @@ function showVerseResults(
 
   ul.innerHTML = items + hint;
 
-  const overflowNote = hasOverflow ? ' (overflow pages not searched)' : '';
+  const overflowNote = '';
   if (resolvedCount > 1) {
-    setStatus(`${verseRefs.length}${overflow} verses match all terms${overflowNote}`);
+    setStatus(`${verseRefs.length}${overflow} verses match all terms`);
   } else {
-    setStatus(`${verseRefs.length}${overflow} verses for "${primaryLemma}"${overflowNote}${verseRefs.length ? ' — type more words to narrow' : ''}`);
+    setStatus(`${verseRefs.length}${overflow} verses for "${primaryLemma}"${verseRefs.length ? ' — type more words to narrow' : ''}`);
   }
+  const litCb = document.getElementById('ws-show-lit') as HTMLInputElement | null;
+  const tradCb = document.getElementById('ws-show-trad') as HTMLInputElement | null;
+  if (litCb?.checked || tradCb?.checked) { void updateVerseText(); }
 }
 
 // ---------------------------------------------------------------------------
@@ -299,6 +348,63 @@ function showVerseResults(
 // ---------------------------------------------------------------------------
 
 let activeSearchId = 0;
+let currentAllRenderingsByVerse = new Map<string, Set<string>>();
+let currentLitByVerse = new Map<string, string>();
+let currentTradByVerse = new Map<string, string>();
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function highlightRenderings(text: string, renderings: Set<string>): string {
+  let result = esc(text);
+  for (const rendering of renderings) {
+    const cleaned = rendering.replace(/<[^>]*>/g, ' ').replace(/\[[^\]]*\]/g, ' ')
+      .replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!cleaned || cleaned.length < 2) continue;
+    try {
+      result = result.replace(new RegExp(`\\b(${escapeRegex(cleaned)})\\b`, 'gi'), '<mark>$1</mark>');
+    } catch { /* ignore bad patterns */ }
+  }
+  return result;
+}
+
+async function updateVerseText(): Promise<void> {
+  const ul = document.getElementById(RESULTS_ID);
+  if (!ul) return;
+  const showLit = (document.getElementById('ws-show-lit') as HTMLInputElement | null)?.checked ?? false;
+  const showTrad = (document.getElementById('ws-show-trad') as HTMLInputElement | null)?.checked ?? false;
+  for (const li of ul.querySelectorAll<HTMLLIElement>('li[data-vr]')) {
+    const vr = li.dataset.vr ?? '';
+    const renderings = currentAllRenderingsByVerse.get(vr) ?? new Set<string>();
+    const litDiv = li.querySelector<HTMLDivElement>('.ws-sr-lit');
+    const tradDiv = li.querySelector<HTMLDivElement>('.ws-sr-trad');
+    if (litDiv) {
+      if (showLit) {
+        if (!litDiv.dataset.loaded) {
+          const text = currentLitByVerse.get(vr) ?? '';
+          litDiv.innerHTML = text ? highlightRenderings(text, renderings) : '';
+          litDiv.dataset.loaded = '1';
+        }
+        litDiv.removeAttribute('hidden');
+      } else {
+        litDiv.setAttribute('hidden', '');
+      }
+    }
+    if (tradDiv) {
+      if (showTrad) {
+        if (!tradDiv.dataset.loaded) {
+          const text = currentTradByVerse.get(vr) ?? '';
+          tradDiv.innerHTML = text ? highlightRenderings(text, renderings) : '';
+          tradDiv.dataset.loaded = '1';
+        }
+        tradDiv.removeAttribute('hidden');
+      } else {
+        tradDiv.setAttribute('hidden', '');
+      }
+    }
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Core search pipeline
@@ -308,6 +414,7 @@ async function handleInput(rawQuery: string): Promise<void> {
   const searchId = ++activeSearchId;
   const query = rawQuery.trim();
   if (!query) { clearDisplay(); return; }
+  currentAllRenderingsByVerse = new Map();
 
   // Ensure index is available
   let idx = getIndexSync();
@@ -362,10 +469,15 @@ async function handleInput(rawQuery: string): Promise<void> {
 
   // Seed current intersection with primary word's verse set
   let currentSet: Set<string> = primaryResult.verseSet;
-  let currentSample: Map<string, string> = primaryResult.sampleByVerse;
   let anyOverflow = primaryResult.hasOverflow;
 
-  showVerseResults([...currentSet].sort(), currentSample, primary, sorted.length > 1 ? 0 : 1, anyOverflow);
+  currentLitByVerse = new Map(primaryResult.litByVerse);
+  currentTradByVerse = new Map(primaryResult.tradByVerse);
+  for (const [vr, r] of primaryResult.sampleByVerse) {
+    currentAllRenderingsByVerse.set(vr, new Set([r, ...sorted]));
+  }
+
+  showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow);
 
   // Progressively intersect remaining words as they load
   if (sorted.length > 1) {
@@ -381,8 +493,18 @@ async function handleInput(rawQuery: string): Promise<void> {
       }
       currentSet = narrowed;
       if (result.hasOverflow) anyOverflow = true;
+      for (const [vr, r] of result.sampleByVerse) {
+        const s = currentAllRenderingsByVerse.get(vr);
+        if (s) s.add(r); else currentAllRenderingsByVerse.set(vr, new Set([r]));
+      }
+      for (const [vr, lit] of result.litByVerse) {
+        if (!currentLitByVerse.has(vr)) currentLitByVerse.set(vr, lit);
+      }
+      for (const [vr, trad] of result.tradByVerse) {
+        if (!currentTradByVerse.has(vr)) currentTradByVerse.set(vr, trad);
+      }
       if (searchId !== activeSearchId) return;
-      showVerseResults([...currentSet].sort(), currentSample, primary, sorted.length, anyOverflow);
+      showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow);
     }));
   }
 }
