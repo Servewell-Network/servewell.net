@@ -11,9 +11,19 @@ Here are the main possibilities in my mind, starting with the one I plan to try 
 
 running wrangler deploy when there are no other changes to deploy
     may cause cloudflare to realize that the public/-/ files really are intended to be deployed
+    update: I just tried this; still got 'Read 1284' and 'No updated asset files to upload' and 404s.
+
 wrangler/cloudflare may be respecting my .gitignore somehow
 moving .assetsignore to the root may cause it to have more priority
+    this was from Gemini
+    Claude says wrong, it should stay in public
 making .assetsignore truly empty may cause it to have more priority
+    update: tried this; same deploy output; no more 404s
+
+Fixed for now Apr 18, but suspicious there may be some randomness here, I'm watching carefully
+    to see what I may do that may trigger the problem again, as it happened many times over the 
+    past few days.
+
 all else fails, adding a separate deploy line to pre-deploy that points 
     specifically to public/-/ could cause wrangler/cloudflare to ignore the .gitignore
 cloudflare could be caching the rule to not serve the chapter pages it has, 

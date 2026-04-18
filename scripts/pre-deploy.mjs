@@ -117,6 +117,29 @@ async function askYesNo(question) {
   }
 }
 
+async function smokeTestChapterPages() {
+  const testUrls = [
+    'https://servewell.net/-/Genesis/1',
+    'https://servewell.net/-/Matthew/5',
+    'https://servewell.net/-/Revelation/22',
+  ];
+  console.log('\n== Smoke test: chapter pages ==');
+  let failed = false;
+  for (const url of testUrls) {
+    const res = await fetch(url, { method: 'HEAD' });
+    if (res.ok) {
+      console.log(`  ✓ ${url} → ${res.status}`);
+    } else {
+      console.error(`  ✗ ${url} → ${res.status} (expected 200)`);
+      failed = true;
+    }
+  }
+  if (failed) {
+    throw new Error('Chapter page smoke test failed — chapter files may not be deployed. See docs/public-chap-files-404-issue.txt.');
+  }
+  console.log('  All chapter page checks passed.');
+}
+
 async function main() {
   try {
     console.log('Starting pre-deploy checks...');
@@ -163,6 +186,7 @@ async function main() {
 
     if (approved) {
       await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
+      await smokeTestChapterPages();
     } else {
       console.log('Main deployment skipped.');
     }
