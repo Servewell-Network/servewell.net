@@ -168,10 +168,10 @@ async function main() {
     }
 
     // Check word pages R2 sync regardless of whether the main deploy ran.
-    // dist/.words-content-fingerprint is written by p2-words with a hash of word JSON content.
-    // dist/.words-r2-synced records the fingerprint that was current at last R2 sync.
-    // If they differ (or synced is missing), word pages have changed since the last R2 deploy.
-    const fingerprintFile = path.resolve('dist/.words-content-fingerprint');
+    // dist/.words-render-fingerprint is written by p2-words-html and covers rendering inputs
+    // (SCRIPT_TAG, app shell size). dist/.words-r2-synced records the stamp at last R2 sync.
+    // If they differ (or synced is missing), word pages need to be pushed to R2.
+    const fingerprintFile = path.resolve('dist/.words-render-fingerprint');
     const r2MarkerFile = path.resolve('dist/.words-r2-synced');
     let needsR2Sync = false;
     if (fs.existsSync(fingerprintFile)) {

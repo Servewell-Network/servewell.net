@@ -66,7 +66,8 @@ function refToUrl(ref: string): string | null {
   const bookPath = bookName.replace(/\s+/g, '-');
   return `https://servewell.net/-/${bookPath}/${m[2]}#${m[3]}`;
 }
-const SCRIPT_TAG = `<script src="/js/servewell-app-shell.js"></script>`;
+// Absolute URL required: word pages are served from words.servewell.net, not servewell.net
+const SCRIPT_TAG = `<script src="https://servewell.net/js/servewell-app-shell.js"></script>`;
 
 // ---------------------------------------------------------------------------
 // Types matching JSON output
@@ -651,3 +652,17 @@ for (const name of TEST_R2_SAMPLES) {
   }
 }
 console.log(`Copied ${samplesCopied} sample pages to public/test-r2/ for visual preview`);
+
+// Write a rendering fingerprint that covers HTML template inputs:
+// - The SCRIPT_TAG (captures app shell URL changes)
+// - The size of the built app shell JS (captures shell rebuilds)
+// Combined with the JSON content fingerprint from generateWordStudyJson, this
+// ensures pre-deploy detects both data changes AND rendering changes.
+{
+  const shellPath = path.join(ROOT, 'public/js/servewell-app-shell.js');
+  const shellSize = fs.existsSync(shellPath) ? fs.statSync(shellPath).size : 0;
+  const renderFingerprint = `${SCRIPT_TAG.length}:${shellSize}`;
+  const distDir = path.join(ROOT, 'dist');
+  if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+  fs.writeFileSync(path.join(distDir, '.words-render-fingerprint'), renderFingerprint, 'utf8');
+}

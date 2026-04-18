@@ -917,6 +917,16 @@ console.log(`_word_index.json: ${Object.keys(wordIndex).length} multi-file words
 console.log(`_strongs_index.json: ${Object.keys(strongsIndex).length} Strongs mappings`);
 console.log(`Total instance references: ${totalInstances}`);
 
+// Copy _word_index.json to public/ so it's served by the main wrangler deploy
+// at https://servewell.net/_word_index.json — used by the client-side search module.
+{
+  const publicDir = path.join(ROOT, 'public');
+  const src = path.join(OUT_DIR, '_word_index.json');
+  const dest = path.join(publicDir, '_word_index.json');
+  fs.copyFileSync(src, dest);
+  console.log('Copied _word_index.json → public/_word_index.json');
+}
+
 // Report Strongs IDs with no lexicon coverage (not even via base-strip fallback)
 {
   const noLexicon: string[] = [];

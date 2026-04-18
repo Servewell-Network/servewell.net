@@ -136,8 +136,8 @@ if (failed > 0) {
   process.exit(1);
 } else {
   console.log(`\nDone: ${uploaded} files uploaded to R2 in ${elapsed}s.`);
-  // Record the current content fingerprint so pre-deploy knows R2 is in sync.
-  const fingerprintFile = join(ROOT, 'dist', '.words-content-fingerprint');
+  // Record the current render fingerprint so pre-deploy knows R2 is in sync.
+  const fingerprintFile = join(ROOT, 'dist', '.words-render-fingerprint');
   const syncedFile = join(ROOT, 'dist', '.words-r2-synced');
   const fingerprint = existsSync(fingerprintFile) ? readFileSync(fingerprintFile, 'utf8') : '';
   writeFileSync(syncedFile, fingerprint, 'utf8');

@@ -450,7 +450,8 @@ body.app-panel-open #app-shell-root .app-overlay {
 @media (max-width: 640px) {
   #app-shell-root .app-topbar > .app-topbar-home,
   #app-shell-root .app-topbar > .app-checkrow,
-  #app-shell-root .app-topbar > .app-topbar-link {
+  #app-shell-root .app-topbar > .app-topbar-link,
+  #app-shell-root .app-topbar > .app-topbar-search {
     display: none;
   }
 
@@ -488,6 +489,7 @@ body.app-panel-open #app-shell-root .app-overlay {
     <a class="app-topbar-link" href="/features">Features</a>
     <a class="app-topbar-link" href="/whats-next">What's Next</a>
     <a class="app-topbar-link" href="/about">About</a>
+    <button type="button" id="ws-search-topbar-btn" class="app-auth-menu-toggle app-topbar-search" aria-label="Search words">Search</button>
     <span class="app-spacer"></span>
     <div class="app-auth-cluster">
       <button type="button" class="app-auth-menu-toggle" data-auth-menu-toggle aria-haspopup="true" aria-expanded="false">Account</button>
@@ -539,6 +541,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 
   <nav class="app-bottombar">
     <button type="button" data-action="menu-open">Menu</button>
+    <button type="button" id="ws-search-bottombar-btn" class="ws-search-btn" aria-label="Search words">Search</button>
     <button type="button" data-action="scroll-top">Top</button>
   </nav>
 

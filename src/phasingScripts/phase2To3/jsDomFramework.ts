@@ -43,6 +43,7 @@ import { createModeratorRoleModule } from './createModeratorRoleModule';
 import { createDevTimeModule } from './createDevTimeModule';
 import { createTransliterationModule } from './createTransliterationModule';
 import { createSelectionControlModule } from './createSelectionControlModule';
+import { createWordSearchModule } from './createWordSearchModule';
 
 function isDemoRoute(pathname: string): boolean {
   const normalizedPath = pathname.replace(/\/+$/, '') || '/';
@@ -82,12 +83,16 @@ export function jsDomFramework() {
   modules.register(createVerseNumberPopoverModule(delegator));
   modules.register(createTransliterationModule());
   modules.register(createSelectionControlModule());
+  modules.register(createWordSearchModule());
 
   registerShellListeners(delegator, shell, theme, modules);
 
   theme.restore();
   modules.render();
   modules.restoreFromStorage();
+
+  // Word search is always-on (no menu checkbox); activate unconditionally.
+  modules.activate('word-search');
 
   function applyRoleAvailability(detail: unknown) {
     const roles = Array.isArray((detail as { roles?: unknown[] })?.roles)

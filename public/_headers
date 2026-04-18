@@ -1,0 +1,4 @@
+# Cloudflare Pages / Workers static asset response headers.
+# Allow words.servewell.net to fetch the word search index cross-origin.
+/_word_index.json
+  Access-Control-Allow-Origin: https://words.servewell.net
