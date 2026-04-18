@@ -12,6 +12,8 @@
 	],
 	"assets": {
 		"directory": "./public",
+		"binding": "ASSETS",
+		"run_worker_first": ["/api/*", "/auth/*"],
 	},
 	"kv_namespaces": [
 		{ "binding": "VOTES", "id": "fdb80cfbdf664ada848eeb605f259862", "preview_id": "60a58779b57a43b196106b815a78fdd7" }
