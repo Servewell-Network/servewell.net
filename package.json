@@ -38,7 +38,8 @@
 		"p2-words-all": "npm run p2-words && npm run p2-words-html",
 		"before-after": "node scripts/generate-before-after-report.js",
 		"build:servewell-app-shell": "esbuild src/phasingScripts/phase2To3/browserEntry.ts --bundle --platform=browser --format=iife --target=es2020 --outfile=public/js/servewell-app-shell.js",
-		"build:phase2to3-client": "npm run build:servewell-app-shell"
+		"build:servewell-word-page": "esbuild src/phasingScripts/phase2To3/wordPageEntry.ts --bundle --platform=browser --format=iife --target=es2020 --outfile=public/js/servewell-word-page.js",
+		"build:phase2to3-client": "npm run build:servewell-app-shell && npm run build:servewell-word-page"
 	},
 	"devDependencies": {
 		"@aws-sdk/client-s3": "^3.796.0",
