@@ -3668,6 +3668,117 @@ ${bodyText}` : prefix : bodyText;
     };
   }
 
+  // src/phasingScripts/phase2To3/wordSearchLogic.ts
+  var IRREGULARS = {
+    was: "be",
+    is: "be",
+    am: "be",
+    are: "be",
+    were: "be",
+    been: "be",
+    went: "go",
+    gone: "go",
+    goes: "go",
+    had: "have",
+    has: "have",
+    having: "have",
+    did: "do",
+    does: "do",
+    done: "do",
+    doing: "do",
+    said: "say",
+    says: "say",
+    saying: "say",
+    gave: "give",
+    given: "give",
+    gives: "give",
+    giving: "give",
+    took: "take",
+    taken: "take",
+    takes: "take",
+    came: "come",
+    comes: "come",
+    coming: "come",
+    ran: "run",
+    runs: "run",
+    running: "run",
+    saw: "see",
+    seen: "see",
+    sees: "see",
+    seeing: "see",
+    knew: "know",
+    known: "know",
+    knows: "know",
+    knowing: "know",
+    thought: "think",
+    thinks: "think",
+    thinking: "think"
+  };
+  function simplelemmatize(word) {
+    const w = word.toLowerCase().trim();
+    if (!w) return w;
+    if (IRREGULARS[w]) return IRREGULARS[w];
+    const n = w.length;
+    if (n > 4 && w.endsWith("ies")) return w.slice(0, -3) + "y";
+    if (n > 5 && w.endsWith("ing")) {
+      const stem = w.slice(0, -3);
+      if (stem.length >= 3 && stem[stem.length - 1] === stem[stem.length - 2]) {
+        return stem.slice(0, -1);
+      }
+      return stem + "e";
+    }
+    if (n > 4 && w.endsWith("ed")) {
+      const stem = w.slice(0, -2);
+      if (stem.length >= 3 && stem[stem.length - 1] === stem[stem.length - 2]) {
+        return stem.slice(0, -1);
+      }
+      return stem + "e";
+    }
+    if (n > 3 && w.endsWith("s") && !w.endsWith("ss")) return w.slice(0, -1);
+    return w;
+  }
+  function resolveToken(token, idx) {
+    const lower = token.toLowerCase().trim();
+    if (!lower) return { kind: "unresolved" };
+    if (lower in idx) return { kind: "resolved", lemma: lower };
+    const lem = simplelemmatize(lower);
+    if (lem !== lower && lem in idx) return { kind: "resolved", lemma: lem };
+    if (lem !== lower && lem.endsWith("e") && lem.length > 2) {
+      const noE = lem.slice(0, -1);
+      if (noE in idx) return { kind: "resolved", lemma: noE };
+    }
+    if (lower.endsWith("ing") && lower.length > 5) {
+      const bareStem = lower.slice(0, -3);
+      if (bareStem in idx) return { kind: "resolved", lemma: bareStem };
+    }
+    const MAX_CANDIDATES = 40;
+    const candidates = [];
+    for (const k of Object.keys(idx)) {
+      if (k.startsWith(lower)) {
+        candidates.push(k);
+        if (candidates.length >= MAX_CANDIDATES) break;
+      }
+    }
+    if (candidates.length === 1) return { kind: "resolved", lemma: candidates[0] };
+    if (candidates.length > 1) return { kind: "ambiguous", candidates };
+    return { kind: "unresolved" };
+  }
+  function getFileNamesForLemma(lemma, idx) {
+    const count = idx[lemma] ?? 1;
+    if (count <= 1) return [lemma];
+    return [lemma, ...Array.from({ length: count - 1 }, (_, i) => `${lemma}_${i + 2}`)];
+  }
+  function extractVerseRef(ref) {
+    const dot = ref.lastIndexOf(".");
+    return dot !== -1 ? ref.slice(0, dot) : ref;
+  }
+  function parseQueryTokens(query) {
+    return query.split(/\s+/).filter(Boolean);
+  }
+  function sortByRarity(lemmas, idx) {
+    return [...lemmas].sort((a, b) => (idx[a] ?? 1) - (idx[b] ?? 1));
+  }
+
   // src/phasingScripts/phase2To3/createWordSearchModule.ts
   var WORD_INDEX_URL = "https://servewell.net/_word_index.json";
   var WORDS_BASE_URL = "https://words.servewell.net";
@@ -3676,6 +3787,90 @@ ${bodyText}` : prefix : bodyText;
   var RESULTS_ID = "ws-search-results";
   var TOPBAR_BTN_ID = "ws-search-topbar-btn";
   var BOTTOMBAR_BTN_ID = "ws-search-bottombar-btn";
+  var MAX_DISPLAYED = 10;
+  var BOOK_DISPLAY = {
+    Gen: "Genesis",
+    Exo: "Exodus",
+    Lev: "Leviticus",
+    Num: "Numbers",
+    Deu: "Deuteronomy",
+    Jos: "Joshua",
+    Jdg: "Judges",
+    Rut: "Ruth",
+    "1Sa": "1 Samuel",
+    "2Sa": "2 Samuel",
+    "1Ki": "1 Kings",
+    "2Ki": "2 Kings",
+    "1Ch": "1 Chronicles",
+    "2Ch": "2 Chronicles",
+    Ezr: "Ezra",
+    Neh: "Nehemiah",
+    Est: "Esther",
+    Job: "Job",
+    Psa: "Psalms",
+    Pro: "Proverbs",
+    Ecc: "Ecclesiastes",
+    Sol: "Song of Songs",
+    Isa: "Isaiah",
+    Jer: "Jeremiah",
+    Lam: "Lamentations",
+    Eze: "Ezekiel",
+    Dan: "Daniel",
+    Hos: "Hosea",
+    Joe: "Joel",
+    Amo: "Amos",
+    Oba: "Obadiah",
+    Jon: "Jonah",
+    Mic: "Micah",
+    Nah: "Nahum",
+    Hab: "Habakkuk",
+    Zep: "Zephaniah",
+    Hag: "Haggai",
+    Zec: "Zechariah",
+    Mal: "Malachi",
+    Mat: "Matthew",
+    Mrk: "Mark",
+    Luk: "Luke",
+    Jhn: "John",
+    Act: "Acts",
+    Rom: "Romans",
+    "1Co": "1 Corinthians",
+    "2Co": "2 Corinthians",
+    Gal: "Galatians",
+    Eph: "Ephesians",
+    Php: "Philippians",
+    Col: "Colossians",
+    "1Th": "1 Thessalonians",
+    "2Th": "2 Thessalonians",
+    "1Ti": "1 Timothy",
+    "2Ti": "2 Timothy",
+    Tit: "Titus",
+    Phm: "Philemon",
+    Heb: "Hebrews",
+    Jas: "James",
+    "1Pe": "1 Peter",
+    "2Pe": "2 Peter",
+    "1Jn": "1 John",
+    "2Jn": "2 John",
+    "3Jn": "3 John",
+    Jud: "Jude",
+    Rev: "Revelation"
+  };
+  var BOOK_ALIASES = { Ezk: "Eze", Jol: "Joe", Sng: "Sol", Nam: "Nah" };
+  function formatVerseRef(ref) {
+    const m = ref.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
+    if (!m) return ref;
+    const code = BOOK_ALIASES[m[1]] ?? m[1];
+    return `${BOOK_DISPLAY[code] ?? m[1]} ${m[2]}:${m[3]}`;
+  }
+  function verseUrl(ref) {
+    const m = ref.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
+    if (!m) return null;
+    const code = BOOK_ALIASES[m[1]] ?? m[1];
+    const bookName = BOOK_DISPLAY[code];
+    if (!bookName) return null;
+    return `https://servewell.net/-/${bookName.replace(/\s+/g, "-")}/${m[2]}#${m[3]}`;
+  }
   var indexData = null;
   var indexLoading = false;
   var indexLoadFailed = false;
@@ -3684,19 +3879,19 @@ ${bodyText}` : prefix : bodyText;
     if (indexLoadFailed) return Promise.resolve(null);
     if (indexLoading) {
       return new Promise((resolve) => {
-        const check = setInterval(() => {
+        const id = setInterval(() => {
           if (!indexLoading) {
-            clearInterval(check);
+            clearInterval(id);
             resolve(indexData);
           }
         }, 50);
       });
     }
     indexLoading = true;
-    return fetch(WORD_INDEX_URL).then((res) => res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))).then((data) => {
-      indexData = data;
+    return fetch(WORD_INDEX_URL).then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))).then((d) => {
+      indexData = d;
       indexLoading = false;
-      return data;
+      return d;
     }).catch(() => {
       indexLoadFailed = true;
       indexLoading = false;
@@ -3707,26 +3902,54 @@ ${bodyText}` : prefix : bodyText;
     if (!indexData && !indexLoading && !indexLoadFailed) loadIndex().catch(() => {
     });
   }
-  var MAX_RESULTS = 8;
-  function search(query, index) {
-    const q = query.toLowerCase().trim();
-    if (!q) return [];
-    const exact = [];
-    const startsWith = [];
-    const contains = [];
-    for (const lemma of Object.keys(index)) {
-      if (lemma === q) exact.push(lemma);
-      else if (lemma.startsWith(q)) startsWith.push(lemma);
-      else if (lemma.includes(q)) contains.push(lemma);
-      if (exact.length + startsWith.length + contains.length >= MAX_RESULTS * 3) break;
+  var fileCache = /* @__PURE__ */ new Map();
+  function fetchWordFile(fileName) {
+    const cached = fileCache.get(fileName);
+    if (cached !== void 0) return cached;
+    const url = `${WORDS_BASE_URL}/${encodeURIComponent(fileName)}.json`;
+    const p = fetch(url).then((r) => r.ok ? r.json() : null).then((json) => {
+      if (!json?.ancientWord) return null;
+      const { _meta, slots, overflow } = json.ancientWord;
+      const byVerse = /* @__PURE__ */ new Map();
+      for (const slot of Object.values(slots)) {
+        for (const [rendering, trans] of Object.entries(slot.translations)) {
+          for (const inst of trans.instances) {
+            const vr = extractVerseRef(inst.ref);
+            if (!byVerse.has(vr)) byVerse.set(vr, rendering);
+          }
+        }
+      }
+      return {
+        lemma: _meta.wordKey,
+        fileName,
+        totalInstances: _meta.totalInstances,
+        hasOverflow: !!(overflow && Object.keys(overflow).length > 0),
+        byVerse
+      };
+    }).catch(() => null);
+    fileCache.set(fileName, p);
+    return p;
+  }
+  async function fetchLemmaFiles(lemma, idx) {
+    const names = getFileNamesForLemma(lemma, idx);
+    const results = await Promise.all(names.map(fetchWordFile));
+    const verseSet = /* @__PURE__ */ new Set();
+    const sampleByVerse = /* @__PURE__ */ new Map();
+    let totalInstances = 0;
+    let hasOverflow = false;
+    for (const r of results) {
+      if (!r) continue;
+      totalInstances += r.totalInstances;
+      if (r.hasOverflow) hasOverflow = true;
+      for (const [vr, rendering] of r.byVerse) {
+        verseSet.add(vr);
+        if (!sampleByVerse.has(vr)) sampleByVerse.set(vr, rendering);
+      }
     }
-    return [...exact, ...startsWith, ...contains].slice(0, MAX_RESULTS);
+    return { verseSet, totalInstances, hasOverflow, sampleByVerse };
   }
   function esc(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
-  function wordUrl(lemma) {
-    return `${WORDS_BASE_URL}/${encodeURIComponent(lemma)}`;
   }
   var STYLES = `
 #ws-search-popover {
@@ -3734,13 +3957,16 @@ ${bodyText}` : prefix : bodyText;
   top: 62px;
   right: 0.75rem;
   left: auto;
-  width: min(96vw, 320px);
+  width: min(96vw, 380px);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   background: var(--panel);
-  padding: 0.65rem 0.75rem;
+  padding: 0.65rem 0.75rem 0.5rem;
   margin: 0;
   box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 #ws-search-popover:not(:popover-open) { display: none; }
 
@@ -3755,13 +3981,59 @@ ${bodyText}` : prefix : bodyText;
   box-sizing: border-box;
 }
 
+#ws-search-status {
+  font-size: 0.8rem;
+  color: var(--muted);
+  min-height: 1.3em;
+  padding: 0.25rem 0.1rem 0.1rem;
+}
+
 #ws-search-results {
   list-style: none;
   padding: 0;
-  margin: 0.4rem 0 0;
+  margin: 0;
+  max-height: 55vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-#ws-search-results li a {
+#ws-search-results li {
+  border-top: 1px solid var(--border);
+}
+#ws-search-results:empty { border: none; }
+
+.ws-sr-verse-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0.4rem;
+  text-decoration: none;
+  color: var(--fg);
+  font-size: 0.88rem;
+}
+.ws-sr-verse-link:hover, .ws-sr-verse-link:focus {
+  background: var(--bg);
+  border-radius: 0.3rem;
+}
+.ws-sr-ref { font-weight: 600; white-space: nowrap; }
+.ws-sr-rendering {
+  font-size: 0.78em;
+  color: var(--muted);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 50%;
+}
+.ws-sr-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 0.35rem 0.4rem 0.1rem;
+  font-style: italic;
+  border-top: none !important;
+}
+.ws-sr-word-link {
   display: block;
   padding: 0.38rem 0.4rem;
   border-radius: 0.35rem;
@@ -3769,22 +4041,11 @@ ${bodyText}` : prefix : bodyText;
   color: var(--fg);
   font-size: 0.9rem;
 }
-
-#ws-search-results li a:hover,
-#ws-search-results li a:focus {
-  background: var(--bg);
-}
-
-#ws-search-results .ws-sr-count {
+.ws-sr-word-link:hover, .ws-sr-word-link:focus { background: var(--bg); }
+.ws-sr-count {
   font-size: 0.78em;
   color: var(--muted);
   margin-left: 0.35em;
-}
-
-#ws-search-status {
-  font-size: 0.82rem;
-  color: var(--muted);
-  padding: 0.25rem 0.1rem 0;
 }
 `;
   var injected = false;
@@ -3802,67 +4063,135 @@ ${bodyText}` : prefix : bodyText;
       popover.id = POPOVER_ID2;
       popover.setAttribute("popover", "");
       popover.innerHTML = `
-<input id="${INPUT_ID}" type="search" placeholder="Search words\u2026" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search Bible words">
-<ul id="${RESULTS_ID}" role="listbox" aria-label="Word search results"></ul>
-<div id="ws-search-status"></div>`;
+<input id="${INPUT_ID}" type="search" placeholder="Search Bible words\u2026" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search Bible words">
+<div id="ws-search-status" aria-live="polite"></div>
+<ul id="${RESULTS_ID}" role="list" aria-label="Search results"></ul>`;
       document.body.appendChild(popover);
     }
-    for (const btnId of [TOPBAR_BTN_ID, BOTTOMBAR_BTN_ID]) {
-      document.getElementById(btnId)?.setAttribute("popovertarget", POPOVER_ID2);
+    for (const id of [TOPBAR_BTN_ID, BOTTOMBAR_BTN_ID]) {
+      document.getElementById(id)?.setAttribute("popovertarget", POPOVER_ID2);
     }
     document.getElementById(POPOVER_ID2)?.addEventListener("toggle", (e) => {
       if (e.newState === "open") {
         setTimeout(() => document.getElementById(INPUT_ID)?.focus(), 30);
         prefetchIndex();
       } else {
-        const input = document.getElementById(INPUT_ID);
-        if (input) input.value = "";
-        const ul = document.getElementById(RESULTS_ID);
-        if (ul) ul.innerHTML = "";
-        const status = document.getElementById("ws-search-status");
-        if (status) status.textContent = "";
+        const inp = document.getElementById(INPUT_ID);
+        if (inp) inp.value = "";
+        clearDisplay();
       }
     });
     document.getElementById(INPUT_ID)?.addEventListener("input", (e) => {
-      const input = e.target;
-      const query = input.value;
-      if (!query.trim()) {
-        setResults([], {});
-        setStatus("");
-        return;
-      }
-      if (indexData) {
-        const results = search(query, indexData);
-        setResults(results, indexData);
-        setStatus(results.length === 0 ? "No matching words found." : "");
-      } else if (indexLoadFailed) {
-        setStatus("Search index unavailable.");
-      } else {
-        setStatus("Loading index\u2026");
-        loadIndex().then((idx) => {
-          if (!idx) {
-            setStatus("Search index unavailable.");
-            return;
-          }
-          const results = search(document.getElementById(INPUT_ID).value, idx);
-          setResults(results, idx);
-          setStatus(results.length === 0 ? "No matching words found." : "");
-        });
-      }
+      handleInput(e.target.value);
     });
   }
   function setStatus(msg) {
     const el = document.getElementById("ws-search-status");
     if (el) el.textContent = msg;
   }
-  function setResults(results, index) {
+  function clearDisplay() {
+    const ul = document.getElementById(RESULTS_ID);
+    if (ul) ul.innerHTML = "";
+    setStatus("");
+  }
+  function showWordLinks(matches, idx) {
     const ul = document.getElementById(RESULTS_ID);
     if (!ul) return;
-    ul.innerHTML = results.map((lemma) => {
-      const count = index[lemma];
-      const countHtml = count ? `<span class="ws-sr-count">(${count} pages)</span>` : "";
-      return `<li><a href="${esc(wordUrl(lemma))}" target="_blank" rel="noopener">${esc(lemma)}${countHtml}</a></li>`;
+    ul.innerHTML = matches.map((lemma) => {
+      const count = idx[lemma];
+      const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
+      const url = `${WORDS_BASE_URL}/${encodeURIComponent(lemma)}`;
+      return `<li><a class="ws-sr-word-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(lemma)}${countHtml}</a></li>`;
     }).join("");
+  }
+  function showVerseResults(verseRefs, sampleByVerse, primaryLemma, resolvedCount, hasOverflow) {
+    const ul = document.getElementById(RESULTS_ID);
+    if (!ul) return;
+    const slice = verseRefs.slice(0, MAX_DISPLAYED);
+    const items = slice.map((vr) => {
+      const display = formatVerseRef(vr);
+      const url = verseUrl(vr);
+      const rendering = sampleByVerse.get(vr) ?? "";
+      const renderHtml = rendering ? `<span class="ws-sr-rendering">${esc(rendering.toLowerCase())}</span>` : "";
+      return url ? `<li><a class="ws-sr-verse-link" href="${esc(url)}"><span class="ws-sr-ref">${esc(display)}</span>${renderHtml}</a></li>` : `<li><span class="ws-sr-verse-link"><span class="ws-sr-ref">${esc(display)}</span>${renderHtml}</span></li>`;
+    }).join("");
+    const overflow = hasOverflow ? "+" : "";
+    const hint = verseRefs.length > MAX_DISPLAYED ? `<li class="ws-sr-hint">Showing ${MAX_DISPLAYED} of ${verseRefs.length}${overflow} \u2014 keep typing to narrow down</li>` : "";
+    ul.innerHTML = items + hint;
+    const overflowNote = hasOverflow ? " (overflow pages not searched)" : "";
+    if (resolvedCount > 1) {
+      setStatus(`${verseRefs.length}${overflow} verses match all terms${overflowNote}`);
+    } else {
+      setStatus(`${verseRefs.length}${overflow} verses for "${primaryLemma}"${overflowNote}${verseRefs.length ? " \u2014 type more words to narrow" : ""}`);
+    }
+  }
+  var activeSearchId = 0;
+  async function handleInput(rawQuery) {
+    const searchId = ++activeSearchId;
+    const query = rawQuery.trim();
+    if (!query) {
+      clearDisplay();
+      return;
+    }
+    let idx = indexData;
+    if (!idx) {
+      if (indexLoadFailed) {
+        setStatus("Search index unavailable.");
+        return;
+      }
+      setStatus("Loading index\u2026");
+      idx = await loadIndex();
+      if (searchId !== activeSearchId) return;
+      if (!idx) {
+        setStatus("Search index unavailable.");
+        return;
+      }
+    }
+    const tokens = parseQueryTokens(query);
+    const resolutions = tokens.map((t) => ({ token: t, res: resolveToken(t, idx) }));
+    const resolvedLemmas = resolutions.filter((r) => r.res.kind === "resolved").map((r) => r.res.lemma);
+    if (resolvedLemmas.length === 0) {
+      const lastRes = resolutions[resolutions.length - 1]?.res;
+      if (lastRes?.kind === "ambiguous") {
+        showWordLinks(lastRes.candidates.slice(0, 8), idx);
+        setStatus("");
+      } else {
+        clearDisplay();
+        setStatus(tokens.length > 0 ? "No matching words found." : "");
+      }
+      return;
+    }
+    const sorted = sortByRarity(resolvedLemmas, idx);
+    const primary = sorted[0];
+    setStatus(`Searching "${sorted.join(" + ")}"\u2026`);
+    const fetchPromises = new Map(sorted.map((lemma) => [lemma, fetchLemmaFiles(lemma, idx)]));
+    const primaryResult = await fetchPromises.get(primary);
+    if (searchId !== activeSearchId) return;
+    if (!primaryResult || primaryResult.verseSet.size === 0) {
+      clearDisplay();
+      setStatus(`No verse data found for "${primary}". (JSON files may not be deployed yet.)`);
+      return;
+    }
+    let currentSet = primaryResult.verseSet;
+    let currentSample = primaryResult.sampleByVerse;
+    let anyOverflow = primaryResult.hasOverflow;
+    showVerseResults([...currentSet].sort(), currentSample, primary, sorted.length > 1 ? 0 : 1, anyOverflow);
+    if (sorted.length > 1) {
+      const remaining = sorted.slice(1);
+      await Promise.all(remaining.map(async (lemma) => {
+        const result = await fetchPromises.get(lemma);
+        if (searchId !== activeSearchId) return;
+        if (!result) return;
+        const narrowed = /* @__PURE__ */ new Set();
+        for (const vr of currentSet) {
+          if (result.verseSet.has(vr)) narrowed.add(vr);
+        }
+        currentSet = narrowed;
+        if (result.hasOverflow) anyOverflow = true;
+        if (searchId !== activeSearchId) return;
+        showVerseResults([...currentSet].sort(), currentSample, primary, sorted.length, anyOverflow);
+      }));
+    }
   }
   function createWordSearchModule() {
     const disposers = [];

@@ -900,10 +900,10 @@ for (const [fileName, data] of wordFileData) {
   totalInstances += fileTotalInstances;
 }
 
-// _word_index.json
+// _word_index.json — all lemmas (count=1 for single-Strongs words)
 const wordIndex: Record<string, number> = {};
 for (const [lemma, strongsIds] of lemmaToStrongsIds) {
-  if (strongsIds.length > 1) wordIndex[lemma] = strongsIds.length;
+  wordIndex[lemma] = strongsIds.length;
 }
 fs.writeFileSync(path.join(OUT_DIR, '_word_index.json'), JSON.stringify(wordIndex, null, 2), 'utf8');
 
