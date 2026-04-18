@@ -668,6 +668,48 @@ for (const [lemma, targets] of Object.entries(WORD_CROSS_REFS)) {
   if (refs.length > 0) crossRefsMap.set(firstFile, refs);
 }
 
+// Automatic rendering-based cross-refs: if a file uses a single-word rendering
+// that exactly matches a DIFFERENT lemma's key, add a crossRef from that lemma's
+// first file pointing to this specific file.  This catches cases like clean_5
+// rendering G2513/katharoi as "PURE" → adds crossRef in pure.json → clean_5.
+{
+  const singleWordRenderingToFiles = new Map<string, Set<string>>();
+  for (const [fileName, data] of wordFileData) {
+    for (const [, slot] of data.slots) {
+      for (const [rendering] of slot.translations) {
+        const words = toWordTokens(rendering);
+        if (words.length === 1) {
+          const word = words[0];
+          if (!singleWordRenderingToFiles.has(word)) singleWordRenderingToFiles.set(word, new Set());
+          singleWordRenderingToFiles.get(word)!.add(fileName);
+        }
+      }
+    }
+  }
+  for (const [lemma, sids] of lemmaToStrongsIds) {
+    const externalFiles = singleWordRenderingToFiles.get(lemma);
+    if (!externalFiles) continue;
+    const firstFile = assignedFileNames.get(makeFileKey(lemma, sids[0]));
+    if (!firstFile) continue;
+    const siblingNames = new Set(sids.map(sid => assignedFileNames.get(makeFileKey(lemma, sid))).filter(Boolean) as string[]);
+    for (const extFile of externalFiles) {
+      if (siblingNames.has(extFile)) continue;
+      const extData = wordFileData.get(extFile);
+      if (!extData) continue;
+      const existing = crossRefsMap.get(firstFile) ?? [];
+      if (existing.some(e => e.fileName === extFile)) continue;
+      existing.push({
+        fileName: extFile, wordKey: extData.wordKey,
+        strongsId: extData.strongsId,
+        lang: extData.lang,
+        lemma: extData.lemmaScript,
+        ...(extData.rootTranslation ? { rootTranslation: extData.rootTranslation } : {}),
+      });
+      crossRefsMap.set(firstFile, existing);
+    }
+  }
+}
+
 // Automatic reverse cross-refs from slash-alt segments and consumed light verbs.
 for (const [sid, reverseKeys] of pendingReverseKeys) {
   const targetFile = strongsToFile.get(sid);

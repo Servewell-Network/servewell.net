@@ -99,7 +99,9 @@ interface WordInstance { ref: string; trad: string; lit: string; }
 interface WordTranslation { totalInstances: number; instances: WordInstance[]; }
 interface WordSlot { grammarFull: string; totalInstances: number; translations: Record<string, WordTranslation>; }
 interface WordMeta { wordKey: string; totalInstances: number; }
+interface CrossRefEntry { fileName: string; wordKey: string; }
 interface WordFileJson {
+  crossRefs?: CrossRefEntry[];
   ancientWord: {
     _meta: WordMeta;
     overflow?: Record<string, string>;
@@ -112,6 +114,7 @@ interface LoadedWordData {
   fileName: string;
   totalInstances: number;
   hasOverflow: boolean;
+  crossRefFileNames: string[];
   /** verse-level ref (e.g. "Gen22:2") → first matching rendering in this file */
   byVerse: Map<string, string>;
 }
@@ -143,6 +146,7 @@ function fetchWordFile(fileName: string): Promise<LoadedWordData | null> {
         fileName,
         totalInstances: _meta.totalInstances,
         hasOverflow: !!(overflow && Object.keys(overflow).length > 0),
+        crossRefFileNames: json.crossRefs?.map(c => c.fileName) ?? [],
         byVerse,
       };
     })
@@ -160,12 +164,20 @@ async function fetchLemmaFiles(lemma: string, idx: WordIndex): Promise<{
   sampleByVerse: Map<string, string>;
 }> {
   const names = getFileNamesForLemma(lemma, idx);
-  const results = await Promise.all(names.map(fetchWordFile));
+  // Fetch sibling files; crossRef file names come from the first file's metadata
+  const [firstResult, ...restResults] = await Promise.all(names.map(fetchWordFile));
+  const allResults: (LoadedWordData | null)[] = [firstResult, ...restResults];
+  // Also fetch cross-referenced files (e.g. pure → clean_5)
+  const crossRefNames = firstResult?.crossRefFileNames ?? [];
+  if (crossRefNames.length > 0) {
+    const crossResults = await Promise.all(crossRefNames.map(fetchWordFile));
+    allResults.push(...crossResults);
+  }
   const verseSet = new Set<string>();
   const sampleByVerse = new Map<string, string>();
   let totalInstances = 0;
   let hasOverflow = false;
-  for (const r of results) {
+  for (const r of allResults) {
     if (!r) continue;
     totalInstances += r.totalInstances;
     if (r.hasOverflow) hasOverflow = true;
