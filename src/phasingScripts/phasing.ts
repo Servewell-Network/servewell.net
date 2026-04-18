@@ -25,4 +25,4 @@ async function runNeighborScripts() {
   }
 }
 
-runNeighborScripts();
+await runNeighborScripts();

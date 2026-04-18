@@ -7,6 +7,22 @@
 			"approve": true,
 			"matchCommandLine": true
 		},
-		"node scripts/debug-search.mjs": true
+		"node scripts/debug-search.mjs": true,
+		"/^npx wrangler --version 2>/dev/null \\| head -3$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"/^npx wrangler deploy --dry-run 2>&1 \\| head -60$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"/^npx wrangler deploy --dry-run 2>&1 \\| grep -i \"error\\\\\\|warn\\\\\\|skip\\\\\\|ignore\\\\\\|exclude\"$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"/^npx wrangler deploy --dry-run 2>&1$/": {
+			"approve": true,
+			"matchCommandLine": true
+		}
 	}
 }

@@ -4,7 +4,6 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"deploy": "node scripts/pre-deploy.mjs",
 		"deploy:raw": "wrangler deploy",
 		"deploy:words-r2": "node scripts/sync-words-to-r2.mjs",
 		"dev": "wrangler dev",
