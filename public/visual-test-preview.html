@@ -242,6 +242,11 @@
 				{ type: 'action', title: 'Action: Open Bible nav widget', selector: '#bible-nav-btns .nav-ref-btn', event: 'click' },
 				{ type: 'action', title: 'Action: Choose a Bible book', selector: 'button[data-nav-pick-book]', event: 'click' },
 
+				// Search popover on mobile — verifies left-edge is not clipped
+				{ type: 'page', title: 'Search Popover: Chapter page - Narrow', path: '/-/Genesis/1', width: 375, height: 600 },
+				{ type: 'action', title: 'Action: Open search popover (narrow)', selector: '#ws-search-topbar-btn', event: 'click', waitMs: 300 },
+				{ type: 'action', title: 'Action: Type search query (narrow)', selector: '#ws-search-input', event: 'type', value: 'love', waitMs: 1200 },
+
 				// Word study sample pages (served from public/test-r2/ — mirrors R2/words.servewell.net layout)
 				{ type: 'page', title: 'Word Study: aaron (Hebrew proper noun, merged slots)', path: '/test-r2/aaron', width: 1220, height: 600 },
 				{ type: 'page', title: 'Word Study: love (common word, multiple slots)', path: '/test-r2/love', width: 1220, height: 600 },
@@ -385,6 +390,11 @@
 					case 'uncheck':
 						target.checked = false;
 						dispatchCheckEvents(target);
+						break;
+					case 'type':
+						target.value = slide.value || '';
+						target.dispatchEvent(new Event('input', { bubbles: true }));
+						target.dispatchEvent(new Event('change', { bubbles: true }));
 						break;
 					case 'assert-visible':
 					case 'assert-present':

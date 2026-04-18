@@ -84,8 +84,9 @@ const STYLES = `
   position: fixed;
   top: 62px;
   right: 0.75rem;
-  left: auto;
-  width: min(96vw, 380px);
+  left: 0.75rem;
+  width: min(calc(100vw - 1.5rem), 380px);
+  box-sizing: border-box;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   background: var(--panel);
