@@ -24,6 +24,18 @@ Fixed for now Apr 18, but suspicious there may be some randomness here, I'm watc
     to see what I may do that may trigger the problem again, as it happened many times over the 
     past few days.
 
+Yep it happened again Apr 18, and I'm not sure why. 
+    We made debug script and browser script use shared code.
+    We made css change for script input.
+    I deployed with pre-deploy for shell app css change, 
+    did not deploy to r2 though it wants it due to shell app css change
+    checked and the early results were good (Matthew 5 took a few moments, but eventually it showed up)
+    Claude says there were other deploys in there (though I don't recall)
+    Later, I got 404s. 
+    Claude wants to try ensuring that public/.assetsignore always has a '\n'
+        so it doesn't get treated as non-existent
+    I want to try a monitoring process to alert as soon as it happens.
+
 all else fails, adding a separate deploy line to pre-deploy that points 
     specifically to public/-/ could cause wrangler/cloudflare to ignore the .gitignore
 cloudflare could be caching the rule to not serve the chapter pages it has, 

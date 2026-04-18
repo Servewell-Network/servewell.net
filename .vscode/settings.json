@@ -25,6 +25,18 @@
 		"/^npx wrangler deploy --dry-run 2>&1$/": {
 			"approve": true,
 			"matchCommandLine": true
+		},
+		"/^npx wrangler deploy --dry-run 2>&1 \\| grep -i \"asset\\\\\\|ignore\\\\\\|skip\\\\\\|exclude\\\\\\|found\\\\\\|-/\" \\| head -30$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"/^curl -s -o /dev/null -w \"%\\{http_code\\}\" \"https://servewell\\.net/\" && echo \" \\(home\\)\" && curl -s -o /dev/null -w \"%\\{http_code\\}\" \"https://servewell\\.net/about\" && echo \" \\(about\\)\" && npx wrangler deployments list 2>&1 \\| head -20$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"/^npx wrangler deployments list 2>&1 \\| grep -E \"Created:\\|Version\"$/": {
+			"approve": true,
+			"matchCommandLine": true
 		}
 	}
 }

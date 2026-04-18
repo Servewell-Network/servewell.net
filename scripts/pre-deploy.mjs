@@ -198,6 +198,13 @@ async function main() {
     }
 
     if (approved) {
+      // Guard: .assetsignore must be non-empty (at least a newline) so Wrangler
+      // does not fall back to .gitignore and exclude public/-/ from the asset manifest.
+      const assetsIgnorePath = path.resolve('public/.assetsignore');
+      if (!fs.existsSync(assetsIgnorePath) || fs.statSync(assetsIgnorePath).size === 0) {
+        console.log('  Fixing public/.assetsignore (was missing or empty — restoring newline to prevent /-/ 404s)');
+        fs.writeFileSync(assetsIgnorePath, '\n');
+      }
       await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
       await smokeTestChapterPages();
     } else {
