@@ -41,6 +41,15 @@ const IRREGULARS: Record<string, string> = {
  * Not a full morphological analyser; good enough to map inflected queries to
  * word-index keys (which are already root-translation forms).
  * Returns the original word if no rule fires.
+ *
+ * NOTE: This intentionally does NOT need to match wink-lemmatizer, which is
+ * used by generateWordStudyJson.ts to derive R2 file names. The two are
+ * decoupled by design: resolveToken() in this file handles the gap via
+ * exact-key lookup → lemmatize → prefix matching, so a user query like
+ * "running" still finds the correct file even if simplelemmatize produces a
+ * slightly different stem than wink would. Replacing simplelemmatize with
+ * wink here would require ~1,565 R2 file renames (9% of all files) for no
+ * user-visible benefit.
  */
 export function simplelemmatize(word: string): string {
   const w = word.toLowerCase().trim();
