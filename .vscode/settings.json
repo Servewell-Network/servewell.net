@@ -9,6 +9,7 @@
 			"matchCommandLine": true
 		},
 		"node scripts/debug-search.mjs": true,
+		"npx tsx scripts/debug-search.mts": true,
 		"/^npx wrangler --version 2>/dev/null \\| head -3$/": {
 			"approve": true,
 			"matchCommandLine": true

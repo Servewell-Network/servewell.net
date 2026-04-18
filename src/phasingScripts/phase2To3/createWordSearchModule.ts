@@ -1,20 +1,25 @@
 import type { AppModule } from './createModuleRegistry';
 import {
-  type WordIndex,
   type TokenResolution,
+  type WordIndex,
   resolveToken,
-  getFileNamesForLemma,
-  extractVerseRef,
   parseQueryTokens,
   sortByRarity,
 } from './wordSearchLogic';
+import {
+  type LoadedWordData,
+  WORDS_BASE_URL,
+  loadIndex,
+  prefetchIndex,
+  fetchLemmaFiles,
+  getIndexSync,
+  isIndexLoadFailed,
+} from './wordSearchFetch';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const WORD_INDEX_URL    = 'https://servewell.net/_word_index.json';
-const WORDS_BASE_URL    = 'https://words.servewell.net';
 const POPOVER_ID        = 'ws-search-popover';
 const INPUT_ID          = 'ws-search-input';
 const RESULTS_ID        = 'ws-search-results';
@@ -60,143 +65,6 @@ function verseUrl(ref: string): string | null {
   const bookName = BOOK_DISPLAY[code];
   if (!bookName) return null;
   return `https://servewell.net/-/${bookName.replace(/\s+/g, '-')}/${m[2]}#${m[3]}`;
-}
-
-// ---------------------------------------------------------------------------
-// Index state
-// ---------------------------------------------------------------------------
-
-let indexData: WordIndex | null = null;
-let indexLoading = false;
-let indexLoadFailed = false;
-
-function loadIndex(): Promise<WordIndex | null> {
-  if (indexData) return Promise.resolve(indexData);
-  if (indexLoadFailed) return Promise.resolve(null);
-  if (indexLoading) {
-    return new Promise((resolve) => {
-      const id = setInterval(() => {
-        if (!indexLoading) { clearInterval(id); resolve(indexData); }
-      }, 50);
-    });
-  }
-  indexLoading = true;
-  return fetch(WORD_INDEX_URL)
-    .then((r) => r.ok ? r.json() as Promise<WordIndex> : Promise.reject(new Error(`HTTP ${r.status}`)))
-    .then((d) => { indexData = d; indexLoading = false; return d; })
-    .catch(() => { indexLoadFailed = true; indexLoading = false; return null; });
-}
-
-function prefetchIndex(): void {
-  if (!indexData && !indexLoading && !indexLoadFailed) loadIndex().catch(() => {});
-}
-
-// ---------------------------------------------------------------------------
-// Word file types & fetching
-// ---------------------------------------------------------------------------
-
-interface WordInstance { ref: string; trad: string; lit: string; }
-interface WordTranslation { totalInstances: number; instances: WordInstance[]; }
-interface WordSlot { grammarFull: string; totalInstances: number; translations: Record<string, WordTranslation>; }
-interface WordMeta { wordKey: string; totalInstances: number; }
-interface CrossRefEntry { fileName: string; wordKey: string; }
-interface WordFileJson {
-  crossRefs?: CrossRefEntry[];
-  ancientWord: {
-    _meta: WordMeta;
-    overflow?: Record<string, string>;
-    slots: Record<string, WordSlot>;
-  };
-}
-
-interface LoadedWordData {
-  lemma: string;
-  fileName: string;
-  totalInstances: number;
-  hasOverflow: boolean;
-  crossRefFileNames: string[];
-  /** verse-level ref (e.g. "Gen22:2") → first matching rendering in this file */
-  byVerse: Map<string, string>;
-}
-
-// Promise cache — avoids re-fetching the same file across searches
-const fileCache = new Map<string, Promise<LoadedWordData | null>>();
-
-function fetchWordFile(fileName: string): Promise<LoadedWordData | null> {
-  const cached = fileCache.get(fileName);
-  if (cached !== undefined) return cached;
-
-  const url = `${WORDS_BASE_URL}/${encodeURIComponent(fileName)}`;
-  const p = fetch(url)
-    .then((r): Promise<WordFileJson | null> => {
-      if (!r.ok) return Promise.resolve(null);
-      return r.text().then((html) => {
-        const m = html.match(/<pre id="ws-data">([\s\S]*?)<\/pre>/);
-        if (!m) return null;
-        const jsonText = m[1]
-          .replace(/&amp;/g, '&').replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-        try { return JSON.parse(jsonText) as WordFileJson; } catch { return null; }
-      });
-    })
-    .then((json): LoadedWordData | null => {
-      if (!json?.ancientWord) return null;
-      const { _meta, slots, overflow } = json.ancientWord;
-      const byVerse = new Map<string, string>();
-      for (const slot of Object.values(slots)) {
-        for (const [rendering, trans] of Object.entries(slot.translations)) {
-          for (const inst of trans.instances) {
-            const vr = extractVerseRef(inst.ref);
-            if (!byVerse.has(vr)) byVerse.set(vr, rendering);
-          }
-        }
-      }
-      return {
-        lemma: _meta.wordKey,
-        fileName,
-        totalInstances: _meta.totalInstances,
-        hasOverflow: !!(overflow && Object.keys(overflow).length > 0),
-        crossRefFileNames: json.crossRefs?.map(c => c.fileName) ?? [],
-        byVerse,
-      };
-    })
-    .catch(() => null);
-
-  fileCache.set(fileName, p);
-  return p;
-}
-
-/** Fetch all non-overflow files for a lemma; return combined verse set + total instances. */
-async function fetchLemmaFiles(lemma: string, idx: WordIndex): Promise<{
-  verseSet: Set<string>;
-  totalInstances: number;
-  hasOverflow: boolean;
-  sampleByVerse: Map<string, string>;
-}> {
-  const names = getFileNamesForLemma(lemma, idx);
-  // Fetch sibling files; crossRef file names come from the first file's metadata
-  const [firstResult, ...restResults] = await Promise.all(names.map(fetchWordFile));
-  const allResults: (LoadedWordData | null)[] = [firstResult, ...restResults];
-  // Also fetch cross-referenced files (e.g. pure → clean_5)
-  const crossRefNames = firstResult?.crossRefFileNames ?? [];
-  if (crossRefNames.length > 0) {
-    const crossResults = await Promise.all(crossRefNames.map(fetchWordFile));
-    allResults.push(...crossResults);
-  }
-  const verseSet = new Set<string>();
-  const sampleByVerse = new Map<string, string>();
-  let totalInstances = 0;
-  let hasOverflow = false;
-  for (const r of allResults) {
-    if (!r) continue;
-    totalInstances += r.totalInstances;
-    if (r.hasOverflow) hasOverflow = true;
-    for (const [vr, rendering] of r.byVerse) {
-      verseSet.add(vr);
-      if (!sampleByVerse.has(vr)) sampleByVerse.set(vr, rendering);
-    }
-  }
-  return { verseSet, totalInstances, hasOverflow, sampleByVerse };
 }
 
 // ---------------------------------------------------------------------------
@@ -441,9 +309,9 @@ async function handleInput(rawQuery: string): Promise<void> {
   if (!query) { clearDisplay(); return; }
 
   // Ensure index is available
-  let idx = indexData;
+  let idx = getIndexSync();
   if (!idx) {
-    if (indexLoadFailed) { setStatus('Search index unavailable.'); return; }
+    if (isIndexLoadFailed()) { setStatus('Search index unavailable.'); return; }
     setStatus('Loading index…');
     idx = await loadIndex();
     if (searchId !== activeSearchId) return;
