@@ -142,13 +142,18 @@ for (const lemma of sorted) {
   const firstFileName = fileNames[0];
   let crossRefFileNames = [];
   for (const fileName of fileNames) {
-    const url = `${WORDS_BASE_URL}/${encodeURIComponent(fileName)}.json`;
+    const url = `${WORDS_BASE_URL}/${encodeURIComponent(fileName)}`;
     console.log(`    GET ${url}`);
     let data;
     try {
       const r = await fetch(url);
       if (!r.ok) { console.log(`    → HTTP ${r.status} (skipping)`); continue; }
-      data = await r.json();
+      const html = await r.text();
+      const m = html.match(/<pre id="ws-data">([\s\S]*?)<\/pre>/);
+      if (!m) { console.log(`    → no #ws-data island found`); continue; }
+      const jsonText = m[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<')
+        .replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+      data = JSON.parse(jsonText);
     } catch (e) { console.log(`    → fetch error: ${e.message}`); continue; }
 
     if (!data?.ancientWord?.slots) { console.log(`    → unexpected JSON shape`); continue; }
@@ -180,13 +185,18 @@ for (const lemma of sorted) {
   // Fetch crossRef files if any
   if (crossRefFileNames.length > 0) {
     for (const xFile of crossRefFileNames) {
-      const url = `${WORDS_BASE_URL}/${encodeURIComponent(xFile)}.json`;
-      console.log(`    crossRef GET ${url}`);
+      const xUrl = `${WORDS_BASE_URL}/${encodeURIComponent(xFile)}`;
+      console.log(`    crossRef GET ${xUrl}`);
       let data;
       try {
-        const r = await fetch(url);
+        const r = await fetch(xUrl);
         if (!r.ok) { console.log(`    → HTTP ${r.status} (skipping)`); continue; }
-        data = await r.json();
+        const html = await r.text();
+        const m = html.match(/<pre id="ws-data">([\s\S]*?)<\/pre>/);
+        if (!m) { console.log(`    → no #ws-data island found`); continue; }
+        const jsonText = m[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<')
+          .replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+        data = JSON.parse(jsonText);
       } catch (e) { console.log(`    → fetch error: ${e.message}`); continue; }
       if (!data?.ancientWord?.slots) continue;
       let count = 0;
