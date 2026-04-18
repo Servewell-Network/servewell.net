@@ -117,6 +117,19 @@ async function askYesNo(question) {
   }
 }
 
+async function checkUrlWithRetry(url, retries = 4, delayMs = 3000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const res = await fetch(url, { method: 'HEAD' });
+    if (res.ok) return res.status;
+    if (attempt < retries) {
+      process.stdout.write(`  ↻ ${url} → ${res.status}, retrying in ${delayMs / 1000}s (attempt ${attempt}/${retries})...\n`);
+      await new Promise(r => setTimeout(r, delayMs));
+    } else {
+      return res.status;
+    }
+  }
+}
+
 async function smokeTestChapterPages() {
   const testUrls = [
     'https://servewell.net/-/Genesis/1',
@@ -126,11 +139,11 @@ async function smokeTestChapterPages() {
   console.log('\n== Smoke test: chapter pages ==');
   let failed = false;
   for (const url of testUrls) {
-    const res = await fetch(url, { method: 'HEAD' });
-    if (res.ok) {
-      console.log(`  ✓ ${url} → ${res.status}`);
+    const status = await checkUrlWithRetry(url);
+    if (status === 200) {
+      console.log(`  ✓ ${url} → ${status}`);
     } else {
-      console.error(`  ✗ ${url} → ${res.status} (expected 200)`);
+      console.error(`  ✗ ${url} → ${status} (expected 200)`);
       failed = true;
     }
   }
