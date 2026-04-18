@@ -3,6 +3,7 @@
 		"wrangler.json": "jsonc"
 	},
 	"chat.tools.terminal.autoApprove": {
+		"curl -I https://servewell.net/-/Genesis/1": true,
 		"/^curl -s -o /dev/null -w \"%\\{http_code\\}\" \"https://servewell\\.net/Genesis/1\" && echo \"\" && npx wrangler deploy --dry-run 2>&1 \\| head -10$/": {
 			"approve": true,
 			"matchCommandLine": true
