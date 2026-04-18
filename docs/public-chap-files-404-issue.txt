@@ -36,6 +36,10 @@ Yep it happened again Apr 18, and I'm not sure why.
         so it doesn't get treated as non-existent
     I want to try a monitoring process to alert as soon as it happens.
 
+Okay, after about an hour after I think a deploy fixed it, 
+    it suddenly went down for no reason.
+
+
 all else fails, adding a separate deploy line to pre-deploy that points 
     specifically to public/-/ could cause wrangler/cloudflare to ignore the .gitignore
 cloudflare could be caching the rule to not serve the chapter pages it has, 
@@ -44,3 +48,21 @@ the cache can perhaps be cleared in the cloudflare dashboard or
     by arbitrarily introducing a throw-away file into public/-/
     Claude: in the Cloudflare dashboard you can purge cache for servewell.net/-/* 
     by going to Caching → Cache Rules → Purge Cache.
+
+That changes my understanding significantly. Let me look at this fresh — the timeline is: bad 404s → 19:29 UTC deploy fixed them → good for 1 hour → 404s again. No further deploy.
+
+No deploy after 19:29 UTC. So this is a genuine Cloudflare behaviour.
+
+Here's what I think is actually happening: the 19:29 deploy uploaded the chapter files as new assets (their hashes weren't in the previously-active manifest, so Wrangler uploaded them fresh). Cloudflare's asset delivery system serves newly-uploaded assets directly for up to 1 hour — but after that TTL, the CDN falls back to checking whether those asset hashes are still referenced by the current active worker binding. If the binding's manifest wasn't cleanly updated (perhaps because "already uploaded" from an earlier version was cached in the binding layer), those hash references expire and 404s resume.
+
+This is conjecture about Cloudflare internals, but the pattern points to the asset manifest embedded in the worker itself being stale — not the CDN cache. The practical fix is the same either way: make sure the chapter files get newly regenerated (not hash-identical to old uploads) every time you deploy, so Wrangler is forced to re-upload them and update the manifest binding freshly. Adding a build timestamp comment to the phasing output would achieve that, but it's a sledgehammer. Alternatively, always running wrangler deploy after a fresh phasing run (which you already do) should be sufficient — the issue kept recurring because the .assetsignore was silently zeroing out.
+
+The real danger was that .assetsignore kept becoming 0 bytes. With .DS_Store as real content and the pre-deploy guard checking the exact content, that specific trigger should be gone. I'd keep the monitor running for the next few deploys to confirm the 1-hour pattern doesn't recur.
+
+The logs tell a clean story — nothing alarming:
+
+**The 1-Chronicles 404 at 13:52:54** is normal deployment propagation delay. The monitor started at essentially the same second as the deploy completed, and that particular edge node hadn't received the new worker manifest yet. 37 seconds later, 1-Corinthians on a different edge was already fine. Not a real failure.
+
+**"No updated asset files to upload"** is the key line. It means all 1284 file hashes — including all 1189 chapter files — were already present in Cloudflare's asset store from earlier today's uploads. The deploy just published a new worker version with a fresh manifest pointing to those hashes. With `.assetsignore` correctly containing .DS_Store, the manifest should include all of them.
+
+**What to watch for at the 1-hour mark (~14:52):** if chapters are still 200, the theory holds — the 1-hour failures before were caused by the `.assetsignore` being 0 bytes, which produced a bad manifest on some deploy, and the CDN edge TTL was masking it. If they 404 again at the hour mark despite this deploy having a correct manifest, that points to something deeper in how Cloudflare ages out asset hashes that haven't been "re-uploaded" in a while, which would require a different fix (forcing a re-upload by touching the files).

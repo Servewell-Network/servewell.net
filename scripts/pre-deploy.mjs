@@ -118,8 +118,12 @@ async function askYesNo(question) {
 }
 
 async function checkUrlWithRetry(url, retries = 4, delayMs = 3000) {
+  // Cache-busting query param forces Cloudflare to revalidate against the asset manifest
+  // rather than returning a cached response. Without this, a bad deploy (missing /-/ files)
+  // can appear to pass for up to 1 hour while CDN edge caches still hold the old assets.
+  const bustUrl = `${url}?_cb=${Date.now()}`;
   for (let attempt = 1; attempt <= retries; attempt++) {
-    const res = await fetch(url, { method: 'HEAD' });
+    const res = await fetch(bustUrl, { method: 'HEAD' });
     if (res.ok) return res.status;
     if (attempt < retries) {
       process.stdout.write(`  ↻ ${url} → ${res.status}, retrying in ${delayMs / 1000}s (attempt ${attempt}/${retries})...\n`);
@@ -131,9 +135,11 @@ async function checkUrlWithRetry(url, retries = 4, delayMs = 3000) {
 }
 
 async function smokeTestChapterPages() {
+  // Use a spread of books, not just the popular ones — all chapter pages share the same
+  // asset manifest entry mechanism, so one obscure miss = all would miss after cache expiry.
   const testUrls = [
     'https://servewell.net/-/Genesis/1',
-    'https://servewell.net/-/Matthew/5',
+    'https://servewell.net/-/Micah/1',
     'https://servewell.net/-/Revelation/22',
   ];
   console.log('\n== Smoke test: chapter pages ==');
@@ -198,12 +204,15 @@ async function main() {
     }
 
     if (approved) {
-      // Guard: .assetsignore must be non-empty (at least a newline) so Wrangler
-      // does not fall back to .gitignore and exclude public/-/ from the asset manifest.
+      // Guard: .assetsignore must be non-empty so Wrangler does not fall back to
+      // .gitignore and exclude public/-/ from the asset manifest.
+      // A 0-byte file (e.g. after a git operation or editor save) silently breaks all chapter pages.
       const assetsIgnorePath = path.resolve('public/.assetsignore');
-      if (!fs.existsSync(assetsIgnorePath) || fs.statSync(assetsIgnorePath).size === 0) {
-        console.log('  Fixing public/.assetsignore (was missing or empty — restoring newline to prevent /-/ 404s)');
-        fs.writeFileSync(assetsIgnorePath, '\n');
+      const expectedContent = '.DS_Store\n';
+      const currentContent = fs.existsSync(assetsIgnorePath) ? fs.readFileSync(assetsIgnorePath, 'utf8') : '';
+      if (currentContent.trim() !== expectedContent.trim()) {
+        console.log('  Fixing public/.assetsignore (was missing or wrong — restoring to prevent /-/ 404s)');
+        fs.writeFileSync(assetsIgnorePath, expectedContent);
       }
       await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
       await smokeTestChapterPages();
