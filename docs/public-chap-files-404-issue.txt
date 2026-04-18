@@ -49,7 +49,10 @@ the cache can perhaps be cleared in the cloudflare dashboard or
     Claude: in the Cloudflare dashboard you can purge cache for servewell.net/-/* 
     by going to Caching → Cache Rules → Purge Cache.
 
-That changes my understanding significantly. Let me look at this fresh — the timeline is: bad 404s → 19:29 UTC deploy fixed them → good for 1 hour → 404s again. No further deploy.
+
+Claude's comments last time this happened:
+
+Let me look at this fresh — the timeline is: bad 404s → 19:29 UTC deploy fixed them → good for 1 hour → 404s again. No further deploy.
 
 No deploy after 19:29 UTC. So this is a genuine Cloudflare behaviour.
 
@@ -66,3 +69,219 @@ The logs tell a clean story — nothing alarming:
 **"No updated asset files to upload"** is the key line. It means all 1284 file hashes — including all 1189 chapter files — were already present in Cloudflare's asset store from earlier today's uploads. The deploy just published a new worker version with a fresh manifest pointing to those hashes. With `.assetsignore` correctly containing .DS_Store, the manifest should include all of them.
 
 **What to watch for at the 1-hour mark (~14:52):** if chapters are still 200, the theory holds — the 1-hour failures before were caused by the `.assetsignore` being 0 bytes, which produced a bad manifest on some deploy, and the CDN edge TTL was masking it. If they 404 again at the hour mark despite this deploy having a correct manifest, that points to something deeper in how Cloudflare ages out asset hashes that haven't been "re-uploaded" in a while, which would require a different fix (forcing a re-upload by touching the files).
+
+Then we only had a little glitch at around the hour mark ("/Judges/1 returned HTTP 000"):
+
+mreese@Marcuss-MacBook-Pro servewell.net % ./scripts/monitor-chapter-pages.sh
+
+=== Cycle 1 — 2026-04-18 13:52:54 — checking 66 books (30s between each) ===
+  [13:52:54] ✗  1-Chronicles/1                 → 404
+
+🚨  ServeWell ALERT: /1-Chronicles/1 returned HTTP 404
+
+  [13:53:31] ✓  1-Corinthians/1                → 200
+  [13:54:01] ✓  1-John/1                       → 200
+  [13:54:32] ✓  1-Kings/1                      → 200
+  [13:55:02] ✓  1-Peter/1                      → 200
+  [13:55:33] ✓  1-Samuel/1                     → 200
+  [13:56:03] ✓  1-Thessalonians/1              → 200
+  [13:56:34] ✓  1-Timothy/1                    → 200
+  [13:57:05] ✓  2-Chronicles/1                 → 200
+  [13:57:35] ✓  2-Corinthians/1                → 200
+  [13:58:05] ✓  2-John/1                       → 200
+  [13:58:36] ✓  2-Kings/1                      → 200
+  [13:59:06] ✓  2-Peter/1                      → 200
+  [13:59:37] ✓  2-Samuel/1                     → 200
+  [14:00:07] ✓  2-Thessalonians/1              → 200
+  [14:00:37] ✓  2-Timothy/1                    → 200
+  [14:01:07] ✓  3-John/1                       → 200
+  [14:01:38] ✓  Acts/1                         → 200
+  [14:02:09] ✓  Amos/1                         → 200
+  [14:02:40] ✓  Colossians/1                   → 200
+  [14:03:10] ✓  Daniel/1                       → 200
+  [14:03:41] ✓  Deuteronomy/1                  → 200
+  [14:04:11] ✓  Ecclesiastes/1                 → 200
+  [14:04:42] ✓  Ephesians/1                    → 200
+  [14:05:12] ✓  Esther/1                       → 200
+  [14:05:42] ✓  Exodus/1                       → 200
+  [14:06:13] ✓  Ezekiel/1                      → 200
+  [14:06:44] ✓  Ezra/1                         → 200
+  [14:07:14] ✓  Galatians/1                    → 200
+  [14:07:45] ✓  Genesis/1                      → 200
+  [14:08:15] ✓  Habakkuk/1                     → 200
+  [14:08:45] ✓  Haggai/1                       → 200
+  [14:09:16] ✓  Hebrews/1                      → 200
+  [14:09:46] ✓  Hosea/1                        → 200
+  [14:10:17] ✓  Isaiah/1                       → 200
+  [14:10:48] ✓  James/1                        → 200
+  [14:11:19] ✓  Jeremiah/1                     → 200
+  [14:11:49] ✓  Job/1                          → 200
+  [14:12:19] ✓  Joel/1                         → 200
+  [14:12:50] ✓  John/1                         → 200
+  [14:13:20] ✓  Jonah/1                        → 200
+  [14:13:51] ✓  Joshua/1                       → 200
+  [14:14:21] ✓  Jude/1                         → 200
+  [14:14:52] ✓  Judges/1                       → 200
+  [14:15:22] ✓  Lamentations/1                 → 200
+  [14:15:52] ✓  Leviticus/1                    → 200
+  [14:16:23] ✓  Luke/1                         → 200
+  [14:16:54] ✓  Malachi/1                      → 200
+  [14:17:24] ✓  Mark/1                         → 200
+  [14:17:55] ✓  Matthew/1                      → 200
+  [14:18:26] ✓  Micah/1                        → 200
+  [14:18:56] ✓  Nahum/1                        → 200
+  [14:19:26] ✓  Nehemiah/1                     → 200
+  [14:19:57] ✓  Numbers/1                      → 200
+  [14:20:27] ✓  Obadiah/1                      → 200
+  [14:20:59] ✓  Philemon/1                     → 200
+  [14:21:29] ✓  Philippians/1                  → 200
+  [14:22:00] ✓  Proverbs/1                     → 200
+  [14:22:31] ✓  Psalms/1                       → 200
+  [14:23:03] ✓  Revelation/1                   → 200
+  [14:23:34] ✓  Romans/1                       → 200
+  [14:24:05] ✓  Ruth/1                         → 200
+  [14:24:35] ✓  Song-of-Songs/1                → 200
+  [14:25:05] ✓  Titus/1                        → 200
+  [14:25:36] ✓  Zechariah/1                    → 200
+  [14:26:07] ✓  Zephaniah/1                    → 200
+--- Cycle 1 complete. Failures: 1/66 ---
+
+=== Cycle 2 — 2026-04-18 14:26:37 — checking 66 books (30s between each) ===
+  [14:26:37] ✓  1-Chronicles/1                 → 200
+  [14:27:07] ✓  1-Corinthians/1                → 200
+  [14:27:38] ✓  1-John/1                       → 200
+  [14:28:08] ✓  1-Kings/1                      → 200
+  [14:28:39] ✓  1-Peter/1                      → 200
+  [14:29:10] ✓  1-Samuel/1                     → 200
+  [14:29:40] ✓  1-Thessalonians/1              → 200
+  [14:30:11] ✓  1-Timothy/1                    → 200
+  [14:30:41] ✓  2-Chronicles/1                 → 200
+  [14:31:12] ✓  2-Corinthians/1                → 200
+  [14:31:42] ✓  2-John/1                       → 200
+  [14:32:13] ✓  2-Kings/1                      → 200
+  [14:32:44] ✓  2-Peter/1                      → 200
+  [14:33:57] ✓  2-Samuel/1                     → 200
+  [14:34:30] ✓  2-Thessalonians/1              → 200
+  [14:35:02] ✓  2-Timothy/1                    → 200
+  [14:35:32] ✓  3-John/1                       → 200
+  [14:36:03] ✓  Acts/1                         → 200
+  [14:36:33] ✓  Amos/1                         → 200
+  [14:37:03] ✓  Colossians/1                   → 200
+  [14:37:33] ✓  Daniel/1                       → 200
+  [14:38:04] ✓  Deuteronomy/1                  → 200
+  [14:38:35] ✓  Ecclesiastes/1                 → 200
+  [14:39:05] ✓  Ephesians/1                    → 200
+  [14:39:36] ✓  Esther/1                       → 200
+  [14:40:06] ✓  Exodus/1                       → 200
+  [14:40:37] ✓  Ezekiel/1                      → 200
+  [14:41:07] ✓  Ezra/1                         → 200
+  [14:41:37] ✓  Galatians/1                    → 200
+  [14:42:08] ✓  Genesis/1                      → 200
+  [14:42:38] ✓  Habakkuk/1                     → 200
+  [14:43:08] ✓  Haggai/1                       → 200
+  [14:43:39] ✓  Hebrews/1                      → 200
+  [14:44:09] ✓  Hosea/1                        → 200
+  [14:44:39] ✓  Isaiah/1                       → 200
+  [14:45:10] ✓  James/1                        → 200
+  [14:45:40] ✓  Jeremiah/1                     → 200
+  [14:46:10] ✓  Job/1                          → 200
+  [14:46:41] ✓  Joel/1                         → 200
+  [14:47:11] ✓  John/1                         → 200
+  [14:47:42] ✓  Jonah/1                        → 200
+  [14:48:12] ✓  Joshua/1                       → 200
+  [14:48:42] ✓  Jude/1                         → 200
+  [14:49:30] ✗  Judges/1                       → 000
+
+🚨  ServeWell ALERT: /Judges/1 returned HTTP 000
+
+  [14:50:43] ✓  Lamentations/1                 → 200
+  [14:51:13] ✓  Leviticus/1                    → 200
+  [14:51:44] ✓  Luke/1                         → 200
+  [14:52:14] ✓  Malachi/1                      → 200
+  [14:52:45] ✓  Mark/1                         → 200
+  [14:53:15] ✓  Matthew/1                      → 200
+  [14:53:45] ✓  Micah/1                        → 200
+  [14:54:15] ✓  Nahum/1                        → 200
+  [14:54:46] ✓  Nehemiah/1                     → 200
+  [14:55:16] ✓  Numbers/1                      → 200
+  [14:55:46] ✓  Obadiah/1                      → 200
+  [14:56:17] ✓  Philemon/1                     → 200
+  [14:56:47] ✓  Philippians/1                  → 200
+  [14:57:17] ✓  Proverbs/1                     → 200
+  [14:57:48] ✓  Psalms/1                       → 200
+  [14:58:20] ✓  Revelation/1                   → 200
+  [14:58:51] ✓  Romans/1                       → 200
+  [14:59:21] ✓  Ruth/1                         → 200
+  [14:59:51] ✓  Song-of-Songs/1                → 200
+  [15:00:21] ✓  Titus/1                        → 200
+  [15:00:52] ✓  Zechariah/1                    → 200
+  [15:01:22] ✓  Zephaniah/1                    → 200
+--- Cycle 2 complete. Failures: 1/66 ---
+
+=== Cycle 3 — 2026-04-18 15:01:52 — checking 66 books (30s between each) ===
+  [15:01:52] ✓  1-Chronicles/1                 → 200
+  [15:02:23] ✓  1-Corinthians/1                → 200
+  [15:02:53] ✓  1-John/1                       → 200
+  [15:03:23] ✓  1-Kings/1                      → 200
+  [15:03:54] ✓  1-Peter/1                      → 200
+  [15:04:24] ✓  1-Samuel/1                     → 200
+  [15:04:54] ✓  1-Thessalonians/1              → 200
+  [15:05:25] ✓  1-Timothy/1                    → 200
+  [15:05:55] ✓  2-Chronicles/1                 → 200
+  [15:06:25] ✓  2-Corinthians/1                → 200
+  [15:06:56] ✓  2-John/1                       → 200
+  [15:07:26] ✓  2-Kings/1                      → 200
+  [15:07:56] ✓  2-Peter/1                      → 200
+  [15:08:26] ✓  2-Samuel/1                     → 200
+  [15:08:57] ✓  2-Thessalonians/1              → 200
+  [15:09:27] ✓  2-Timothy/1                    → 200
+  [15:09:57] ✓  3-John/1                       → 200
+  [15:10:27] ✓  Acts/1                         → 200
+  [15:10:58] ✓  Amos/1                         → 200
+  [15:11:28] ✓  Colossians/1                   → 200
+  [15:11:58] ✓  Daniel/1                       → 200
+  [15:12:29] ✓  Deuteronomy/1                  → 200
+  [15:12:59] ✓  Ecclesiastes/1                 → 200
+  [15:13:30] ✓  Ephesians/1                    → 200
+  [15:14:00] ✓  Esther/1                       → 200
+  [15:14:30] ✓  Exodus/1                       → 200
+  [15:15:01] ✓  Ezekiel/1                      → 200
+  [15:15:32] ✓  Ezra/1                         → 200
+  [15:16:02] ✓  Galatians/1                    → 200
+  [15:16:32] ✓  Genesis/1                      → 200
+  [15:17:02] ✓  Habakkuk/1                     → 200
+  [15:17:33] ✓  Haggai/1                       → 200
+  [15:18:03] ✓  Hebrews/1                      → 200
+  [15:18:34] ✓  Hosea/1                        → 200
+  [15:19:04] ✓  Isaiah/1                       → 200
+  [15:19:34] ✓  James/1                        → 200
+  [15:20:05] ✓  Jeremiah/1                     → 200
+  [15:20:35] ✓  Job/1                          → 200
+  [15:21:05] ✓  Joel/1                         → 200
+  [15:21:35] ✓  John/1                         → 200
+  [15:22:06] ✓  Jonah/1                        → 200
+  [15:22:36] ✓  Joshua/1                       → 200
+  [15:23:06] ✓  Jude/1                         → 200
+  [15:23:37] ✓  Judges/1                       → 200
+  [15:24:07] ✓  Lamentations/1                 → 200
+  [15:24:38] ✓  Leviticus/1                    → 200
+  [15:25:08] ✓  Luke/1                         → 200
+  [15:25:39] ✓  Malachi/1                      → 200
+  [15:26:09] ✓  Mark/1                         → 200
+  [15:26:39] ✓  Matthew/1                      → 200
+  [15:27:10] ✓  Micah/1                        → 200
+  [15:27:40] ✓  Nahum/1                        → 200
+  [15:28:11] ✓  Nehemiah/1                     → 200
+  [15:28:41] ✓  Numbers/1                      → 200
+  [15:29:11] ✓  Obadiah/1                      → 200
+  [15:29:42] ✓  Philemon/1                     → 200
+  [15:30:12] ✓  Philippians/1                  → 200
+  [15:30:42] ✓  Proverbs/1                     → 200
+  [15:31:12] ✓  Psalms/1                       → 200
+  [15:31:43] ✓  Revelation/1                   → 200
+  [15:32:13] ✓  Romans/1                       → 200
+  [15:32:43] ✓  Ruth/1                         → 200
+  [15:33:14] ✓  Song-of-Songs/1                → 200
+
+
+
