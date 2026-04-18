@@ -201,20 +201,6 @@ console.log(`Wrote ${written} word HTML files to dist/words/`);
 console.log(`  ${mainCount} main word pages, ${overflowCount} overflow pages, ${redirectCount} redirects`);
 
 // ---------------------------------------------------------------------------
-// Copy JSON source files into dist/words/ alongside the HTML, so that
-// sync-words-to-r2.mjs uploads them and they become fetchable as
-// words.servewell.net/<name>.json — used by the client-side search feature.
-// ---------------------------------------------------------------------------
-let jsonsCopied = 0;
-for (const jsonFile of jsonFiles) {
-  const src = path.join(IN_DIR, jsonFile);
-  const dest = path.join(OUT_DIR, jsonFile);
-  fs.copyFileSync(src, dest);
-  jsonsCopied++;
-}
-console.log(`Copied ${jsonsCopied} JSON source files to dist/words/ (for R2 JSON API)`);
-
-// ---------------------------------------------------------------------------
 // Copy a small set of diverse sample pages into public/test-r2/ so they are
 // served by wrangler dev and visible in the visual-test-preview.html slides.
 // ---------------------------------------------------------------------------

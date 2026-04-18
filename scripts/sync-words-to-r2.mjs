@@ -101,9 +101,8 @@ async function uploadFile(filePath) {
   // R2 custom domain serves keys directly, so the key IS the URL path.
   // .json files keep their extension: words.servewell.net/love.json
   const isHtml = rawKey.endsWith('.html');
-  const isJson = rawKey.endsWith('.json');
   const key = isHtml ? rawKey.slice(0, -5) : rawKey;
-  const contentType = isJson ? 'application/json; charset=utf-8' : 'text/html; charset=utf-8';
+  const contentType = 'text/html; charset=utf-8';
   const body = readFileSync(filePath);
   await s3.send(new PutObjectCommand({
     Bucket: BUCKET,

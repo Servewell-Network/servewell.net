@@ -126,9 +126,19 @@ function fetchWordFile(fileName: string): Promise<LoadedWordData | null> {
   const cached = fileCache.get(fileName);
   if (cached !== undefined) return cached;
 
-  const url = `${WORDS_BASE_URL}/${encodeURIComponent(fileName)}.json`;
+  const url = `${WORDS_BASE_URL}/${encodeURIComponent(fileName)}`;
   const p = fetch(url)
-    .then((r) => r.ok ? r.json() as Promise<WordFileJson> : null)
+    .then((r): Promise<WordFileJson | null> => {
+      if (!r.ok) return Promise.resolve(null);
+      return r.text().then((html) => {
+        const m = html.match(/<pre id="ws-data">([\s\S]*?)<\/pre>/);
+        if (!m) return null;
+        const jsonText = m[1]
+          .replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+        try { return JSON.parse(jsonText) as WordFileJson; } catch { return null; }
+      });
+    })
     .then((json): LoadedWordData | null => {
       if (!json?.ancientWord) return null;
       const { _meta, slots, overflow } = json.ancientWord;
