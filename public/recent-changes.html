@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Recent Changes | ServeWell.Net</title>
+		<meta name="description" content="Recent changes to ServeWell.Net" />
+		<style>
+			body {
+				margin: 2.25rem;
+				font-family: sans-serif;
+				font-size: large;
+			}
+			main {
+				max-width: 48rem;
+			}
+			a {
+				color: #0b57d0;
+				text-underline-offset: 0.12em;
+			}
+			a:visited { color: #6a3dad; }
+			a:hover { opacity: 0.88; }
+			[data-theme="dark"] a { color: #8ec5ff; }
+			[data-theme="dark"] a:visited { color: #c4a8ff; }
+			.rc-version {
+				margin-bottom: 2.5rem;
+			}
+			.rc-version h2 {
+				font-size: 1.3rem;
+				margin-bottom: 0.6rem;
+				border-bottom: 1px solid var(--border, #d9d9de);
+				padding-bottom: 0.3rem;
+			}
+			.rc-date {
+				font-size: 0.9rem;
+				font-weight: normal;
+				color: var(--muted, #475467);
+				margin-left: 0.5rem;
+			}
+			.rc-version h3 {
+				font-size: 0.95rem;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				color: var(--muted, #475467);
+				margin: 1rem 0 0.3rem;
+			}
+			.rc-version ul {
+				margin: 0 0 0.5rem 1.25rem;
+				padding: 0;
+			}
+			.rc-version li {
+				margin-bottom: 0.3rem;
+				line-height: 1.5;
+			}
+			.rc-empty {
+				color: var(--muted, #475467);
+				font-style: italic;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>Recent Changes</h1>
+			<p>Changes from the last 30 days. For planned features, see <a href="/whats-next">What's Next</a>.</p>
+			<p>For more details on features, see the <a href="/features">Features page</a>.</p>
+		<section class="rc-version">
+			<h2>v0.0.1 <span class="rc-date">April 19, 2026</span></h2>
+			<h3>Features</h3>
+			<ul>
+				<li>a What's New page with semantic standard version</li>
+			</ul>
+			<h3>Bug Fixes</h3>
+			<ul>
+				<li>3Jo, Jude and Rev1 missing from json</li>
+				<li>**deploy:** configure valid Cloudflare KV namespace IDs and regenerate worker types</li>
+				<li>no links to occurrences/instances word pages</li>
+				<li>stray closing curly brackets</li>
+				<li>was putting last verse into next chapter</li>
+			</ul>
+		</section>
+		</main>
+		<script src="/js/servewell-app-shell.js"></script>
+	</body>
+</html>

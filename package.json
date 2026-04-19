@@ -39,7 +39,7 @@
 		"build:servewell-app-shell": "esbuild src/phasingScripts/phase2To3/browserEntry.ts --bundle --platform=browser --format=iife --target=es2020 --outfile=public/js/servewell-app-shell.js",
 		"build:servewell-word-page": "esbuild src/phasingScripts/phase2To3/wordPageEntry.ts --bundle --platform=browser --format=iife --target=es2020 --outfile=public/js/servewell-word-page.js",
 		"build:phase2to3-client": "npm run build:servewell-app-shell && npm run build:servewell-word-page",
-		"generate:whats-new": "node scripts/generate-whats-new.mjs",
+		"generate:recent-changes": "node scripts/generate-recent-changes.mjs",
 		"release": "standard-version"
 	},
 	"devDependencies": {

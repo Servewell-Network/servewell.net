@@ -268,7 +268,7 @@ async function main() {
         stampChapterFiles();
       }
       await run('npx', ['standard-version'], 'Bump version + update changelog');
-      await run('npm', ['run', 'generate:whats-new'], 'Generate What\'s New page');
+      await run('npm', ['run', 'generate:recent-changes'], 'Generate Recent Changes page');
       await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
       // Record that chapter files from this phasing run are now deployed.
       // On the next deploy (if no phasing ran), stampChapterFiles will stamp HTML files.
