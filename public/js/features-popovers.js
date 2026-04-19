@@ -181,7 +181,7 @@
     },
     'need-basic-search': {
       title: 'Basic search',
-      content: '<p><strong>Value</strong><br>Search for any word across the full Bible corpus and see every verse that contains it — ranked in canonical Bible order. Results include the verse reference and, optionally, the literal or traditional text in context.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Click the Search button in the top bar. Type a word or phrase and press Enter. Results show up to 50 matching verses sorted by book and chapter. Check the &ldquo;Lit&rdquo; or &ldquo;Trad&rdquo; boxes to see verse text inline. Click any result to go directly to that chapter.</p>'
+      content: '<p><strong>Value</strong><br>Search for any word across the full corpus and see every verse that contains it — ranked in canonical Bible order. Results include the verse reference and, optionally, the literal or traditional text in context.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Click the Search button in the top bar. Type a word or phrase and press Enter. Results show up to 50 matching verses sorted by book and chapter. Check the &ldquo;Literal&rdquo; or &ldquo;Traditional&rdquo; boxes to see verse text inline. Click any result to go directly to that chapter.</p>'
     },
     'need-settings-in-links': {
       title: 'Settings in links',
