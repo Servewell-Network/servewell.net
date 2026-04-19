@@ -14,11 +14,11 @@
     "need-community-edits",
     "need-task-feature-voting",
     "need-logins",
-    "need-new-feature-marker"
+    "need-new-feature-marker",
+    "need-basic-search"
   ],
   "whatsNextPageIds": [
     "need-search-all",
-    "need-basic-search",
     "need-settings-in-links",
     "need-literal-consistency",
     "need-compare-popular-translations",

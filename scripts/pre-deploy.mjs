@@ -267,6 +267,8 @@ async function main() {
         console.log('  --force: stamping all public assets to force Cloudflare re-upload.');
         stampChapterFiles();
       }
+      await run('npx', ['standard-version'], 'Bump version + update changelog');
+      await run('npm', ['run', 'generate:whats-new'], 'Generate What\'s New page');
       await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
       // Record that chapter files from this phasing run are now deployed.
       // On the next deploy (if no phasing ran), stampChapterFiles will stamp HTML files.

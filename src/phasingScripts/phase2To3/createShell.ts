@@ -511,6 +511,7 @@ body.app-panel-open #app-shell-root .app-overlay {
 
     <section class="app-sidepanel-links">
       <a class="app-sidepanel-link" href="/features">Features</a>
+      <a class="app-sidepanel-link" href="/whats-new">What's New</a>
       <a class="app-sidepanel-link" href="/whats-next">What's Next</a>
       <a class="app-sidepanel-link" href="/about">About</a>
       <a class="app-sidepanel-link" href="/list-to-moderate" data-moderation-link hidden>List to Moderate (0)</a>
