@@ -277,7 +277,7 @@
     },
     'need-concordance-word-studies': {
       title: 'Concordance word studies',
-      content: '<p><strong>Value</strong><br>One of the best ways to discover the meaning of a word is to look at the different places where it is used. This needs to be an option in the popover of every Bible word, to take us to a page that lists places where that word is used.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Coordinating with the literal consistency effort that needs the same thing, we should build index pages of how the original words are translated into English, including context.</p>'
+      content: '<p><strong>Value</strong><br>One of the best ways to discover the meaning of a word is to look at the different places where it is used across the full corpus.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Click any word token in a chapter page to open its popover. Click &ldquo;All occurrences&rdquo; to open a word study page listing every verse where that original word appears. Each occurrence shows the verse reference and both the literal and traditional renderings in context.</p>'
     },
 
   };

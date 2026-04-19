@@ -15,7 +15,8 @@
     "need-task-feature-voting",
     "need-logins",
     "need-new-feature-marker",
-    "need-basic-search"
+    "need-basic-search",
+    "need-concordance-word-studies"
   ],
   "whatsNextPageIds": [
     "need-search-all",
@@ -30,7 +31,6 @@
     "need-second-batch-ancient-texts",
     "need-improve-page-load-performance",
     "need-swn-swan-logo",
-    "need-concordance-word-studies",
     "need-clarified-bible-column",
     "need-clarified-bible-snippets",
     "need-inspire-equip",
