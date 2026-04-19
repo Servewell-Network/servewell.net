@@ -30,7 +30,8 @@ const DAYS = 30;
 function parseChangelog(text) {
   const sections = [];
   // Match lines like: ## [1.2.3] - 2026-04-18  or  ## [1.2.3] (2026-04-18)
-  const versionRe = /^##\s+\[([^\]]+)\](?:\s*[-–]\s*|\s+\()(\d{4}-\d{2}-\d{2})\)?/;
+  // Also matches standard-version format: ### 1.2.3 (2026-04-18)
+  const versionRe = /^#{2,3}\s+\[?([^\]\s(]+)\]?(?:\s*[-–]\s*|\s+\()(\d{4}-\d{2}-\d{2})\)?/;
   const typeRe = /^###\s+(.+)/;
   const itemRe = /^\*\s+(.+)/;
 
