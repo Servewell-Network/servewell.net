@@ -408,13 +408,15 @@
 						throw new Error(`Unsupported event: ${slide.event}`);
 				}
 				await sleep(slide.waitMs || 450);
-				// After a 'type' action, blur the iframe's focused element so the outer
-				// page regains keyboard focus and Space advances slides normally.
+				// After a 'type' action, blur the iframe's active element then blur the
+				// iframe itself so the outer page fully regains keyboard focus and Space
+				// advances slides instead of typing into the input.
 				if (slide.event === 'type') {
 					const activeEl = frame.contentDocument?.activeElement;
 					if (activeEl && activeEl !== frame.contentDocument?.body) {
 						activeEl.blur();
 					}
+					frame.blur();
 				}
 			}
 
