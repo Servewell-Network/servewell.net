@@ -736,6 +736,131 @@ for (const [sid, reverseKeys] of pendingReverseKeys) {
 }
 
 // ---------------------------------------------------------------------------
+// Traditional word redirect pass
+// ---------------------------------------------------------------------------
+// Second pass through chapter files: for each significant traditional English
+// word (from EnglishHeadingsAndWords), check whether it already has a literal
+// word-study file. If yes, add a crossRef from that file to the dominant target.
+// If no, record a redirect stub pointing to the dominant Strongs target file.
+//
+// Results are also written to _traditional-redirects.json (checked in alongside
+// the generated word files so git diffs show when the redirect map changes).
+// ---------------------------------------------------------------------------
+
+/** Traditional-translation words that are too common/grammatical to redirect. */
+const TRAD_STOPWORDS = new Set([
+  'the','a','an','and','or','but','nor','yet','so',
+  'in','of','to','for','with','by','from','on','at','as',
+  'is','it','he','she','we','they','you',
+  'me','him','her','us','them','my','his','our','your','their','its',
+  'be','been','being','was','were','are','am',
+  'not','no','nor','none',
+  'do','did','does','will','shall','may','might','can','could','would','should','must',
+  'this','that','these','those',
+  'who','which','what','when','where','how','why','whom','whose',
+  'into','upon','over','out','up','off','down','away','back',
+  'before','after','then','now','also','too','only','just','even',
+  'have','has','had',
+  'all','any','each','every','both','either','neither','some','other',
+  'said','says','came','come','went','goes','made','make','shall',
+  'more','most','very','such','than','though','while','like',
+  'thus','therefore','because','since','until','again','still',
+  'thee','thou','thy','thine','hath','doth','hast','shalt','wouldest',
+  'unto','upon','thereof','therein','whereby','wherein','thereof',
+  'yea','nay',
+]);
+
+
+// Accumulate: normalizedTradLemma → Map<targetFile, count>
+const tradWordCounts = new Map<string, Map<string, number>>();
+
+for (const filePath of allFiles) {
+  const chapter = readChapter(filePath);
+  if (!chapter) continue;
+
+  for (const snippet of chapter.SnippetsAndExplanations) {
+    const ehw = (snippet as unknown as Record<string, unknown>)['EnglishHeadingsAndWords'];
+    if (!Array.isArray(ehw)) continue;
+
+    for (const item of ehw as Array<Record<string, unknown>>) {
+      const word = item['EnglishWord'] as string | undefined;
+      const sid = item['StrongsId'] as string | undefined;
+      if (!word || !sid) continue;
+
+      // Strip punctuation, lowercase
+      const stripped = word.toLowerCase().replace(/[^a-z]/g, '');
+      if (stripped.length < 4) continue;
+      if (TRAD_STOPWORDS.has(stripped)) continue;
+
+      // Find which word file this Strongs maps to
+      const targetFile = strongsToFile.get(sid);
+      if (!targetFile) continue;
+
+      // Lemmatize: try all three strategies, prefer whichever form already
+      // has its own word file (so we match existing files when possible).
+      const nounLemma = winkLemmatizer.noun(stripped);
+      const verbLemma = winkLemmatizer.verb(stripped);
+      const adjLemma  = winkLemmatizer.adjective(stripped);
+      const lemma = [nounLemma, verbLemma, adjLemma, stripped]
+        .find(c => lemmaToStrongsIds.has(c)) ?? nounLemma;
+
+      if (!tradWordCounts.has(lemma)) tradWordCounts.set(lemma, new Map());
+      const m = tradWordCounts.get(lemma)!;
+      m.set(targetFile, (m.get(targetFile) ?? 0) + 1);
+    }
+  }
+}
+
+type TradRedirectEntry = { target: string; count: number; type: 'redirect' | 'crossref' };
+const traditionalRedirects: Record<string, TradRedirectEntry> = {};
+/** New redirect stubs to write into OUT_DIR: lemma → targetFile */
+const newTradRedirectStubs = new Map<string, string>();
+
+for (const [lemma, targetCounts] of tradWordCounts) {
+  // Find dominant target (most occurrences)
+  let maxCount = 0;
+  let dominantTarget = '';
+  for (const [target, count] of targetCounts) {
+    if (count > maxCount) { maxCount = count; dominantTarget = target; }
+  }
+
+  if (!dominantTarget || lemma === dominantTarget) continue;
+
+  const existsAsWordFile = lemmaToStrongsIds.has(lemma);
+
+  if (existsAsWordFile) {
+    // The trad word already has its own word-study file — add a crossRef from
+    // its first sibling file pointing to the dominant Strongs target file.
+    const sids = lemmaToStrongsIds.get(lemma)!;
+    const firstFile = assignedFileNames.get(makeFileKey(lemma, sids[0]));
+    if (firstFile && firstFile !== dominantTarget) {
+      const targetData = wordFileData.get(dominantTarget);
+      if (targetData) {
+        const existing = crossRefsMap.get(firstFile) ?? [];
+        if (!existing.some(e => e.fileName === dominantTarget)) {
+          existing.push({
+            fileName: dominantTarget, wordKey: targetData.wordKey,
+            strongsId: targetData.strongsId, lang: targetData.lang,
+            lemma: targetData.lemmaScript,
+            ...(targetData.rootTranslation ? { rootTranslation: targetData.rootTranslation } : {}),
+          });
+          crossRefsMap.set(firstFile, existing);
+        }
+        traditionalRedirects[lemma] = { target: dominantTarget, count: maxCount, type: 'crossref' };
+      }
+    }
+  } else {
+    // No existing word file — create a redirect stub.
+    newTradRedirectStubs.set(lemma, dominantTarget);
+    traditionalRedirects[lemma] = { target: dominantTarget, count: maxCount, type: 'redirect' };
+  }
+}
+
+const tradRedirectCount  = [...Object.values(traditionalRedirects)].filter(e => e.type === 'redirect').length;
+const tradCrossRefCount  = [...Object.values(traditionalRedirects)].filter(e => e.type === 'crossref').length;
+console.log(`Traditional word analysis: ${tradRedirectCount} new redirect stubs, ${tradCrossRefCount} crossRef additions`);
+
+// ---------------------------------------------------------------------------
 // Write output
 // ---------------------------------------------------------------------------
 if (fs.existsSync(OUT_DIR)) fs.rmSync(OUT_DIR, { recursive: true, force: true });
@@ -948,6 +1073,32 @@ for (const [lemma, strongsIds] of lemmaToStrongsIds) {
   wordIndex[lemma] = strongsIds.length;
 }
 fs.writeFileSync(path.join(OUT_DIR, '_word_index.json'), JSON.stringify(wordIndex, null, 2), 'utf8');
+
+// Write traditional word redirect stubs — plain { _redirect: targetFile } JSON
+// files that generateWordStudyHtml.ts turns into meta-refresh HTML pages, which
+// sync-words-to-r2.mjs then uploads so words.servewell.net/<trad-word> redirects.
+let tradStubsWritten = 0;
+for (const [lemma, targetFile] of newTradRedirectStubs) {
+  const destPath = path.join(OUT_DIR, `${lemma}.json`);
+  // Safety: never clobber a word file that was generated by the main pass.
+  if (!fs.existsSync(destPath)) {
+    fs.writeFileSync(destPath, JSON.stringify({ _redirect: targetFile }, null, 2), 'utf8');
+    tradStubsWritten++;
+  }
+}
+console.log(`Wrote ${tradStubsWritten} traditional word redirect stubs`);
+
+// Write _traditional-redirects.json — checked in alongside the other word-JSON
+// index files so `git diff` shows whenever the redirect map changes.
+const sortedTradRedirects = Object.fromEntries(
+  Object.entries(traditionalRedirects).sort(([a], [b]) => a.localeCompare(b))
+);
+fs.writeFileSync(
+  path.join(OUT_DIR, '_traditional-redirects.json'),
+  JSON.stringify(sortedTradRedirects, null, 2),
+  'utf8'
+);
+console.log(`_traditional-redirects.json: ${Object.keys(sortedTradRedirects).length} entries`);
 
 // _strongs_index.json
 const strongsIndex: Record<string, string> = {};

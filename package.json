@@ -6,6 +6,7 @@
 	"scripts": {
 		"deploy:raw": "wrangler deploy",
 		"deploy:words-r2": "node scripts/sync-words-to-r2.mjs",
+		"deploy:trad-redirects-cf": "node scripts/sync-trad-redirects-cf.mjs",
 		"dev": "wrangler dev",
 		"dev:static": "node scripts/dev-server.mjs",
 		"start": "wrangler dev",
