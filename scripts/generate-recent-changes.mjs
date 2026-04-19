@@ -175,7 +175,8 @@ function buildPage(sections) {
 \t<body>
 \t\t<main>
 \t\t\t<h1>Recent Changes</h1>
-\t\t\t<p>Changes from the last 30 days. For planned features, see <a href="/whats-next">What's Next</a>.</p>
+\t\t\t<p>Changes from the last 30 days.</p>
+\t\t\t<p>For planned features, fixes, and other tasks, see <a href="/whats-next">What's Next</a>.</p>
 \t\t\t<p>For more details on features, see the <a href="/features">Features page</a>.</p>
 ${body}
 \t\t</main>
