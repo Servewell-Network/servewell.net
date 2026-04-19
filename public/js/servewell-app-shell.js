@@ -4151,7 +4151,7 @@ ${bodyText}` : prefix : bodyText;
       popover.setAttribute("popover", "");
       popover.innerHTML = `
 <input id="${INPUT_ID}" type="search" placeholder="Search Bible words\u2026" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search Bible words">
-<div id="ws-search-status" aria-live="polite"></div><div id="ws-see-text-bar">Show: <label>Lit <input type="checkbox" id="ws-show-lit"></label> <label>Trad <input type="checkbox" id="ws-show-trad"></label></div><ul id="${RESULTS_ID}" role="list" aria-label="Search results"></ul>`;
+<div id="ws-search-status" aria-live="polite"></div><div id="ws-see-text-bar">Show: <label>Literal <input type="checkbox" id="ws-show-lit"></label> <label>Traditional <input type="checkbox" id="ws-show-trad"></label></div><ul id="${RESULTS_ID}" role="list" aria-label="Search results"></ul>`;
       document.body.appendChild(popover);
     }
     for (const id of [TOPBAR_BTN_ID, BOTTOMBAR_BTN_ID]) {
