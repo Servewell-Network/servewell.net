@@ -285,9 +285,11 @@ async function main() {
     }
 
     // Check word pages R2 sync regardless of whether the main deploy ran.
-    // dist/.words-render-fingerprint is written by p2-words-html and covers rendering inputs
-    // (SCRIPT_TAG, app shell size). dist/.words-r2-synced records the stamp at last R2 sync.
-    // If they differ (or synced is missing), word pages need to be pushed to R2.
+    // dist/.words-render-fingerprint is written by p2-words-html and covers the
+    // script tag URLs embedded in word pages. dist/.words-r2-synced records the
+    // stamp at last R2 sync. If they differ (or synced is missing), word pages
+    // need to be pushed to R2. Rebuilding the app shell alone does NOT require
+    // an R2 re-sync since word pages load the shell via URL at runtime.
     const fingerprintFile = path.resolve('dist/.words-render-fingerprint');
     const r2MarkerFile = path.resolve('dist/.words-r2-synced');
     let needsR2Sync = false;

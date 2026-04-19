@@ -37,6 +37,14 @@
 		"/^npx wrangler deployments list 2>&1 \\| grep -E \"Created:\\|Version\"$/": {
 			"approve": true,
 			"matchCommandLine": true
+		},
+		"/^npx wrangler r2 bucket cors set words-servewell-net --file scripts/r2-cors\\.json$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"/^npx wrangler r2 bucket cors set servewell-words --file scripts/r2-cors\\.json$/": {
+			"approve": true,
+			"matchCommandLine": true
 		}
 	}
 }

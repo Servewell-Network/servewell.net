@@ -219,16 +219,12 @@ for (const name of TEST_R2_SAMPLES) {
 console.log(`Copied ${samplesCopied} sample pages to public/test-r2/ for visual preview`);
 
 // ---------------------------------------------------------------------------
-// Render fingerprint: covers both script tags + built JS sizes.
-// Changing either servewell-app-shell.js or servewell-word-page.js will
-// invalidate the fingerprint and trigger a pre-deploy rebuild warning.
+// Render fingerprint: covers the script tags embedded in word pages.
+// Changing the tag URLs will invalidate the fingerprint and trigger a
+// pre-deploy R2 sync warning.
 // ---------------------------------------------------------------------------
 {
-  const shellPath = path.join(ROOT, 'public/js/servewell-app-shell.js');
-  const wordPagePath = path.join(ROOT, 'public/js/servewell-word-page.js');
-  const shellSize = fs.existsSync(shellPath) ? fs.statSync(shellPath).size : 0;
-  const wordPageSize = fs.existsSync(wordPagePath) ? fs.statSync(wordPagePath).size : 0;
-  const renderFingerprint = `${APP_SHELL_TAG.length}:${WORD_PAGE_TAG.length}:${shellSize}:${wordPageSize}`;
+  const renderFingerprint = `${APP_SHELL_TAG.length}:${WORD_PAGE_TAG.length}`;
   const distDir = path.join(ROOT, 'dist');
   if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
   fs.writeFileSync(path.join(distDir, '.words-render-fingerprint'), renderFingerprint, 'utf8');

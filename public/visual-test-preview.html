@@ -196,6 +196,8 @@
 					{ type: 'page', title: `${label}: Features - Narrow`, path: '/features', width: 375, height: 600 },
 					{ type: 'page', title: `${label}: What's Next - Wide`, path: '/whats-next', width: 1220, height: 600 },
 					{ type: 'page', title: `${label}: What's Next - Narrow`, path: '/whats-next', width: 375, height: 600 },
+					{ type: 'page', title: `${label}: Recent Changes - Wide`, path: '/recent-changes', width: 1220, height: 600 },
+					{ type: 'page', title: `${label}: Recent Changes - Narrow`, path: '/recent-changes', width: 375, height: 600 },
 					{ type: 'page', title: `${label}: About - Wide`, path: '/about', width: 1220, height: 600 },
 					{ type: 'page', title: `${label}: About - Narrow`, path: '/about', width: 375, height: 600 },
 					{ type: 'page', title: `${label}: Genesis 1`, path: '/-/Genesis/1', width: 1220, height: 600 },
@@ -211,6 +213,8 @@
 				{ type: 'action', title: 'Action: Enable transliteration', selector: 'input[data-module-id="transliteration"]', event: 'check' },
 				{ type: 'action', title: 'Action: Enable dark mode', selector: 'input[data-setting="dark-mode"]', event: 'check' },
 				{ type: 'action', title: 'Action: Close app menu', selector: '[data-action="menu-close"]', event: 'click' },
+				{ type: 'page', title: 'Dark Mode: Recent Changes - Wide', path: '/recent-changes', width: 1220, height: 600 },
+				{ type: 'page', title: 'Dark Mode: Recent Changes - Narrow', path: '/recent-changes', width: 375, height: 600 },
 
 				{ type: 'page', title: 'Run 2: Home - Wide', path: '/', width: 1220, height: 600 },
 				{ type: 'action', title: 'Action: Open account popover', selector: '[data-auth-menu-toggle]', event: 'click' },
@@ -226,6 +230,8 @@
 
 				{ type: 'page', title: "Run 2: What's Next - Wide", path: '/whats-next', width: 1220, height: 600 },
 				{ type: 'page', title: "Run 2: What's Next - Narrow", path: '/whats-next', width: 375, height: 600 },
+				{ type: 'page', title: 'Run 2: Recent Changes - Wide', path: '/recent-changes', width: 1220, height: 600 },
+				{ type: 'page', title: 'Run 2: Recent Changes - Narrow', path: '/recent-changes', width: 375, height: 600 },
 				{ type: 'page', title: 'Run 2: About - Wide', path: '/about', width: 1220, height: 600 },
 				{ type: 'page', title: 'Run 2: About - Narrow', path: '/about', width: 375, height: 600 },
 				{ type: 'page', title: 'Run 2: Genesis 1', path: '/-/Genesis/1', width: 1220, height: 600 },
@@ -396,13 +402,20 @@
 						target.dispatchEvent(new Event('input', { bubbles: true }));
 						target.dispatchEvent(new Event('change', { bubbles: true }));
 						break;
-					case 'assert-visible':
 					case 'assert-present':
 						break;
 					default:
 						throw new Error(`Unsupported event: ${slide.event}`);
 				}
 				await sleep(slide.waitMs || 450);
+				// After a 'type' action, blur the iframe's focused element so the outer
+				// page regains keyboard focus and Space advances slides normally.
+				if (slide.event === 'type') {
+					const activeEl = frame.contentDocument?.activeElement;
+					if (activeEl && activeEl !== frame.contentDocument?.body) {
+						activeEl.blur();
+					}
+				}
 			}
 
 			async function render(forceReload = false) {
