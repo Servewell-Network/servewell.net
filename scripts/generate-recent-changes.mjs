@@ -30,7 +30,8 @@ const DAYS = 30;
 function parseChangelog(text) {
   const sections = [];
   // Matches: ## [1.2.3] - 2026-04-18  or  ### 1.2.3 (2026-04-18)
-  const versionRe = /^#{2,3}\s+\[?([^\]\s(]+)\]?(?:\s*[-–]\s*|\s+\()(\d{4}-\d{2}-\d{2})\)?/;
+  // or the standard-version linked form: ## [1.2.3](https://github.com/.../compare/...) (2026-04-18)
+  const versionRe = /^#{2,3}\s+\[?([^\]\s(]+)\]?(?:\([^)]*\))?(?:\s*[-–]\s*|\s+\()(\d{4}-\d{2}-\d{2})\)?/;
   const typeRe = /^#{3,4}\s+(.+)/;
   const itemRe = /^\*\s+(.+)/;
 

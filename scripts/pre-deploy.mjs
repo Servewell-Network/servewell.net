@@ -332,11 +332,26 @@ async function main() {
         : '';
       if (currentTradFp !== syncedTradFp) {
         console.log('\n⚠️  Traditional word redirect map has changed since last CF Bulk Redirects sync.');
-        const deployTrad = isYes || await askYesNo('Push trad-word redirects to Cloudflare Bulk Redirects now? (y/n): ');
-        if (deployTrad) {
-          await run('npm', ['run', 'deploy:trad-redirects-cf'], 'Sync traditional word redirects to CF Bulk Redirects');
+        // Only offer to sync if credentials are available (read .env for pre-deploy context)
+        const envRaw = fs.existsSync('.env') ? fs.readFileSync('.env', 'utf8') : '';
+        const hasCreds =
+          (process.env.CLOUDFLARE_ACCOUNT_ID || envRaw.includes('CLOUDFLARE_ACCOUNT_ID=')) &&
+          (process.env.CLOUDFLARE_API_TOKEN  || envRaw.includes('CLOUDFLARE_API_TOKEN='));
+        if (!hasCreds) {
+          console.log('  (Skipping — CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN not set. Run `npm run deploy:trad-redirects-cf` when ready.)');
         } else {
-          console.log('Skipping CF trad-redirect sync. Run `npm run deploy:trad-redirects-cf` when ready.');
+          const deployTrad = isYes || await askYesNo('Push trad-word redirects to Cloudflare Bulk Redirects now? (y/n): ');
+          if (deployTrad) {
+            try {
+              await run('npm', ['run', 'deploy:trad-redirects-cf'], 'Sync traditional word redirects to CF Bulk Redirects');
+            } catch (e) {
+              console.warn('\n⚠️  CF Bulk Redirects sync failed (non-fatal):');
+              console.warn(e instanceof Error ? e.message : String(e));
+              console.warn('Run `npm run deploy:trad-redirects-cf` manually when ready.');
+            }
+          } else {
+            console.log('Skipping CF trad-redirect sync. Run `npm run deploy:trad-redirects-cf` when ready.');
+          }
         }
       } else {
         console.log('\nTraditional word redirects are in sync with Cloudflare Bulk Redirects.');

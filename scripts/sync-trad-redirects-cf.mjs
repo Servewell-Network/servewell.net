@@ -68,9 +68,10 @@ const LIST_NAME    = process.env.CF_REDIRECT_LIST_NAME ?? 'servewell_word_redire
 const WORDS_DOMAIN = process.env.WORDS_DOMAIN ?? 'words.servewell.net';
 
 if (!ACCOUNT_ID || !API_TOKEN) {
-  console.error('Error: CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN must be set.');
-  console.error('Add them to your .env file or export them as shell variables.');
-  process.exit(1);
+  console.warn('Warning: CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN must be set to sync CF Bulk Redirects.');
+  console.warn('Add them to your .env file or export them as shell variables.');
+  console.warn('Skipping CF Bulk Redirects sync.');
+  process.exit(0);
 }
 
 // ---------------------------------------------------------------------------

@@ -219,14 +219,23 @@ for (const name of TEST_R2_SAMPLES) {
 console.log(`Copied ${samplesCopied} sample pages to public/test-r2/ for visual preview`);
 
 // ---------------------------------------------------------------------------
-// Render fingerprint: covers the script tags embedded in word pages.
-// Changing the tag URLs will invalidate the fingerprint and trigger a
-// pre-deploy R2 sync warning.
+// Render fingerprint: covers the script tags embedded in word pages AND the
+// number/size of word JSON files (so adding new redirect stubs or word files
+// also triggers a pre-deploy R2 sync warning, not just script-URL changes).
 // ---------------------------------------------------------------------------
 {
-  const renderFingerprint = `${APP_SHELL_TAG.length}:${WORD_PAGE_TAG.length}`;
   const distDir = path.join(ROOT, 'dist');
   if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+
+  // Content signal: file count + total bytes of the word JSON files.
+  // (generateWordStudyJson.ts writes this; we read it here rather than
+  // recomputing so the two scripts stay in sync.)
+  const contentFpFile = path.join(distDir, '.words-content-fingerprint');
+  const contentFp = fs.existsSync(contentFpFile)
+    ? fs.readFileSync(contentFpFile, 'utf8').trim()
+    : `${written}`;
+
+  const renderFingerprint = `${APP_SHELL_TAG.length}:${WORD_PAGE_TAG.length}:${contentFp}`;
   fs.writeFileSync(path.join(distDir, '.words-render-fingerprint'), renderFingerprint, 'utf8');
 }
 
