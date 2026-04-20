@@ -4116,7 +4116,7 @@ ${bodyText}` : prefix : bodyText;
   gap: 0.6rem;
   align-items: center;
 }
-#ws-see-text-bar label { cursor: pointer; user-select: none; }
+#ws-see-text-bar label { cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 0.3em; }
 .ws-sr-verse-text {
   font-size: 0.76rem;
   padding: 0.15rem 0.4rem 0.3rem;
@@ -4151,7 +4151,7 @@ ${bodyText}` : prefix : bodyText;
       popover.setAttribute("popover", "");
       popover.innerHTML = `
 <input id="${INPUT_ID}" type="search" placeholder="Search Bible words\u2026" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search Bible words">
-<div id="ws-search-status" aria-live="polite"></div><div id="ws-see-text-bar">Show: <label>Literal <input type="checkbox" id="ws-show-lit"></label> <label>Traditional <input type="checkbox" id="ws-show-trad"></label></div><ul id="${RESULTS_ID}" role="list" aria-label="Search results"></ul>`;
+<div id="ws-search-status" aria-live="polite"></div><div id="ws-see-text-bar">Show: <label><input type="checkbox" id="ws-show-lit"> Literal</label> <label><input type="checkbox" id="ws-show-trad"> Traditional</label></div><ul id="${RESULTS_ID}" role="list" aria-label="Search results"></ul>`;
       document.body.appendChild(popover);
     }
     for (const id of [TOPBAR_BTN_ID, BOTTOMBAR_BTN_ID]) {
@@ -4202,7 +4202,19 @@ ${bodyText}` : prefix : bodyText;
       return `<li><a class="ws-sr-word-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(lemma)}${countHtml}</a></li>`;
     }).join("");
   }
-  function showVerseResults(verseRefs, primaryLemma, resolvedCount, hasOverflow) {
+  async function probeBlindWord(searchId, word) {
+    const data = await fetchWordFile(word);
+    if (searchId !== activeSearchId) return;
+    if (!data) {
+      clearDisplay();
+      return;
+    }
+    const ul = document.getElementById(RESULTS_ID);
+    if (!ul) return;
+    const url = `${WORDS_BASE_URL}/${encodeURIComponent(word)}`;
+    ul.innerHTML = `<li><a class="ws-sr-word-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(word)}</a></li>`;
+  }
+  function showVerseResults(verseRefs, primaryLemma, resolvedCount, hasOverflow, wordStudyHtml = "") {
     const ul = document.getElementById(RESULTS_ID);
     if (!ul) return;
     const slice = verseRefs.slice(0, MAX_DISPLAYED);
@@ -4214,7 +4226,8 @@ ${bodyText}` : prefix : bodyText;
     }).join("");
     const overflow = hasOverflow ? "+" : "";
     const hint = verseRefs.length > MAX_DISPLAYED ? `<li class="ws-sr-hint">Showing ${MAX_DISPLAYED} of ${verseRefs.length}${overflow} \u2014 keep typing to narrow down</li>` : "";
-    ul.innerHTML = items + hint;
+    const versesHint = wordStudyHtml && verseRefs.length > 0 ? `<li class="ws-sr-hint">Matching verses:</li>` : "";
+    ul.innerHTML = wordStudyHtml + versesHint + items + hint;
     const overflowNote = "";
     if (resolvedCount > 1) {
       setStatus(`${verseRefs.length}${overflow} verses match all terms`);
@@ -4312,9 +4325,11 @@ ${bodyText}` : prefix : bodyText;
       if (lastRes?.kind === "ambiguous") {
         showWordLinks(lastRes.candidates.slice(0, 8), idx);
         setStatus("");
+      } else if (tokens.length === 1) {
+        void probeBlindWord(searchId, tokens[0]);
       } else {
         clearDisplay();
-        setStatus(tokens.length > 0 ? "No matching words found." : "");
+        setStatus("No matching words found.");
       }
       return;
     }
@@ -4336,7 +4351,14 @@ ${bodyText}` : prefix : bodyText;
     for (const [vr, r] of primaryResult.sampleByVerse) {
       currentAllRenderingsByVerse.set(vr, /* @__PURE__ */ new Set([r, ...sorted]));
     }
-    showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow);
+    let wordStudyHtml = "";
+    if (sorted.length === 1) {
+      const wsUrl = `${WORDS_BASE_URL}/${encodeURIComponent(primary)}`;
+      const count = idx[primary];
+      const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
+      wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener">${esc(primary)}${countHtml}</a></li>`;
+    }
+    showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml);
     if (sorted.length > 1) {
       const remaining = sorted.slice(1);
       await Promise.all(remaining.map(async (lemma) => {

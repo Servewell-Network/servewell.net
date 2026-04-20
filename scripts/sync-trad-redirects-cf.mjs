@@ -180,28 +180,83 @@ const items = redirectEntries.map(({ lemma, target }) => ({
 
 console.log(`\nPushing ${items.length} redirect items to list "${LIST_NAME}" (id: ${list.id})...`);
 
-// CF allows at most 500 items per PUT request — batch if needed
+// ---------------------------------------------------------------------------
+// Delete existing items (if any) by fetching their IDs first.
+// CF DELETE requires explicit item IDs — an empty array is not valid.
+// ---------------------------------------------------------------------------
 const BATCH_SIZE = 500;
-if (items.length > BATCH_SIZE) {
-  // Delete all existing items first, then add in batches
-  await cfFetch(`/rules/lists/${list.id}/items`, {
-    method: 'DELETE',
-    body: JSON.stringify({ items: [] }), // empty array = delete all
-  });
-  for (let i = 0; i < items.length; i += BATCH_SIZE) {
-    const batch = items.slice(i, i + BATCH_SIZE);
-    await cfFetch(`/rules/lists/${list.id}/items`, {
-      method: 'POST',
-      body: JSON.stringify(batch),
-    });
-    console.log(`  Uploaded batch ${Math.floor(i / BATCH_SIZE) + 1} / ${Math.ceil(items.length / BATCH_SIZE)}`);
+{
+  let existingIds = [];
+  let cursor = null;
+  do {
+    const qs = cursor ? `?cursor=${encodeURIComponent(cursor)}` : '';
+    const res = await cfFetch(`/rules/lists/${list.id}/items${qs}`);
+    for (const item of res.result ?? []) existingIds.push({ id: item.id });
+    cursor = res.result_info?.cursors?.after ?? null;
+  } while (cursor);
+
+  if (existingIds.length > 0) {
+    console.log(`  Deleting ${existingIds.length} existing items...`);
+    for (let i = 0; i < existingIds.length; i += BATCH_SIZE) {
+      await cfFetchWithRetry(`/rules/lists/${list.id}/items`, {
+        method: 'DELETE',
+        body: JSON.stringify({ items: existingIds.slice(i, i + BATCH_SIZE) }),
+      });
+      if (i + BATCH_SIZE < existingIds.length) await sleep(500);
+    }
   }
-} else {
-  // PUT replaces all items atomically
-  await cfFetch(`/rules/lists/${list.id}/items`, {
-    method: 'PUT',
-    body: JSON.stringify(items),
-  });
+}
+
+// ---------------------------------------------------------------------------
+// Upload new items in POST batches (≤500 per request, with rate-limit backoff)
+// ---------------------------------------------------------------------------
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+async function cfFetchWithRetry(path, options = {}) {
+  let attempts = 0;
+  while (true) {
+    try {
+      return await cfFetch(path, options);
+    } catch (e) {
+      if (attempts < 5 && String(e.message).includes('10040')) {
+        const wait = 2000 * (attempts + 1);
+        console.log(`  Rate limited — waiting ${wait / 1000}s before retry...`);
+        await sleep(wait);
+        attempts++;
+      } else {
+        throw e;
+      }
+    }
+  }
+}
+
+for (let i = 0; i < items.length; i += BATCH_SIZE) {
+  const batch = items.slice(i, i + BATCH_SIZE);
+  const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+  const totalBatches = Math.ceil(items.length / BATCH_SIZE);
+
+  let attempts = 0;
+  while (true) {
+    try {
+      await cfFetchWithRetry(`/rules/lists/${list.id}/items`, {
+        method: 'POST',
+        body: JSON.stringify(batch),
+      });
+      console.log(`  Uploaded batch ${batchNum} / ${totalBatches}`);
+      break;
+    } catch (e) {
+      if (attempts < 4 && String(e.message).includes('10040')) {
+        const wait = 2000 * (attempts + 1);
+        console.log(`  Rate limited on batch ${batchNum} — waiting ${wait / 1000}s...`);
+        await sleep(wait);
+        attempts++;
+      } else {
+        throw e;
+      }
+    }
+  }
+  // Small pause between batches to stay under the rate limit
+  if (i + BATCH_SIZE < items.length) await sleep(500);
 }
 
 console.log(`\nDone. ${items.length} redirect items pushed to Cloudflare Bulk Redirect List.`);

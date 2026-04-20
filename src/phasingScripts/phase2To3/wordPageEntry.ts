@@ -218,25 +218,55 @@ function renderFooter(
   overflow: Record<string, string> | undefined,
   relatedFiles: RelatedEntry[] | undefined,
   crossRefs: CrossRefEntry[] | undefined,
+  meta: MetaOut,
 ): string {
   const parts: string[] = [];
   if (overflow && Object.keys(overflow).length > 0) {
     const items = Object.entries(overflow).map(([fn, label]) => `<li>${wordLink(fn, label)}</li>`).join('');
     parts.push(`<section class="ws-overflow-links"><h2>More Instances</h2><ul>${items}</ul></section>`);
   }
+  if (relatedFiles?.length || crossRefs?.length) {
+    parts.push(`<span id="ws-related-anchor"></span>`);
+  }
   if (relatedFiles?.length) {
-    const items = relatedFiles.map(r => {
-      const label = r.rootTranslation ? `${r.rootTranslation} (${r.lang}, ${r.strongsId})` : `${r.fileName} (${r.lang}, ${r.strongsId})`;
-      return `<li>${wordLink(r.fileName, label)}</li>`;
-    }).join('');
-    parts.push(`<section class="ws-related"><h2>Related Files</h2><ul>${items}</ul></section>`);
+    // Build ordered list: self at position meta.fileNumber, others at their fileNumber.
+    // relatedFiles only exists on the primary file (fileNumber=1) so self is always #1.
+    const selfLabel = meta.rootTranslation
+      ? `${meta.rootTranslation} (${meta.lang}, ${meta.strongsId})`
+      : `${meta.wordKey} (${meta.lang}, ${meta.strongsId})`;
+    const allItems: Array<{ n: number; html: string }> = [
+      { n: meta.fileNumber, html: `<a href="#">${esc(selfLabel)}</a>` },
+    ];
+    for (const r of relatedFiles) {
+      const m = r.fileName.match(/_(\d+)$/);
+      const n = m ? parseInt(m[1]) : 2;
+      const label = r.rootTranslation
+        ? `${r.rootTranslation} (${r.lang}, ${r.strongsId})`
+        : `${r.fileName} (${r.lang}, ${r.strongsId})`;
+      allItems.push({ n, html: wordLink(r.fileName, label) });
+    }
+    allItems.sort((a, b) => a.n - b.n);
+    const items = allItems.map(it => `<li>${it.html}</li>`).join('');
+    parts.push(
+      `<section class="ws-related">` +
+      `<h2>Closely Related Pages</h2>` +
+      `<p class="ws-section-desc">Pages about original language words with the same primary English translation</p>` +
+      `<ol>${items}</ol>` +
+      `</section>`,
+    );
   }
   if (crossRefs?.length) {
     const items = crossRefs.map(r => {
       const label = r.rootTranslation ? `${r.rootTranslation} (${r.lang}, ${r.strongsId})` : `${r.wordKey} (${r.lang}, ${r.strongsId})`;
       return `<li>${wordLink(r.fileName, label)}</li>`;
     }).join('');
-    parts.push(`<section class="ws-crossrefs"><h2>Cross References</h2><ul>${items}</ul></section>`);
+    parts.push(
+      `<section class="ws-crossrefs">` +
+      `<h2>Loosely Related Pages</h2>` +
+      `<p class="ws-section-desc">Pages about original language words that occasionally have the same English translation</p>` +
+      `<ul>${items}</ul>` +
+      `</section>`,
+    );
   }
   return parts.length ? `<div class="ws-footer">${parts.join('')}</div>` : '';
 }
@@ -247,7 +277,9 @@ function renderFooter(
 
 function renderMain(data: MainWordFile, container: HTMLElement): void {
   const meta = data.ancientWord._meta;
-  const suffix = meta.fileNumber > 1 ? ` (${meta.fileNumber})` : '';
+  const hasRelatedSection = !!(data.relatedFiles?.length || data.crossRefs?.length);
+  const isMultiPage = meta.fileNumber > 1 || hasRelatedSection;
+  const suffix = isMultiPage ? ` (${meta.fileNumber})` : '';
   const displayWord = (meta.rootTranslation ?? meta.wordKey).toUpperCase();
 
   const hasAnyCollapse = meta.totalInstances > 30 &&
@@ -255,7 +287,23 @@ function renderMain(data: MainWordFile, container: HTMLElement): void {
       Object.values(s.translations).some(t => t.totalInstances > 5));
 
   const { html: slotsHtml, mergedSlotCount } = renderSlotsSection(data.ancientWord.slots, meta.totalInstances);
-  const footer = renderFooter(data.ancientWord.overflow, data.relatedFiles, data.crossRefs);
+  const footer = renderFooter(data.ancientWord.overflow, data.relatedFiles, data.crossRefs, meta);
+
+  // "See also related pages" link — points to #ws-related-anchor on this page,
+  // or on the primary page when we're on a secondary file (fileNumber > 1).
+  let seeAlsoHref = '';
+  if (isMultiPage) {
+    if (hasRelatedSection) {
+      seeAlsoHref = '#ws-related-anchor';
+    } else {
+      // Secondary page: derive primary page URL by stripping the _N suffix.
+      const primaryPath = location.pathname.replace(/_\d+$/, '');
+      seeAlsoHref = `https://words.servewell.net${primaryPath}#ws-related-anchor`;
+    }
+  }
+  const seeAlsoHtml = seeAlsoHref
+    ? `<p class="ws-see-also">(See also <a href="${esc(seeAlsoHref)}">related pages</a>)</p>`
+    : '';
 
   const subtitleParts = [
     ...(meta.transliteration ? [esc(meta.transliteration)] : []),
@@ -267,6 +315,7 @@ function renderMain(data: MainWordFile, container: HTMLElement): void {
   container.innerHTML = [
     `<h1>${esc(displayWord)}${esc(suffix)} <span class="ws-title-sub">· ${subtitleParts.join(' · ')}</span></h1>`,
     `<p class="ws-meta-stats">${meta.totalInstances.toLocaleString()} total instance${meta.totalInstances === 1 ? '' : 's'} · ${mergedSlotCount} grammar slot${mergedSlotCount === 1 ? '' : 's'}${expandBtn}</p>`,
+    seeAlsoHtml,
     `<div id="ws-slots">${slotsHtml}</div>`,
     footer,
   ].join('');

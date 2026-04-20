@@ -91,7 +91,10 @@ mark.ws-target { background: #fef08a; color: #1a1200; border-radius: 2px; paddin
 .ws-footer { border-top: 2px solid var(--pane-border); margin-top: 2.5rem; padding-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 2rem; }
 .ws-footer section > h2 { font-size: 0.95rem; margin: 0 0 0.4rem; }
 .ws-footer section ul { margin: 0; padding-left: 1.25rem; }
+.ws-footer section ol { margin: 0; padding-left: 1.25rem; }
 .ws-footer section li { font-size: 0.9rem; margin: 0.25rem 0; }
+.ws-section-desc { font-size: 0.82rem; color: var(--muted); font-style: italic; margin: 0 0 0.5rem; }
+.ws-see-also { font-size: 0.85rem; color: var(--muted); margin: 0.2rem 0 0; }
 #ws-raw { margin-top: 2rem; font-size: 0.75rem; color: var(--muted); }
 #ws-raw summary { cursor: pointer; font-size: 0.85rem; }
 #ws-raw pre { white-space: pre-wrap; word-break: break-all; overflow: auto; max-height: 60vh; background: var(--pane-bg); border: 1px solid var(--pane-border); padding: 0.75rem; border-radius: 4px; }
@@ -180,8 +183,9 @@ for (const jsonFile of jsonFiles) {
     html = buildIslandPage(title, `Word study: ${title} (${meta.lang}, ${meta.strongsId})`, d);
     overflowCount++;
   } else if ((raw as RedirectFile)._redirect) {
-    html = renderRedirectPage((raw as RedirectFile)._redirect);
+    // Redirect stubs are no longer written by the JSON phase; skip any legacy files.
     redirectCount++;
+    continue;
   } else {
     const d = raw as MainWordFile;
     const meta = d.ancientWord._meta;
