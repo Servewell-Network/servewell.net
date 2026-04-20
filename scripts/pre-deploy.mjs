@@ -9,12 +9,18 @@ const isYes = process.argv.includes('--yes');
 const skipE2E = process.argv.includes('--skip-e2e');
 const forceReupload = process.argv.includes('--force');
 
-function run(command, args, label) {
+function run(command, args, label, { omitEnvKeys = [] } = {}) {
   return new Promise((resolve, reject) => {
     console.log(`\n== ${label} ==`);
+    let env = undefined;
+    if (omitEnvKeys.length > 0) {
+      env = { ...process.env };
+      for (const key of omitEnvKeys) delete env[key];
+    }
     const child = spawn(command, args, {
       stdio: 'inherit',
-      shell: process.platform === 'win32'
+      shell: process.platform === 'win32',
+      ...(env ? { env } : {}),
     });
 
     child.on('close', (code) => {
@@ -336,9 +342,9 @@ async function main() {
         const envRaw = fs.existsSync('.env') ? fs.readFileSync('.env', 'utf8') : '';
         const hasCreds =
           (process.env.CLOUDFLARE_ACCOUNT_ID || envRaw.includes('CLOUDFLARE_ACCOUNT_ID=')) &&
-          (process.env.CLOUDFLARE_API_TOKEN  || envRaw.includes('CLOUDFLARE_API_TOKEN='));
+          (process.env.CF_REDIRECTS_API_TOKEN  || envRaw.includes('CF_REDIRECTS_API_TOKEN='));
         if (!hasCreds) {
-          console.log('  (Skipping — CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN not set. Run `npm run deploy:trad-redirects-cf` when ready.)');
+          console.log('  (Skipping — CLOUDFLARE_ACCOUNT_ID / CF_REDIRECTS_API_TOKEN not set. Run `npm run deploy:trad-redirects-cf` when ready.)');
         } else {
           const deployTrad = isYes || await askYesNo('Push trad-word redirects to Cloudflare Bulk Redirects now? (y/n): ');
           if (deployTrad) {

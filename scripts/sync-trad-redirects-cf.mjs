@@ -28,7 +28,7 @@
  *
  * Required environment variables:
  *   CLOUDFLARE_ACCOUNT_ID   — Cloudflare account ID
- *   CLOUDFLARE_API_TOKEN    — API token with "Account Firewall Access Rules: Edit"
+ *   CF_REDIRECTS_API_TOKEN  — API token with "Account Firewall Access Rules: Edit"
  *                             permission (or "Zone: Edit" if you also create rules)
  *
  * Optional environment variables:
@@ -63,12 +63,12 @@ if (existsSync(envFile)) {
 }
 
 const ACCOUNT_ID   = process.env.CLOUDFLARE_ACCOUNT_ID;
-const API_TOKEN    = process.env.CLOUDFLARE_API_TOKEN;
+const API_TOKEN    = process.env.CF_REDIRECTS_API_TOKEN;
 const LIST_NAME    = process.env.CF_REDIRECT_LIST_NAME ?? 'servewell_word_redirects';
 const WORDS_DOMAIN = process.env.WORDS_DOMAIN ?? 'words.servewell.net';
 
 if (!ACCOUNT_ID || !API_TOKEN) {
-  console.warn('Warning: CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN must be set to sync CF Bulk Redirects.');
+  console.warn('Warning: CLOUDFLARE_ACCOUNT_ID and CF_REDIRECTS_API_TOKEN must be set to sync CF Bulk Redirects.');
   console.warn('Add them to your .env file or export them as shell variables.');
   console.warn('Skipping CF Bulk Redirects sync.');
   process.exit(0);
@@ -127,11 +127,38 @@ async function cfFetch(path, options = {}) {
       ...(options.headers ?? {}),
     },
   });
-  const body = await res.json();
+  const text = await res.text();
+  let body;
+  try { body = JSON.parse(text); } catch {
+    throw new Error(`CF API non-JSON response (HTTP ${res.status}) at ${path}: ${text.slice(0, 200)}`);
+  }
   if (!body.success) {
     throw new Error(`CF API error at ${path}: ${JSON.stringify(body.errors)}`);
   }
   return body;
+}
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+async function cfFetchWithRetry(path, options = {}) {
+  let attempts = 0;
+  while (true) {
+    try {
+      return await cfFetch(path, options);
+    } catch (e) {
+      const msg = String(e.message);
+      const isRetryable = msg.includes('10040') || msg.includes('non-JSON') || msg.includes('HTTP 5');
+      if (attempts < 5 && isRetryable) {
+        const wait = 2000 * (attempts + 1);
+        console.log(`  Transient error — waiting ${wait / 1000}s before retry (attempt ${attempts + 1})...`);
+        console.log(`    ${msg.slice(0, 120)}`);
+        await sleep(wait);
+        attempts++;
+      } else {
+        throw e;
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -210,51 +237,18 @@ const BATCH_SIZE = 500;
 // ---------------------------------------------------------------------------
 // Upload new items in POST batches (≤500 per request, with rate-limit backoff)
 // ---------------------------------------------------------------------------
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-async function cfFetchWithRetry(path, options = {}) {
-  let attempts = 0;
-  while (true) {
-    try {
-      return await cfFetch(path, options);
-    } catch (e) {
-      if (attempts < 5 && String(e.message).includes('10040')) {
-        const wait = 2000 * (attempts + 1);
-        console.log(`  Rate limited — waiting ${wait / 1000}s before retry...`);
-        await sleep(wait);
-        attempts++;
-      } else {
-        throw e;
-      }
-    }
-  }
-}
 
 for (let i = 0; i < items.length; i += BATCH_SIZE) {
   const batch = items.slice(i, i + BATCH_SIZE);
   const batchNum = Math.floor(i / BATCH_SIZE) + 1;
   const totalBatches = Math.ceil(items.length / BATCH_SIZE);
 
-  let attempts = 0;
-  while (true) {
-    try {
-      await cfFetchWithRetry(`/rules/lists/${list.id}/items`, {
-        method: 'POST',
-        body: JSON.stringify(batch),
-      });
-      console.log(`  Uploaded batch ${batchNum} / ${totalBatches}`);
-      break;
-    } catch (e) {
-      if (attempts < 4 && String(e.message).includes('10040')) {
-        const wait = 2000 * (attempts + 1);
-        console.log(`  Rate limited on batch ${batchNum} — waiting ${wait / 1000}s...`);
-        await sleep(wait);
-        attempts++;
-      } else {
-        throw e;
-      }
-    }
-  }
+  await cfFetchWithRetry(`/rules/lists/${list.id}/items`, {
+    method: 'POST',
+    body: JSON.stringify(batch),
+  });
+  console.log(`  Uploaded batch ${batchNum} / ${totalBatches}`);
+
   // Small pause between batches to stay under the rate limit
   if (i + BATCH_SIZE < items.length) await sleep(500);
 }
