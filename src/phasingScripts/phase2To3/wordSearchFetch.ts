@@ -151,6 +151,7 @@ export function fetchWordFile(fileName: string): Promise<LoadedWordData | null> 
 /** Fetch all non-overflow files for a lemma; return combined verse set + total instances. */
 export async function fetchLemmaFiles(lemma: string, idx: WordIndex): Promise<{
   verseSet: Set<string>;
+  primaryVerseSet: Set<string>;
   totalInstances: number;
   hasOverflow: boolean;
   sampleByVerse: Map<string, string>;
@@ -158,22 +159,31 @@ export async function fetchLemmaFiles(lemma: string, idx: WordIndex): Promise<{
   tradByVerse: Map<string, string>;
 }> {
   const names = getFileNamesForLemma(lemma, idx);
-  // Fetch sibling files; crossRef file names come from the first file's metadata
-  const [firstResult, ...restResults] = await Promise.all(names.map(fetchWordFile));
-  const allResults: (LoadedWordData | null)[] = [firstResult, ...restResults];
-  // Also fetch cross-referenced files (e.g. pure → clean_5)
-  const crossRefNames = firstResult?.crossRefFileNames ?? [];
-  if (crossRefNames.length > 0) {
-    const crossResults = await Promise.all(crossRefNames.map(fetchWordFile));
-    allResults.push(...crossResults);
-  }
+  const primaryResults: (LoadedWordData | null)[] = await Promise.all(names.map(fetchWordFile));
+
+  // CrossRef file names come from the first primary file's raw data.
+  // CrossRefs are files with different lemma keys whose translations overlap with this word —
+  // they legitimately broaden single-word search results. However, including them in
+  // multi-word intersection causes false positives (e.g. "the_2" has "STONE" as one
+  // rendering but covers thousands of verses, polluting "stones jerusalem" results).
+  // Solution: return both verseSet (primary + crossRefs, for single-word display) and
+  // primaryVerseSet (primary only, used for multi-word intersection).
+  const primaryNameSet = new Set(names);
+  const crossRefNames: string[] = (primaryResults[0]?.crossRefFileNames ?? [])
+    .filter(n => !primaryNameSet.has(n));
+  const crossRefResults: (LoadedWordData | null)[] = crossRefNames.length > 0
+    ? await Promise.all(crossRefNames.map(fetchWordFile))
+    : [];
+
   const verseSet = new Set<string>();
   const sampleByVerse = new Map<string, string>();
   const litByVerse = new Map<string, string>();
   const tradByVerse = new Map<string, string>();
   let totalInstances = 0;
   let hasOverflow = false;
-  for (const r of allResults) {
+
+  // Add all verses from primary files unconditionally.
+  for (const r of primaryResults) {
     if (!r) continue;
     totalInstances += r.totalInstances;
     if (r.hasOverflow) hasOverflow = true;
@@ -188,5 +198,23 @@ export async function fetchLemmaFiles(lemma: string, idx: WordIndex): Promise<{
       if (!tradByVerse.has(vr)) tradByVerse.set(vr, trad);
     }
   }
-  return { verseSet, totalInstances, hasOverflow, sampleByVerse, litByVerse, tradByVerse };
+
+  // primaryVerseSet = primary files only (used for multi-word intersection to avoid
+  // crossRef breadth causing false positives).
+  const primaryVerseSet = new Set(verseSet);
+
+  // Add crossRef verses to the full verseSet (used for single-word display).
+  for (const r of crossRefResults) {
+    if (!r) continue;
+    for (const [vr, rendering] of r.byVerse) {
+      verseSet.add(vr);
+      if (!sampleByVerse.has(vr)) sampleByVerse.set(vr, rendering);
+      const lit = r.litByVerse.get(vr);
+      if (lit && !litByVerse.has(vr)) litByVerse.set(vr, lit);
+      const trad = r.tradByVerse.get(vr);
+      if (trad && !tradByVerse.has(vr)) tradByVerse.set(vr, trad);
+    }
+  }
+
+  return { verseSet, primaryVerseSet, totalInstances, hasOverflow, sampleByVerse, litByVerse, tradByVerse };
 }

@@ -1413,7 +1413,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       if (loadNavData().books.length > 0) return;
       if (navDataLoading) return;
       navDataLoading = true;
-      fetch("/-/Genesis/1").then((res) => res.ok ? res.text() : Promise.reject(new Error(`HTTP ${res.status}`))).then((html) => {
+      fetch("https://servewell.net/-/Genesis/1").then((res) => res.ok ? res.text() : Promise.reject(new Error(`HTTP ${res.status}`))).then((html) => {
         const loaded = loadNavDataFromHtml(html);
         if (loaded) {
           navData = loaded;
@@ -3873,20 +3873,17 @@ ${bodyText}` : prefix : bodyText;
   }
   async function fetchLemmaFiles(lemma, idx) {
     const names = getFileNamesForLemma(lemma, idx);
-    const [firstResult, ...restResults] = await Promise.all(names.map(fetchWordFile));
-    const allResults = [firstResult, ...restResults];
-    const crossRefNames = firstResult?.crossRefFileNames ?? [];
-    if (crossRefNames.length > 0) {
-      const crossResults = await Promise.all(crossRefNames.map(fetchWordFile));
-      allResults.push(...crossResults);
-    }
+    const primaryResults = await Promise.all(names.map(fetchWordFile));
+    const primaryNameSet = new Set(names);
+    const crossRefNames = (primaryResults[0]?.crossRefFileNames ?? []).filter((n) => !primaryNameSet.has(n));
+    const crossRefResults = crossRefNames.length > 0 ? await Promise.all(crossRefNames.map(fetchWordFile)) : [];
     const verseSet = /* @__PURE__ */ new Set();
     const sampleByVerse = /* @__PURE__ */ new Map();
     const litByVerse = /* @__PURE__ */ new Map();
     const tradByVerse = /* @__PURE__ */ new Map();
     let totalInstances = 0;
     let hasOverflow = false;
-    for (const r of allResults) {
+    for (const r of primaryResults) {
       if (!r) continue;
       totalInstances += r.totalInstances;
       if (r.hasOverflow) hasOverflow = true;
@@ -3901,7 +3898,19 @@ ${bodyText}` : prefix : bodyText;
         if (!tradByVerse.has(vr)) tradByVerse.set(vr, trad);
       }
     }
-    return { verseSet, totalInstances, hasOverflow, sampleByVerse, litByVerse, tradByVerse };
+    const primaryVerseSet = new Set(verseSet);
+    for (const r of crossRefResults) {
+      if (!r) continue;
+      for (const [vr, rendering] of r.byVerse) {
+        verseSet.add(vr);
+        if (!sampleByVerse.has(vr)) sampleByVerse.set(vr, rendering);
+        const lit = r.litByVerse.get(vr);
+        if (lit && !litByVerse.has(vr)) litByVerse.set(vr, lit);
+        const trad = r.tradByVerse.get(vr);
+        if (trad && !tradByVerse.has(vr)) tradByVerse.set(vr, trad);
+      }
+    }
+    return { verseSet, primaryVerseSet, totalInstances, hasOverflow, sampleByVerse, litByVerse, tradByVerse };
   }
 
   // src/phasingScripts/phase2To3/createWordSearchModule.ts
@@ -4344,7 +4353,8 @@ ${bodyText}` : prefix : bodyText;
       setStatus(`No verse data found for "${primary}". (JSON files may not be deployed yet.)`);
       return;
     }
-    let currentSet = primaryResult.verseSet;
+    const isSingleWord = sorted.length === 1;
+    let currentSet = isSingleWord ? primaryResult.verseSet : primaryResult.primaryVerseSet;
     let anyOverflow = primaryResult.hasOverflow;
     currentLitByVerse = new Map(primaryResult.litByVerse);
     currentTradByVerse = new Map(primaryResult.tradByVerse);
@@ -4367,7 +4377,7 @@ ${bodyText}` : prefix : bodyText;
         if (!result) return;
         const narrowed = /* @__PURE__ */ new Set();
         for (const vr of currentSet) {
-          if (result.verseSet.has(vr)) narrowed.add(vr);
+          if (result.primaryVerseSet.has(vr)) narrowed.add(vr);
         }
         currentSet = narrowed;
         if (result.hasOverflow) anyOverflow = true;

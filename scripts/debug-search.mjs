@@ -182,9 +182,15 @@ for (const lemma of sorted) {
 
   console.log(`  Total unique verses for "${lemma}": ${verseSet.size}`);
 
-  // Fetch crossRef files if any
-  if (crossRefFileNames.length > 0) {
-    for (const xFile of crossRefFileNames) {
+  // primaryVerseSet = primary files only (used for multi-word intersection).
+  // CrossRefs are fetched and added to verseSet for single-word display only.
+  const primaryVerseSet = new Set(verseSet);
+
+  // Fetch crossRef files — add to verseSet (for single-word display) but NOT primaryVerseSet
+  const primaryNameSet = new Set(fileNames);
+  const filteredCrossRefs = crossRefFileNames.filter(n => !primaryNameSet.has(n));
+  if (filteredCrossRefs.length > 0) {
+    for (const xFile of filteredCrossRefs) {
       const xUrl = `${WORDS_BASE_URL}/${encodeURIComponent(xFile)}`;
       console.log(`    crossRef GET ${xUrl}`);
       let data;
@@ -213,10 +219,10 @@ for (const lemma of sorted) {
   }
 
   if (intersectedVerses === null) {
-    intersectedVerses = verseSet;
+    intersectedVerses = sorted.length === 1 ? verseSet : primaryVerseSet;
   } else {
     const before = intersectedVerses.size;
-    intersectedVerses = new Set([...intersectedVerses].filter(v => verseSet.has(v)));
+    intersectedVerses = new Set([...intersectedVerses].filter(v => primaryVerseSet.has(v)));
     console.log(`  After intersection: ${before} → ${intersectedVerses.size}`);
   }
   console.log();

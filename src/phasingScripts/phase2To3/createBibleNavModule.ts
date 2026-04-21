@@ -309,7 +309,8 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
     navDataLoading = true;
 
     // Home page may not have inline nav data. Borrow the canonical payload from one generated chapter page.
-    fetch('/-/Genesis/1')
+    // Use absolute URL so this works on cross-origin pages (e.g. words.servewell.net).
+    fetch('https://servewell.net/-/Genesis/1')
       .then((res) => (res.ok ? res.text() : Promise.reject(new Error(`HTTP ${res.status}`))))
       .then((html) => {
         const loaded = loadNavDataFromHtml(html);

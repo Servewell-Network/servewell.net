@@ -485,8 +485,10 @@ async function handleInput(rawQuery: string): Promise<void> {
     return;
   }
 
-  // Seed current intersection with primary word's verse set
-  let currentSet: Set<string> = primaryResult.verseSet;
+  // For multi-word search, intersect using primaryVerseSet (primary files only, no crossRefs)
+  // to avoid crossRef breadth causing false positives. For single-word, use full verseSet.
+  const isSingleWord = sorted.length === 1;
+  let currentSet: Set<string> = isSingleWord ? primaryResult.verseSet : primaryResult.primaryVerseSet;
   let anyOverflow = primaryResult.hasOverflow;
 
   currentLitByVerse = new Map(primaryResult.litByVerse);
@@ -514,7 +516,7 @@ async function handleInput(rawQuery: string): Promise<void> {
 
       const narrowed = new Set<string>();
       for (const vr of currentSet) {
-        if (result.verseSet.has(vr)) narrowed.add(vr);
+        if (result.primaryVerseSet.has(vr)) narrowed.add(vr);
       }
       currentSet = narrowed;
       if (result.hasOverflow) anyOverflow = true;
