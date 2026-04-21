@@ -45,6 +45,11 @@
 		"/^npx wrangler r2 bucket cors set servewell-words --file scripts/r2-cors\\.json$/": {
 			"approve": true,
 			"matchCommandLine": true
-		}
+		},
+		"npm run deploy:raw": false,
+		"npx wrangler deploy": false,
+		"npm run deploy:words-r2": false,
+		"npm run deploy:trad-redirects-cf": false,
+		"/^git commit .*/": false,
 	}
 }
