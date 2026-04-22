@@ -55,6 +55,132 @@ const BOOK_DISPLAY: Record<string, string> = {
 const BOOK_ALIASES: Record<string, string> = { Ezk: 'Eze', Jol: 'Joe', Sng: 'Sol', Nam: 'Nah' };
 const BOOK_ORDER: Record<string, number> = Object.fromEntries(Object.keys(BOOK_DISPLAY).map((k, i) => [k, i]));
 
+// ---------------------------------------------------------------------------
+// Reverse lookup: user-typed name/abbreviation → canonical book code
+// ---------------------------------------------------------------------------
+
+// Each entry: lowercased alias → canonical code in BOOK_DISPLAY
+const BOOK_NAME_TO_CODE: Record<string, string> = (() => {
+  const m: Record<string, string> = {};
+  const add = (alias: string, code: string) => { m[alias.toLowerCase()] = code; };
+
+  // Canonical codes and display names auto-populated
+  for (const [code, name] of Object.entries(BOOK_DISPLAY)) {
+    add(code, code);
+    add(name, code);
+    // "1 Kings" → also "1kings"
+    add(name.replace(/\s+/g, ''), code);
+  }
+  // Also register BOOK_ALIASES keys
+  for (const [alias, code] of Object.entries(BOOK_ALIASES)) add(alias, code);
+
+  // Common abbreviations not covered by the 3-letter codes
+  const extras: Array<[string, string]> = [
+    // OT
+    ['ge', 'Gen'], ['gn', 'Gen'],
+    ['ex', 'Exo'], ['exod', 'Exo'],
+    ['lv', 'Lev'],
+    ['nm', 'Num'], ['nb', 'Num'],
+    ['dt', 'Deu'], ['deut', 'Deu'],
+    ['josh', 'Jos'],
+    ['judg', 'Jdg'], ['jg', 'Jdg'],
+    ['ru', 'Rut'],
+    ['1sam', '1Sa'], ['1 sam', '1Sa'], ['i sam', '1Sa'], ['i samuel', '1Sa'],
+    ['2sam', '2Sa'], ['2 sam', '2Sa'], ['ii sam', '2Sa'], ['ii samuel', '2Sa'],
+    ['1kgs', '1Ki'], ['1 kgs', '1Ki'], ['i kgs', '1Ki'], ['i kings', '1Ki'],
+    ['2kgs', '2Ki'], ['2 kgs', '2Ki'], ['ii kgs', '2Ki'], ['ii kings', '2Ki'],
+    ['1chr', '1Ch'], ['1 chr', '1Ch'], ['1chron', '1Ch'], ['i chronicles', '1Ch'],
+    ['2chr', '2Ch'], ['2 chr', '2Ch'], ['2chron', '2Ch'], ['ii chronicles', '2Ch'],
+    ['ezra', 'Ezr'],
+    ['neh', 'Neh'],
+    ['esth', 'Est'],
+    ['ps', 'Psa'], ['pss', 'Psa'], ['psalm', 'Psa'],
+    ['prov', 'Pro'], ['pv', 'Pro'],
+    ['eccl', 'Ecc'], ['qoh', 'Ecc'],
+    ['song', 'Sol'], ['ss', 'Sol'], ['sg', 'Sol'],
+    ['song of solomon', 'Sol'], ['canticles', 'Sol'], ['cant', 'Sol'],
+    ['isa', 'Isa'],
+    ['jer', 'Jer'],
+    ['lam', 'Lam'],
+    ['ezek', 'Eze'],
+    ['dan', 'Dan'],
+    ['hos', 'Hos'],
+    ['joel', 'Joe'],
+    ['amos', 'Amo'],
+    ['obad', 'Oba'],
+    ['jonah', 'Jon'],
+    ['mic', 'Mic'],
+    ['nah', 'Nah'],
+    ['hab', 'Hab'],
+    ['zeph', 'Zep'],
+    ['hag', 'Hag'],
+    ['zech', 'Zec'],
+    ['mal', 'Mal'],
+    // NT
+    ['matt', 'Mat'], ['mt', 'Mat'],
+    ['mk', 'Mrk'], ['mar', 'Mrk'],
+    ['lk', 'Luk'],
+    ['jn', 'Jhn'], ['joh', 'Jhn'],
+    ['acts', 'Act'],
+    ['rom', 'Rom'],
+    ['1cor', '1Co'], ['1 cor', '1Co'], ['i cor', '1Co'], ['i corinthians', '1Co'],
+    ['2cor', '2Co'], ['2 cor', '2Co'], ['ii cor', '2Co'], ['ii corinthians', '2Co'],
+    ['gal', 'Gal'],
+    ['eph', 'Eph'],
+    ['phil', 'Php'], ['php', 'Php'],
+    ['col', 'Col'],
+    ['1th', '1Th'], ['1 th', '1Th'], ['1thess', '1Th'], ['i thess', '1Th'],
+    ['2th', '2Th'], ['2 th', '2Th'], ['2thess', '2Th'], ['ii thess', '2Th'],
+    ['1tim', '1Ti'], ['1 tim', '1Ti'], ['i tim', '1Ti'], ['i timothy', '1Ti'],
+    ['2tim', '2Ti'], ['2 tim', '2Ti'], ['ii tim', '2Ti'], ['ii timothy', '2Ti'],
+    ['titus', 'Tit'],
+    ['philem', 'Phm'], ['phlm', 'Phm'],
+    ['heb', 'Heb'],
+    ['jas', 'Jas'],
+    ['1pt', '1Pe'], ['1 pet', '1Pe'], ['i pet', '1Pe'], ['i peter', '1Pe'],
+    ['2pt', '2Pe'], ['2 pet', '2Pe'], ['ii pet', '2Pe'], ['ii peter', '2Pe'],
+    ['1jn', '1Jn'], ['1 jn', '1Jn'], ['i jn', '1Jn'], ['i john', '1Jn'],
+    ['2jn', '2Jn'], ['2 jn', '2Jn'], ['ii jn', '2Jn'], ['ii john', '2Jn'],
+    ['3jn', '3Jn'], ['3 jn', '3Jn'], ['iii jn', '3Jn'], ['iii john', '3Jn'],
+    ['jude', 'Jud'],
+    ['rev', 'Rev'], ['apoc', 'Rev'],
+  ];
+  for (const [alias, code] of extras) add(alias, code);
+  return m;
+})();
+
+/**
+ * Try to parse the query as a verse reference like "Gen 1:1", "1 Kings 3:5", "Ps 23".
+ * Returns { url, display } if matched, null otherwise.
+ */
+function parseVerseRefQuery(query: string): { url: string; display: string } | null {
+  const q = query.trim();
+  // Match: optional leading number + book name + whitespace + chapter + optional :verse + optional -endVerse
+  // Also accept period as chapter/verse separator e.g. "Gen 1.1"
+  const m = q.match(/^((?:\d\s*)?[a-z\s]+?)\s+(\d+)(?:[:.]\s*(\d+)(?:\s*[-\u2013\u2014]\s*(\d+))?)?$/i);
+  if (!m) return null;
+  const bookRaw = m[1].trim().toLowerCase();
+  const chapter = parseInt(m[2], 10);
+  const verse = m[3] ? parseInt(m[3], 10) : null;
+  const endVerse = m[4] ? parseInt(m[4], 10) : null;
+
+  const code = BOOK_NAME_TO_CODE[bookRaw];
+  if (!code) return null;
+  const bookName = BOOK_DISPLAY[code];
+  if (!bookName) return null;
+
+  let anchor = '';
+  let displaySuffix = '';
+  if (verse !== null) {
+    anchor = endVerse !== null ? `#${verse}-${endVerse}` : `#${verse}`;
+    displaySuffix = endVerse !== null ? `:${verse}-${endVerse}` : `:${verse}`;
+  }
+
+  const url = `https://servewell.net/-/${bookName.replace(/\s+/g, '-')}/${chapter}${anchor}`;
+  const display = `${bookName} ${chapter}${displaySuffix}`;
+  return { url, display };
+}
+
 function sortCanonical(refs: string[]): string[] {
   return [...refs].sort((a, b) => {
     const ma = a.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
@@ -210,6 +336,18 @@ const STYLES = `
   line-height: 1.55;
 }
 .ws-sr-trad { font-size: 0.9rem; }
+.ws-sr-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.4rem;
+  text-decoration: none;
+  color: var(--fg);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.ws-sr-nav-link:hover, .ws-sr-nav-link:focus { background: var(--bg); border-radius: 0.3rem; }
+.ws-sr-nav-link::before { content: '→'; color: var(--muted); font-weight: 400; }
 .ws-sr-partial .ws-sr-ref { font-weight: 400; }
 .ws-sr-partial { opacity: 0.7; }
 .ws-sr-verse-text mark {
@@ -272,6 +410,12 @@ function injectOnce(): void {
   document.getElementById(INPUT_ID)?.addEventListener('input', (e) => {
     handleInput((e.target as HTMLInputElement).value);
   });
+  document.getElementById(INPUT_ID)?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && currentVerseUrl) {
+      e.preventDefault();
+      window.location.href = currentVerseUrl;
+    }
+  });
   for (const id of ['ws-show-lit', 'ws-show-trad']) {
     document.getElementById(id)?.addEventListener('change', () => { void updateVerseText(); });
   }
@@ -293,6 +437,7 @@ function clearDisplay(): void {
   currentAllRenderingsByVerse = new Map();
   currentLitByVerse = new Map();
   currentTradByVerse = new Map();
+  currentVerseUrl = null;
   for (const id of ['ws-show-lit', 'ws-show-trad']) {
     const cb = document.getElementById(id) as HTMLInputElement | null;
     if (cb) cb.checked = false;
@@ -376,6 +521,7 @@ let activeSearchId = 0;
 let currentAllRenderingsByVerse = new Map<string, Set<string>>();
 let currentLitByVerse = new Map<string, string>();
 let currentTradByVerse = new Map<string, string>();
+let currentVerseUrl: string | null = null;
 // Raw words typed by the user (before stop-word filtering/lemmatization).
 // Used to highlight exactly what was typed (e.g. "stones" even if lemma is "stone").
 let currentRawTerms: string[] = [];
@@ -445,6 +591,17 @@ async function handleInput(rawQuery: string): Promise<void> {
   currentRawTerms = query.split(/\s+/).filter(Boolean).map(t => t.toLowerCase());
   currentAllRenderingsByVerse = new Map();
 
+  // Check for verse reference before hitting the word index
+  const verseRef = parseVerseRefQuery(query);
+  if (verseRef) {
+    currentVerseUrl = verseRef.url;
+    const ul = document.getElementById(RESULTS_ID);
+    if (ul) ul.innerHTML = `<li><a class="ws-sr-nav-link" href="${esc(verseRef.url)}">${esc(verseRef.display)}</a></li>`;
+    setStatus('Go to verse');
+    return;
+  }
+  currentVerseUrl = null;
+
   // Ensure index is available
   let idx = getIndexSync();
   if (!idx) {
@@ -471,7 +628,7 @@ async function handleInput(rawQuery: string): Promise<void> {
         if (!raw) continue;
         // Trad index targets may be file names (e.g. "faint_3") rather than
         // base lemma keys — strip the _N suffix when the key isn't in the index.
-        const target = raw in idx! ? raw : raw.replace(/_\d+$/, '');
+        const target: string = raw in idx! ? raw : raw.replace(/_\d+$/, '');
         if (target && target in idx!) r.res = { kind: 'resolved', lemma: target };
       }
     }
