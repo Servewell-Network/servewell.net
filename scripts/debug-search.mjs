@@ -89,8 +89,15 @@ function sortByRarity(lemmas, idx) {
   return [...lemmas].sort((a,b) => (idx[a]??1) - (idx[b]??1));
 }
 
+const STOP_WORDS = new Set([
+  'a', 'an', 'the',
+  'in', 'of', 'to', 'at', 'by', 'on', 'up', 'as', 'or', 'is',
+  'for', 'and', 'but', 'not', 'nor', 'yet', 'so',
+  'from', 'with', 'into', 'upon', 'over', 'unto', 'also',
+]);
+
 function parseQueryTokens(raw) {
-  return raw.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return raw.trim().toLowerCase().split(/\s+/).filter(t => t && !STOP_WORDS.has(t));
 }
 
 // ── Run ───────────────────────────────────────────────────────────────────

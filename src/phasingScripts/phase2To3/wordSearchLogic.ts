@@ -190,8 +190,18 @@ export function parseVerseRef(ref: string): { bookCode: string; chapter: number;
  * Split a raw query string into tokens (non-empty whitespace-delimited pieces).
  * Returns [] for empty/whitespace-only input.
  */
+// Common English function words that are not indexed and should be silently
+// dropped from search queries so users can write natural phrases like
+// "stones in Jerusalem" or "the word of God".
+const STOP_WORDS = new Set([
+  'a', 'an', 'the',
+  'in', 'of', 'to', 'at', 'by', 'on', 'up', 'as', 'or', 'is',
+  'for', 'and', 'but', 'not', 'nor', 'yet', 'so',
+  'from', 'with', 'into', 'upon', 'over', 'unto', 'also',
+]);
+
 export function parseQueryTokens(query: string): string[] {
-  return query.split(/\s+/).filter(Boolean);
+  return query.split(/\s+/).filter(t => t && !STOP_WORDS.has(t.toLowerCase()));
 }
 
 // ---------------------------------------------------------------------------
