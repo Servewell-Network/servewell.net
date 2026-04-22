@@ -4404,7 +4404,9 @@ ${bodyText}` : prefix : bodyText;
     if (tradIdx) {
       for (const r of resolutions) {
         if (r.res.kind === "unresolved" || r.res.kind === "ambiguous") {
-          const target = tradIdx[r.token];
+          const raw = tradIdx[r.token];
+          if (!raw) continue;
+          const target = raw in idx ? raw : raw.replace(/_\d+$/, "");
           if (target && target in idx) r.res = { kind: "resolved", lemma: target };
         }
       }
@@ -4429,7 +4431,7 @@ ${bodyText}` : prefix : bodyText;
     if (searchId !== activeSearchId) return;
     if (!primaryResult || primaryResult.verseSet.size === 0) {
       clearDisplay();
-      setStatus(`No verse data found for "${primary}". (JSON files may not be deployed yet.)`);
+      setStatus(`No verse data found for "${primary}".`);
       return;
     }
     const isSingleWord = sorted.length === 1;
@@ -4448,7 +4450,27 @@ ${bodyText}` : prefix : bodyText;
       const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
       wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener">${esc(primary)}${countHtml}</a></li>`;
     }
+    const collectedResults = /* @__PURE__ */ new Map();
+    collectedResults.set(primary, primaryResult);
     const computePartials = () => sorted.length > 1 ? sortCanonical([...unionSet].filter((vr) => !currentSet.has(vr))).slice(0, 20) : [];
+    const computeScoredPartials = () => {
+      if (sorted.length <= 1) return [];
+      const tradPatterns = currentRawTerms.map((t) => new RegExp(`\\b${escapeRegex(t)}\\b`, "i"));
+      const scored = [...unionSet].filter((vr) => !currentSet.has(vr)).map((vr) => {
+        let trad = currentTradByVerse.get(vr) ?? "";
+        if (!trad) {
+          for (const [, r] of collectedResults) {
+            trad = r.tradByVerse.get(vr) ?? "";
+            if (trad) break;
+          }
+        }
+        return { vr, score: tradPatterns.filter((re) => re.test(trad)).length };
+      }).filter((s) => s.score > 0);
+      scored.sort(
+        (a, b) => b.score - a.score || (sortCanonical([a.vr, b.vr])[0] === a.vr ? -1 : 1)
+      );
+      return scored.slice(0, 20).map((s) => s.vr);
+    };
     showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials());
     if (sorted.length > 1) {
       const remaining = sorted.slice(1);
@@ -4456,6 +4478,7 @@ ${bodyText}` : prefix : bodyText;
         const result = await fetchPromises.get(lemma);
         if (searchId !== activeSearchId) return;
         if (!result) return;
+        collectedResults.set(lemma, result);
         const narrowed = /* @__PURE__ */ new Set();
         for (const vr of currentSet) {
           if (result.primaryVerseSet.has(vr)) narrowed.add(vr);
@@ -4477,6 +4500,30 @@ ${bodyText}` : prefix : bodyText;
         if (searchId !== activeSearchId) return;
         showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow, "", computePartials());
       }));
+      if (searchId !== activeSearchId) return;
+      if (currentSet.size < 10) {
+        const tradPatterns = currentRawTerms.map((t) => new RegExp(`\\b${escapeRegex(t)}\\b`, "i"));
+        const tradExpanded = /* @__PURE__ */ new Set();
+        for (const [, result] of collectedResults) {
+          for (const [vr, trad] of result.tradByVerse) {
+            if (currentSet.has(vr) || tradExpanded.has(vr)) continue;
+            if (tradPatterns.every((re) => re.test(trad))) tradExpanded.add(vr);
+          }
+        }
+        if (tradExpanded.size > 0) {
+          for (const vr of tradExpanded) currentSet.add(vr);
+          for (const [, result] of collectedResults) {
+            for (const [vr, lit] of result.litByVerse) {
+              if (!currentLitByVerse.has(vr)) currentLitByVerse.set(vr, lit);
+            }
+            for (const [vr, trad] of result.tradByVerse) {
+              if (!currentTradByVerse.has(vr)) currentTradByVerse.set(vr, trad);
+            }
+          }
+        }
+      }
+      if (searchId !== activeSearchId) return;
+      showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow, "", computeScoredPartials());
     }
   }
   function createWordSearchModule() {

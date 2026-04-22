@@ -467,7 +467,11 @@ async function handleInput(rawQuery: string): Promise<void> {
   if (tradIdx) {
     for (const r of resolutions) {
       if (r.res.kind === 'unresolved' || r.res.kind === 'ambiguous') {
-        const target = tradIdx[r.token];
+        const raw = tradIdx[r.token];
+        if (!raw) continue;
+        // Trad index targets may be file names (e.g. "faint_3") rather than
+        // base lemma keys — strip the _N suffix when the key isn't in the index.
+        const target = raw in idx! ? raw : raw.replace(/_\d+$/, '');
         if (target && target in idx!) r.res = { kind: 'resolved', lemma: target };
       }
     }
@@ -505,7 +509,7 @@ async function handleInput(rawQuery: string): Promise<void> {
 
   if (!primaryResult || primaryResult.verseSet.size === 0) {
     clearDisplay();
-    setStatus(`No verse data found for "${primary}". (JSON files may not be deployed yet.)`);
+    setStatus(`No verse data found for "${primary}".`);
     return;
   }
 
@@ -530,13 +534,43 @@ async function handleInput(rawQuery: string): Promise<void> {
     const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : '';
     wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener">${esc(primary)}${countHtml}</a></li>`;
   }
+  // Collect fetched results — needed for trad-text scoring after all loads finish.
+  const collectedResults = new Map<string, Awaited<ReturnType<typeof fetchLemmaFiles>>>();
+  collectedResults.set(primary, primaryResult);
+
+  // Simple partials: union minus exact set, canonical order. Used during progressive loading.
   const computePartials = () =>
     sorted.length > 1
       ? sortCanonical([...unionSet].filter(vr => !currentSet.has(vr))).slice(0, 20)
       : [];
+
+  // Scored partials: rank remaining union verses by how many raw tokens appear in their
+  // trad text, then sort score-desc / canonical-within-score. Used for the final render.
+  const computeScoredPartials = () => {
+    if (sorted.length <= 1) return [];
+    const tradPatterns = currentRawTerms.map(t => new RegExp(`\\b${escapeRegex(t)}\\b`, 'i'));
+    const scored = [...unionSet]
+      .filter(vr => !currentSet.has(vr))
+      .map(vr => {
+        let trad = currentTradByVerse.get(vr) ?? '';
+        if (!trad) {
+          for (const [, r] of collectedResults) {
+            trad = r.tradByVerse.get(vr) ?? '';
+            if (trad) break;
+          }
+        }
+        return { vr, score: tradPatterns.filter(re => re.test(trad)).length };
+      })
+      .filter(s => s.score > 0);
+    scored.sort((a, b) =>
+      (b.score - a.score) ||
+      (sortCanonical([a.vr, b.vr])[0] === a.vr ? -1 : 1)
+    );
+    return scored.slice(0, 20).map(s => s.vr);
+  };
+
   showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials());
 
-  // Progressively intersect remaining words as they load
   if (sorted.length > 1) {
     const remaining = sorted.slice(1);
     await Promise.all(remaining.map(async (lemma) => {
@@ -544,6 +578,7 @@ async function handleInput(rawQuery: string): Promise<void> {
       if (searchId !== activeSearchId) return;
       if (!result) return;
 
+      collectedResults.set(lemma, result);
       const narrowed = new Set<string>();
       for (const vr of currentSet) {
         if (result.primaryVerseSet.has(vr)) narrowed.add(vr);
@@ -564,6 +599,38 @@ async function handleInput(rawQuery: string): Promise<void> {
       if (searchId !== activeSearchId) return;
       showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow, '', computePartials());
     }));
+
+    // Trad-text expansion: when the exact lemma intersection is sparse (< 10),
+    // sweep each lemma's tradByVerse for verses whose full sentence text contains
+    // ALL raw typed tokens as whole words. This catches cases where the traditional
+    // translation uses different words than the lemma key (e.g. "abundance" is
+    // translated as "common" in 1Ki 10:27).
+    if (searchId !== activeSearchId) return;
+    if (currentSet.size < 10) {
+      const tradPatterns = currentRawTerms.map(t => new RegExp(`\\b${escapeRegex(t)}\\b`, 'i'));
+      const tradExpanded = new Set<string>();
+      for (const [, result] of collectedResults) {
+        for (const [vr, trad] of result.tradByVerse) {
+          if (currentSet.has(vr) || tradExpanded.has(vr)) continue;
+          if (tradPatterns.every(re => re.test(trad))) tradExpanded.add(vr);
+        }
+      }
+      if (tradExpanded.size > 0) {
+        for (const vr of tradExpanded) currentSet.add(vr);
+        // Ensure lit/trad maps are populated for newly added verses.
+        for (const [, result] of collectedResults) {
+          for (const [vr, lit] of result.litByVerse) {
+            if (!currentLitByVerse.has(vr)) currentLitByVerse.set(vr, lit);
+          }
+          for (const [vr, trad] of result.tradByVerse) {
+            if (!currentTradByVerse.has(vr)) currentTradByVerse.set(vr, trad);
+          }
+        }
+      }
+    }
+    // Final render: exact+expanded results with scored partials (score-desc, then canonical).
+    if (searchId !== activeSearchId) return;
+    showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow, '', computeScoredPartials());
   }
 }
 
