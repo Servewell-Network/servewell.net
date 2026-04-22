@@ -367,6 +367,9 @@ let activeSearchId = 0;
 let currentAllRenderingsByVerse = new Map<string, Set<string>>();
 let currentLitByVerse = new Map<string, string>();
 let currentTradByVerse = new Map<string, string>();
+// Raw words typed by the user (before stop-word filtering/lemmatization).
+// Used to highlight exactly what was typed (e.g. "stones" even if lemma is "stone").
+let currentRawTerms: string[] = [];
 
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -392,7 +395,7 @@ async function updateVerseText(): Promise<void> {
   const showTrad = (document.getElementById('ws-show-trad') as HTMLInputElement | null)?.checked ?? false;
   for (const li of ul.querySelectorAll<HTMLLIElement>('li[data-vr]')) {
     const vr = li.dataset.vr ?? '';
-    const renderings = currentAllRenderingsByVerse.get(vr) ?? new Set<string>();
+    const renderings = new Set([...( currentAllRenderingsByVerse.get(vr) ?? []), ...currentRawTerms]);
     const litDiv = li.querySelector<HTMLDivElement>('.ws-sr-lit');
     const tradDiv = li.querySelector<HTMLDivElement>('.ws-sr-trad');
     if (litDiv) {
@@ -430,6 +433,7 @@ async function handleInput(rawQuery: string): Promise<void> {
   const searchId = ++activeSearchId;
   const query = rawQuery.trim();
   if (!query) { clearDisplay(); return; }
+  currentRawTerms = query.split(/\s+/).filter(Boolean).map(t => t.toLowerCase());
   currentAllRenderingsByVerse = new Map();
 
   // Ensure index is available
