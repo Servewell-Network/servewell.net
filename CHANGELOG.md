@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.0.6](https://github.com/Servewell-Network/servewell.net/compare/v0.0.5...v0.0.6) (2026-04-22)
+
+
+### Features
+
+* show partial matches when there are less than ten exact matches for a search query ([82d7e77](https://github.com/Servewell-Network/servewell.net/commit/82d7e776039f5fd2f1c41884363ac111e8180546))
+
+
+### Bug Fixes
+
+* highlight what the user typed in search ([c3c92af](https://github.com/Servewell-Network/servewell.net/commit/c3c92afdf2d07d3b902ed43ea5ea536612fb4d96))
+* user-typed stopwords should not prevent search results ([4ae6912](https://github.com/Servewell-Network/servewell.net/commit/4ae691211e11be110038898fe6c4052603845958))
+
 ## [0.0.5](https://github.com/Servewell-Network/servewell.net/compare/v0.0.4...v0.0.5) (2026-04-21)
 
 ## [0.0.4](https://github.com/Servewell-Network/servewell.net/compare/v0.0.3...v0.0.4) (2026-04-20)
