@@ -1139,6 +1139,10 @@ body.app-panel-open #app-shell-root .app-overlay {
   }
 
   // src/phasingScripts/phase2To3/createBibleNavModule.ts
+  var CHAPTER_ORIGIN = typeof location !== "undefined" && location.hostname !== "servewell.net" ? "https://servewell.net" : "";
+  function chapterUrl(bookUrl, chapter) {
+    return `${CHAPTER_ORIGIN}/-/${bookUrl}/${chapter}`;
+  }
   var navData = null;
   var navDataLoading = false;
   function loadNavData() {
@@ -1574,7 +1578,7 @@ body.app-panel-open #app-shell-root .app-overlay {
         topControls = `<label class="nav-check-row"><input type="checkbox" id="nav-bookmark-chk"${checked}><span>Bookmark This Reference</span></label>`;
       } else if (slotRef) {
         const book = getBook(slotRef.book);
-        const href = book ? `/-/${escHtml(book.url)}/${slotRef.chapter}` : "#";
+        const href = book ? escHtml(chapterUrl(book.url, slotRef.chapter)) : "#";
         topControls = `<a class="nav-goto-btn" href="${href}">Go\xA0to ${escHtml(refLabel(slotRef))}</a><button type="button" class="nav-remove-btn" id="nav-remove-bookmark">Remove This Bookmark</button>`;
       }
       const alphaChecked = alphabetical ? " checked" : "";
@@ -1612,7 +1616,7 @@ body.app-panel-open #app-shell-root .app-overlay {
     function renderChaptersView(abbr) {
       const book = getBook(abbr);
       if (!book) return "";
-      const links = Array.from({ length: book.chapters }, (_, i) => i + 1).map((n) => `<a class="nav-ch-btn" href="/-/${escHtml(book.url)}/${n}">${n}</a>`).join("");
+      const links = Array.from({ length: book.chapters }, (_, i) => i + 1).map((n) => `<a class="nav-ch-btn" href="${escHtml(chapterUrl(book.url, n))}">${n}</a>`).join("");
       return `<div class="nav-pop-inner">
 <div class="nav-pop-header"><button type="button" class="nav-back-btn" id="nav-back" aria-label="Back to book list">&#8249;</button><strong>${escHtml(book.name)}</strong></div>
 <div class="nav-ch-grid">${links}</div>
@@ -3773,8 +3777,37 @@ ${bodyText}` : prefix : bodyText;
     const dot = ref.lastIndexOf(".");
     return dot !== -1 ? ref.slice(0, dot) : ref;
   }
+  var STOP_WORDS = /* @__PURE__ */ new Set([
+    "a",
+    "an",
+    "the",
+    "in",
+    "of",
+    "to",
+    "at",
+    "by",
+    "on",
+    "up",
+    "as",
+    "or",
+    "is",
+    "for",
+    "and",
+    "but",
+    "not",
+    "nor",
+    "yet",
+    "so",
+    "from",
+    "with",
+    "into",
+    "upon",
+    "over",
+    "unto",
+    "also"
+  ]);
   function parseQueryTokens(query) {
-    return query.split(/\s+/).filter(Boolean);
+    return query.split(/\s+/).filter((t) => t && !STOP_WORDS.has(t.toLowerCase()));
   }
   function sortByRarity(lemmas, idx) {
     return [...lemmas].sort((a, b) => (idx[a] ?? 1) - (idx[b] ?? 1));
@@ -3822,6 +3855,45 @@ ${bodyText}` : prefix : bodyText;
   }
   function prefetchIndex() {
     if (!indexData && !indexLoading && !indexLoadFailed) loadIndex().catch(() => {
+    });
+  }
+  var TRAD_INDEX_URL = (() => {
+    if (typeof location === "undefined") return "https://servewell.net/_trad_index.json";
+    const h = location.hostname;
+    return h === "servewell.net" || h === "localhost" || h === "127.0.0.1" ? "/_trad_index.json" : "https://servewell.net/_trad_index.json";
+  })();
+  var tradIndexData = null;
+  var tradIndexLoading = false;
+  var tradIndexLoadFailed = false;
+  function getTradIndexSync() {
+    return tradIndexData;
+  }
+  function loadTradIndex() {
+    if (tradIndexData) return Promise.resolve(tradIndexData);
+    if (tradIndexLoadFailed) return Promise.resolve(null);
+    if (tradIndexLoading) {
+      return new Promise((resolve) => {
+        const id = setInterval(() => {
+          if (!tradIndexLoading) {
+            clearInterval(id);
+            resolve(tradIndexData);
+          }
+        }, 50);
+      });
+    }
+    tradIndexLoading = true;
+    return fetch(TRAD_INDEX_URL).then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))).then((d) => {
+      tradIndexData = d;
+      tradIndexLoading = false;
+      return d;
+    }).catch(() => {
+      tradIndexLoadFailed = true;
+      tradIndexLoading = false;
+      return null;
+    });
+  }
+  function prefetchTradIndex() {
+    if (!tradIndexData && !tradIndexLoading && !tradIndexLoadFailed) loadTradIndex().catch(() => {
     });
   }
   var fileCache = /* @__PURE__ */ new Map();
@@ -4133,6 +4205,8 @@ ${bodyText}` : prefix : bodyText;
   line-height: 1.55;
 }
 .ws-sr-trad { font-size: 0.9rem; }
+.ws-sr-partial .ws-sr-ref { font-weight: 400; }
+.ws-sr-partial { opacity: 0.7; }
 .ws-sr-verse-text mark {
   background: #ffe08a;
   color: #1a1a1a;
@@ -4170,6 +4244,7 @@ ${bodyText}` : prefix : bodyText;
       if (e.newState === "open") {
         setTimeout(() => document.getElementById(INPUT_ID)?.focus(), 30);
         prefetchIndex();
+        prefetchTradIndex();
       } else {
         const inp = document.getElementById(INPUT_ID);
         if (inp) inp.value = "";
@@ -4211,19 +4286,7 @@ ${bodyText}` : prefix : bodyText;
       return `<li><a class="ws-sr-word-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(lemma)}${countHtml}</a></li>`;
     }).join("");
   }
-  async function probeBlindWord(searchId, word) {
-    const data = await fetchWordFile(word);
-    if (searchId !== activeSearchId) return;
-    if (!data) {
-      clearDisplay();
-      return;
-    }
-    const ul = document.getElementById(RESULTS_ID);
-    if (!ul) return;
-    const url = `${WORDS_BASE_URL}/${encodeURIComponent(word)}`;
-    ul.innerHTML = `<li><a class="ws-sr-word-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(word)}</a></li>`;
-  }
-  function showVerseResults(verseRefs, primaryLemma, resolvedCount, hasOverflow, wordStudyHtml = "") {
+  function showVerseResults(verseRefs, primaryLemma, resolvedCount, hasOverflow, wordStudyHtml = "", partialRefs = []) {
     const ul = document.getElementById(RESULTS_ID);
     if (!ul) return;
     const slice = verseRefs.slice(0, MAX_DISPLAYED);
@@ -4236,7 +4299,14 @@ ${bodyText}` : prefix : bodyText;
     const overflow = hasOverflow ? "+" : "";
     const hint = verseRefs.length > MAX_DISPLAYED ? `<li class="ws-sr-hint">Showing ${MAX_DISPLAYED} of ${verseRefs.length}${overflow} \u2014 keep typing to narrow down</li>` : "";
     const versesHint = wordStudyHtml && verseRefs.length > 0 ? `<li class="ws-sr-hint">Matching verses:</li>` : "";
-    ul.innerHTML = wordStudyHtml + versesHint + items + hint;
+    const showPartials = resolvedCount > 1 && verseRefs.length < 10 && partialRefs.length > 0;
+    const partialSection = showPartials ? `<li class="ws-sr-hint">Partial Matches:</li>` + partialRefs.slice(0, 20).map((vr) => {
+      const display = formatVerseRef(vr);
+      const url = verseUrl(vr);
+      const textDivs = `<div class="ws-sr-verse-text ws-sr-lit" hidden></div><div class="ws-sr-verse-text ws-sr-trad" hidden></div>`;
+      return url ? `<li data-vr="${esc(vr)}"><a class="ws-sr-verse-link ws-sr-partial" href="${esc(url)}"><span class="ws-sr-ref">${esc(display)}</span></a>${textDivs}</li>` : `<li data-vr="${esc(vr)}"><span class="ws-sr-verse-link ws-sr-partial"><span class="ws-sr-ref">${esc(display)}</span></span>${textDivs}</li>`;
+    }).join("") : "";
+    ul.innerHTML = wordStudyHtml + versesHint + items + hint + partialSection;
     const overflowNote = "";
     if (resolvedCount > 1) {
       setStatus(`${verseRefs.length}${overflow} verses match all terms`);
@@ -4253,6 +4323,7 @@ ${bodyText}` : prefix : bodyText;
   var currentAllRenderingsByVerse = /* @__PURE__ */ new Map();
   var currentLitByVerse = /* @__PURE__ */ new Map();
   var currentTradByVerse = /* @__PURE__ */ new Map();
+  var currentRawTerms = [];
   function escapeRegex(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
@@ -4275,7 +4346,7 @@ ${bodyText}` : prefix : bodyText;
     const showTrad = document.getElementById("ws-show-trad")?.checked ?? false;
     for (const li of ul.querySelectorAll("li[data-vr]")) {
       const vr = li.dataset.vr ?? "";
-      const renderings = currentAllRenderingsByVerse.get(vr) ?? /* @__PURE__ */ new Set();
+      const renderings = /* @__PURE__ */ new Set([...currentAllRenderingsByVerse.get(vr) ?? [], ...currentRawTerms]);
       const litDiv = li.querySelector(".ws-sr-lit");
       const tradDiv = li.querySelector(".ws-sr-trad");
       if (litDiv) {
@@ -4311,6 +4382,7 @@ ${bodyText}` : prefix : bodyText;
       clearDisplay();
       return;
     }
+    currentRawTerms = query.split(/\s+/).filter(Boolean).map((t) => t.toLowerCase());
     currentAllRenderingsByVerse = /* @__PURE__ */ new Map();
     let idx = getIndexSync();
     if (!idx) {
@@ -4328,14 +4400,21 @@ ${bodyText}` : prefix : bodyText;
     }
     const tokens = parseQueryTokens(query);
     const resolutions = tokens.map((t) => ({ token: t, res: resolveToken(t, idx) }));
+    const tradIdx = getTradIndexSync();
+    if (tradIdx) {
+      for (const r of resolutions) {
+        if (r.res.kind === "unresolved" || r.res.kind === "ambiguous") {
+          const target = tradIdx[r.token];
+          if (target && target in idx) r.res = { kind: "resolved", lemma: target };
+        }
+      }
+    }
     const resolvedLemmas = resolutions.filter((r) => r.res.kind === "resolved").map((r) => r.res.lemma);
     if (resolvedLemmas.length === 0) {
       const lastRes = resolutions[resolutions.length - 1]?.res;
       if (lastRes?.kind === "ambiguous") {
         showWordLinks(lastRes.candidates.slice(0, 8), idx);
         setStatus("");
-      } else if (tokens.length === 1) {
-        void probeBlindWord(searchId, tokens[0]);
       } else {
         clearDisplay();
         setStatus("No matching words found.");
@@ -4355,6 +4434,7 @@ ${bodyText}` : prefix : bodyText;
     }
     const isSingleWord = sorted.length === 1;
     let currentSet = isSingleWord ? primaryResult.verseSet : primaryResult.primaryVerseSet;
+    const unionSet = new Set(isSingleWord ? [] : primaryResult.primaryVerseSet);
     let anyOverflow = primaryResult.hasOverflow;
     currentLitByVerse = new Map(primaryResult.litByVerse);
     currentTradByVerse = new Map(primaryResult.tradByVerse);
@@ -4368,7 +4448,8 @@ ${bodyText}` : prefix : bodyText;
       const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
       wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener">${esc(primary)}${countHtml}</a></li>`;
     }
-    showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml);
+    const computePartials = () => sorted.length > 1 ? sortCanonical([...unionSet].filter((vr) => !currentSet.has(vr))).slice(0, 20) : [];
+    showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials());
     if (sorted.length > 1) {
       const remaining = sorted.slice(1);
       await Promise.all(remaining.map(async (lemma) => {
@@ -4380,6 +4461,7 @@ ${bodyText}` : prefix : bodyText;
           if (result.primaryVerseSet.has(vr)) narrowed.add(vr);
         }
         currentSet = narrowed;
+        for (const vr of result.primaryVerseSet) unionSet.add(vr);
         if (result.hasOverflow) anyOverflow = true;
         for (const [vr, r] of result.sampleByVerse) {
           const s = currentAllRenderingsByVerse.get(vr);
@@ -4393,7 +4475,7 @@ ${bodyText}` : prefix : bodyText;
           if (!currentTradByVerse.has(vr)) currentTradByVerse.set(vr, trad);
         }
         if (searchId !== activeSearchId) return;
-        showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow);
+        showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow, "", computePartials());
       }));
     }
   }
@@ -4419,10 +4501,14 @@ ${bodyText}` : prefix : bodyText;
         document.addEventListener("keydown", keydownHandler);
         disposers.push(() => document.removeEventListener("keydown", keydownHandler));
         if (typeof requestIdleCallback !== "undefined") {
-          const handle = requestIdleCallback(() => prefetchIndex());
+          const handle = requestIdleCallback(() => {
+            prefetchIndex();
+            setTimeout(() => prefetchTradIndex(), 500);
+          });
           disposers.push(() => typeof cancelIdleCallback !== "undefined" ? cancelIdleCallback(handle) : void 0);
         } else {
           setTimeout(() => prefetchIndex(), 300);
+          setTimeout(() => prefetchTradIndex(), 1e3);
         }
       },
       deactivate() {

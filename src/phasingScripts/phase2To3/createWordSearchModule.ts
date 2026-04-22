@@ -12,9 +12,11 @@ import {
   loadIndex,
   prefetchIndex,
   fetchLemmaFiles,
-  fetchWordFile,
   getIndexSync,
   isIndexLoadFailed,
+  getTradIndexSync,
+  loadTradIndex,
+  prefetchTradIndex,
 } from './wordSearchFetch';
 
 // ---------------------------------------------------------------------------
@@ -208,6 +210,8 @@ const STYLES = `
   line-height: 1.55;
 }
 .ws-sr-trad { font-size: 0.9rem; }
+.ws-sr-partial .ws-sr-ref { font-weight: 400; }
+.ws-sr-partial { opacity: 0.7; }
 .ws-sr-verse-text mark {
   background: #ffe08a;
   color: #1a1a1a;
@@ -256,6 +260,7 @@ function injectOnce(): void {
     if ((e as ToggleEvent).newState === 'open') {
       setTimeout(() => (document.getElementById(INPUT_ID) as HTMLInputElement | null)?.focus(), 30);
       prefetchIndex();
+      prefetchTradIndex();
     } else {
       // Clear on close so it's fresh next open.
       const inp = document.getElementById(INPUT_ID) as HTMLInputElement | null;
@@ -306,17 +311,6 @@ function showWordLinks(matches: string[], idx: WordIndex): void {
   }).join('');
 }
 
-/** Blind probe: fetch words.servewell.net/<word> silently; only show the link if a real word page comes back. */
-async function probeBlindWord(searchId: number, word: string): Promise<void> {
-  const data = await fetchWordFile(word);
-  if (searchId !== activeSearchId) return;
-  if (!data) { clearDisplay(); return; }
-  const ul = document.getElementById(RESULTS_ID);
-  if (!ul) return;
-  const url = `${WORDS_BASE_URL}/${encodeURIComponent(word)}`;
-  ul.innerHTML = `<li><a class="ws-sr-word-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(word)}</a></li>`;
-}
-
 /** Render verse result rows. Optional wordStudyHtml is prepended before verse items (for single-word queries). */
 function showVerseResults(
   verseRefs: string[],
@@ -324,6 +318,7 @@ function showVerseResults(
   resolvedCount: number,
   hasOverflow: boolean,
   wordStudyHtml = '',
+  partialRefs: string[] = [],
 ): void {
   const ul = document.getElementById(RESULTS_ID);
   if (!ul) return;
@@ -346,7 +341,21 @@ function showVerseResults(
     ? `<li class="ws-sr-hint">Matching verses:</li>`
     : '';
 
-  ul.innerHTML = wordStudyHtml + versesHint + items + hint;
+  // Partial matches section: shown when multi-word search yields < 10 exact results
+  const showPartials = resolvedCount > 1 && verseRefs.length < 10 && partialRefs.length > 0;
+  const partialSection = showPartials
+    ? `<li class="ws-sr-hint">Partial Matches:</li>` +
+      partialRefs.slice(0, 20).map((vr) => {
+        const display = formatVerseRef(vr);
+        const url = verseUrl(vr);
+        const textDivs = `<div class="ws-sr-verse-text ws-sr-lit" hidden></div><div class="ws-sr-verse-text ws-sr-trad" hidden></div>`;
+        return url
+          ? `<li data-vr="${esc(vr)}"><a class="ws-sr-verse-link ws-sr-partial" href="${esc(url)}"><span class="ws-sr-ref">${esc(display)}</span></a>${textDivs}</li>`
+          : `<li data-vr="${esc(vr)}"><span class="ws-sr-verse-link ws-sr-partial"><span class="ws-sr-ref">${esc(display)}</span></span>${textDivs}</li>`;
+      }).join('')
+    : '';
+
+  ul.innerHTML = wordStudyHtml + versesHint + items + hint + partialSection;
 
   const overflowNote = '';
   if (resolvedCount > 1) {
@@ -451,6 +460,19 @@ async function handleInput(rawQuery: string): Promise<void> {
   // Resolve each token to a lemma (or ambiguous candidates)
   const resolutions = tokens.map((t) => ({ token: t, res: resolveToken(t, idx!) }));
 
+  // For unresolved or ambiguous tokens, check the trad index for an exact match.
+  // Ambiguous case matters for short words like "dim" which may prefix-match
+  // multiple word-index entries but have a distinct trad index entry.
+  const tradIdx = getTradIndexSync();
+  if (tradIdx) {
+    for (const r of resolutions) {
+      if (r.res.kind === 'unresolved' || r.res.kind === 'ambiguous') {
+        const target = tradIdx[r.token];
+        if (target && target in idx!) r.res = { kind: 'resolved', lemma: target };
+      }
+    }
+  }
+
   const resolvedLemmas = resolutions
     .filter((r) => r.res.kind === 'resolved')
     .map((r) => (r.res as { kind: 'resolved'; lemma: string }).lemma);
@@ -461,8 +483,6 @@ async function handleInput(rawQuery: string): Promise<void> {
     if (lastRes?.kind === 'ambiguous') {
       showWordLinks(lastRes.candidates.slice(0, 8), idx);
       setStatus('');
-    } else if (tokens.length === 1) {
-      void probeBlindWord(searchId, tokens[0]);
     } else {
       clearDisplay();
       setStatus('No matching words found.');
@@ -493,6 +513,8 @@ async function handleInput(rawQuery: string): Promise<void> {
   // to avoid crossRef breadth causing false positives. For single-word, use full verseSet.
   const isSingleWord = sorted.length === 1;
   let currentSet: Set<string> = isSingleWord ? primaryResult.verseSet : primaryResult.primaryVerseSet;
+  // Union of all words' primaryVerseSets — used to compute partial matches.
+  const unionSet = new Set<string>(isSingleWord ? [] : primaryResult.primaryVerseSet);
   let anyOverflow = primaryResult.hasOverflow;
 
   currentLitByVerse = new Map(primaryResult.litByVerse);
@@ -508,7 +530,11 @@ async function handleInput(rawQuery: string): Promise<void> {
     const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : '';
     wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener">${esc(primary)}${countHtml}</a></li>`;
   }
-  showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml);
+  const computePartials = () =>
+    sorted.length > 1
+      ? sortCanonical([...unionSet].filter(vr => !currentSet.has(vr))).slice(0, 20)
+      : [];
+  showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials());
 
   // Progressively intersect remaining words as they load
   if (sorted.length > 1) {
@@ -523,6 +549,7 @@ async function handleInput(rawQuery: string): Promise<void> {
         if (result.primaryVerseSet.has(vr)) narrowed.add(vr);
       }
       currentSet = narrowed;
+      for (const vr of result.primaryVerseSet) unionSet.add(vr);
       if (result.hasOverflow) anyOverflow = true;
       for (const [vr, r] of result.sampleByVerse) {
         const s = currentAllRenderingsByVerse.get(vr);
@@ -535,7 +562,7 @@ async function handleInput(rawQuery: string): Promise<void> {
         if (!currentTradByVerse.has(vr)) currentTradByVerse.set(vr, trad);
       }
       if (searchId !== activeSearchId) return;
-      showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow);
+      showVerseResults(sortCanonical([...currentSet]), primary, sorted.length, anyOverflow, '', computePartials());
     }));
   }
 }
@@ -571,12 +598,19 @@ export function createWordSearchModule(): AppModule {
       document.addEventListener('keydown', keydownHandler);
       disposers.push(() => document.removeEventListener('keydown', keydownHandler));
 
-      // Prefetch index on idle so it's ready before the user opens search
+      // Prefetch word index on idle, trad index a beat later so it doesn't
+      // compete with the primary index fetch on page load.
       if (typeof requestIdleCallback !== 'undefined') {
-        const handle = requestIdleCallback(() => prefetchIndex());
+        const handle = requestIdleCallback(() => {
+          prefetchIndex();
+          // Schedule trad index after the current idle period so the more
+          // critical word index gets first use of the network.
+          setTimeout(() => prefetchTradIndex(), 500);
+        });
         disposers.push(() => (typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback(handle) : undefined));
       } else {
         setTimeout(() => prefetchIndex(), 300);
+        setTimeout(() => prefetchTradIndex(), 1000);
       }
     },
 

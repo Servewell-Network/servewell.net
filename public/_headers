@@ -2,6 +2,8 @@
 # Allow words.servewell.net to fetch the word search index cross-origin.
 /_word_index.json
   Access-Control-Allow-Origin: https://words.servewell.net
+/_trad_index.json
+  Access-Control-Allow-Origin: https://words.servewell.net
 
 # Allow words.servewell.net to fetch chapter pages cross-origin.
 # Needed by the Bible nav widget on word pages to load the book/chapter list.

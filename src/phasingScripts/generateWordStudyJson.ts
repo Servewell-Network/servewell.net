@@ -1089,6 +1089,23 @@ fs.writeFileSync(
 );
 console.log(`_traditional-redirects.json: ${Object.keys(sortedTradRedirects).length} entries`);
 
+// _trad_index.json — filtered client-side lookup: traditional word → target lemma.
+// Only 'redirect' entries (crossref words already exist in the word index).
+// Targets that are stop words or fewer than 3 chars are excluded as low-quality.
+// Written to public/ so it's served at servewell.net/_trad_index.json.
+{
+  const tradIndex: Record<string, string> = {};
+  for (const [word, entry] of Object.entries(sortedTradRedirects)) {
+    if (entry.type !== 'redirect') continue;
+    if (entry.target.length < 3) continue;
+    if (TRAD_STOPWORDS.has(entry.target)) continue;
+    tradIndex[word] = entry.target;
+  }
+  const publicDir = path.join(ROOT, 'public');
+  fs.writeFileSync(path.join(publicDir, '_trad_index.json'), JSON.stringify(tradIndex), 'utf8');
+  console.log(`_trad_index.json: ${Object.keys(tradIndex).length} entries → public/`);
+}
+
 // _strongs_index.json
 const strongsIndex: Record<string, string> = {};
 for (const [sid, fn] of strongsToFile) strongsIndex[sid] = fn;

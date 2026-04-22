@@ -92,6 +92,47 @@ export function prefetchIndex(): void {
 }
 
 // ---------------------------------------------------------------------------
+// Traditional word index  (_trad_index.json: traditional word → lemma target)
+// Loaded lazily; used to resolve typed traditional words that aren't in the
+// word index (e.g. "dimly" → "darken").
+// ---------------------------------------------------------------------------
+
+const TRAD_INDEX_URL: string = (() => {
+  if (typeof location === 'undefined') return 'https://servewell.net/_trad_index.json';
+  const h = location.hostname;
+  return (h === 'servewell.net' || h === 'localhost' || h === '127.0.0.1')
+    ? '/_trad_index.json'
+    : 'https://servewell.net/_trad_index.json';
+})();
+
+let tradIndexData: Record<string, string> | null = null;
+let tradIndexLoading = false;
+let tradIndexLoadFailed = false;
+
+export function getTradIndexSync(): Record<string, string> | null { return tradIndexData; }
+
+export function loadTradIndex(): Promise<Record<string, string> | null> {
+  if (tradIndexData) return Promise.resolve(tradIndexData);
+  if (tradIndexLoadFailed) return Promise.resolve(null);
+  if (tradIndexLoading) {
+    return new Promise((resolve) => {
+      const id = setInterval(() => {
+        if (!tradIndexLoading) { clearInterval(id); resolve(tradIndexData); }
+      }, 50);
+    });
+  }
+  tradIndexLoading = true;
+  return fetch(TRAD_INDEX_URL)
+    .then((r) => r.ok ? r.json() as Promise<Record<string, string>> : Promise.reject(new Error(`HTTP ${r.status}`)))
+    .then((d) => { tradIndexData = d; tradIndexLoading = false; return d; })
+    .catch(() => { tradIndexLoadFailed = true; tradIndexLoading = false; return null; });
+}
+
+export function prefetchTradIndex(): void {
+  if (!tradIndexData && !tradIndexLoading && !tradIndexLoadFailed) loadTradIndex().catch(() => {});
+}
+
+// ---------------------------------------------------------------------------
 // Word file fetching
 // ---------------------------------------------------------------------------
 
