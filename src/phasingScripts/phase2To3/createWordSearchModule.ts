@@ -768,7 +768,7 @@ async function handleInput(rawQuery: string): Promise<void> {
       const tradExpanded = new Set<string>();
       for (const [, result] of collectedResults) {
         for (const [vr, trad] of result.tradByVerse) {
-          if (currentSet.has(vr) || tradExpanded.has(vr)) continue;
+          if (!trad || currentSet.has(vr) || tradExpanded.has(vr)) continue;
           if (tradPatterns.every(re => re.test(trad))) tradExpanded.add(vr);
         }
       }

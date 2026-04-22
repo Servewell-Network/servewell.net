@@ -167,8 +167,9 @@ export function fetchWordFile(fileName: string): Promise<LoadedWordData | null> 
           for (const inst of trans.instances) {
             const vr = extractVerseRef(inst.ref);
             if (!byVerse.has(vr)) byVerse.set(vr, rendering);
-            if (!litByVerse.has(vr)) litByVerse.set(vr, inst.lit);
-            if (!tradByVerse.has(vr)) tradByVerse.set(vr, inst.trad);
+            if (inst.lit && !litByVerse.has(vr)) litByVerse.set(vr, inst.lit);
+            // Allow overwriting a falsy/undefined trad with a real value.
+            if (inst.trad && !tradByVerse.get(vr)) tradByVerse.set(vr, inst.trad);
           }
         }
       }

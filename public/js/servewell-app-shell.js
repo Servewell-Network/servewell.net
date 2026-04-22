@@ -3924,8 +3924,8 @@ ${bodyText}` : prefix : bodyText;
           for (const inst of trans.instances) {
             const vr = extractVerseRef(inst.ref);
             if (!byVerse.has(vr)) byVerse.set(vr, rendering);
-            if (!litByVerse.has(vr)) litByVerse.set(vr, inst.lit);
-            if (!tradByVerse.has(vr)) tradByVerse.set(vr, inst.trad);
+            if (inst.lit && !litByVerse.has(vr)) litByVerse.set(vr, inst.lit);
+            if (inst.trad && !tradByVerse.get(vr)) tradByVerse.set(vr, inst.trad);
           }
         }
       }
@@ -4711,7 +4711,7 @@ ${bodyText}` : prefix : bodyText;
         const tradExpanded = /* @__PURE__ */ new Set();
         for (const [, result] of collectedResults) {
           for (const [vr, trad] of result.tradByVerse) {
-            if (currentSet.has(vr) || tradExpanded.has(vr)) continue;
+            if (!trad || currentSet.has(vr) || tradExpanded.has(vr)) continue;
             if (tradPatterns.every((re) => re.test(trad))) tradExpanded.add(vr);
           }
         }
