@@ -13,6 +13,16 @@ type BookInfo = {
 
 type NavData = { books: BookInfo[]; sections: string[][] };
 
+// Use absolute URLs when on a cross-origin page (e.g. words.servewell.net)
+// so chapter navigation links resolve to servewell.net, not the current origin.
+const CHAPTER_ORIGIN =
+  typeof location !== 'undefined' && location.hostname !== 'servewell.net'
+    ? 'https://servewell.net'
+    : '';
+function chapterUrl(bookUrl: string, chapter: number | string): string {
+  return `${CHAPTER_ORIGIN}/-/${bookUrl}/${chapter}`;
+}
+
 let navData: NavData | null = null;
 let navDataLoading = false;
 
@@ -506,7 +516,7 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
       topControls = `<label class="nav-check-row"><input type="checkbox" id="nav-bookmark-chk"${checked}><span>Bookmark This Reference</span></label>`;
     } else if (slotRef) {
       const book = getBook(slotRef.book);
-      const href = book ? `/-/${escHtml(book.url)}/${slotRef.chapter}` : '#';
+      const href = book ? escHtml(chapterUrl(book.url, slotRef.chapter)) : '#';
       topControls = `<a class="nav-goto-btn" href="${href}">Go\u00a0to ${escHtml(refLabel(slotRef))}</a><button type="button" class="nav-remove-btn" id="nav-remove-bookmark">Remove This Bookmark</button>`;
     }
 
@@ -551,7 +561,7 @@ export function createBibleNavModule(delegator: Delegator): AppModule {
     const book = getBook(abbr);
     if (!book) return '';
     const links = Array.from({ length: book.chapters }, (_, i) => i + 1)
-      .map(n => `<a class="nav-ch-btn" href="/-/${escHtml(book.url)}/${n}">${n}</a>`)
+      .map(n => `<a class="nav-ch-btn" href="${escHtml(chapterUrl(book.url, n))}">${n}</a>`)
       .join('');
     return `<div class="nav-pop-inner">
 <div class="nav-pop-header"><button type="button" class="nav-back-btn" id="nav-back" aria-label="Back to book list">&#8249;</button><strong>${escHtml(book.name)}</strong></div>
