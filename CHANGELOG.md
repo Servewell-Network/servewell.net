@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.0.7](https://github.com/Servewell-Network/servewell.net/compare/v0.0.6...v0.0.7) (2026-04-23)
+
+
+### Features
+
+* allow search for Bible reference ([7291c2c](https://github.com/Servewell-Network/servewell.net/commit/7291c2c304c6077cc45a7b768d990e3a088f2c08))
+
+
+### Bug Fixes
+
+* more search edge cases and usability issues ([e7742fe](https://github.com/Servewell-Network/servewell.net/commit/e7742fef49ba3d8b4b85bf60ea12e74b6a619711))
+* more search issues ([9cf408c](https://github.com/Servewell-Network/servewell.net/commit/9cf408c9b053d47ffd742198a89d544e8b982d9b))
+
 ## [0.0.6](https://github.com/Servewell-Network/servewell.net/compare/v0.0.5...v0.0.6) (2026-04-22)
 
 
