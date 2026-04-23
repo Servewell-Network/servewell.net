@@ -4360,6 +4360,9 @@ ${bodyText}` : prefix : bodyText;
   font-size: 0.9rem;
 }
 .ws-sr-word-link:hover, .ws-sr-word-link:focus { background: var(--bg); }
+button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-align: left; width: 100%; font-family: inherit; }
+.ws-sr-trad-hint { color: var(--muted); font-style: italic; font-size: 0.85em; }
+.ws-sr-ws-lemma { font-weight: 700; letter-spacing: 0.04em; }
 .ws-sr-count {
   font-size: 0.78em;
   color: var(--muted);
@@ -4442,6 +4445,18 @@ ${bodyText}` : prefix : bodyText;
     document.getElementById(INPUT_ID)?.addEventListener("input", (e) => {
       handleInput(e.target.value);
     });
+    document.getElementById(RESULTS_ID)?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-lemma]");
+      if (!btn) return;
+      const lemma = btn.getAttribute("data-lemma");
+      if (!lemma) return;
+      const tradKey = btn.getAttribute("data-trad-key");
+      const searchValue = tradKey || lemma;
+      if (tradKey) pendingTradResolutions.set(tradKey, lemma);
+      const inp = document.getElementById(INPUT_ID);
+      if (inp) inp.value = searchValue;
+      handleInput(searchValue);
+    });
     document.getElementById(INPUT_ID)?.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && currentVerseUrl) {
         e.preventDefault();
@@ -4471,17 +4486,22 @@ ${bodyText}` : prefix : bodyText;
       if (cb) cb.checked = false;
     }
   }
-  function showWordLinks(matches, idx) {
+  function showWordLinks(matches, idx, tradSuggestions = []) {
     const ul = document.getElementById(RESULTS_ID);
     if (!ul) return;
-    ul.innerHTML = matches.map((lemma) => {
+    const tradItems = tradSuggestions.map(({ lemma, tradKey }) => {
       const count = idx[lemma];
       const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
-      const url = `${WORDS_BASE_URL}/${encodeURIComponent(lemma)}`;
-      return `<li><a class="ws-sr-word-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(lemma)}${countHtml}</a></li>`;
+      return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}" data-trad-key="${esc(tradKey)}">${esc(lemma)}${countHtml} <span class="ws-sr-trad-hint">(${esc(tradKey)})</span></button></li>`;
     }).join("");
+    const wordItems = matches.map((lemma) => {
+      const count = idx[lemma];
+      const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
+      return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
+    }).join("");
+    ul.innerHTML = tradItems + wordItems;
   }
-  function showVerseResults(verseRefs, primaryLemma, resolvedCount, hasOverflow, wordStudyHtml = "", partialRefs = []) {
+  function showVerseResults(verseRefs, primaryLemma, resolvedCount, hasOverflow, wordStudyHtml = "", partialRefs = [], partialLabel = "Partial Matches:") {
     const ul = document.getElementById(RESULTS_ID);
     if (!ul) return;
     const slice = verseRefs.slice(0, MAX_DISPLAYED);
@@ -4494,8 +4514,8 @@ ${bodyText}` : prefix : bodyText;
     const overflow = hasOverflow ? "+" : "";
     const hint = verseRefs.length > MAX_DISPLAYED ? `<li class="ws-sr-hint">Showing ${MAX_DISPLAYED} of ${verseRefs.length}${overflow} \u2014 keep typing to narrow down</li>` : "";
     const versesHint = wordStudyHtml && verseRefs.length > 0 ? `<li class="ws-sr-hint">Matching verses:</li>` : "";
-    const showPartials = resolvedCount > 1 && verseRefs.length < 10 && partialRefs.length > 0;
-    const partialSection = showPartials ? `<li class="ws-sr-hint">Partial Matches:</li>` + partialRefs.slice(0, 20).map((vr) => {
+    const showPartials = resolvedCount !== 1 && partialRefs.length > 0 && (resolvedCount === 0 || verseRefs.length < 10);
+    const partialSection = showPartials ? `<li class="ws-sr-hint">${esc(partialLabel)}</li>` + partialRefs.slice(0, 20).map((vr) => {
       const display = formatVerseRef(vr);
       const url = verseUrl(vr);
       const textDivs = `<div class="ws-sr-verse-text ws-sr-lit" hidden></div><div class="ws-sr-verse-text ws-sr-trad" hidden></div>`;
@@ -4520,6 +4540,7 @@ ${bodyText}` : prefix : bodyText;
   var currentTradByVerse = /* @__PURE__ */ new Map();
   var currentVerseUrl = null;
   var currentRawTerms = [];
+  var pendingTradResolutions = /* @__PURE__ */ new Map();
   function escapeRegex(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
@@ -4606,21 +4627,57 @@ ${bodyText}` : prefix : bodyText;
     const tokens = parseQueryTokens(query);
     const resolutions = tokens.map((t) => ({ token: t, res: resolveToken(t, idx) }));
     const tradIdx = getTradIndexSync();
+    const tradResolvedOriginals = /* @__PURE__ */ new Map();
+    const tradResolvedRawFiles = /* @__PURE__ */ new Map();
+    const tradBypassedCandidates = /* @__PURE__ */ new Map();
     if (tradIdx) {
       for (const r of resolutions) {
-        if (r.res.kind === "unresolved" || r.res.kind === "ambiguous") {
+        if (r.res.kind === "unresolved") {
           const raw = tradIdx[r.token];
           if (!raw) continue;
           const target = raw in idx ? raw : raw.replace(/_\d+$/, "");
-          if (target && target in idx) r.res = { kind: "resolved", lemma: target };
+          if (target && target in idx) {
+            r.res = { kind: "resolved", lemma: target };
+            tradResolvedOriginals.set(target, r.token);
+            tradResolvedRawFiles.set(target, raw);
+          }
+        } else if (r.res.kind === "ambiguous" && pendingTradResolutions.has(r.token)) {
+          const forcedLemma = pendingTradResolutions.get(r.token);
+          pendingTradResolutions.delete(r.token);
+          tradBypassedCandidates.set(forcedLemma, r.res.candidates);
+          r.res = { kind: "resolved", lemma: forcedLemma };
+          tradResolvedOriginals.set(forcedLemma, r.token);
+          const rawForced = tradIdx[r.token];
+          if (rawForced) tradResolvedRawFiles.set(forcedLemma, rawForced);
+        } else {
+          if (pendingTradResolutions.has(r.token)) pendingTradResolutions.delete(r.token);
         }
       }
     }
     const resolvedLemmas = resolutions.filter((r) => r.res.kind === "resolved").map((r) => r.res.lemma);
     if (resolvedLemmas.length === 0) {
+      let tradIdx2 = getTradIndexSync();
+      if (!tradIdx2) tradIdx2 = await loadTradIndex();
+      if (searchId !== activeSearchId) return;
       const lastRes = resolutions[resolutions.length - 1]?.res;
-      if (lastRes?.kind === "ambiguous") {
-        showWordLinks(lastRes.candidates.slice(0, 8), idx);
+      const wordCandidates = lastRes?.kind === "ambiguous" ? lastRes.candidates.slice(0, 8) : [];
+      const tradSugs = [];
+      if (tradIdx2 && lastRes?.kind === "ambiguous") {
+        const token = tokens[tokens.length - 1];
+        const candidateSet = new Set(wordCandidates);
+        const seenLemmas = /* @__PURE__ */ new Set();
+        for (const [key, raw] of Object.entries(tradIdx2)) {
+          if (key.startsWith(token)) {
+            const target = raw in idx ? raw : raw.replace(/_\d+$/, "");
+            if (target && target in idx && !candidateSet.has(target) && !seenLemmas.has(target)) {
+              seenLemmas.add(target);
+              tradSugs.push({ lemma: target, tradKey: key });
+            }
+          }
+        }
+      }
+      if (wordCandidates.length > 0 || tradSugs.length > 0) {
+        showWordLinks(wordCandidates, idx, tradSugs);
         setStatus("");
       } else {
         clearDisplay();
@@ -4653,7 +4710,7 @@ ${bodyText}` : prefix : bodyText;
       const wsUrl = `${WORDS_BASE_URL}/${encodeURIComponent(primary)}`;
       const count = idx[primary];
       const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
-      wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener">${esc(primary)}${countHtml}</a></li>`;
+      wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener"><span class="ws-sr-ws-lemma">${esc(primary.toUpperCase())}</span> word study page${countHtml}</a></li>`;
     }
     const collectedResults = /* @__PURE__ */ new Map();
     collectedResults.set(primary, primaryResult);
@@ -4676,6 +4733,56 @@ ${bodyText}` : prefix : bodyText;
       );
       return scored.slice(0, 20).map((s) => s.vr);
     };
+    if (isSingleWord && tradResolvedOriginals.has(primary)) {
+      const tradOriginal = tradResolvedOriginals.get(primary);
+      const tradRe = new RegExp(`\\b${escapeRegex(tradOriginal)}\\b`, "i");
+      const filteredVrs = [];
+      const spillOverVrs = [];
+      for (const vr of currentSet) {
+        const trad = currentTradByVerse.get(vr) ?? "";
+        if (tradRe.test(trad)) filteredVrs.push(vr);
+        else spillOverVrs.push(vr);
+      }
+      if (filteredVrs.length > 0) {
+        const partials = sortCanonical(spillOverVrs).slice(0, 20);
+        const bypassed = tradBypassedCandidates.get(primary) ?? [];
+        const seeAlsoHtml = bypassed.length > 0 ? `<li class="ws-sr-hint">See also:</li>` + bypassed.map((lemma) => {
+          const count = idx[lemma];
+          const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
+          return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
+        }).join("") : "";
+        showVerseResults(sortCanonical(filteredVrs), primary, 0, anyOverflow, wordStudyHtml + seeAlsoHtml, partials, `Other ${primary} verses:`);
+        setStatus(`${filteredVrs.length} verse${filteredVrs.length !== 1 ? "s" : ""} translated "${tradOriginal}"`);
+        return;
+      }
+      const rawFile = tradResolvedRawFiles.get(primary);
+      if (rawFile && rawFile !== primary) {
+        const fileResult = await fetchWordFile(rawFile);
+        if (searchId !== activeSearchId) return;
+        if (fileResult && fileResult.primaryVerseSet.size > 0) {
+          for (const [vr, lit] of fileResult.litByVerse) {
+            if (!currentLitByVerse.has(vr)) currentLitByVerse.set(vr, lit);
+          }
+          for (const [vr, trad] of fileResult.tradByVerse) {
+            if (!currentTradByVerse.has(vr)) currentTradByVerse.set(vr, trad);
+          }
+          for (const [vr, r] of fileResult.sampleByVerse) {
+            currentAllRenderingsByVerse.set(vr, /* @__PURE__ */ new Set([r]));
+          }
+          const fileVrs = sortCanonical([...fileResult.primaryVerseSet]);
+          const otherVrs = sortCanonical([...currentSet].filter((vr) => !fileResult.primaryVerseSet.has(vr))).slice(0, 20);
+          const bypassed2 = tradBypassedCandidates.get(primary) ?? [];
+          const seeAlsoHtml2 = bypassed2.length > 0 ? `<li class="ws-sr-hint">See also:</li>` + bypassed2.map((lemma) => {
+            const count = idx[lemma];
+            const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
+            return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
+          }).join("") : "";
+          showVerseResults(fileVrs, primary, 0, fileResult.hasOverflow, wordStudyHtml + seeAlsoHtml2, otherVrs, `Other ${primary} verses:`);
+          setStatus(`${fileVrs.length} verses ("${tradOriginal}"-related)`);
+          return;
+        }
+      }
+    }
     showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials());
     if (sorted.length > 1) {
       const remaining = sorted.slice(1);

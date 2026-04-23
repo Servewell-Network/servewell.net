@@ -11,6 +11,7 @@ import {
   WORDS_BASE_URL,
   loadIndex,
   prefetchIndex,
+  fetchWordFile,
   fetchLemmaFiles,
   getIndexSync,
   isIndexLoadFailed,
@@ -315,6 +316,9 @@ const STYLES = `
   font-size: 0.9rem;
 }
 .ws-sr-word-link:hover, .ws-sr-word-link:focus { background: var(--bg); }
+button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-align: left; width: 100%; font-family: inherit; }
+.ws-sr-trad-hint { color: var(--muted); font-style: italic; font-size: 0.85em; }
+.ws-sr-ws-lemma { font-weight: 700; letter-spacing: 0.04em; }
 .ws-sr-count {
   font-size: 0.78em;
   color: var(--muted);
@@ -410,6 +414,21 @@ function injectOnce(): void {
   document.getElementById(INPUT_ID)?.addEventListener('input', (e) => {
     handleInput((e.target as HTMLInputElement).value);
   });
+  // Delegated handler for word-suggestion buttons (two-step preview flow).
+  document.getElementById(RESULTS_ID)?.addEventListener('click', (e) => {
+    const btn = (e.target as Element).closest<HTMLElement>('[data-lemma]');
+    if (!btn) return;
+    const lemma = btn.getAttribute('data-lemma');
+    if (!lemma) return;
+    const tradKey = btn.getAttribute('data-trad-key');
+    // For trad suggestions, put the trad key in the input and force-resolve it
+    // to the lemma so handleInput shows trad-filtered results (like 'dimly' → 'darken').
+    const searchValue = tradKey || lemma;
+    if (tradKey) pendingTradResolutions.set(tradKey, lemma);
+    const inp = document.getElementById(INPUT_ID) as HTMLInputElement | null;
+    if (inp) inp.value = searchValue;
+    handleInput(searchValue);
+  });
   document.getElementById(INPUT_ID)?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && currentVerseUrl) {
       e.preventDefault();
@@ -444,16 +463,26 @@ function clearDisplay(): void {
   }
 }
 
-/** Fallback: show word-index entry links when no verse data. */
-function showWordLinks(matches: string[], idx: WordIndex): void {
+/** Fallback: show word-index suggestion buttons (two-step: click to preview verses, then navigate). */
+function showWordLinks(
+  matches: string[],
+  idx: WordIndex,
+  tradSuggestions: Array<{ lemma: string; tradKey: string }> = [],
+): void {
   const ul = document.getElementById(RESULTS_ID);
   if (!ul) return;
-  ul.innerHTML = matches.map((lemma) => {
+  // Trad suggestions: clicking puts the tradKey back in the search box (not the lemma).
+  const tradItems = tradSuggestions.map(({ lemma, tradKey }) => {
     const count = idx[lemma];
     const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : '';
-    const url = `${WORDS_BASE_URL}/${encodeURIComponent(lemma)}`;
-    return `<li><a class="ws-sr-word-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(lemma)}${countHtml}</a></li>`;
+    return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}" data-trad-key="${esc(tradKey)}">${esc(lemma)}${countHtml} <span class="ws-sr-trad-hint">(${esc(tradKey)})</span></button></li>`;
   }).join('');
+  const wordItems = matches.map((lemma) => {
+    const count = idx[lemma];
+    const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : '';
+    return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
+  }).join('');
+  ul.innerHTML = tradItems + wordItems;
 }
 
 /** Render verse result rows. Optional wordStudyHtml is prepended before verse items (for single-word queries). */
@@ -464,6 +493,7 @@ function showVerseResults(
   hasOverflow: boolean,
   wordStudyHtml = '',
   partialRefs: string[] = [],
+  partialLabel = 'Partial Matches:',
 ): void {
   const ul = document.getElementById(RESULTS_ID);
   if (!ul) return;
@@ -486,10 +516,11 @@ function showVerseResults(
     ? `<li class="ws-sr-hint">Matching verses:</li>`
     : '';
 
-  // Partial matches section: shown when multi-word search yields < 10 exact results
-  const showPartials = resolvedCount > 1 && verseRefs.length < 10 && partialRefs.length > 0;
+  // Partial matches section: shown when multi-word search yields < 10 exact results,
+  // OR for trad-filtered single-word (resolvedCount === 0) to show remaining lemma verses.
+  const showPartials = resolvedCount !== 1 && partialRefs.length > 0 && (resolvedCount === 0 || verseRefs.length < 10);
   const partialSection = showPartials
-    ? `<li class="ws-sr-hint">Partial Matches:</li>` +
+    ? `<li class="ws-sr-hint">${esc(partialLabel)}</li>` +
       partialRefs.slice(0, 20).map((vr) => {
         const display = formatVerseRef(vr);
         const url = verseUrl(vr);
@@ -525,6 +556,10 @@ let currentVerseUrl: string | null = null;
 // Raw words typed by the user (before stop-word filtering/lemmatization).
 // Used to highlight exactly what was typed (e.g. "stones" even if lemma is "stone").
 let currentRawTerms: string[] = [];
+// When a trad suggestion button is clicked with data-trad-key, we put the trad key
+// in the input and set a forced resolution so handleInput resolves it via trad
+// (bypassing ambiguous word-index prefix detection for that token).
+const pendingTradResolutions = new Map<string, string>(); // tradKey → lemma
 
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -617,19 +652,43 @@ async function handleInput(rawQuery: string): Promise<void> {
   // Resolve each token to a lemma (or ambiguous candidates)
   const resolutions = tokens.map((t) => ({ token: t, res: resolveToken(t, idx!) }));
 
-  // For unresolved or ambiguous tokens, check the trad index for an exact match.
-  // Ambiguous case matters for short words like "dim" which may prefix-match
-  // multiple word-index entries but have a distinct trad index entry.
+  // Resolve tokens against the trad index.
+  // - Unresolved (no word-index match): direct trad resolution.
+  // - Ambiguous with a pending forced resolution (from clicking a trad suggestion button):
+  //   use the stored lemma, show trad-filtered results, and keep prefix candidates for
+  //   a 'See also:' section. Also save the candidates so we can show related word studies.
   const tradIdx = getTradIndexSync();
+  // lemma → original typed token (e.g. 'be' → 'dimension')
+  const tradResolvedOriginals = new Map<string, string>();
+  // lemma → raw file name from trad index (e.g. 'be' → 'be_5'); may differ from lemma
+  const tradResolvedRawFiles = new Map<string, string>();
+  const tradBypassedCandidates = new Map<string, string[]>(); // lemma → word-index prefix candidates
   if (tradIdx) {
     for (const r of resolutions) {
-      if (r.res.kind === 'unresolved' || r.res.kind === 'ambiguous') {
+      if (r.res.kind === 'unresolved') {
         const raw = tradIdx[r.token];
         if (!raw) continue;
         // Trad index targets may be file names (e.g. "faint_3") rather than
         // base lemma keys — strip the _N suffix when the key isn't in the index.
         const target: string = raw in idx! ? raw : raw.replace(/_\d+$/, '');
-        if (target && target in idx!) r.res = { kind: 'resolved', lemma: target };
+        if (target && target in idx!) {
+          r.res = { kind: 'resolved', lemma: target };
+          tradResolvedOriginals.set(target, r.token);
+          tradResolvedRawFiles.set(target, raw); // may be 'be_5' (file), not 'be' (lemma)
+        }
+      } else if (r.res.kind === 'ambiguous' && pendingTradResolutions.has(r.token)) {
+        // Forced resolution from clicking a trad suggestion — bypass ambiguity.
+        const forcedLemma = pendingTradResolutions.get(r.token)!;
+        pendingTradResolutions.delete(r.token);
+        tradBypassedCandidates.set(forcedLemma, r.res.candidates);
+        r.res = { kind: 'resolved', lemma: forcedLemma };
+        tradResolvedOriginals.set(forcedLemma, r.token);
+        // For forced resolutions from suggestions, also look up the raw file name from trad index.
+        const rawForced = tradIdx[r.token];
+        if (rawForced) tradResolvedRawFiles.set(forcedLemma, rawForced);
+      } else {
+        // Clean up any stale pending entry for this token.
+        if (pendingTradResolutions.has(r.token)) pendingTradResolutions.delete(r.token);
       }
     }
   }
@@ -638,11 +697,35 @@ async function handleInput(rawQuery: string): Promise<void> {
     .filter((r) => r.res.kind === 'resolved')
     .map((r) => (r.res as { kind: 'resolved'; lemma: string }).lemma);
 
-  // Nothing resolved yet — show suggestion links for the last partial token
+  // Nothing resolved yet — show suggestion buttons for the last partial token
   if (resolvedLemmas.length === 0) {
+    // Load the trad index now if it isn't ready — so trad suggestions can be included.
+    let tradIdx2 = getTradIndexSync();
+    if (!tradIdx2) tradIdx2 = await loadTradIndex();
+    if (searchId !== activeSearchId) return;
+
     const lastRes = resolutions[resolutions.length - 1]?.res;
-    if (lastRes?.kind === 'ambiguous') {
-      showWordLinks(lastRes.candidates.slice(0, 8), idx);
+    const wordCandidates = lastRes?.kind === 'ambiguous' ? lastRes.candidates.slice(0, 8) : [];
+
+    // Collect trad-redirect entries whose key starts with the queried token.
+    const tradSugs: Array<{ lemma: string; tradKey: string }> = [];
+    if (tradIdx2 && lastRes?.kind === 'ambiguous') {
+      const token = tokens[tokens.length - 1];
+      const candidateSet = new Set(wordCandidates);
+      const seenLemmas = new Set<string>();
+      for (const [key, raw] of Object.entries(tradIdx2)) {
+        if (key.startsWith(token)) {
+          const target: string = raw in idx! ? raw : raw.replace(/_\d+$/, '');
+          if (target && target in idx! && !candidateSet.has(target) && !seenLemmas.has(target)) {
+            seenLemmas.add(target);
+            tradSugs.push({ lemma: target, tradKey: key });
+          }
+        }
+      }
+    }
+
+    if (wordCandidates.length > 0 || tradSugs.length > 0) {
+      showWordLinks(wordCandidates, idx, tradSugs);
       setStatus('');
     } else {
       clearDisplay();
@@ -689,7 +772,7 @@ async function handleInput(rawQuery: string): Promise<void> {
     const wsUrl = `${WORDS_BASE_URL}/${encodeURIComponent(primary)}`;
     const count = idx![primary];
     const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : '';
-    wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener">${esc(primary)}${countHtml}</a></li>`;
+    wordStudyHtml = `<li><a class="ws-sr-word-link" href="${esc(wsUrl)}" target="_blank" rel="noopener"><span class="ws-sr-ws-lemma">${esc(primary.toUpperCase())}</span> word study page${countHtml}</a></li>`;
   }
   // Collect fetched results — needed for trad-text scoring after all loads finish.
   const collectedResults = new Map<string, Awaited<ReturnType<typeof fetchLemmaFiles>>>();
@@ -725,6 +808,73 @@ async function handleInput(rawQuery: string): Promise<void> {
     );
     return scored.slice(0, 20).map(s => s.vr);
   };
+
+  // For single-word trad-resolved searches (e.g. "dimly" → "darken" via trad index),
+  // filter primary results to only verses where trad text actually contains the typed word.
+  // The remaining verses become labeled partial matches ("Other darken verses:").
+  if (isSingleWord && tradResolvedOriginals.has(primary)) {
+    const tradOriginal = tradResolvedOriginals.get(primary)!;
+    const tradRe = new RegExp(`\\b${escapeRegex(tradOriginal)}\\b`, 'i');
+    const filteredVrs: string[] = [];
+    const spillOverVrs: string[] = [];
+    for (const vr of currentSet) {
+      const trad = currentTradByVerse.get(vr) ?? '';
+      if (tradRe.test(trad)) filteredVrs.push(vr);
+      else spillOverVrs.push(vr);
+    }
+    if (filteredVrs.length > 0) {
+      const partials = sortCanonical(spillOverVrs).slice(0, 20);
+      // Build 'See also:' related word-study buttons for bypassed prefix candidates.
+      const bypassed = tradBypassedCandidates.get(primary) ?? [];
+      const seeAlsoHtml = bypassed.length > 0
+        ? `<li class="ws-sr-hint">See also:</li>` +
+          bypassed.map(lemma => {
+            const count = idx![lemma];
+            const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : '';
+            return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
+          }).join('')
+        : '';
+      showVerseResults(sortCanonical(filteredVrs), primary, 0, anyOverflow, wordStudyHtml + seeAlsoHtml, partials, `Other ${primary} verses:`);
+      setStatus(`${filteredVrs.length} verse${filteredVrs.length !== 1 ? 's' : ''} translated "${tradOriginal}"`);
+      return;
+    }
+
+    // Trad filter yielded 0 results — the typed word is an ancient gloss, not a BSB English word.
+    // If the trad index pointed to a specific file (e.g. 'be_5'), fetch just that file
+    // and show its verses as the primary result, with remaining 'primary' verses as partials.
+    const rawFile = tradResolvedRawFiles.get(primary);
+    if (rawFile && rawFile !== primary) {
+      const fileResult = await fetchWordFile(rawFile);
+      if (searchId !== activeSearchId) return;
+      if (fileResult && fileResult.byVerse.size > 0) {
+        // Merge lit/trad maps from this specific file.
+        for (const [vr, lit] of fileResult.litByVerse) {
+          if (!currentLitByVerse.has(vr)) currentLitByVerse.set(vr, lit);
+        }
+        for (const [vr, trad] of fileResult.tradByVerse) {
+          if (!currentTradByVerse.has(vr)) currentTradByVerse.set(vr, trad);
+        }
+        for (const [vr, r] of fileResult.byVerse) {
+          currentAllRenderingsByVerse.set(vr, new Set([r]));
+        }
+        const fileVrs = sortCanonical([...fileResult.byVerse.keys()]);
+        const otherVrs = sortCanonical([...currentSet].filter(vr => !fileResult.byVerse.has(vr))).slice(0, 20);
+        const bypassed2 = tradBypassedCandidates.get(primary) ?? [];
+        const seeAlsoHtml2 = bypassed2.length > 0
+          ? `<li class="ws-sr-hint">See also:</li>` +
+            bypassed2.map(lemma => {
+              const count = idx![lemma];
+              const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : '';
+              return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
+            }).join('')
+          : '';
+        showVerseResults(fileVrs, primary, 0, fileResult.hasOverflow, wordStudyHtml + seeAlsoHtml2, otherVrs, `Other ${primary} verses:`);
+        setStatus(`${fileVrs.length} verses ("${tradOriginal}"-related)`);
+        return;
+      }
+    }
+    // Absolute fallback: show all lemma verses normally.
+  }
 
   showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials());
 

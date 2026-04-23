@@ -2254,7 +2254,7 @@ H1635	H1635 = in Aramaic of	H1634	גְּרַם	ge.rem	A:N-M	bone	bone<BR>Aramaic
 H1636	H1636 =	H1636	גַּרְמִי	gar.mi	N:N--PG	Garmite	Someone descended from Garam(?), only mentioned at 1Ch.4.19 <BR> § Garmite = "bony"<br> a descendant of Gerem of Judah<br>
 H1637	H1637 =	H1637	גֹּ֫רֶן	go.ren	H:N-F	threshing floor	1) threshing-floor<br>2) (TWOT) barn, barn floor, corn floor, void place
 H1638	H1638 =	H1638	גָּרַס	ga.ras	H:V	to break	1) to be crushed, be broken<br>1a) (Qal) to be crushed<br>1b) (Hiphil) to crush, break (the teeth)
-H1639	H1639 =	H1639	גָּרַע	ga.ra	H:V	to dimish	1) to diminish, restrain, withdraw, abate, keep back, do away, take from, clip<br>1a) (Qal)<br>1a1) to diminish<br>1a2) to restrain<br>1a3) to withdraw<br>1b) (Niphal)<br>1b1) to be withdrawn<br>1b2) to be restrained<br>1c) (Piel) to withdraw, draw up
+H1639	H1639 =	H1639	גָּרַע	ga.ra	H:V	to diminish	1) to diminish, restrain, withdraw, abate, keep back, do away, take from, clip<br>1a) (Qal)<br>1a1) to diminish<br>1a2) to restrain<br>1a3) to withdraw<br>1b) (Niphal)<br>1b1) to be withdrawn<br>1b2) to be restrained<br>1c) (Piel) to withdraw, draw up
 H1640	H1640 =	H1640	גָּרַף	ga.raph	H:V	to sweep away	(Qal) to sweep away, sweep
 H1641	H1641 =	H1641	גָּרַר	ga.rar	H:V	to drag/chew/saw	1) to drag, drag away<br>1a) (Qal) to drag away<br>1b) (Niphal) to chew the cud<br>1c) (Poal) sawn (participle)<br>1d) (Hithpoel) roaring (participle)
 H1642	H1642 =	H1642	גְּרָר	ge.rar	N:N--L	Gerar	 <BR> § Gerar = "a lodging place"<br> a Philistine town south of Gaza, modern 'Umm'<br>

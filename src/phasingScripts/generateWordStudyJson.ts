@@ -1092,6 +1092,9 @@ console.log(`_traditional-redirects.json: ${Object.keys(sortedTradRedirects).len
 // _trad_index.json — filtered client-side lookup: traditional word → target lemma.
 // Only 'redirect' entries (crossref words already exist in the word index).
 // Targets that are stop words or fewer than 3 chars are excluded as low-quality.
+// Also excluded: trad words that never appear as an actual rendering token in the
+// target file — these are academic/grammatical glosses (e.g. "dimension") rather
+// than words a reader would find in a Bible verse.
 // Written to public/ so it's served at servewell.net/_trad_index.json.
 {
   const tradIndex: Record<string, string> = {};
@@ -1099,6 +1102,25 @@ console.log(`_traditional-redirects.json: ${Object.keys(sortedTradRedirects).len
     if (entry.type !== 'redirect') continue;
     if (entry.target.length < 3) continue;
     if (TRAD_STOPWORDS.has(entry.target)) continue;
+    // Check: does 'word' appear as a token in at least one rendering key OR trad text
+    // of the target file? This accepts words like "dimly" that appear in the BSB trad
+    // sentence but not in the rendering key itself (e.g. "THEY WILL GROW DIM").
+    // Words that only appear in academic glosses (e.g. "dimension") are still excluded.
+    const fileData = wordFileData.get(entry.target);
+    if (fileData) {
+      const wordRe = new RegExp(`\\b${word}\\b`, 'i');
+      const appearsInRendering = [...fileData.slots.values()].some(slot =>
+        [...slot.translations.keys()].some(rk => wordRe.test(rk))
+      );
+      const appearsInTrad = !appearsInRendering && [...fileData.slots.values()].some(slot =>
+        [...slot.translations.values()].some(trans =>
+          [...trans.instancesByBook.values()].some(insts =>
+            insts.some(inst => inst.trad && wordRe.test(inst.trad))
+          )
+        )
+      );
+      if (!appearsInRendering && !appearsInTrad) continue;
+    }
     tradIndex[word] = entry.target;
   }
   const publicDir = path.join(ROOT, 'public');
