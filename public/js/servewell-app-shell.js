@@ -4759,18 +4759,18 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
       if (rawFile && rawFile !== primary) {
         const fileResult = await fetchWordFile(rawFile);
         if (searchId !== activeSearchId) return;
-        if (fileResult && fileResult.primaryVerseSet.size > 0) {
+        if (fileResult && fileResult.byVerse.size > 0) {
           for (const [vr, lit] of fileResult.litByVerse) {
             if (!currentLitByVerse.has(vr)) currentLitByVerse.set(vr, lit);
           }
           for (const [vr, trad] of fileResult.tradByVerse) {
             if (!currentTradByVerse.has(vr)) currentTradByVerse.set(vr, trad);
           }
-          for (const [vr, r] of fileResult.sampleByVerse) {
+          for (const [vr, r] of fileResult.byVerse) {
             currentAllRenderingsByVerse.set(vr, /* @__PURE__ */ new Set([r]));
           }
-          const fileVrs = sortCanonical([...fileResult.primaryVerseSet]);
-          const otherVrs = sortCanonical([...currentSet].filter((vr) => !fileResult.primaryVerseSet.has(vr))).slice(0, 20);
+          const fileVrs = sortCanonical([...fileResult.byVerse.keys()]);
+          const otherVrs = sortCanonical([...currentSet].filter((vr) => !fileResult.byVerse.has(vr))).slice(0, 20);
           const bypassed2 = tradBypassedCandidates.get(primary) ?? [];
           const seeAlsoHtml2 = bypassed2.length > 0 ? `<li class="ws-sr-hint">See also:</li>` + bypassed2.map((lemma) => {
             const count = idx[lemma];
