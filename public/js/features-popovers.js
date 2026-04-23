@@ -177,7 +177,7 @@
     },
     'need-search-all': {
       title: 'Search across all chapters',
-      content: '<p><strong>Value</strong><br>Find verses, names, and themes quickly across the full Bible corpus instead of searching chapter by chapter.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Build an indexed backend query path, expose relevance-ranked results, and link every result directly to a verse anchor in the chapter pages.</p>'
+      content: '<p><strong>Value</strong><br>Find verses, names, and themes quickly across the full Bible corpus instead of searching chapter by chapter.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Use the Search button in the top bar to enter a word or phrase. Results include matches from every chapter across the full Bible &mdash; click any result to jump directly to that verse. Coverage and ranking are still being refined.</p>'
     },
     'need-basic-search': {
       title: 'Basic search',

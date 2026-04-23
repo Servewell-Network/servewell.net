@@ -16,10 +16,10 @@
     "need-logins",
     "need-new-feature-marker",
     "need-basic-search",
+    "need-search-all",
     "need-concordance-word-studies"
   ],
   "whatsNextPageIds": [
-    "need-search-all",
     "need-settings-in-links",
     "need-literal-consistency",
     "need-compare-popular-translations",
