@@ -181,19 +181,15 @@
     },
     'need-basic-search': {
       title: 'Basic search',
-      content: '<p><strong>Value</strong><br>Search for any word across the full corpus and see every verse that contains it — ranked in canonical Bible order. Results include the verse reference and, optionally, the literal or traditional text in context.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Click the Search button in the top bar. Type a word or phrase and press Enter. Results show up to 50 matching verses sorted by book and chapter. Check the &ldquo;Literal&rdquo; or &ldquo;Traditional&rdquo; boxes to see verse text inline. Click any result to go directly to that chapter.</p>'
+      content: '<p><strong>Value</strong><br>Search for any word across the full corpus and see every verse that contains it — ranked in canonical Bible order. Results include the verse reference and, optionally, the literal or traditional text in context.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Click the Search button in the top bar. Type a word or phrase and press Enter. Results show up to 50 matching verses sorted by book and chapter. Check the &ldquo;Literal&rdquo; or &ldquo;Traditional&rdquo; boxes to see verse text inline. Click any result to go directly to that chapter.</p>'
     },
     'need-settings-in-links': {
       title: 'Settings in links',
-      content: '<p><strong>Value</strong><br>Lets people share links that preserve meaningful on-screen settings so friends can open the same passage and immediately see the same important context.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Define which settings are safe and useful to encode in URLs, add copy-link controls that include those settings, and ensure incoming links restore view state predictably across supported pages.</p>'
+      content: '<p><strong>Value</strong><br>Lets people share links that preserve meaningful on-screen settings and states so friends can open the same passage and immediately see the same important context.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Define which settings are safe and useful to encode in URLs, add copy-link controls that include those settings, and ensure incoming links restore view state predictably across supported pages. As examples, people should be able to share a chapter page with an open popover, and they should be able to share a word study page with a certain grouping.</p>'
     },
     'need-clarified-bible-column': {
       title: 'Clarified Bible column',
-      content: '<p><strong>Value</strong><br>Adds a companion reading column focused on plain-language clarification so readers can quickly grasp meaning without losing connection to the underlying text.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Design the column layout, define how clarifications are anchored to verses, and establish editorial guidelines to keep explanations faithful, clear, and concise.</p>'
-    },
-    'need-clarified-bible-snippets': {
-      title: 'Clarified Bible snippets',
-      content: '<p><strong>Value</strong><br>Provides short, verse-level clarifications that are easy to scan, share, and revisit during study conversations.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Create snippet authoring workflow, attach snippets to verse references, and expose them in the Clarified Bible column with consistent formatting and source traceability.</p>'
+      content: '<p><strong>Value</strong><br>Adds a companion reading column focused on plain-language clarification so readers can quickly grasp meaning without losing connection to the underlying text.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Establish editorial guidelines to keep it faithful, helpful, clear, and concise. Use simple vocabulary as defined by authorities such as the <a href="https://www.eapfoundation.com/vocab/general/ngsl/" target="_blank" rel="noopener noreferrer" style="color:var(--fg);text-decoration:underline;">New General Word List</a>. Keep sentence structure easy to comprehend. Freely license the resulting text.</p>'
     },
     'need-comparison-view': {
       title: 'Comparison view (2+ translations)',
@@ -213,7 +209,7 @@
     },
     'need-audio': {
       title: 'Audio narrations',
-      content: '<p><strong>Value</strong><br>Helps people absorb Scripture while commuting, walking, or resting, and supports learners who retain more through listening than reading alone.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Create per-chapter narration tracks with timestamp alignment to verses, provide simple playback controls in chapter view, and keep audio synchronized with shared verse links and navigation.</p>'
+      content: '<p><strong>Value</strong><br>Helps people absorb Scripture while commuting, walking, or resting, and supports learners who retain more through listening than reading alone.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Create per-chapter narration tracks with timestamp alignment to verses. Provide simple playback controls in chapter view.</p>'
     },
     'need-accessibility': {
       title: 'Reasonable accessibility',
@@ -229,15 +225,15 @@
     },
     'need-footnotes': {
       title: 'Verse-level Commentaries',
-      content: '<p><strong>Value</strong><br>Short, encouraging, and practical mini-articles attached to individual verses — easy to share with a friend, or use as the foundation for a class or lesson. The goal is insight that fits the moment without requiring a full commentary reading.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Build a submission form for drafting and editing commentary articles. Once published, an article — and the form to contribute a new one — will be accessible by tapping on the verse number in any chapter view.</p>'
+      content: '<p><strong>Value</strong><br>Short, encouraging, and practical mini-articles attached to individual verses should be easy to share with a friend or to use as the foundation for a class or lesson.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Draw on public domain sources for a first draft, but reword with modern language according to a formula for being inspiring, practical and concise. Once published, the article link should be accessible by tapping on the verse number.</p>'
     },
     'need-topical-index': {
       title: 'Topical index generation',
-      content: '<p><strong>Value</strong><br>Lets readers discover related passages by theme (for example forgiveness, hope, justice, prayer) without needing to know exact references in advance.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Generate a curated topic map tied to verse references, expose topic browsing and search, and connect each indexed topic to chapter links that open directly at the relevant verse.</p>'
+      content: '<p><strong>Value</strong><br>Lets readers discover related passages by theme without needing to know exact references in advance. Also informs the clarified Bible column and verse-level commentaries.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Generate a curated topic map tied to verse references, expose topic browsing and search, and connect each indexed topic to chapter links that open directly at the relevant verse.</p>'
     },
     'need-literal-consistency': {
       title: 'Literal consistency',
-      content: '<p><strong>Value</strong><br>Currently, the literal translation is not consistent enough to reveal at a glance whether two English words represent the same original word or different original words.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Coordinating with the concordance word studies effort that needs the same thing, we should build index pages of how the original words are translated into English, including context. Then we should use that to narrow the variance to a minimum and disambiguate the literal glosses, probably using optional ruby text. We should improve how we build the literal version so that improving the translation of a word happens in one place.</p>'
+      content: '<p><strong>Value</strong><br>The literal translation should be consistent so that it reveals at a glance whether two English words represent the same original word or different original words.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>We should improve how we build the literal version so that improving the translation of a word happens in one place, in its word study page, which shows how the original word is currently translated in the literal version. We should narrow the variance to a minimum and disambiguate the literal word translations. We should provide optional ways to display that disambiguation, probably using interlinear text and/or subscripts.</p>'
     },
     'need-compare-popular-translations': {
       title: 'Compare popular translations',
@@ -249,7 +245,7 @@
     },
     'need-ability-to-donate': {
       title: 'Ability to donate',
-      content: '<p><strong>Value</strong><br>Sometimes people want to participate by contributing financially, especially when they or their loved ones have been helped. This allows the love of Christ to spread more rapidly, and that is what the world needs.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>There should be the ability to donate from the dollar estimate on each feature. Within the donation form there should be the ability to select all or multiple or zero features. If there is no nonprofit status, then there should be a question asking how much they would give if there were nonprofit status. There should also be an explanation that giving does not guarantee that the feature will be everything they want. We should also give people the option to allow us to spend the money on other features if we need to do so. The total income estimate for a feature should immediately go up for all users as soon as someone contributes to that feature. This provides some accountability to those that run the website. There should be an animation to emphasize this and make it somewhat tangible and satisfying. There should also be a way of reporting how much of that money is used and how long the total is likely to last at the current rate of spending.</p>'
+      content: '<p><strong>Value</strong><br>Sometimes people may want to participate in the ministry of this website by contributing financially. This allows the love of Christ to spread more rapidly, which is what the world needs.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>There should be the ability to donate from the dollar estimate on each feature. Within the donation form there should be the ability to select all or multiple or zero features. There should a few disclaimers, but not too many. The total income estimate for a feature should immediately go up for all users as soon as someone contributes to that feature. This provides some accountability to those that run the website. There should be an animation to emphasize this and make it somewhat tangible and satisfying. There should also be a similar way of donating to the general fund.</p>'
     },
     'need-recent-settings': {
       title: 'Recent settings',
@@ -269,15 +265,59 @@
     },
     'need-improve-page-load-performance': {
       title: 'Improve page load performance',
-      content: '<p><strong>Value</strong><br>Reducing the size of the underlying page data can help people in countries where internet data is monitored and expensive. It can also help Bible search to be faster and better as index pages are loaded in the background.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Much of the page bulk is in information that is not revealed on page load, so it can be transferred more purely as data without all of the bulky HTML that currently surrounds it. Then that HTML can be quickly recreated after the page is displayed.</p>'
+      content: '<p><strong>Value</strong><br>Reducing the size of the underlying page data can help people in countries where internet data is monitored and expensive.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Much of the page bulk is in information that is not revealed on page load, so it can be transferred more purely as data without all of the bulky HTML that currently surrounds it. Then that HTML can be quickly recreated after the page is displayed.</p>'
     },
     'need-swn-swan-logo': {
       title: 'SWN swan logo',
-      content: '<p><strong>Value</strong><br>Adding a swan logo with the letters SWN inside it can make the site more interesting and memorable, and it can also make it easier to find because when people search the internet for something in the Bible, they should be able to append the acronym "swn" and be more likely to find our site.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Create an SVG that is fairly lightweight for performance and easy to scale to any size, starting with the sizes that are needed for the web and for progressive web apps. Keep it fairly simple so it is adaptable to different backgrounds. If there is a place to provide more info, perhaps we should call it Swen the Swan.</p>'
+      content: '<p><strong>Value</strong><br>Adding a swan logo with the letters SWN inside it can make the site more interesting and memorable, and it can also make it easier to find because when people search the internet for something in the Bible, they should be able to append the acronym "swn" and be more likely to find our site.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Create an SVG that is fairly lightweight for performance and easy to scale to any size, starting with the sizes that are needed for the web and for progressive web apps. Keep it fairly simple so it is adaptable to different backgrounds.</p>'
     },
     'need-concordance-word-studies': {
       title: 'Concordance word studies',
       content: '<p><strong>Value</strong><br>One of the best ways to discover the meaning of a word is to look at the different places where it is used across the full corpus.</p><p><strong>Status</strong><br>Stable</p><p><strong>Steps</strong><br>Click any word token in a chapter page to open its popover. Click &ldquo;All occurrences&rdquo; to open a word study page listing every verse where that original word appears. Each occurrence shows the verse reference and both the literal and traditional renderings in context.</p>'
+    },
+    'need-improved-search': {
+      title: 'Improved search',
+      content: '<p><strong>Value</strong><br>Better search accuracy, ranking, and convenience make it significantly easier to find what you are looking for.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Improve ranking to surface the most relevant results first. Refine query parsing to handle partial words, phrases, and common Bible names. Consider autocomplete suggestions for frequently searched terms.</p>'
+    },
+    'need-receiving-suggestions': {
+      title: 'Receiving suggestions for content and functionality',
+      content: '<p><strong>Value</strong><br>Gives the community a clear path to share ideas, report problems, and request content improvements without requiring a GitHub account.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Add a suggestion form accessible from multiple pages. Route submissions to a moderation queue. Acknowledge receipt and provide basic status updates to submitters.</p>'
+    },
+    'need-optional-spelling': {
+      title: 'Optional non-US spelling',
+      content: '<p><strong>Value</strong><br>Lets readers in the UK, Australia, and other regions read content in the spelling conventions they are most comfortable with.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Identify the most common spelling differences in the content. Add a setting to toggle between US and non-US spelling. Apply the preference consistently across all reading views.</p>'
+    },
+    'need-second-language': {
+      title: 'Add features in a second language',
+      content: '<p><strong>Value</strong><br>Extends the reach of the site to communities whose primary language is not English, allowing more people to benefit from the tools and content available here.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Choose a second language based on community interest and available freely licensed Bible data. Adapt the data pipeline and UI for that language. Launch with a subset of core features and expand from there.</p>'
+    },
+    'need-notify-developers': {
+      title: 'Notify developers and moderators',
+      content: '<p><strong>Value</strong><br>Keeps contributors aware of new submissions, votes, and content changes so that important updates are not missed and response time stays short.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Define notification triggers for key events such as new suggestions, flagged content, and voting milestones. Implement email or in-app delivery for authorized roles. Add preferences so contributors can control notification frequency.</p>'
+    },
+    'need-progress-percentages': {
+      title: 'Progress Percentages',
+      content: '<p><strong>Value</strong><br>Shows how far along a feature or content goal is, giving the community a tangible sense of momentum and making it easier to direct contributions where they have the most impact.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Define measurable completion criteria for key features and content areas. Calculate and display percentage progress next to relevant items. Update automatically as underlying data changes.</p>'
+    },
+    'need-home-server': {
+      title: 'Home or church server',
+      content: '<p><strong>Value</strong><br>Allows individuals or small groups to run their own instance of the site locally for offline use or private community study, without depending on external hosting.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Package the site so it can run on common local server environments. Document the setup process clearly for non-technical users. Test on representative low-cost hardware.</p>'
+    },
+    'need-advanced-search': {
+      title: 'Advanced search',
+      content: '<p><strong>Value</strong><br>Enables precise queries using filters for book, chapter, original language, grammar attributes, or translation, helping researchers and serious students find exactly what they need.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Design a query interface that exposes useful filters without overwhelming casual users. Support common search operators such as exact phrase and exclusion. Connect results to existing chapter and word study views.</p>'
+    },
+    'need-copy-simplification': {
+      title: 'Copy simplification',
+      content: '<p><strong>Value</strong><br>Makes it easier to copy Bible text in a clean, readable format \u2014 without stray formatting, reference numbers, or interlinear annotations \u2014 suitable for pasting into messages, notes, or presentations.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps to use</strong><br>Select any verse text and use the browser copy action, or use the dedicated copy button where available. The text is formatted to include just the reference and readable verse text.</p>'
+    },
+    'need-word-study-groupings': {
+      title: 'Word study groupings',
+      content: '<p><strong>Value</strong><br>Lets readers reorganize word study results by translation rendering, grammatical slot, or Bible book \u2014 making it easier to see patterns and compare usage across contexts.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps to use</strong><br>Open any word study page. Use the group-by radio buttons to switch between Translation, Grammar, and Document groupings. Your last choice is remembered across visits.</p>'
+    },
+    'need-recent-changes': {
+      title: 'Recent Changes page',
+      content: '<p><strong>Value</strong><br>Shows what has changed on the site recently so returning visitors can quickly catch up on content and feature updates without reviewing everything manually.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps to use</strong><br>Visit the <a href="/recent-changes" style="color:var(--fg);text-decoration:underline;">Recent Changes</a> page from the navigation menu. Each entry shows the date, what changed, and a link to the affected content.</p>'
     },
 
   };
