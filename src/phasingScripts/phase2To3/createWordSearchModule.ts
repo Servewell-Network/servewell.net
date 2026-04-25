@@ -788,7 +788,13 @@ async function handleInput(rawQuery: string): Promise<void> {
   // trad text, then sort score-desc / canonical-within-score. Used for the final render.
   const computeScoredPartials = () => {
     if (sorted.length <= 1) return [];
-    const tradPatterns = currentRawTerms.map(t => new RegExp(`\\b${escapeRegex(t)}\\b`, 'i'));
+    const resolvedForPartials = new Set(
+      resolutions.filter(r => r.res.kind === 'resolved').map(r => r.token.toLowerCase()),
+    );
+    const tokenSetForPartials = new Set(tokens.map(t => t.toLowerCase()));
+    const tradPatterns = currentRawTerms
+      .filter(t => !tokenSetForPartials.has(t) || resolvedForPartials.has(t))
+      .map(t => new RegExp(`\\b${escapeRegex(t)}\\b`, 'i'));
     const scored = [...unionSet]
       .filter(vr => !currentSet.has(vr))
       .map(vr => {
@@ -914,7 +920,18 @@ async function handleInput(rawQuery: string): Promise<void> {
     // translated as "common" in 1Ki 10:27).
     if (searchId !== activeSearchId) return;
     if (currentSet.size < 10) {
-      const tradPatterns = currentRawTerms.map(t => new RegExp(`\\b${escapeRegex(t)}\\b`, 'i'));
+      // Build patterns only from terms that are either stop words (useful for
+      // phrase context, e.g. "so" in "God so loved") or tokens that actually
+      // resolved to a lemma. Exclude ambiguous/unresolved partial tokens (e.g.
+      // a trailing "t" that prefix-matches hundreds of index keys) — those
+      // patterns never match real verse text and would block valid results.
+      const resolvedTokenSet = new Set(
+        resolutions.filter(r => r.res.kind === 'resolved').map(r => r.token.toLowerCase()),
+      );
+      const tokenSet = new Set(tokens.map(t => t.toLowerCase()));
+      const tradPatterns = currentRawTerms
+        .filter(t => !tokenSet.has(t) || resolvedTokenSet.has(t))
+        .map(t => new RegExp(`\\b${escapeRegex(t)}\\b`, 'i'));
       const tradExpanded = new Set<string>();
       for (const [, result] of collectedResults) {
         for (const [vr, trad] of result.tradByVerse) {

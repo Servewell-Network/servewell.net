@@ -321,49 +321,6 @@ async function main() {
       console.log('\nWord pages are in sync with R2.');
     }
 
-    // Check whether the traditional-word redirect map needs to be pushed to
-    // Cloudflare Bulk Redirects.  The source file lives in src/json-Phase2/words/
-    // so it's checked in and git-diffable.  dist/.trad-redirects-cf-synced holds
-    // the SHA fingerprint from the last successful push.
-    const tradRedirectsFile = path.resolve('src/json-Phase2/words/_traditional-redirects.json');
-    const tradRedirectsMarker = path.resolve('dist/.trad-redirects-cf-synced');
-    if (fs.existsSync(tradRedirectsFile)) {
-      const { createHash } = await import('node:crypto');
-      const currentTradFp = createHash('sha256')
-        .update(fs.readFileSync(tradRedirectsFile, 'utf8'))
-        .digest('hex')
-        .slice(0, 16);
-      const syncedTradFp = fs.existsSync(tradRedirectsMarker)
-        ? fs.readFileSync(tradRedirectsMarker, 'utf8').trim()
-        : '';
-      if (currentTradFp !== syncedTradFp) {
-        console.log('\n⚠️  Traditional word redirect map has changed since last CF Bulk Redirects sync.');
-        // Only offer to sync if credentials are available (read .env for pre-deploy context)
-        const envRaw = fs.existsSync('.env') ? fs.readFileSync('.env', 'utf8') : '';
-        const hasCreds =
-          (process.env.CLOUDFLARE_ACCOUNT_ID || envRaw.includes('CLOUDFLARE_ACCOUNT_ID=')) &&
-          (process.env.CF_REDIRECTS_API_TOKEN  || envRaw.includes('CF_REDIRECTS_API_TOKEN='));
-        if (!hasCreds) {
-          console.log('  (Skipping — CLOUDFLARE_ACCOUNT_ID / CF_REDIRECTS_API_TOKEN not set. Run `npm run deploy:trad-redirects-cf` when ready.)');
-        } else {
-          const deployTrad = isYes || await askYesNo('Push trad-word redirects to Cloudflare Bulk Redirects now? (y/n): ');
-          if (deployTrad) {
-            try {
-              await run('npm', ['run', 'deploy:trad-redirects-cf'], 'Sync traditional word redirects to CF Bulk Redirects');
-            } catch (e) {
-              console.warn('\n⚠️  CF Bulk Redirects sync failed (non-fatal):');
-              console.warn(e instanceof Error ? e.message : String(e));
-              console.warn('Run `npm run deploy:trad-redirects-cf` manually when ready.');
-            }
-          } else {
-            console.log('Skipping CF trad-redirect sync. Run `npm run deploy:trad-redirects-cf` when ready.');
-          }
-        }
-      } else {
-        console.log('\nTraditional word redirects are in sync with Cloudflare Bulk Redirects.');
-      }
-    }
-
     process.exit(0);
   } catch (error) {
     console.error('\nPre-deploy failed.');

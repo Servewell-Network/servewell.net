@@ -90,9 +90,18 @@ describe('simplelemmatize', () => {
     expect(simplelemmatize('loves')).toBe('love');
   });
 
-  it('does not strip double-s endings', () => {
-    expect(simplelemmatize('bless')).toBe('bless');
-    expect(simplelemmatize('pass')).toBe('pass');
+  it('returns identity for multi-syllable base forms not matching any rule', () => {
+    expect(simplelemmatize('diminish')).toBe('diminish');
+    expect(simplelemmatize('rejoice')).toBe('rejoice');
+    expect(simplelemmatize('multiply')).toBe('multiply');
+    expect(simplelemmatize('redeem')).toBe('redeem');
+  });
+
+  it('does not confuse "-ish" words with any valid rule', () => {
+    // "diminish" must never be trimmed to "dimish" — no rule should fire
+    expect(simplelemmatize('diminish')).toBe('diminish');
+    expect(simplelemmatize('establish')).toBe('establish');
+    expect(simplelemmatize('vanish')).toBe('vanish');
   });
 
   it('is case-insensitive', () => {
@@ -241,6 +250,62 @@ describe('parseQueryTokens', () => {
 
   it('handles leading/trailing whitespace', () => {
     expect(parseQueryTokens('  love  ')).toEqual(['love']);
+  });
+
+  it('filters common English stop words', () => {
+    expect(parseQueryTokens('the love of God')).toEqual(['love', 'God']);
+    expect(parseQueryTokens('in the beginning')).toEqual(['beginning']);
+    expect(parseQueryTokens('and with the servants')).toEqual(['servants']);
+  });
+
+  it('stop word check is case-insensitive', () => {
+    expect(parseQueryTokens('The Love Of God')).toEqual(['Love', 'God']);
+    expect(parseQueryTokens('IN THE BEGINNING')).toEqual(['BEGINNING']);
+  });
+
+  it('filters pure stop-word queries to empty', () => {
+    expect(parseQueryTokens('the and or')).toEqual([]);
+    expect(parseQueryTokens('in of to for')).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveToken — inflection + typo regression anchors
+// ---------------------------------------------------------------------------
+
+describe('resolveToken — diminish inflections and typo guard', () => {
+  const idx: WordIndex = { diminish: 2, fear: 5, love: 3, king: 7 };
+
+  it('resolves "diminish" exactly', () => {
+    expect(resolveToken('diminish', idx)).toEqual({ kind: 'resolved', lemma: 'diminish' });
+  });
+
+  it('resolves "diminishes" via -s strip', () => {
+    // "diminishes" ends in -s; strip → "diminishe"; lemma 'diminishe' not in idx;
+    // step 3 tries dropping trailing e → "diminish" ✓
+    expect(resolveToken('diminishes', idx)).toEqual({ kind: 'resolved', lemma: 'diminish' });
+  });
+
+  it('resolves "diminished" via -ed strip with e-restoration', () => {
+    // "diminished" → strip -ed → "diminish" + e = "diminishe"; falls back to drop-e → "diminish" ✓
+    expect(resolveToken('diminished', idx)).toEqual({ kind: 'resolved', lemma: 'diminish' });
+  });
+
+  it('resolves "diminishing" via -ing strip', () => {
+    // "diminishing" → strip -ing → "diminish" + e = "diminishe"; not in idx;
+    // step 3 "diminishe".endsWith("e") → try "diminish" ✓
+    expect(resolveToken('diminishing', idx)).toEqual({ kind: 'resolved', lemma: 'diminish' });
+  });
+
+  it('"dimish" (typo) does not resolve to "diminish"', () => {
+    // "dimish" is subtly different (missing 'in'); must NOT match anything
+    expect(resolveToken('dimish', idx)).toEqual({ kind: 'unresolved' });
+  });
+
+  it('"dimish" does not prefix-match "diminish"', () => {
+    // "diminish".startsWith("dimish") is false — positional mismatch at index 4
+    expect('diminish'.startsWith('dimish')).toBe(false);
+    expect(resolveToken('dimish', idx)).toEqual({ kind: 'unresolved' });
   });
 });
 

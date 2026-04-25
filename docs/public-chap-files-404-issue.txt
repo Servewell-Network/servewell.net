@@ -53,6 +53,7 @@ the cache can perhaps be cleared in the cloudflare dashboard or
     by arbitrarily introducing a throw-away file into public/-/
     Claude: in the Cloudflare dashboard you can purge cache for servewell.net/-/* 
     by going to Caching → Cache Rules → Purge Cache.
+    Update: I did something like this, but it didn't solve it.
 
 
 Then we only had a little glitch at around the hour mark ("/Judges/1 returned HTTP 000"):
@@ -432,4 +433,8 @@ Uploaded 513 of 1190 assets
 Uploaded 581 of 1190 assets
 
 npm run pre-deploy -- --force is there when you hit the stale-edge problem again.
+
+Apr 23 I deployed with full pre-deploy, and I think an hour later all chapter pages went down again.
+Based on history, I then did a simple npx wrangler deploy, and they came back and stayed up.
+I'm not sure why or what to do.
 

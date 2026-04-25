@@ -4717,7 +4717,11 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
     const computePartials = () => sorted.length > 1 ? sortCanonical([...unionSet].filter((vr) => !currentSet.has(vr))).slice(0, 20) : [];
     const computeScoredPartials = () => {
       if (sorted.length <= 1) return [];
-      const tradPatterns = currentRawTerms.map((t) => new RegExp(`\\b${escapeRegex(t)}\\b`, "i"));
+      const resolvedForPartials = new Set(
+        resolutions.filter((r) => r.res.kind === "resolved").map((r) => r.token.toLowerCase())
+      );
+      const tokenSetForPartials = new Set(tokens.map((t) => t.toLowerCase()));
+      const tradPatterns = currentRawTerms.filter((t) => !tokenSetForPartials.has(t) || resolvedForPartials.has(t)).map((t) => new RegExp(`\\b${escapeRegex(t)}\\b`, "i"));
       const scored = [...unionSet].filter((vr) => !currentSet.has(vr)).map((vr) => {
         let trad = currentTradByVerse.get(vr) ?? "";
         if (!trad) {
@@ -4814,7 +4818,11 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
       }));
       if (searchId !== activeSearchId) return;
       if (currentSet.size < 10) {
-        const tradPatterns = currentRawTerms.map((t) => new RegExp(`\\b${escapeRegex(t)}\\b`, "i"));
+        const resolvedTokenSet = new Set(
+          resolutions.filter((r) => r.res.kind === "resolved").map((r) => r.token.toLowerCase())
+        );
+        const tokenSet = new Set(tokens.map((t) => t.toLowerCase()));
+        const tradPatterns = currentRawTerms.filter((t) => !tokenSet.has(t) || resolvedTokenSet.has(t)).map((t) => new RegExp(`\\b${escapeRegex(t)}\\b`, "i"));
         const tradExpanded = /* @__PURE__ */ new Set();
         for (const [, result] of collectedResults) {
           for (const [vr, trad] of result.tradByVerse) {
