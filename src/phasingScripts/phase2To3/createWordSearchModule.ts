@@ -464,10 +464,35 @@ function clearDisplay(): void {
 }
 
 /** Fallback: show word-index suggestion buttons (two-step: click to preview verses, then navigate). */
+/**
+ * If the query looks like the start of a Bible book name (≥2 chars, no digit
+ * chapter suffix yet), return a nav-link HTML snippet for "<Book> 1".
+ * Returns empty string if no book matches.
+ */
+function bookSuggestionHtml(query: string): string {
+  const q = query.trim().toLowerCase();
+  // Must be ≥2 chars and must NOT already contain a chapter number — those are
+  // handled by parseVerseRefQuery which takes over first.
+  if (q.length < 2 || /\d/.test(q)) return '';
+  // Exact or prefix match against BOOK_NAME_TO_CODE keys.
+  let code: string | undefined = BOOK_NAME_TO_CODE[q];
+  if (!code) {
+    for (const [alias, c] of Object.entries(BOOK_NAME_TO_CODE)) {
+      if (alias.startsWith(q)) { code = c; break; }
+    }
+  }
+  if (!code) return '';
+  const bookName = BOOK_DISPLAY[code];
+  if (!bookName) return '';
+  const url = `https://servewell.net/-/${bookName.replace(/\s+/g, '-')}/1`;
+  return `<li><a class="ws-sr-nav-link" href="${esc(url)}">${esc(bookName)} 1</a></li>`;
+}
+
 function showWordLinks(
   matches: string[],
   idx: WordIndex,
   tradSuggestions: Array<{ lemma: string; tradKey: string }> = [],
+  bookSugHtml = '',
 ): void {
   const ul = document.getElementById(RESULTS_ID);
   if (!ul) return;
@@ -482,7 +507,7 @@ function showWordLinks(
     const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : '';
     return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
   }).join('');
-  ul.innerHTML = tradItems + wordItems;
+  ul.innerHTML = bookSugHtml + tradItems + wordItems;
 }
 
 /** Render verse result rows. Optional wordStudyHtml is prepended before verse items (for single-word queries). */
@@ -494,6 +519,7 @@ function showVerseResults(
   wordStudyHtml = '',
   partialRefs: string[] = [],
   partialLabel = 'Partial Matches:',
+  bookSugHtml = '',
 ): void {
   const ul = document.getElementById(RESULTS_ID);
   if (!ul) return;
@@ -531,7 +557,7 @@ function showVerseResults(
       }).join('')
     : '';
 
-  ul.innerHTML = wordStudyHtml + versesHint + items + hint + partialSection;
+  ul.innerHTML = bookSugHtml + wordStudyHtml + versesHint + items + hint + partialSection;
 
   const overflowNote = '';
   if (resolvedCount > 1) {
@@ -637,6 +663,11 @@ async function handleInput(rawQuery: string): Promise<void> {
   }
   currentVerseUrl = null;
 
+  // Pre-compute a book suggestion (e.g. "gen" → "Genesis 1") to prepend to
+  // all result lists — computed from the raw typed query, not the token list,
+  // so it works even when the book name is also a word ("job", "mark", "john").
+  const bookSugHtml = bookSuggestionHtml(query);
+
   // Ensure index is available
   let idx = getIndexSync();
   if (!idx) {
@@ -725,7 +756,11 @@ async function handleInput(rawQuery: string): Promise<void> {
     }
 
     if (wordCandidates.length > 0 || tradSugs.length > 0) {
-      showWordLinks(wordCandidates, idx, tradSugs);
+      showWordLinks(wordCandidates, idx, tradSugs, bookSugHtml);
+      setStatus('');
+    } else if (bookSugHtml) {
+      const ul = document.getElementById(RESULTS_ID);
+      if (ul) ul.innerHTML = bookSugHtml;
       setStatus('');
     } else {
       clearDisplay();
@@ -840,7 +875,7 @@ async function handleInput(rawQuery: string): Promise<void> {
             return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
           }).join('')
         : '';
-      showVerseResults(sortCanonical(filteredVrs), primary, 0, anyOverflow, wordStudyHtml + seeAlsoHtml, partials, `Other ${primary} verses:`);
+      showVerseResults(sortCanonical(filteredVrs), primary, 0, anyOverflow, wordStudyHtml + seeAlsoHtml, partials, `Other ${primary} verses:`, bookSugHtml);
       setStatus(`${filteredVrs.length} verse${filteredVrs.length !== 1 ? 's' : ''} translated "${tradOriginal}"`);
       return;
     }
@@ -874,7 +909,7 @@ async function handleInput(rawQuery: string): Promise<void> {
               return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
             }).join('')
           : '';
-        showVerseResults(fileVrs, primary, 0, fileResult.hasOverflow, wordStudyHtml + seeAlsoHtml2, otherVrs, `Other ${primary} verses:`);
+        showVerseResults(fileVrs, primary, 0, fileResult.hasOverflow, wordStudyHtml + seeAlsoHtml2, otherVrs, `Other ${primary} verses:`, bookSugHtml);
         setStatus(`${fileVrs.length} verses ("${tradOriginal}"-related)`);
         return;
       }
@@ -882,7 +917,7 @@ async function handleInput(rawQuery: string): Promise<void> {
     // Absolute fallback: show all lemma verses normally.
   }
 
-  showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials());
+  showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials(), 'Partial Matches:', bookSugHtml);
 
   if (sorted.length > 1) {
     const remaining = sorted.slice(1);

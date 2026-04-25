@@ -4486,7 +4486,25 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
       if (cb) cb.checked = false;
     }
   }
-  function showWordLinks(matches, idx, tradSuggestions = []) {
+  function bookSuggestionHtml(query) {
+    const q = query.trim().toLowerCase();
+    if (q.length < 2 || /\d/.test(q)) return "";
+    let code = BOOK_NAME_TO_CODE[q];
+    if (!code) {
+      for (const [alias, c] of Object.entries(BOOK_NAME_TO_CODE)) {
+        if (alias.startsWith(q)) {
+          code = c;
+          break;
+        }
+      }
+    }
+    if (!code) return "";
+    const bookName = BOOK_DISPLAY[code];
+    if (!bookName) return "";
+    const url = `https://servewell.net/-/${bookName.replace(/\s+/g, "-")}/1`;
+    return `<li><a class="ws-sr-nav-link" href="${esc(url)}">${esc(bookName)} 1</a></li>`;
+  }
+  function showWordLinks(matches, idx, tradSuggestions = [], bookSugHtml = "") {
     const ul = document.getElementById(RESULTS_ID);
     if (!ul) return;
     const tradItems = tradSuggestions.map(({ lemma, tradKey }) => {
@@ -4499,9 +4517,9 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
       const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
       return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
     }).join("");
-    ul.innerHTML = tradItems + wordItems;
+    ul.innerHTML = bookSugHtml + tradItems + wordItems;
   }
-  function showVerseResults(verseRefs, primaryLemma, resolvedCount, hasOverflow, wordStudyHtml = "", partialRefs = [], partialLabel = "Partial Matches:") {
+  function showVerseResults(verseRefs, primaryLemma, resolvedCount, hasOverflow, wordStudyHtml = "", partialRefs = [], partialLabel = "Partial Matches:", bookSugHtml = "") {
     const ul = document.getElementById(RESULTS_ID);
     if (!ul) return;
     const slice = verseRefs.slice(0, MAX_DISPLAYED);
@@ -4521,7 +4539,7 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
       const textDivs = `<div class="ws-sr-verse-text ws-sr-lit" hidden></div><div class="ws-sr-verse-text ws-sr-trad" hidden></div>`;
       return url ? `<li data-vr="${esc(vr)}"><a class="ws-sr-verse-link ws-sr-partial" href="${esc(url)}"><span class="ws-sr-ref">${esc(display)}</span></a>${textDivs}</li>` : `<li data-vr="${esc(vr)}"><span class="ws-sr-verse-link ws-sr-partial"><span class="ws-sr-ref">${esc(display)}</span></span>${textDivs}</li>`;
     }).join("") : "";
-    ul.innerHTML = wordStudyHtml + versesHint + items + hint + partialSection;
+    ul.innerHTML = bookSugHtml + wordStudyHtml + versesHint + items + hint + partialSection;
     const overflowNote = "";
     if (resolvedCount > 1) {
       setStatus(`${verseRefs.length}${overflow} verses match all terms`);
@@ -4610,6 +4628,7 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
       return;
     }
     currentVerseUrl = null;
+    const bookSugHtml = bookSuggestionHtml(query);
     let idx = getIndexSync();
     if (!idx) {
       if (isIndexLoadFailed()) {
@@ -4677,7 +4696,11 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
         }
       }
       if (wordCandidates.length > 0 || tradSugs.length > 0) {
-        showWordLinks(wordCandidates, idx, tradSugs);
+        showWordLinks(wordCandidates, idx, tradSugs, bookSugHtml);
+        setStatus("");
+      } else if (bookSugHtml) {
+        const ul = document.getElementById(RESULTS_ID);
+        if (ul) ul.innerHTML = bookSugHtml;
         setStatus("");
       } else {
         clearDisplay();
@@ -4755,7 +4778,7 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
           const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
           return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
         }).join("") : "";
-        showVerseResults(sortCanonical(filteredVrs), primary, 0, anyOverflow, wordStudyHtml + seeAlsoHtml, partials, `Other ${primary} verses:`);
+        showVerseResults(sortCanonical(filteredVrs), primary, 0, anyOverflow, wordStudyHtml + seeAlsoHtml, partials, `Other ${primary} verses:`, bookSugHtml);
         setStatus(`${filteredVrs.length} verse${filteredVrs.length !== 1 ? "s" : ""} translated "${tradOriginal}"`);
         return;
       }
@@ -4781,13 +4804,13 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
             const countHtml = count && count > 1 ? `<span class="ws-sr-count">(${count} forms)</span>` : "";
             return `<li><button class="ws-sr-word-link" data-lemma="${esc(lemma)}">${esc(lemma)}${countHtml}</button></li>`;
           }).join("") : "";
-          showVerseResults(fileVrs, primary, 0, fileResult.hasOverflow, wordStudyHtml + seeAlsoHtml2, otherVrs, `Other ${primary} verses:`);
+          showVerseResults(fileVrs, primary, 0, fileResult.hasOverflow, wordStudyHtml + seeAlsoHtml2, otherVrs, `Other ${primary} verses:`, bookSugHtml);
           setStatus(`${fileVrs.length} verses ("${tradOriginal}"-related)`);
           return;
         }
       }
     }
-    showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials());
+    showVerseResults(sortCanonical([...currentSet]), primary, sorted.length > 1 ? 0 : 1, anyOverflow, wordStudyHtml, computePartials(), "Partial Matches:", bookSugHtml);
     if (sorted.length > 1) {
       const remaining = sorted.slice(1);
       await Promise.all(remaining.map(async (lemma) => {
