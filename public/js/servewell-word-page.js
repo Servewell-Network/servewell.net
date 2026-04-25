@@ -75,6 +75,13 @@
     Sng: "Sol",
     Nam: "Nah"
   };
+  var BOOK_ORDER = {};
+  Object.keys(BOOK_TO_DISPLAY_NAME).forEach((code, i) => {
+    BOOK_ORDER[code] = i;
+  });
+  var GROUPBY_KEY = "ws-groupby";
+  var DEFAULT_GROUPBY = "translation";
+  var TRANS_PRONOUNS = /* @__PURE__ */ new Set(["I", "HE", "SHE", "IT", "THEY", "YOU", "WE", "THOU", "YE"]);
   function esc(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
@@ -164,6 +171,155 @@
       return esc(rawText);
     }
   }
+  function normalizeTrans(rendering) {
+    const words = rendering.trim().split(/\s+/);
+    const filtered = words.filter((w) => !TRANS_PRONOUNS.has(w.toUpperCase()));
+    return filtered.length > 0 ? filtered.join(" ") : rendering;
+  }
+  function compareRefs(a, b) {
+    const ma = a.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
+    const mb = b.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
+    if (!ma || !mb) return a.localeCompare(b);
+    const ba = BOOK_ORDER[BOOK_ABBREV_ALIASES[ma[1]] ?? ma[1]] ?? 999;
+    const bb = BOOK_ORDER[BOOK_ABBREV_ALIASES[mb[1]] ?? mb[1]] ?? 999;
+    if (ba !== bb) return ba - bb;
+    const ca = parseInt(ma[2]), cb = parseInt(mb[2]);
+    if (ca !== cb) return ca - cb;
+    return parseInt(ma[3]) - parseInt(mb[3]);
+  }
+  function renderByTranslation(slots, fileTotal) {
+    const groups = /* @__PURE__ */ new Map();
+    for (const slot of Object.values(slots)) {
+      for (const [rendering, trans] of Object.entries(slot.translations)) {
+        const norm = normalizeTrans(rendering);
+        let g = groups.get(norm);
+        if (!g) {
+          g = { totalInstances: 0, instances: [] };
+          groups.set(norm, g);
+        }
+        g.totalInstances += trans.totalInstances;
+        g.instances.push(...trans.instances);
+      }
+    }
+    const shouldCollapse = fileTotal > 30;
+    return [...groups.entries()].sort((a, b) => b[1].totalInstances - a[1].totalInstances).map(([norm, g]) => {
+      const trans = { totalInstances: g.totalInstances, instances: g.instances };
+      return `<section class="ws-slot">${renderTranslation(norm, trans, shouldCollapse && g.totalInstances > 5)}</section>`;
+    }).join("");
+  }
+  function renderByDocument(slots) {
+    const flat = [];
+    for (const slot of Object.values(slots)) {
+      for (const [rendering, trans] of Object.entries(slot.translations)) {
+        for (const inst of trans.instances) flat.push({ ...inst, rendering });
+      }
+    }
+    flat.sort((a, b) => compareRefs(a.ref, b.ref));
+    const books = /* @__PURE__ */ new Map();
+    for (const inst of flat) {
+      const m = inst.ref.match(/^([0-9]?[A-Za-z]+)/);
+      const rawCode = m ? m[1] : "?";
+      const canon = BOOK_ABBREV_ALIASES[rawCode] ?? rawCode;
+      const bookName = BOOK_TO_DISPLAY_NAME[canon] ?? rawCode;
+      let arr = books.get(bookName);
+      if (!arr) {
+        arr = [];
+        books.set(bookName, arr);
+      }
+      arr.push(inst);
+    }
+    function instHtml(inst) {
+      const url = refToUrl(inst.ref);
+      const refHtml = url ? `<a class="ws-ref" href="${esc(url)}">${esc(formatRef(inst.ref))}</a>` : `<span class="ws-ref">${esc(formatRef(inst.ref))}</span>`;
+      return [
+        `<div class="ws-instance">`,
+        refHtml,
+        `<span class="ws-doc-rendering">${esc(inst.rendering)}</span>`,
+        `<p class="ws-trad">${highlightTarget(inst.trad, inst.rendering, false)}</p>`,
+        `<p class="ws-lit">${highlightTarget(inst.lit, inst.rendering, true)}</p>`,
+        `</div>`
+      ].join("");
+    }
+    const sections = [...books.entries()].map(([bookName, insts]) => {
+      const countLabel = `${insts.length.toLocaleString()} instance${insts.length === 1 ? "" : "s"}`;
+      const heading = `<h3 class="ws-rendering">${esc(bookName)} <span class="ws-count">(${countLabel})</span></h3>`;
+      const [first, ...rest] = insts;
+      if (rest.length === 0) {
+        return `<section class="ws-slot"><div class="ws-translation">${heading}${instHtml(first)}</div></section>`;
+      }
+      return [
+        `<section class="ws-slot"><div class="ws-translation">`,
+        heading,
+        instHtml(first),
+        `<details class="ws-more">`,
+        `<summary>${rest.length.toLocaleString()} more instance${rest.length === 1 ? "" : "s"}</summary>`,
+        rest.map((i) => instHtml(i)).join(""),
+        `</details>`,
+        `</div></section>`
+      ].join("");
+    });
+    return sections.join("");
+  }
+  function renderGroupByControl() {
+    return [
+      `<div class="ws-group-by" role="radiogroup" aria-label="Group word study page by" id="ws-group-by-form">`,
+      `<span class="ws-group-by-label">Group word study page by</span>`,
+      `<label><input type="radio" name="ws-group-by" value="translation"> translation</label>`,
+      `<label><input type="radio" name="ws-group-by" value="grammar"> grammar</label>`,
+      `<label><input type="radio" name="ws-group-by" value="document"> document</label>`,
+      `</div>`
+    ].join("");
+  }
+  function injectGroupByStyles() {
+    const style = document.createElement("style");
+    style.textContent = [
+      `.ws-group-by{display:flex;flex-wrap:wrap;align-items:center;gap:.2rem 1.2rem;`,
+      `margin:.2rem 0 .9rem;font-size:.9rem;}`,
+      `.ws-group-by-label{color:var(--muted);font-weight:500;width:100%;}`,
+      `@media(min-width:520px){.ws-group-by-label{width:auto;}}`,
+      `.ws-group-by label{display:flex;align-items:center;gap:.3rem;cursor:pointer;}`,
+      `.ws-group-by input[type="radio"]{cursor:pointer;accent-color:var(--link);}`,
+      `.ws-doc-rendering{display:block;font-size:.78rem;font-weight:700;font-variant:small-caps;`,
+      `letter-spacing:.02em;color:var(--muted);margin:.15rem 0 .1rem;}`
+    ].join("");
+    document.head.appendChild(style);
+  }
+  function wireGroupBy(data) {
+    const slots = data.ancientWord.slots;
+    const fileTotal = data.ancientWord._meta.totalInstances;
+    const form = document.getElementById("ws-group-by-form");
+    if (!form) return;
+    function applyMode(mode) {
+      const container = document.getElementById("ws-slots");
+      if (!container) return;
+      if (mode === "grammar") {
+        const { html } = renderSlotsSection(slots, fileTotal);
+        container.innerHTML = html;
+      } else if (mode === "translation") {
+        container.innerHTML = renderByTranslation(slots, fileTotal);
+      } else {
+        container.innerHTML = renderByDocument(slots);
+      }
+      wireExpandAll();
+    }
+    let saved = DEFAULT_GROUPBY;
+    try {
+      saved = localStorage.getItem(GROUPBY_KEY) ?? DEFAULT_GROUPBY;
+    } catch {
+    }
+    const radio = form.querySelector(`input[value="${CSS.escape(saved)}"]`);
+    if (radio) radio.checked = true;
+    applyMode(saved);
+    form.addEventListener("change", (e) => {
+      const target = e.target;
+      if (target.type !== "radio" || target.name !== "ws-group-by") return;
+      try {
+        localStorage.setItem(GROUPBY_KEY, target.value);
+      } catch {
+      }
+      applyMode(target.value);
+    });
+  }
   function renderInstance(inst, rendering) {
     const url = refToUrl(inst.ref);
     const refHtml = url ? `<a class="ws-ref" href="${url}">${esc(formatRef(inst.ref))}</a>` : `<span class="ws-ref">${esc(formatRef(inst.ref))}</span>`;
@@ -248,13 +404,11 @@
     };
   }
   function renderFooter(overflow, relatedFiles, crossRefs, meta) {
+    const anchorHtml = relatedFiles?.length || crossRefs?.length ? `<span id="ws-related-anchor"></span>` : "";
     const parts = [];
     if (overflow && Object.keys(overflow).length > 0) {
       const items = Object.entries(overflow).map(([fn, label]) => `<li>${wordLink(fn, label)}</li>`).join("");
       parts.push(`<section class="ws-overflow-links"><h2>More Instances</h2><ul>${items}</ul></section>`);
-    }
-    if (relatedFiles?.length || crossRefs?.length) {
-      parts.push(`<span id="ws-related-anchor"></span>`);
     }
     if (relatedFiles?.length) {
       const selfLabel = meta.rootTranslation ? `${meta.rootTranslation} (${meta.lang}, ${meta.strongsId})` : `${meta.wordKey} (${meta.lang}, ${meta.strongsId})`;
@@ -282,7 +436,7 @@
         `<section class="ws-crossrefs"><h2>Loosely Related Pages</h2><p class="ws-section-desc">Pages about original language words that occasionally have the same English translation</p><ul>${items}</ul></section>`
       );
     }
-    return parts.length ? `<div class="ws-footer">${parts.join("")}</div>` : "";
+    return parts.length ? `${anchorHtml}<div class="ws-footer">${parts.join("")}</div>` : "";
   }
   function renderMain(data, container) {
     const meta = data.ancientWord._meta;
@@ -314,6 +468,7 @@
       `<h1>${esc(displayWord)}${esc(suffix)} <span class="ws-title-sub">\xB7 ${subtitleParts.join(" \xB7 ")}</span></h1>`,
       `<p class="ws-meta-stats">${meta.totalInstances.toLocaleString()} total instance${meta.totalInstances === 1 ? "" : "s"} \xB7 ${mergedSlotCount} grammar slot${mergedSlotCount === 1 ? "" : "s"}${expandBtn}</p>`,
       seeAlsoHtml,
+      renderGroupByControl(),
       `<div id="ws-slots">${slotsHtml}</div>`,
       footer
     ].join("");
@@ -388,7 +543,11 @@
     } else {
       renderMain(data, renderEl);
     }
+    injectGroupByStyles();
     wireExpandAll();
     handleFragmentScroll();
+    if (!(data.type === "overflow")) {
+      wireGroupBy(data);
+    }
   })();
 })();

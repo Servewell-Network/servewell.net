@@ -216,7 +216,11 @@ let samplesCopied = 0;
 for (const name of TEST_R2_SAMPLES) {
   const src = path.join(OUT_DIR, `${name}.html`);
   if (fs.existsSync(src)) {
-    fs.copyFileSync(src, path.join(TEST_R2_DIR, `${name}.html`));
+    // Rewrite production script URLs to localhost so wrangler dev serves the
+    // locally-built JS rather than the deployed production files.
+    const content = fs.readFileSync(src, 'utf8')
+      .replaceAll('https://servewell.net/', 'http://localhost:8787/');
+    fs.writeFileSync(path.join(TEST_R2_DIR, `${name}.html`), content, 'utf8');
     samplesCopied++;
   }
 }

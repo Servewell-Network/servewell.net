@@ -208,7 +208,7 @@
 			}
 
 			const rawSlides = [
-				...baseRun('Run 1'),
+				...baseRun('Light Mode'),
 				{ type: 'action', title: 'Action: Open app menu', selector: '[data-action="menu-open"]', event: 'click' },
 				{ type: 'action', title: 'Action: Enable transliteration', selector: 'input[data-module-id="transliteration"]', event: 'check' },
 				{ type: 'action', title: 'Action: Enable dark mode', selector: 'input[data-setting="dark-mode"]', event: 'check' },
@@ -216,29 +216,22 @@
 				{ type: 'page', title: 'Dark Mode: Recent Changes - Wide', path: '/recent-changes', width: 1220, height: 600 },
 				{ type: 'page', title: 'Dark Mode: Recent Changes - Narrow', path: '/recent-changes', width: 375, height: 600 },
 
-				{ type: 'page', title: 'Run 2: Home - Wide', path: '/', width: 1220, height: 600 },
+				{ type: 'page', title: 'Dark Mode: Home - Wide', path: '/', width: 1220, height: 600 },
 				{ type: 'action', title: 'Action: Open account popover', selector: '[data-auth-menu-toggle]', event: 'click' },
 				{ type: 'action', title: 'Action: Close account popover', selector: '[data-auth-menu-toggle]', event: 'click' },
-				{ type: 'page', title: 'Run 2: Home - Narrow', path: '/', width: 375, height: 600 },
+				{ type: 'page', title: 'Dark Mode: Home - Narrow', path: '/', width: 375, height: 600 },
 
-				{ type: 'page', title: 'Run 2: Features - Wide', path: '/features', width: 1220, height: 600 },
+				{ type: 'page', title: 'Dark Mode: Features - Wide', path: '/features', width: 1220, height: 600 },
 				{ type: 'action', title: 'Action: Open vote popover', selector: '.votes-cell', event: 'click' },
 				{ type: 'action', title: 'Action: Click vote button', selector: '#voteUpBtn', event: 'click' },
 				{ type: 'action', title: 'Action: Open account from features', selector: '[data-auth-menu-toggle]', event: 'click' },
 				{ type: 'action', title: 'Action: Open main feature popover', selector: '.task-name', event: 'click' },
-				{ type: 'page', title: 'Run 2: Features - Narrow', path: '/features', width: 375, height: 600 },
+				{ type: 'page', title: 'Dark Mode: Features - Narrow', path: '/features', width: 375, height: 600 },
 
-				{ type: 'page', title: "Run 2: What's Next - Wide", path: '/whats-next', width: 1220, height: 600 },
-				{ type: 'page', title: "Run 2: What's Next - Narrow", path: '/whats-next', width: 375, height: 600 },
-				{ type: 'page', title: 'Run 2: Recent Changes - Wide', path: '/recent-changes', width: 1220, height: 600 },
-				{ type: 'page', title: 'Run 2: Recent Changes - Narrow', path: '/recent-changes', width: 375, height: 600 },
-				{ type: 'page', title: 'Run 2: About - Wide', path: '/about', width: 1220, height: 600 },
-				{ type: 'page', title: 'Run 2: About - Narrow', path: '/about', width: 375, height: 600 },
-				{ type: 'page', title: 'Run 2: Genesis 1', path: '/-/Genesis/1', width: 1220, height: 600 },
-				{ type: 'page', title: 'Run 2: Malachi 4:6', path: '/-/Malachi/4#6', width: 1220, height: 600 },
+				{ type: 'page', title: 'Dark Mode: Genesis 1', path: '/-/Genesis/1', width: 1220, height: 600 },
+				{ type: 'page', title: 'Dark Mode: Malachi 4:6', path: '/-/Malachi/4#6', width: 1220, height: 600 },
 				{ type: 'action', title: 'Action: Select last verse in Malachi 4', selector: '.snippet-row[id="6"] .verse-num[aria-label="Verse 6"]', event: 'click' },
-				{ type: 'page', title: 'Run 2: Matthew 1', path: '/-/Matthew/1', width: 1220, height: 600 },
-				{ type: 'page', title: 'Run 2: Revelation 22:2', path: '/-/Revelation/22#2', width: 1220, height: 600 },
+				{ type: 'page', title: 'Dark Mode: Revelation 22:2', path: '/-/Revelation/22#2', width: 1220, height: 600 },
 				{ type: 'action', title: 'Action: Enable Literal column', selector: '#column-toggle-literal', event: 'check' },
 				{ type: 'action', title: 'Action: Disable Traditional column', selector: '#column-toggle-traditional', event: 'uncheck' },
 				{ type: 'action', title: 'Action: Re-enable Traditional column', selector: '#column-toggle-traditional', event: 'check' },
@@ -258,7 +251,25 @@
 				{ type: 'page', title: 'Word Study: love (common word, multiple slots)', path: '/test-r2/love', width: 1220, height: 600 },
 				{ type: 'page', title: 'Word Study: grace (Greek NT word)', path: '/test-r2/grace', width: 1220, height: 600 },
 				{ type: 'page', title: 'Word Study: create (Hebrew verb, overflow)', path: '/test-r2/create', width: 1220, height: 600 },
-				{ type: 'page', title: 'Word Study: aaron - Narrow', path: '/test-r2/aaron', width: 375, height: 600 }
+				{ type: 'page', title: 'Word Study: aaron - Narrow', path: '/test-r2/aaron', width: 375, height: 600 },
+
+				// Group-by: translation (default)
+				{ type: 'page',   title: 'Group by — love: translation (default)', path: '/test-r2/love', width: 1220, height: 700, waitMs: 1200 },
+				{ type: 'action', title: 'Action: Select "translation" grouping on love', selector: '#ws-group-by-form input[value="translation"]', event: 'click', waitMs: 800 },
+
+				// Group by grammar
+				{ type: 'action', title: 'Action: Select "grammar" grouping on love', selector: '#ws-group-by-form input[value="grammar"]', event: 'click', waitMs: 600 },
+
+				// Group by document
+				{ type: 'action', title: 'Action: Select "document" grouping on love', selector: '#ws-group-by-form input[value="document"]', event: 'click', waitMs: 600 },
+
+				// Narrow viewport — confirm label wraps and radios stay accessible
+				{ type: 'page',   title: 'Group by — love: translation - Narrow', path: '/test-r2/love', width: 375, height: 700, waitMs: 1200 },
+				{ type: 'action', title: 'Action: Select "document" grouping (narrow)', selector: '#ws-group-by-form input[value="document"]', event: 'click', waitMs: 600 },
+				{ type: 'action', title: 'Action: Select "grammar" grouping (narrow)', selector: '#ws-group-by-form input[value="grammar"]', event: 'click', waitMs: 600 },
+
+				// Verify on a second word to confirm localStorage persistence carries over
+				{ type: 'page',   title: 'Group by — grace: persisted grouping from localStorage', path: '/test-r2/grace', width: 1220, height: 700, waitMs: 1200 }
 			];
 
 			const slides = [];
@@ -439,6 +450,8 @@
 					if (slide.type === 'action') {
 						await executeAction(slide);
 						detail.textContent = `${detail.textContent} - complete`;
+					} else if (slide.waitMs) {
+						await sleep(slide.waitMs);
 					}
 					window.scrollTo(0, 0);
 					if (frameWrap) {
