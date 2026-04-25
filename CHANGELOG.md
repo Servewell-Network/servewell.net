@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.0.8](https://github.com/Servewell-Network/servewell.net/compare/v0.0.7...v0.0.8) (2026-04-25)
+
+
+### Features
+
+* let users search for Bible book name without typing chapter ([9ef0ed1](https://github.com/Servewell-Network/servewell.net/commit/9ef0ed1ce5d37210b00aae3f44a0336cfaea63a2))
+* let word study pages be grouped by translation, grammar or document ([eaf4be0](https://github.com/Servewell-Network/servewell.net/commit/eaf4be0cb2bcfff31b8e6cecc85aecc9f14a1666))
+
+
+### Bug Fixes
+
+* partial search terms should not impede search ([08f3d15](https://github.com/Servewell-Network/servewell.net/commit/08f3d15f4d5f3474ad68f577bcc638743fa89b9c))
+
 ## [0.0.7](https://github.com/Servewell-Network/servewell.net/compare/v0.0.6...v0.0.7) (2026-04-23)
 
 
