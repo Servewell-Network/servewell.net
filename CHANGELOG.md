@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/Servewell-Network/servewell.net/compare/v0.0.8...v0.1.0) (2026-04-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* reporting 66 rough draft searchable Bible documents with word study pages
+
+### Features
+
+* reporting 66 rough draft searchable Bible documents with word study pages ([f2cccd2](https://github.com/Servewell-Network/servewell.net/commit/f2cccd2d585c0e6c98e3b11cb946c745996e512c))
+* updates to the What's Next and Features pages ([a24e066](https://github.com/Servewell-Network/servewell.net/commit/a24e0664311cd8d3e675306b586fed9a81d87ff9))
+
 ## [0.0.8](https://github.com/Servewell-Network/servewell.net/compare/v0.0.7...v0.0.8) (2026-04-25)
 
 
