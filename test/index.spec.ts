@@ -509,4 +509,126 @@ describe('servewell worker', () => {
 		expect(response.status).toBe(200);
 		await expect(response.json()).resolves.toEqual({ success: true });
 	});
+
+	it('rejects suggestion submission when not signed in', async () => {
+		const response = await workerFetch('/api/suggestions', jsonRequest({
+			title: 'A great idea',
+			description: 'Here is why.',
+			categories: ['content']
+		}));
+		expect(response.status).toBe(401);
+	});
+
+	it('rejects suggestion when no category is provided', async () => {
+		const { cookie } = await signInTestUser();
+		const response = await workerFetch('/api/suggestions', {
+			...jsonRequest({ title: 'A great idea', description: 'Here is why.', categories: [] }),
+			headers: { 'content-type': 'application/json', cookie }
+		});
+		expect(response.status).toBe(400);
+		await expect(response.json()).resolves.toMatchObject({
+			error: expect.stringContaining('category')
+		});
+	});
+
+	it('accepts a valid suggestion and returns an id', async () => {
+		const { cookie } = await signInTestUser();
+		const response = await workerFetch('/api/suggestions', {
+			...jsonRequest({ title: 'Translation comparison', description: 'Allow side-by-side translations.', categories: ['content'] }),
+			headers: { 'content-type': 'application/json', cookie }
+		});
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toMatchObject({
+			success: true,
+			id: expect.any(String)
+		});
+	});
+
+	it('rejects suggestions queue for unauthenticated users', async () => {
+		const response = await workerFetch('/api/moderation/suggestions/queue');
+		expect(response.status).toBe(401);
+	});
+
+	it('rejects suggestions queue for users without moderator or developer role', async () => {
+		const { cookie } = await signInTestUser();
+		const response = await workerFetch('/api/moderation/suggestions/queue', {
+			headers: { cookie }
+		});
+		expect(response.status).toBe(403);
+	});
+
+	it('lets moderators view the suggestions queue', async () => {
+		const author = await signInTestUser();
+		const moderator = await signInTestUser();
+		await grantRole(moderator.cookie, 'moderator');
+
+		const submitResponse = await workerFetch('/api/suggestions', {
+			...jsonRequest({ title: 'Moderator test suggestion', description: 'Content suggestion for moderation test.', categories: ['content'] }),
+			headers: { 'content-type': 'application/json', cookie: author.cookie }
+		});
+		expect(submitResponse.status).toBe(200);
+		const { id } = await submitResponse.json() as { id: string };
+
+		const queueResponse = await workerFetch('/api/moderation/suggestions/queue', {
+			headers: { cookie: moderator.cookie }
+		});
+		expect(queueResponse.status).toBe(200);
+		const queueJson = await queueResponse.json() as { items: Array<{ id: string; title: string; categories: string[]; authorEmail: string }> };
+		const item = queueJson.items.find((i) => i.id === id);
+		expect(item).toBeTruthy();
+		expect(item?.title).toBe('Moderator test suggestion');
+		expect(item?.categories).toContain('content');
+		expect(item?.authorEmail).toBe(author.email);
+	});
+
+	it('lets developers view the suggestions queue', async () => {
+		const developer = await signInTestUser();
+		await grantRole(developer.cookie, 'developer');
+
+		const submitResponse = await workerFetch('/api/suggestions', {
+			...jsonRequest({ title: 'Developer test suggestion', description: 'Code suggestion for developer test.', categories: ['code'] }),
+			headers: { 'content-type': 'application/json', cookie: developer.cookie }
+		});
+		expect(submitResponse.status).toBe(200);
+
+		const queueResponse = await workerFetch('/api/moderation/suggestions/queue', {
+			headers: { cookie: developer.cookie }
+		});
+		expect(queueResponse.status).toBe(200);
+		const queueJson = await queueResponse.json() as { items: Array<{ id: string }> };
+		expect(Array.isArray(queueJson.items)).toBe(true);
+	});
+
+	it('returns notification preferences defaulting to opted-in', async () => {
+		const { cookie } = await signInTestUser();
+		const response = await workerFetch('/api/notification-preferences', {
+			headers: { cookie }
+		});
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toMatchObject({
+			notifySuggestions: true
+		});
+	});
+
+	it('saves and retrieves updated notification preference', async () => {
+		const { cookie } = await signInTestUser();
+
+		const saveResponse = await workerFetch('/api/notification-preferences', {
+			...jsonRequest({ notifySuggestions: false }),
+			headers: { 'content-type': 'application/json', cookie }
+		});
+		expect(saveResponse.status).toBe(200);
+		await expect(saveResponse.json()).resolves.toMatchObject({
+			success: true,
+			notifySuggestions: false
+		});
+
+		const getResponse = await workerFetch('/api/notification-preferences', {
+			headers: { cookie }
+		});
+		expect(getResponse.status).toBe(200);
+		await expect(getResponse.json()).resolves.toMatchObject({
+			notifySuggestions: false
+		});
+	});
 });

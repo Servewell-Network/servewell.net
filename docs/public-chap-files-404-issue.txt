@@ -438,3 +438,8 @@ Apr 23 I deployed with full pre-deploy, and I think an hour later all chapter pa
 Based on history, I then did a simple npx wrangler deploy, and they came back and stayed up.
 I'm not sure why or what to do.
 
+Apr 25 I did pre-deploy full except no word pages, 
+  and it stayed up much of the day and then seemed to start failing for no reason.
+I did another pre-deploy full except no word pages, 
+  and it stayed up 17:55 to 18:37, so about 40 minutes.
+I did a simple npx wrangler deploy at around 18:41

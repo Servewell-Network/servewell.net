@@ -23,6 +23,7 @@ const TABLES_SQL = [
 	`CREATE TABLE IF NOT EXISTS auth_users (
 		id TEXT PRIMARY KEY,
 		email TEXT NOT NULL UNIQUE,
+		known_name TEXT,
 		created_at INTEGER NOT NULL
 	)`,
 	`CREATE TABLE IF NOT EXISTS auth_magic_links (
@@ -108,7 +109,40 @@ const TABLES_SQL = [
 		FOREIGN KEY (moderator_user_id) REFERENCES auth_users(id)
 	)`,
 	`CREATE INDEX IF NOT EXISTS idx_verse_commentary_verse_status ON verse_commentary_submissions(verse_key, status, updated_at)`,
-	`CREATE INDEX IF NOT EXISTS idx_verse_commentary_author_verse ON verse_commentary_submissions(author_user_id, verse_key, updated_at)`
+	`CREATE INDEX IF NOT EXISTS idx_verse_commentary_author_verse ON verse_commentary_submissions(author_user_id, verse_key, updated_at)`,
+	`CREATE TABLE IF NOT EXISTS general_suggestions (
+		id TEXT PRIMARY KEY,
+		user_id TEXT NOT NULL,
+		title TEXT NOT NULL,
+		description TEXT NOT NULL,
+		categories TEXT NOT NULL DEFAULT '[]',
+		status TEXT NOT NULL DEFAULT 'pending',
+		resolution_notes TEXT,
+		moderator_user_id TEXT,
+		notify_submitter INTEGER NOT NULL DEFAULT 1,
+		submitter_name TEXT,
+		created_at INTEGER NOT NULL,
+		updated_at INTEGER NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES auth_users(id),
+		FOREIGN KEY (moderator_user_id) REFERENCES auth_users(id)
+	)`,
+	`CREATE INDEX IF NOT EXISTS idx_general_suggestions_status ON general_suggestions(status, created_at)`,
+	`CREATE TABLE IF NOT EXISTS notification_preferences (
+		user_id TEXT PRIMARY KEY,
+		notify_suggestions INTEGER NOT NULL DEFAULT 1,
+		updated_at INTEGER NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES auth_users(id)
+	)`,
+	`CREATE TABLE IF NOT EXISTS pending_notifications (
+		id TEXT PRIMARY KEY,
+		recipient_user_id TEXT NOT NULL,
+		suggestion_id TEXT NOT NULL,
+		created_at INTEGER NOT NULL,
+		sent_at INTEGER,
+		FOREIGN KEY (recipient_user_id) REFERENCES auth_users(id),
+		FOREIGN KEY (suggestion_id) REFERENCES general_suggestions(id)
+	)`,
+	`CREATE INDEX IF NOT EXISTS idx_pending_notifications_unsent ON pending_notifications(sent_at, created_at)`
 ];
 
 export default {
@@ -167,6 +201,21 @@ export default {
 		if (url.pathname === '/api/moderation/verse-commentary/rejected' && method === 'GET') {
 			return handleGetRejectedModerationItems(request, env as AuthDbEnv);
 		}
+		if (url.pathname === '/api/moderation/verse-commentary/processed' && method === 'GET') {
+			return handleGetRejectedModerationItems(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/suggestions' && method === 'POST') {
+			return handleSubmitSuggestion(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/moderation/suggestions/queue' && method === 'GET') {
+			return handleGetSuggestionsQueue(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/notification-preferences' && method === 'GET') {
+			return handleGetNotifPrefs(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/notification-preferences' && method === 'POST') {
+			return handleUpdateNotifPrefs(request, env as AuthDbEnv);
+		}
 
 		// Vote endpoints
 		if (url.pathname === '/api/votes' && method === 'GET') {
@@ -178,6 +227,10 @@ export default {
 
 		// Fallback to static assets
 		return new Response('Not Found', { status: 404 });
+	},
+
+	async scheduled(_event, env, _ctx): Promise<void> {
+		await runNotificationSweep(env as AuthDbEnv);
 	},
 } satisfies ExportedHandler<Env>;
 
@@ -1248,6 +1301,21 @@ async function ensureAuthTables(db: D1Database): Promise<void> {
 		await db.prepare(sql).run();
 	}
 	await ensureVerseCommentarySchema(db);
+	// Add known_name to auth_users if it was created before this column existed
+	const userCols = await db.prepare('PRAGMA table_info(auth_users)').all<{ name: string }>();
+	const userColNames = new Set((userCols.results || []).map((c) => c.name));
+	if (!userColNames.has('known_name')) {
+		await db.prepare('ALTER TABLE auth_users ADD COLUMN known_name TEXT').run();
+	}
+	// Add notify_submitter to general_suggestions if it was created before this column existed
+	const suggCols = await db.prepare('PRAGMA table_info(general_suggestions)').all<{ name: string }>();
+	const suggNames = new Set((suggCols.results || []).map((c) => c.name));
+	if (!suggNames.has('notify_submitter')) {
+		await db.prepare('ALTER TABLE general_suggestions ADD COLUMN notify_submitter INTEGER NOT NULL DEFAULT 1').run();
+	}
+	if (!suggNames.has('submitter_name')) {
+		await db.prepare('ALTER TABLE general_suggestions ADD COLUMN submitter_name TEXT').run();
+	}
 }
 
 function getAuthOrigin(url: URL, env: AuthDbEnv): string {
@@ -1582,5 +1650,280 @@ async function handleVote(request: Request, env: Env, url: URL): Promise<Respons
 			status: 500,
 			headers: { 'Content-Type': 'application/json' },
 		});
+	}
+}
+
+// ---- Suggestion Handlers ----
+
+type SuggestionCategory = 'content' | 'code';
+
+function sanitizeSuggestionTitle(value: unknown): string {
+	const raw = typeof value === 'string' ? value.trim() : '';
+	return raw.slice(0, 200);
+}
+
+function sanitizeSuggestionDescription(value: unknown): string {
+	const raw = typeof value === 'string' ? value.trim() : '';
+	return raw.slice(0, 4000);
+}
+
+function sanitizeSuggestionCategories(value: unknown): SuggestionCategory[] {
+	if (!Array.isArray(value)) return [];
+	const valid: SuggestionCategory[] = [];
+	for (const item of value) {
+		if (item === 'content' || item === 'code') valid.push(item);
+	}
+	return valid;
+}
+
+async function handleSubmitSuggestion(request: Request, env: AuthDbEnv): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const user = await requireAuthUser(request, env);
+	if (!user) return jsonResponse({ error: 'Sign-in required' }, 401);
+
+	const body = await parseBody(request);
+	const title = sanitizeSuggestionTitle(body.title);
+	const description = sanitizeSuggestionDescription(body.description);
+	const categories = sanitizeSuggestionCategories(body.categories);
+	const submitterName = typeof body.submitterName === 'string' ? body.submitterName.trim().slice(0, 120) : null;
+
+	if (!title) return jsonResponse({ error: 'title is required' }, 400);
+	if (!description) return jsonResponse({ error: 'description is required' }, 400);
+	if (categories.length === 0) return jsonResponse({ error: 'At least one category (content or code) is required' }, 400);
+
+	const notifySubmitter = body.notifyMe === false || body.notifyMe === 'false' ? 0 : 1;
+	const now = Date.now();
+	const id = crypto.randomUUID();
+	await db
+		.prepare(
+			`INSERT INTO general_suggestions (id, user_id, title, description, categories, status, notify_submitter, submitter_name, created_at, updated_at)
+			 VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)`
+		)
+		.bind(id, user.id, title, description, JSON.stringify(categories), notifySubmitter, submitterName || null, now, now)
+		.run();
+
+	// Enqueue notifications for role users who have opted in
+	await enqueueSuggestionNotifications(db, env, id, categories, now);
+
+	// Persist the submitter name on the user record if provided
+	if (submitterName) {
+		const userRow = await db
+			.prepare('SELECT known_name FROM auth_users WHERE id = ? LIMIT 1')
+			.bind(user.id)
+			.first<{ known_name: string | null }>();
+		const existing = userRow?.known_name || null;
+		const names = existing ? existing.split('|').map((s) => s.trim()) : [];
+		if (!names.includes(submitterName)) {
+			names.push(submitterName);
+			await db
+				.prepare('UPDATE auth_users SET known_name = ? WHERE id = ?')
+				.bind(names.join(' | '), user.id)
+				.run();
+		}
+	}
+
+	return jsonResponse({ success: true, id });
+}
+
+async function enqueueSuggestionNotifications(
+	db: D1Database,
+	env: AuthDbEnv,
+	suggestionId: string,
+	categories: SuggestionCategory[],
+	now: number
+): Promise<void> {
+	const recipientEmails = new Set<string>();
+
+	if (categories.includes('content')) {
+		for (const email of getConfiguredModeratorEmails(env)) recipientEmails.add(email);
+	}
+	if (categories.includes('code')) {
+		for (const email of getConfiguredDeveloperEmails(env)) recipientEmails.add(email);
+	}
+
+	if (recipientEmails.size === 0) return;
+
+	// Look up user IDs for these emails
+	const placeholders = Array.from(recipientEmails).map(() => '?').join(', ');
+	const rows = await db
+		.prepare(`SELECT id, email FROM auth_users WHERE email IN (${placeholders})`)
+		.bind(...Array.from(recipientEmails))
+		.all<{ id: string; email: string }>();
+
+	for (const row of (rows.results || [])) {
+		// Check notification preference (default: notify)
+		const pref = await db
+			.prepare('SELECT notify_suggestions FROM notification_preferences WHERE user_id = ?')
+			.bind(row.id)
+			.first<{ notify_suggestions: number }>();
+		if (pref && pref.notify_suggestions === 0) continue;
+
+		const notifId = crypto.randomUUID();
+		await db
+			.prepare('INSERT OR IGNORE INTO pending_notifications (id, recipient_user_id, suggestion_id, created_at) VALUES (?, ?, ?, ?)')
+			.bind(notifId, row.id, suggestionId, now)
+			.run();
+	}
+}
+
+async function handleGetSuggestionsQueue(request: Request, env: AuthDbEnv): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	// Accessible to both moderators and developers
+	const user = await requireAuthUser(request, env);
+	if (!user) return jsonResponse({ error: 'Sign-in required' }, 401);
+	const roles = await getUserRoles(db, user.id);
+	if (!roles.includes('moderator') && !roles.includes('developer')) {
+		return jsonResponse({ error: 'Moderator or developer role required' }, 403);
+	}
+
+	const rows = await db
+		.prepare(
+			`SELECT s.id, s.title, s.description, s.categories, s.status, s.created_at, s.submitter_name,
+			        u.email as author_email
+			 FROM general_suggestions s
+			 JOIN auth_users u ON s.user_id = u.id
+			 WHERE s.status = 'pending'
+			 ORDER BY s.created_at ASC
+			 LIMIT 100`
+		)
+		.all<{ id: string; title: string; description: string; categories: string; status: string; created_at: number; author_email: string; submitter_name: string | null }>();
+
+	const items = (rows.results || []).map((row) => ({
+		id: row.id,
+		title: row.title,
+		description: row.description,
+		categories: parseCategories(row.categories),
+		status: row.status,
+		createdAt: row.created_at,
+		authorEmail: row.author_email,
+		submitterName: row.submitter_name || null,
+	}));
+
+	return jsonResponse({ items });
+}
+
+function parseCategories(raw: string): SuggestionCategory[] {
+	try {
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? sanitizeSuggestionCategories(parsed) : [];
+	} catch {
+		return [];
+	}
+}
+
+async function handleGetNotifPrefs(request: Request, env: AuthDbEnv): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const user = await requireAuthUser(request, env);
+	if (!user) return jsonResponse({ error: 'Sign-in required' }, 401);
+
+	const pref = await db
+		.prepare('SELECT notify_suggestions FROM notification_preferences WHERE user_id = ?')
+		.bind(user.id)
+		.first<{ notify_suggestions: number }>();
+
+	return jsonResponse({ notifySuggestions: pref ? pref.notify_suggestions !== 0 : true });
+}
+
+async function handleUpdateNotifPrefs(request: Request, env: AuthDbEnv): Promise<Response> {
+	const db = env.AUTH_DB;
+	if (!db) return jsonResponse({ error: 'Auth database is not configured' }, 503);
+	await ensureAuthTables(db);
+
+	const user = await requireAuthUser(request, env);
+	if (!user) return jsonResponse({ error: 'Sign-in required' }, 401);
+
+	const body = await parseBody(request);
+	const notifySuggestions = body.notifySuggestions === true || body.notifySuggestions === 'true' ? 1 : 0;
+	const now = Date.now();
+
+	await db
+		.prepare(
+			`INSERT INTO notification_preferences (user_id, notify_suggestions, updated_at) VALUES (?, ?, ?)
+			 ON CONFLICT(user_id) DO UPDATE SET notify_suggestions = excluded.notify_suggestions, updated_at = excluded.updated_at`
+		)
+		.bind(user.id, notifySuggestions, now)
+		.run();
+
+	return jsonResponse({ success: true, notifySuggestions: notifySuggestions !== 0 });
+}
+
+// ---- Notification Sweep (Cron) ----
+
+async function runNotificationSweep(env: AuthDbEnv): Promise<void> {
+	const db = env.AUTH_DB;
+	if (!db) return;
+	await ensureAuthTables(db);
+
+	const apiKey = (env.RESEND_API_KEY || '').trim();
+	const fromEmail = (env.AUTH_FROM_EMAIL || '').trim();
+	if (!apiKey || !fromEmail) return;
+
+	const rows = await db
+		.prepare(
+			`SELECT pn.id, pn.recipient_user_id, pn.suggestion_id,
+			        u.email as recipient_email,
+			        s.title as suggestion_title, s.description as suggestion_description,
+			        s.categories as suggestion_categories
+			 FROM pending_notifications pn
+			 JOIN auth_users u ON pn.recipient_user_id = u.id
+			 JOIN general_suggestions s ON pn.suggestion_id = s.id
+			 WHERE pn.sent_at IS NULL
+			 ORDER BY pn.created_at ASC
+			 LIMIT 50`
+		)
+		.all<{
+			id: string;
+			recipient_user_id: string;
+			suggestion_id: string;
+			recipient_email: string;
+			suggestion_title: string;
+			suggestion_description: string;
+			suggestion_categories: string;
+		}>();
+
+	const now = Date.now();
+	for (const row of (rows.results || [])) {
+		const categories = parseCategories(row.suggestion_categories).join(', ');
+		const html = [
+			'<p>A new suggestion has been submitted on ServeWell.Net:</p>',
+			`<p><strong>${escapeHtml(row.suggestion_title)}</strong></p>`,
+			`<p>Category: ${escapeHtml(categories)}</p>`,
+			`<p>${escapeHtml(row.suggestion_description)}</p>`,
+			`<p><a href="https://servewell.net/list-to-moderate">Review suggestions</a></p>`,
+			`<p>To manage your notification preferences: <a href="https://servewell.net/notification-settings">notification settings</a></p>`
+		].join('');
+
+		const response = await fetch('https://api.resend.com/emails', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${apiKey}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				from: fromEmail,
+				to: [row.recipient_email],
+				subject: `New suggestion: ${row.suggestion_title.slice(0, 60)}`,
+				html
+			})
+		});
+
+		if (response.ok) {
+			await db
+				.prepare('UPDATE pending_notifications SET sent_at = ? WHERE id = ?')
+				.bind(now, row.id)
+				.run();
+		} else {
+			const details = await response.text();
+			console.error('[notif] resend error', response.status, details);
+		}
 	}
 }

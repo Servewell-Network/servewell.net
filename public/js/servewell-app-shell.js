@@ -493,6 +493,154 @@ body.app-panel-open #app-shell-root .app-overlay {
     display: none;
   }
 }
+
+#app-shell-root .app-suggestion-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.34);
+  z-index: 70;
+}
+
+#app-shell-root .app-suggestion-modal[hidden] {
+  display: none;
+}
+
+#app-shell-root .app-suggestion-modal-card {
+  width: min(92vw, 32rem);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--panel);
+  padding: 1.25rem;
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+#app-shell-root .app-suggestion-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+#app-shell-root .app-suggestion-modal-title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+#app-shell-root .app-suggestion-modal-close {
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bar);
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+#app-shell-root .app-suggestion-modal-close:hover {
+  color: var(--fg);
+  background: var(--bg);
+}
+
+#app-shell-root .app-suggestion-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+#app-shell-root .app-suggestion-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+#app-shell-root .app-suggestion-input,
+#app-shell-root .app-suggestion-textarea {
+  color: var(--fg);
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--bg);
+  font: inherit;
+}
+
+#app-shell-root .app-suggestion-textarea {
+  resize: vertical;
+  min-height: 7rem;
+}
+
+#app-shell-root .app-suggestion-checkgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+#app-shell-root .app-suggestion-checkgroup legend {
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  padding: 0;
+}
+
+#app-shell-root .app-suggestion-checkrow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+#app-shell-root .app-suggestion-message {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--bar);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+#app-shell-root .app-suggestion-message[data-tone="error"] {
+  border-color: #d97706;
+}
+
+#app-shell-root .app-suggestion-message[data-tone="success"] {
+  border-color: #15803d;
+}
+
+#app-shell-root .app-suggestion-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+#app-shell-root .app-suggestion-cancel,
+#app-shell-root .app-suggestion-submit {
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--panel);
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+#app-shell-root .app-suggestion-cancel:hover,
+#app-shell-root .app-suggestion-submit:hover {
+  background: var(--bg);
+}
+
+#app-shell-root .app-suggestion-noauth {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
 `;
     if (!qs("#app-shell-style")) {
       const style = document.createElement("style");
@@ -537,6 +685,7 @@ body.app-panel-open #app-shell-root .app-overlay {
       <a class="app-sidepanel-link" href="/whats-next">What's Next</a>
       <a class="app-sidepanel-link" href="/about">About</a>
       <a class="app-sidepanel-link" href="/list-to-moderate" data-moderation-link hidden>List to Moderate (0)</a>
+      <button type="button" class="app-sidepanel-link" data-action="open-suggestion-form" style="text-align:left;cursor:pointer;width:100%;background:none;">Make a suggestion</button>
     </section>
 
     <section>
@@ -584,6 +733,50 @@ body.app-panel-open #app-shell-root .app-overlay {
         <div class="app-auth-modal-actions">
           <button type="button" class="app-auth-modal-secondary" data-auth-modal-close>Cancel</button>
           <button type="submit" class="app-auth-modal-submit" data-auth-submit>Send sign-in link</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-suggestion-modal" data-suggestion-modal hidden>
+    <div class="app-suggestion-modal-card" role="dialog" aria-modal="true" aria-labelledby="app-suggestion-modal-title">
+      <div class="app-suggestion-modal-header">
+        <h3 class="app-suggestion-modal-title" id="app-suggestion-modal-title">Make a suggestion</h3>
+        <button type="button" class="app-suggestion-modal-close" data-suggestion-modal-close aria-label="Close suggestion dialog">\u2715</button>
+      </div>
+      <p class="app-suggestion-noauth" data-suggestion-noauth hidden>You need to be signed in to make a suggestion. Sign in via the Account menu and try again.</p>
+      <form class="app-suggestion-form" data-suggestion-form>
+        <label class="app-suggestion-label">
+          <span>Title</span>
+          <input class="app-suggestion-input" type="text" data-suggestion-title placeholder="Brief summary" maxlength="200" required>
+        </label>
+        <label class="app-suggestion-label">
+          <span>Description</span>
+          <textarea class="app-suggestion-textarea" data-suggestion-description placeholder="Details, context, or examples" maxlength="4000" required></textarea>
+        </label>
+        <label class="app-suggestion-label">
+          <span>Your name <span style="font-weight:400;opacity:0.7;">(optional \u2014 shown to moderators)</span></span>
+          <input class="app-suggestion-input" type="text" data-suggestion-submitter-name placeholder="Leave blank to stay anonymous" maxlength="120">
+        </label>
+        <fieldset class="app-suggestion-checkgroup">
+          <legend>Category \u2014 who should review this?</legend>
+          <label class="app-suggestion-checkrow">
+            <input type="checkbox" data-suggestion-cat="content">
+            <span>Content \u2014 a suggestion about Bible text, commentary, or translations (goes to moderators)</span>
+          </label>
+          <label class="app-suggestion-checkrow">
+            <input type="checkbox" data-suggestion-cat="code">
+            <span>Code \u2014 a suggestion about features, design, or how the site works (goes to developers)</span>
+          </label>
+        </fieldset>
+        <label class="app-suggestion-checkrow" style="margin-top:0.5rem;">
+          <input type="checkbox" data-suggestion-notify-me checked>
+          <span>Email me when there are updates about my suggestion</span>
+        </label>
+        <p class="app-suggestion-message" data-suggestion-message hidden></p>
+        <div class="app-suggestion-actions">
+          <button type="button" class="app-suggestion-cancel" data-suggestion-modal-close>Cancel</button>
+          <button type="submit" class="app-suggestion-submit" data-suggestion-submit disabled>Send suggestion</button>
         </div>
       </form>
     </div>
@@ -827,6 +1020,123 @@ body.app-panel-open #app-shell-root .app-overlay {
         }
       });
     });
+    const suggestionModal = qs("[data-suggestion-modal]");
+    const suggestionForm = qs("[data-suggestion-form]");
+    const suggestionNoAuth = qs("[data-suggestion-noauth]");
+    const suggestionMessage = qs("[data-suggestion-message]");
+    const suggestionSubmit = qs("[data-suggestion-submit]");
+    function openSuggestionForm() {
+      closePanel();
+      if (!suggestionModal) return;
+      suggestionModal.removeAttribute("hidden");
+      suggestionForm?.reset();
+      clearSuggestionMessage();
+      if (authState.authenticated) {
+        if (suggestionNoAuth) suggestionNoAuth.hidden = true;
+        if (suggestionForm) suggestionForm.hidden = false;
+        updateSuggestionSubmitButton();
+        window.setTimeout(() => {
+          const titleInput = qs("[data-suggestion-title]");
+          titleInput?.focus();
+        }, 0);
+      } else {
+        if (suggestionNoAuth) suggestionNoAuth.hidden = false;
+        if (suggestionForm) suggestionForm.hidden = true;
+      }
+    }
+    function closeSuggestionForm() {
+      suggestionModal?.setAttribute("hidden", "");
+      clearSuggestionMessage();
+    }
+    function setSuggestionMessage(message, tone) {
+      if (!suggestionMessage) return;
+      suggestionMessage.hidden = false;
+      suggestionMessage.textContent = message;
+      suggestionMessage.dataset.tone = tone;
+    }
+    function clearSuggestionMessage() {
+      if (!suggestionMessage) return;
+      suggestionMessage.hidden = true;
+      suggestionMessage.textContent = "";
+      delete suggestionMessage.dataset.tone;
+    }
+    qsa("[data-suggestion-modal-close]").forEach((button) => {
+      button.addEventListener("click", () => closeSuggestionForm());
+    });
+    function updateSuggestionSubmitButton() {
+      if (!suggestionSubmit) return;
+      const title = qs("[data-suggestion-title]")?.value.trim() || "";
+      const description = qs("[data-suggestion-description]")?.value.trim() || "";
+      const anyCatChecked = qsa("[data-suggestion-cat]").some((el) => el.checked);
+      suggestionSubmit.disabled = !title || !description || !anyCatChecked;
+    }
+    suggestionForm?.addEventListener("input", updateSuggestionSubmitButton);
+    suggestionForm?.addEventListener("change", updateSuggestionSubmitButton);
+    suggestionModal?.addEventListener("click", (event) => {
+      if (event.target === suggestionModal) closeSuggestionForm();
+    });
+    suggestionForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const titleInput = qs("[data-suggestion-title]");
+      const descInput = qs("[data-suggestion-description]");
+      const nameInput = qs("[data-suggestion-submitter-name]");
+      const catInputs = qsa("[data-suggestion-cat]");
+      const notifyMeInput = qs("[data-suggestion-notify-me]");
+      const title = titleInput?.value.trim() || "";
+      const description = descInput?.value.trim() || "";
+      const submitterName = nameInput?.value.trim() || "";
+      const categories = catInputs.filter((input) => input.checked).map((input) => input.dataset.suggestionCat);
+      const notifyMe = notifyMeInput ? notifyMeInput.checked : true;
+      if (!title) {
+        setSuggestionMessage("Please enter a title.", "error");
+        return;
+      }
+      if (!description) {
+        setSuggestionMessage("Please enter a description.", "error");
+        return;
+      }
+      if (categories.length === 0) {
+        setSuggestionMessage("Please select at least one category.", "error");
+        return;
+      }
+      clearSuggestionMessage();
+      if (suggestionSubmit) {
+        suggestionSubmit.disabled = true;
+        suggestionSubmit.textContent = "Sending...";
+      }
+      try {
+        const response = await fetch("/api/suggestions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description, submitterName, categories, notifyMe })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not submit suggestion");
+        setSuggestionMessage("Suggestion sent \u2014 thank you!", "success");
+        suggestionForm?.reset();
+        if (suggestionSubmit) {
+          suggestionSubmit.disabled = false;
+          suggestionSubmit.textContent = "Send suggestion";
+        }
+        window.setTimeout(() => closeSuggestionForm(), 2e3);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Could not submit suggestion";
+        setSuggestionMessage(message, "error");
+        if (suggestionSubmit) {
+          suggestionSubmit.disabled = false;
+          suggestionSubmit.textContent = "Send suggestion";
+        }
+      }
+    });
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target?.closest('[data-action="open-suggestion-form"]')) {
+        openSuggestionForm();
+      }
+    });
+    window.addEventListener("servewell-open-suggestion-form", () => {
+      openSuggestionForm();
+    });
     void refreshAuthState();
     window.addEventListener("focus", () => {
       void refreshAuthState();
@@ -896,7 +1206,8 @@ body.app-panel-open #app-shell-root .app-overlay {
       appendDemoLine,
       syncModuleInputs,
       syncDemoButtons,
-      renderModuleList
+      renderModuleList,
+      openSuggestionForm
     };
   }
 

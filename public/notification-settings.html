@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Notification Settings | ServeWell.Net</title>
+		<meta name="description" content="Manage your notification preferences for ServeWell.Net" />
+		<style>
+			body {
+				margin: 2.25rem;
+				font-family: sans-serif;
+				font-size: large;
+			}
+			main {
+				max-width: 40rem;
+			}
+			.settings-status {
+				margin-top: 1rem;
+				padding: 0.85rem 1rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.75rem;
+				background: var(--bar, #f4f4f5);
+			}
+			.settings-form {
+				margin-top: 1.5rem;
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+			}
+			.settings-form[hidden] {
+				display: none;
+			}
+			.settings-checkrow {
+				display: flex;
+				align-items: center;
+				gap: 0.55rem;
+			}
+			.settings-save {
+				align-self: flex-start;
+				padding: 0.5rem 1rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.5rem;
+				background: var(--panel, #ffffff);
+				cursor: pointer;
+				font: inherit;
+				font-size: 1rem;
+			}
+			.settings-save:hover {
+				background: var(--bg, #f4f4f5);
+			}
+			.settings-message {
+				padding: 0.7rem 0.9rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.55rem;
+				background: var(--bar, #f4f4f5);
+				font-size: 0.95rem;
+			}
+			.settings-message[hidden] {
+				display: none;
+			}
+			.settings-message[data-tone="error"] {
+				border-color: #d97706;
+			}
+			.settings-message[data-tone="success"] {
+				border-color: #15803d;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>Notification Settings</h1>
+			<p>Control which emails you receive from ServeWell.Net.</p>
+			<div id="settings-status" class="settings-status">Loading your preferences...</div>
+			<form id="settings-form" class="settings-form" hidden>
+				<label class="settings-checkrow">
+					<input type="checkbox" id="notify-suggestions" name="notifySuggestions">
+					<span>Notify me when a new suggestion is submitted</span>
+				</label>
+				<p id="settings-message" class="settings-message" hidden></p>
+				<button type="submit" class="settings-save">Save preferences</button>
+			</form>
+		</main>
+		<script src="/js/servewell-app-shell.js"></script>
+		<script src="/js/notification-settings.js"></script>
+	</body>
+</html>

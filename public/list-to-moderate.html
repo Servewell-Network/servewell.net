@@ -50,12 +50,24 @@
 	<body>
 		<main>
 			<h1>List to Moderate</h1>
-			<p>Pending verse-level commentary submissions appear here for moderators. Choose one to review and publish.</p>
-			<p><a href="/moderation-rejected">View rejected items</a></p>
-			<div id="moderation-status" class="queue-status">Loading moderation queue...</div>
-			<div id="moderation-list" class="queue-list" hidden></div>
+			<p><a href="/moderation-processed" style="color:var(--fg,#171717);opacity:0.7;">View processed items</a></p>
+
+			<section>
+				<h2>Suggestions</h2>
+				<p>General suggestions submitted via the "Make a suggestion" form.</p>
+				<div id="suggestions-status" class="queue-status">Loading suggestions...</div>
+				<div id="suggestions-list" class="queue-list" hidden></div>
+			</section>
+
+			<section>
+				<h2>Verse Commentary</h2>
+				<p>Pending verse-level commentary submissions appear here. Choose one to review and publish.</p>
+				<div id="moderation-status" class="queue-status">Loading moderation queue...</div>
+				<div id="moderation-list" class="queue-list" hidden></div>
+			</section>
 		</main>
 		<script src="/js/servewell-app-shell.js"></script>
 		<script src="/js/moderation-list.js"></script>
+		<script src="/js/suggestion-queue.js"></script>
 	</body>
 </html>

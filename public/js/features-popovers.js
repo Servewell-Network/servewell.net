@@ -280,8 +280,8 @@
       content: '<p><strong>Value</strong><br>Better search accuracy, ranking, and convenience make it significantly easier to find what you are looking for.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Improve ranking to surface the most relevant results first. Refine query parsing to handle partial words, phrases, and common Bible names. Consider autocomplete suggestions for frequently searched terms.</p>'
     },
     'need-receiving-suggestions': {
-      title: 'Receiving suggestions for content and functionality',
-      content: '<p><strong>Value</strong><br>Gives the community a clear path to share ideas, report problems, and request content improvements without requiring a GitHub account.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Add a suggestion form accessible from multiple pages. Route submissions to a moderation queue. Acknowledge receipt and provide basic status updates to submitters.</p>'
+      title: 'Receiving suggestions',
+      content: '<p><strong>Value</strong><br>Gives the community a clear path to share ideas and report problems without needing a GitHub account.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps</strong><br>Sign in to access the suggestion form via the "Make a suggestion" button on Features or What\'s Next, or from the side menu. Select whether your suggestion is about content (goes to moderators) or code (goes to developers) or both.</p>'
     },
     'need-optional-spelling': {
       title: 'Optional non-US spelling',
@@ -463,13 +463,12 @@
     });
   }
 
-  // --- Suggest Feature Button ---
+  // --- Suggest Button ---
   const suggestButton = document.getElementById('suggestButton');
   if (suggestButton) {
     suggestButton.addEventListener('click', function(e) {
       e.stopPropagation();
-      // Phase 3: This will open a suggestion form or nav to a dedicated page
-      showPopover('Suggest a Feature', '<p>Feature suggestion form coming soon!</p><p>In the meantime, suggestions welcome on <a href="https://github.com/Servewell-Network/servewell.net" style="color: var(--fg); text-decoration: underline;">GitHub</a>.</p>');
+      window.dispatchEvent(new CustomEvent('servewell-open-suggestion-form'));
     });
   }
 

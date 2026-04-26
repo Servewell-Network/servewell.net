@@ -269,7 +269,13 @@
 				{ type: 'action', title: 'Action: Select "grammar" grouping (narrow)', selector: '#ws-group-by-form input[value="grammar"]', event: 'click', waitMs: 600 },
 
 				// Verify on a second word to confirm localStorage persistence carries over
-				{ type: 'page',   title: 'Group by — grace: persisted grouping from localStorage', path: '/test-r2/grace', width: 1220, height: 700, waitMs: 1200 }
+				{ type: 'page',   title: 'Group by — grace: persisted grouping from localStorage', path: '/test-r2/grace', width: 1220, height: 700, waitMs: 1200 },
+
+				// Suggestion system
+				{ type: 'page',   title: 'Suggestion: Features page with Make a suggestion button', path: '/features', width: 1220, height: 600 },
+				{ type: 'action', title: 'Action: Open suggestion form from Make a suggestion button', selector: '#suggestButton', event: 'click' },
+				{ type: 'page',   title: 'Suggestion: Notification Settings page', path: '/notification-settings', width: 1220, height: 600 },
+				{ type: 'page',   title: 'Suggestion: List to Moderate (Suggestions section)', path: '/list-to-moderate', width: 1220, height: 600 }
 			];
 
 			const slides = [];

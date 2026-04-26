@@ -20,7 +20,8 @@
     "need-concordance-word-studies",
     "need-copy-simplification",
     "need-word-study-groupings",
-    "need-recent-changes"
+    "need-recent-changes",
+    "need-receiving-suggestions"
   ],
   "whatsNextPageIds": [
     "need-settings-in-links",
@@ -46,7 +47,6 @@
     "need-accessibility",
     "need-wcag-aa",
     "need-improved-search",
-    "need-receiving-suggestions",
     "need-optional-spelling",
     "need-second-language",
     "need-notify-developers",
