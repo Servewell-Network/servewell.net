@@ -54,7 +54,7 @@ const OVERFLOW_THRESHOLD = 1000;
 // used in whichever verse is encountered first (e.g. "charin" instead of "charis").
 // Fallback: for disambiguated IDs (e.g. H5653G, H0157G) strip the trailing
 // uppercase letter(s) or + suffix and try again.
-interface LexiconEntry { translit: string; script: string; }
+interface LexiconEntry { translit: string; script: string; fromLang?: string; }
 function buildLexiconMap(filePath: string): Map<string, LexiconEntry> {
   const map = new Map<string, LexiconEntry>();
   try {
@@ -66,7 +66,15 @@ function buildLexiconMap(filePath: string): Map<string, LexiconEntry> {
       const script = cols[3].trim();
       const translit = cols[4].trim();
       if (!id || !translit || !/^[HG]\d+/.test(id)) continue;
-      if (!map.has(id)) map.set(id, { translit, script });
+      // Detect cross-language origin from the dStrong description (col 1).
+      // e.g. "G0076 = the Greek of" → fromLang 'Hebrew'
+      //      "H0002 = in Aramaic of" → fromLang 'Hebrew'
+      let fromLang: string | undefined;
+      const desc = cols[1] ?? '';
+      if (/the Greek of/i.test(desc)) fromLang = 'Hebrew';
+      else if (/in Aramaic of/i.test(desc)) fromLang = 'Hebrew';
+      else if (/the Hebrew of/i.test(desc)) fromLang = 'Aramaic';
+      if (!map.has(id)) map.set(id, { translit, script, ...(fromLang ? { fromLang } : {}) });
     }
   } catch { /* file not present — silent, falls back gracefully */ }
   return map;
@@ -85,6 +93,15 @@ function lexiconEntry(strongsId: string): LexiconEntry | undefined {
 
 function lexiconTranslit(strongsId: string): string | undefined {
   return lexiconEntry(strongsId)?.translit;
+}
+
+/** Map dStrong# (e.g. H7307G, G4151H) to its eStrong# base (H7307, G4151).
+ * dStrong adds a trailing uppercase letter suffix to differentiate sub-meanings;
+ * stripping it yields the shared eStrong root. Entries without a suffix (e.g.
+ * H0003) are already their own eStrong and are returned unchanged.
+ */
+function toEStrong(strongsId: string): string {
+  return strongsId.replace(/[A-Z]+$/, '').replace(/\+.*$/, '');
 }
 
 const BOOK_ORDER = [
@@ -285,7 +302,8 @@ interface SlotAcc {
 }
 interface WordFileAcc {
   wordKey: string;      // canonical lemma
-  strongsId: string;
+  strongsId: string;    // eStrong ID (e.g. H7307) — organizational grouping key
+  dStrongIds: Set<string>; // all contributing dStrong IDs (e.g. H7307G, H7307H)
   lemmaScript: string;  // original-script lemma form
   lang: string;
   rootTranslation?: string;
@@ -555,21 +573,27 @@ for (const filePath of allFiles) {
 
       const grammarFn = morph.OriginalMorphemeGrammarFunction ?? 'Unknown';
       const strongsId = morph.OriginalRootStrongsID;
+      const eStrongId = toEStrong(strongsId);
       const lemma = getWordKey(morph);
       if (!lemma) continue;
-      const fileName = assignFile(lemma, strongsId);
+      const fileName = assignFile(lemma, eStrongId);
 
-      if (!strongsToFile.has(strongsId)) {
-        strongsToFile.set(strongsId, fileName);
-      }
+      if (!strongsToFile.has(strongsId)) strongsToFile.set(strongsId, fileName);
+      if (!strongsToFile.has(eStrongId)) strongsToFile.set(eStrongId, fileName);
 
       if (!wordFileData.has(fileName)) {
-        const lex = lexiconEntry(strongsId);
+        const lex = lexiconEntry(eStrongId);
         wordFileData.set(fileName, {
           wordKey: lemma,
-          strongsId,
+          strongsId: eStrongId,
+          dStrongIds: new Set(),
           lemmaScript: lex?.script || getLemma(morph),
-          lang: morph.OriginalLanguage ?? 'Unknown',
+          lang: morph.OriginalLanguage
+            ?? (() => {
+              const nativeLang = eStrongId.startsWith('G') ? 'Greek' : eStrongId.startsWith('H') ? 'Hebrew' : 'Unknown';
+              const fromLang = lexiconEntry(eStrongId)?.fromLang;
+              return fromLang ? `${nativeLang} from ${fromLang}` : nativeLang;
+            })(),
           rootTranslation: morph.EnglishRootTranslation?.trim(),
           transliteration: lex?.translit ?? (morph.OriginalMorphemeTransliteration?.trim() || undefined),
           slots: new Map(),
@@ -577,6 +601,7 @@ for (const filePath of allFiles) {
       }
 
       const data = wordFileData.get(fileName)!;
+      data.dStrongIds.add(strongsId);
       const grammarCode = morph.OriginalMorphemeGrammarCode ?? 'Unknown';
       const grammarFull = morph.OriginalMorphemeGrammar ?? '';
       const renderingKey = normalizeRendering(rawRendering);
@@ -616,7 +641,7 @@ console.log(`Unique word files to write: ${wordFileData.size}`);
 // relatedFiles is only written into the first sibling file (the bare lemma file).
 const relatedFilesMap = new Map<
   string,
-  Array<{ fileName: string; strongsId: string; lang: string; lemma: string; rootTranslation?: string }>
+  Array<{ fileName: string; strongsId: string; lang: string; lemma: string; rootTranslation?: string; translit?: string }>
 >();
 
 for (const [lemma, strongsIds] of lemmaToStrongsIds) {
@@ -626,12 +651,14 @@ for (const [lemma, strongsIds] of lemmaToStrongsIds) {
   const related = strongsIds.slice(1).map(sid => {
     const fn = assignedFileNames.get(makeFileKey(lemma, sid))!;
     const acc = wordFileData.get(fn);
+    const translit = lexiconTranslit(sid);
     return {
       fileName: fn,
       strongsId: sid,
       lang: acc?.lang ?? 'Unknown',
       lemma: acc?.lemmaScript ?? '',
       ...(acc?.rootTranslation ? { rootTranslation: acc.rootTranslation } : {}),
+      ...(translit ? { translit } : {}),
     };
   });
   relatedFilesMap.set(firstFile, related);
@@ -641,7 +668,7 @@ for (const [lemma, strongsIds] of lemmaToStrongsIds) {
 // Start with manual WORD_CROSS_REFS, then add automatic reverse refs below.
 type CrossRefEntry = {
   fileName: string; wordKey: string;
-  strongsId: string; lang: string; lemma: string; rootTranslation?: string;
+  strongsId: string; lang: string; lemma: string; rootTranslation?: string; translit?: string;
 };
 const crossRefsMap = new Map<string, CrossRefEntry[]>();
 for (const [lemma, targets] of Object.entries(WORD_CROSS_REFS)) {
@@ -656,12 +683,14 @@ for (const [lemma, targets] of Object.entries(WORD_CROSS_REFS)) {
     const tFile = assignedFileNames.get(makeFileKey(target, tids[0]));
     if (tFile) {
       const tData = wordFileData.get(tFile);
+      const translit = lexiconTranslit(tData?.strongsId ?? '');
       refs.push({
         fileName: tFile, wordKey: target,
         strongsId: tData?.strongsId ?? '',
         lang: tData?.lang ?? 'Unknown',
         lemma: tData?.lemmaScript ?? '',
         ...(tData?.rootTranslation ? { rootTranslation: tData.rootTranslation } : {}),
+        ...(translit ? { translit } : {}),
       });
     }
   }
@@ -698,12 +727,14 @@ for (const [lemma, targets] of Object.entries(WORD_CROSS_REFS)) {
       if (!extData) continue;
       const existing = crossRefsMap.get(firstFile) ?? [];
       if (existing.some(e => e.fileName === extFile)) continue;
+      const extTranslit = lexiconTranslit(extData.strongsId);
       existing.push({
         fileName: extFile, wordKey: extData.wordKey,
         strongsId: extData.strongsId,
         lang: extData.lang,
         lemma: extData.lemmaScript,
         ...(extData.rootTranslation ? { rootTranslation: extData.rootTranslation } : {}),
+        ...(extTranslit ? { translit: extTranslit } : {}),
       });
       crossRefsMap.set(firstFile, existing);
     }
@@ -723,12 +754,14 @@ for (const [sid, reverseKeys] of pendingReverseKeys) {
     if (!revFirstFile || revFirstFile === targetFile) continue;
     const existing = crossRefsMap.get(revFirstFile) ?? [];
     if (!existing.some(e => e.fileName === targetFile)) {
+      const revTranslit = lexiconTranslit(targetData.strongsId);
       existing.push({
         fileName: targetFile, wordKey: targetData.wordKey,
         strongsId: targetData.strongsId,
         lang: targetData.lang,
         lemma: targetData.lemmaScript,
         ...(targetData.rootTranslation ? { rootTranslation: targetData.rootTranslation } : {}),
+        ...(revTranslit ? { translit: revTranslit } : {}),
       });
       crossRefsMap.set(revFirstFile, existing);
     }
@@ -838,11 +871,13 @@ for (const [lemma, targetCounts] of tradWordCounts) {
       if (targetData) {
         const existing = crossRefsMap.get(firstFile) ?? [];
         if (!existing.some(e => e.fileName === dominantTarget)) {
+          const tradTranslit = lexiconTranslit(targetData.strongsId);
           existing.push({
             fileName: dominantTarget, wordKey: targetData.wordKey,
             strongsId: targetData.strongsId, lang: targetData.lang,
             lemma: targetData.lemmaScript,
             ...(targetData.rootTranslation ? { rootTranslation: targetData.rootTranslation } : {}),
+            ...(tradTranslit ? { translit: tradTranslit } : {}),
           });
           crossRefsMap.set(firstFile, existing);
         }
@@ -1023,6 +1058,7 @@ for (const [fileName, data] of wordFileData) {
           _meta: {
             wordKey: data.wordKey,
             strongsId: data.strongsId,
+            dStrongIds: [...data.dStrongIds].sort(),
             lang: data.lang,
             lemma: data.lemmaScript,
             ...(data.rootTranslation ? { rootTranslation: data.rootTranslation } : {}),
@@ -1050,6 +1086,7 @@ for (const [fileName, data] of wordFileData) {
         wordKey: data.wordKey,
         fileNumber,
         strongsId: data.strongsId,
+        dStrongIds: [...data.dStrongIds].sort(),
         lang: data.lang,
         lemma: data.lemmaScript,
         ...(data.rootTranslation ? { rootTranslation: data.rootTranslation } : {}),

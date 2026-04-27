@@ -263,6 +263,10 @@
       title: 'Add 2nd batch of ancient texts',
       content: '<p><strong>Value</strong><br>Additional revered texts on this platform will facilitate meaningful conversations between faith communities and allow more people to discover a bigger view of God. There will also be language and culture insights.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>We would ideally find freely licensed data tagging original words of ancient texts with their translations, and then build on those.</p>'
     },
+    'need-link-related-words': {
+      title: 'Link related words',
+      content: '<p><strong>Value</strong><br>Words that share a root or are otherwise etymologically related illuminate each other — for example, understanding the Hebrew word for ground (<em>adamah</em>) enriches the study of Adam. Surfacing these connections on word study pages gives readers a richer picture of meaning and how ideas develop across Scripture.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Incorporate a source that maps etymological relationships between original-language words. Use those relationships to add cross-references on word study pages linking related entries.</p>'
+    },
     'need-improve-page-load-performance': {
       title: 'Improve page load performance',
       content: '<p><strong>Value</strong><br>Reducing the size of the underlying page data can help people in countries where internet data is monitored and expensive.</p><p><strong>Status</strong><br>On the roadmap</p><p><strong>Steps</strong><br>Much of the page bulk is in information that is not revealed on page load, so it can be transferred more purely as data without all of the bulky HTML that currently surrounds it. Then that HTML can be quickly recreated after the page is displayed.</p>'

@@ -25,8 +25,8 @@ interface MetaOut {
   rootTranslation?: string; transliteration?: string; totalInstances: number; totalSlots: number;
 }
 interface AncientWordOut { _meta: MetaOut; overflow?: Record<string, string>; slots: Record<string, SlotOut>; }
-interface RelatedEntry { fileName: string; strongsId: string; lang: string; lemma: string; rootTranslation?: string; }
-interface CrossRefEntry { fileName: string; wordKey: string; strongsId: string; lang: string; lemma: string; rootTranslation?: string; }
+interface RelatedEntry { fileName: string; strongsId: string; lang: string; lemma: string; rootTranslation?: string; translit?: string; }
+interface CrossRefEntry { fileName: string; wordKey: string; strongsId: string; lang: string; lemma: string; rootTranslation?: string; translit?: string; }
 interface MainWordFile { relatedFiles?: RelatedEntry[]; crossRefs?: CrossRefEntry[]; ancientWord: AncientWordOut; }
 interface OverflowFile { type: 'overflow'; overflowFrom: string; label: string; ancientWord: AncientWordOut; }
 
@@ -429,8 +429,8 @@ function renderFooter(
     // Build ordered list: self at position meta.fileNumber, others at their fileNumber.
     // relatedFiles only exists on the primary file (fileNumber=1) so self is always #1.
     const selfLabel = meta.rootTranslation
-      ? `${meta.rootTranslation} (${meta.lang}, ${meta.strongsId})`
-      : `${meta.wordKey} (${meta.lang}, ${meta.strongsId})`;
+      ? `${meta.rootTranslation}${meta.transliteration ? ` — ${meta.transliteration}` : ''} (${meta.lang}, ${meta.strongsId})`
+      : `${meta.wordKey}${meta.transliteration ? ` — ${meta.transliteration}` : ''} (${meta.lang}, ${meta.strongsId})`;
     const allItems: Array<{ n: number; html: string }> = [
       { n: meta.fileNumber, html: `<a href="#">${esc(selfLabel)}</a>` },
     ];
@@ -438,8 +438,8 @@ function renderFooter(
       const m = r.fileName.match(/_(\d+)$/);
       const n = m ? parseInt(m[1]) : 2;
       const label = r.rootTranslation
-        ? `${r.rootTranslation} (${r.lang}, ${r.strongsId})`
-        : `${r.fileName} (${r.lang}, ${r.strongsId})`;
+        ? `${r.rootTranslation}${r.translit ? ` — ${r.translit}` : ''} (${r.lang}, ${r.strongsId})`
+        : `${r.fileName}${r.translit ? ` — ${r.translit}` : ''} (${r.lang}, ${r.strongsId})`;
       allItems.push({ n, html: wordLink(r.fileName, label) });
     }
     allItems.sort((a, b) => a.n - b.n);
@@ -454,7 +454,9 @@ function renderFooter(
   }
   if (crossRefs?.length) {
     const items = crossRefs.map(r => {
-      const label = r.rootTranslation ? `${r.rootTranslation} (${r.lang}, ${r.strongsId})` : `${r.wordKey} (${r.lang}, ${r.strongsId})`;
+      const label = r.rootTranslation
+        ? `${r.rootTranslation}${r.translit ? ` — ${r.translit}` : ''} (${r.lang}, ${r.strongsId})`
+        : `${r.wordKey}${r.translit ? ` — ${r.translit}` : ''} (${r.lang}, ${r.strongsId})`;
       return `<li>${wordLink(r.fileName, label)}</li>`;
     }).join('');
     parts.push(

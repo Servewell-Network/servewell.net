@@ -411,14 +411,14 @@
       parts.push(`<section class="ws-overflow-links"><h2>More Instances</h2><ul>${items}</ul></section>`);
     }
     if (relatedFiles?.length) {
-      const selfLabel = meta.rootTranslation ? `${meta.rootTranslation} (${meta.lang}, ${meta.strongsId})` : `${meta.wordKey} (${meta.lang}, ${meta.strongsId})`;
+      const selfLabel = meta.rootTranslation ? `${meta.rootTranslation}${meta.transliteration ? ` \u2014 ${meta.transliteration}` : ""} (${meta.lang}, ${meta.strongsId})` : `${meta.wordKey}${meta.transliteration ? ` \u2014 ${meta.transliteration}` : ""} (${meta.lang}, ${meta.strongsId})`;
       const allItems = [
         { n: meta.fileNumber, html: `<a href="#">${esc(selfLabel)}</a>` }
       ];
       for (const r of relatedFiles) {
         const m = r.fileName.match(/_(\d+)$/);
         const n = m ? parseInt(m[1]) : 2;
-        const label = r.rootTranslation ? `${r.rootTranslation} (${r.lang}, ${r.strongsId})` : `${r.fileName} (${r.lang}, ${r.strongsId})`;
+        const label = r.rootTranslation ? `${r.rootTranslation}${r.translit ? ` \u2014 ${r.translit}` : ""} (${r.lang}, ${r.strongsId})` : `${r.fileName}${r.translit ? ` \u2014 ${r.translit}` : ""} (${r.lang}, ${r.strongsId})`;
         allItems.push({ n, html: wordLink(r.fileName, label) });
       }
       allItems.sort((a, b) => a.n - b.n);
@@ -429,7 +429,7 @@
     }
     if (crossRefs?.length) {
       const items = crossRefs.map((r) => {
-        const label = r.rootTranslation ? `${r.rootTranslation} (${r.lang}, ${r.strongsId})` : `${r.wordKey} (${r.lang}, ${r.strongsId})`;
+        const label = r.rootTranslation ? `${r.rootTranslation}${r.translit ? ` \u2014 ${r.translit}` : ""} (${r.lang}, ${r.strongsId})` : `${r.wordKey}${r.translit ? ` \u2014 ${r.translit}` : ""} (${r.lang}, ${r.strongsId})`;
         return `<li>${wordLink(r.fileName, label)}</li>`;
       }).join("");
       parts.push(
