@@ -447,5 +447,8 @@ It started failing by the time I was ready to deploy again (lasted 3-4 hrs).
 I did another pre-deploy full except word pages before sleeping. 
 It died between 5pm and 7:30pm the next day, Apr 26 (lasted 18-21 hrs).
 So pretty random it seems.
-
-
+Trying in wrangler.jsonc
+		"html_handling": "auto-trailing-slash",
+      in case behavior may vary by edge node
+		"not_found_handling": "none"
+      to maybe get better error info

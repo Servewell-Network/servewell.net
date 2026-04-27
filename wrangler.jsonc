@@ -13,33 +13,46 @@
 	"assets": {
 		"directory": "./public",
 		"binding": "ASSETS",
-		"run_worker_first": ["/api/*", "/auth/*"],
+		"run_worker_first": [
+			"/api/*",
+			"/auth/*"
+		],
+		"html_handling": "auto-trailing-slash",
+		"not_found_handling": "none"
 	},
 	"kv_namespaces": [
-		{ "binding": "VOTES", "id": "fdb80cfbdf664ada848eeb605f259862", "preview_id": "60a58779b57a43b196106b815a78fdd7" }
+		{
+			"binding": "VOTES",
+			"id": "fdb80cfbdf664ada848eeb605f259862",
+			"preview_id": "60a58779b57a43b196106b815a78fdd7"
+		}
 	],
 	"d1_databases": [
-		{ "binding": "AUTH_DB", "database_name": "servewell-auth", "database_id": "b830fdcb-2dd6-43c6-af10-b6ee6a3df9f0" }
+		{
+			"binding": "AUTH_DB",
+			"database_name": "servewell-auth",
+			"database_id": "b830fdcb-2dd6-43c6-af10-b6ee6a3df9f0"
+		}
 	],
 	"observability": {
 		"enabled": true
 	},
 	"triggers": {
-		"crons": ["*/15 * * * *"]
+		"crons": [
+			"*/15 * * * *"
+		]
 	},
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 	 */
 	// "placement": { "mode": "smart" },
-
 	/**
 	 * Bindings
 	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
 	 * databases, object storage, AI inference, real-time communication and more.
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
 	 */
-
 	/**
 	 * Environment Variables
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
@@ -52,13 +65,11 @@
 	 * Note: Use secrets to store sensitive data.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
 	 */
-
 	/**
 	 * Static Assets
 	 * https://developers.cloudflare.com/workers/static-assets/binding/
 	 */
 	// "assets": { "directory": "./public/", "binding": "ASSETS" },
-
 	/**
 	 * Service Bindings (communicate between multiple Workers)
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
