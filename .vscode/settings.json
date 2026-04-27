@@ -2,6 +2,10 @@
 	"files.associations": {
 		"wrangler.json": "jsonc"
 	},
+	"search.useIgnoreFiles": false,
+	"search.useParentIgnoreFiles": false,
+	"git.repositoryScanMaxDepth": 2,
+  	"git.autoRepositoryDetection": "subFolders",
 	"chat.tools.terminal.autoApprove": {
 		"curl -I https://servewell.net/-/Genesis/1": true,
 		"/^curl -s -o /dev/null -w \"%\\{http_code\\}\" \"https://servewell\\.net/Genesis/1\" && echo \"\" && npx wrangler deploy --dry-run 2>&1 \\| head -10$/": {

@@ -452,3 +452,4 @@ Trying in wrangler.jsonc
       in case behavior may vary by edge node
 		"not_found_handling": "none"
       to maybe get better error info
+Apr 26 around 8:05pm did full pre-deploy including recreating and uploading chapter and word study html.

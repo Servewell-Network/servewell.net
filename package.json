@@ -41,7 +41,9 @@
 		"build:servewell-word-page": "esbuild src/phasingScripts/phase2To3/wordPageEntry.ts --bundle --platform=browser --format=iife --target=es2020 --outfile=public/js/servewell-word-page.js",
 		"build:phase2to3-client": "npm run build:servewell-app-shell && npm run build:servewell-word-page",
 		"generate:recent-changes": "node scripts/generate-recent-changes.mjs",
-		"release": "standard-version"
+		"release": "standard-version",
+		"encryptControlled": "zip -er controlled.zip tmpSources/controlled/ && rm -rf tmpSources/controlled/*",
+		"decryptControlled": "unzip -o controlled.zip -d . && rm controlled.zip"
 	},
 	"devDependencies": {
 		"@aws-sdk/client-s3": "^3.796.0",
@@ -49,7 +51,9 @@
 		"@commitlint/cli": "^20.5.0",
 		"@commitlint/config-conventional": "^20.5.0",
 		"@playwright/test": "^1.59.1",
+		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^25.5.0",
+		"better-sqlite3": "^12.9.0",
 		"husky": "^9.1.7",
 		"standard-version": "^9.5.0",
 		"tsx": "^4.21.0",

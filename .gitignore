@@ -181,3 +181,5 @@ src/json-Phase2/**/*
 public/words/
 public/-/
 public/test-r2/
+tmpSources/
+controlled.zip
