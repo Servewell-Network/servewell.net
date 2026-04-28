@@ -634,5 +634,51 @@ GET https://servewell.net/api/moderation/verse-commentary/queue - Ok @ 4/27/2026
 GET https://servewell.net/api/verse-commentary/chapter?book=Mat&chapter=5 - Ok @ 4/27/2026, 9:51:07 PM
 GET https://servewell.net/api/moderation/verse-commentary/queue - Ok @ 4/27/2026, 9:51:07 PM
 GET https://servewell.net/api/moderation/verse-commentary/queue - Ok @ 4/27/2026, 9:51:08 PM
+GET http://servewell.net/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /wp-includes/wlwmanifest.xml
+GET http://servewell.net/blog/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /blog/wp-includes/wlwmanifest.xml
+GET http://servewell.net/website/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /website/wp-includes/wlwmanifest.xml
+GET http://servewell.net/web/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /web/wp-includes/wlwmanifest.xml
+GET http://servewell.net/wordpress/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /wordpress/wp-includes/wlwmanifest.xml
+GET http://servewell.net/xmlrpc.php?rsd - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /xmlrpc.php
+GET http://servewell.net/2020/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /2020/wp-includes/wlwmanifest.xml
+GET http://servewell.net/2019/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /2019/wp-includes/wlwmanifest.xml
+GET http://servewell.net/wp/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /wp/wp-includes/wlwmanifest.xml
+GET http://servewell.net/shop/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /shop/wp-includes/wlwmanifest.xml
+GET http://servewell.net/test/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /test/wp-includes/wlwmanifest.xml
+GET http://servewell.net/wp2/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /wp2/wp-includes/wlwmanifest.xml
+GET http://servewell.net/news/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /news/wp-includes/wlwmanifest.xml
+GET http://servewell.net/wp1/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /wp1/wp-includes/wlwmanifest.xml
+GET http://servewell.net/cms/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /cms/wp-includes/wlwmanifest.xml
+GET http://servewell.net/sito/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /sito/wp-includes/wlwmanifest.xml
+GET http://servewell.net/site/wp-includes/wlwmanifest.xml - Ok @ 4/27/2026, 9:57:35 PM
+  (log) [assets-fallback] GET /site/wp-includes/wlwmanifest.xml
+"*/15 * * * *" @ 4/27/2026, 10:00:19 PM - Ok
+GET http://servewell.net/-/Proverbs/23 - Ok @ 4/27/2026, 10:11:29 PM
+  (log) [assets-fallback] GET /-/Proverbs/23
+"*/15 * * * *" @ 4/27/2026, 10:15:19 PM - Ok
 
+This servewell.net page can’t be found
+No webpage was found for the web address: https://servewell.net/-/Proverbs/23
+HTTP ERROR 404
 
+npx wrangler deploy
+
+npx wrangler types
+
+npx wrangler deploy
