@@ -453,3 +453,186 @@ Trying in wrangler.jsonc
 		"not_found_handling": "none"
       to maybe get better error info
 Apr 26 around 8:05pm did full pre-deploy including recreating and uploading chapter and word study html.
+By morning Apr 27 it was down again.
+
+What I said to cloudflare AI:
+I have been having tons of 404 issues with my assets. 
+For example...
+Apr 25 I deployed my assets (e.g., https://servewell.net/-/Job/1) and it stayed up much of the day (lasted 6-8 hrs) and then started 404
+I did another deploy and it stayed up 17:55 to 18:37 mountain time, (lasted about 40 minutes).
+I did another npx wrangler deploy at around 18:41 (lasted 3-4 hrs).
+I did another deploy before sleeping. 
+It died between 5pm and 7:30pm the next day, Apr 26 (lasted 18-21 hrs).
+Trying in wrangler.jsonc
+		"html_handling": "auto-trailing-slash",
+      in case behavior may vary by edge node
+		"not_found_handling": "none"
+      to maybe get better error info
+Apr 26 around 8:05pm did deploy including recreating and uploading assets.
+By morning Apr 27 it was down again. Still down until I deploy again.
+Here's my wrangler.jsonc:
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "servewellnet",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-07-02",
+	"compatibility_flags": [
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"directory": "./public",
+		"binding": "ASSETS",
+		"run_worker_first": [
+			"/api/*",
+			"/auth/*"
+		],
+		"html_handling": "auto-trailing-slash",
+		"not_found_handling": "none"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "VOTES",
+			"id": "fdb80cfbdf664ada848eeb605f259862",
+			"preview_id": "60a58779b57a43b196106b815a78fdd7"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "AUTH_DB",
+			"database_name": "servewell-auth",
+			"database_id": "b830fdcb-2dd6-43c6-af10-b6ee6a3df9f0"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"triggers": {
+		"crons": [
+			"*/15 * * * *"
+		]
+	},
+	/**
+	 * Smart Placement
+	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+	 */
+	// "placement": { "mode": "smart" },
+	/**
+	 * Bindings
+	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
+	 * databases, object storage, AI inference, real-time communication and more.
+	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
+	 */
+	/**
+	 * Environment Variables
+	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+	 */
+	"vars": {
+		"AUTH_ORIGIN": "https://servewell.net",
+		"AUTH_FROM_EMAIL": "no-reply@updates.servewell.net"
+	}
+}
+
+After logging into cloudflare
+
+clicking servewell.net
+
+Investigate has
+
+Log Explorer
+Trace (Beta)
+Logpush
+
+I clicked Trace, put in URL
+
+Method: GET
+
+Ignoring optional settings for
+
+User agent and request headers
+Cookies
+Geolocation
+Bot Score
+Skip Challenge
+The Request JSON that I think it's using:
+--url https://api.cloudflare.com/client/v4/accounts/0c909b900ea10618976ab9d43c3613b5/request-tracer/tracer     --header 'Content-Type: application/json'  
+
+--header 'Authorization: Bearer $CF_AUTH_TOKEN'  
+
+--data '{"url":"https://servewell.net/-/Genesis/1","method":"GET"}'
+
+Clicking "Send Trace" button...
+
+Here's the resulting trace:
+
+Trace Start
+
+curl
+
+No match: file upload scan
+No match: WAF Managed Rules 0 rulesets 0 rules
+No match: request managed headers
+No match: snippets 0 snippets
+No match: cloud connector 0 connectors
+Matched: Workers
+No match: Response Managed Headers
+Trace End
+
+HTTP Status Code:
+
+404
+Why do my cloudflare assets keep randomly going into 404 oblivion and staying there?
+
+
+I think it ignored most of that. 
+
+Eventually, I got this:
+
+Yes, your assets SHOULD be served without touching your Worker code — and they are, most of the time. Here's the exact flow for a request like https://servewell.net/-/Genesis/1:
+
+Request comes in → not in run_worker_first list → skip Worker
+Assets system looks for a matching file → found → served directly ✅
+But if the asset is not found → since you have a Worker script present, the request falls through to your Worker code
+Your Worker returns a hardcoded 404 instead of env.ASSETS.fetch(request)
+The real question is: why would a deployed asset suddenly not be found? This is the intermittent part. There are two likely causes:
+
+Cause 1: Your not_found_handling: "none" + missing fallback
+With not_found_handling: "none", when the assets layer can't find a file, it falls through to your Worker. Your Worker then returns a hardcoded 404. But if you used env.ASSETS.fetch(request) as the fallback, it would get a second chance to find the asset.
+
+Cause 2: The global_fetch_strictly_public compatibility flag
+You have "global_fetch_strictly_public" in your compatibility flags. This flag changes how fetch() behaves — it restricts subrequests to only publicly accessible resources. This could be interfering with how the assets binding resolves internally, especially as edge nodes propagate and cache state changes.
+
+Recommended fixes (in order of impact):
+1. Add env.ASSETS.fetch(request) as your fallback (highest impact):
+
+// Instead of:
+return new Response("Not Found", { status: 404 });
+
+// Use:
+return env.ASSETS.fetch(request);
+2. Remove global_fetch_strictly_public from your compatibility flags unless you have a specific reason for it. This flag is not commonly needed and could be interfering with asset resolution.
+
+3. Consider setting not_found_handling to "404-page" and adding a 404.html to your assets directory. This keeps the assets layer handling 404s entirely, without ever invoking your Worker for missing assets.
+
+4. Your compatibility_date of 2025-07-02 means you already have the assets_navigation_prefers_asset_serving behavior — this is good, it means browser navigation requests prefer asset serving. But it doesn't help with non-navigation requests (like fetch() calls from client-side JS).
+
+Would you like me to check your Worker logs to see if the 404s are coming from your Worker code or the assets layer?
+
+At around 9:50 I did remove global_fetch_strictly_public; add ASSETS.fetch fallback
+
+The first test did not hit server:
+mreese@Marcuss-MacBook-Pro servewell.net % npx wrangler tail servewellnet
+
+ ⛅️ wrangler 4.83.0 (update available 4.85.0)
+─────────────────────────────────────────────
+Successfully created tail, expires at 2026-04-28T09:44:54Z
+Connected to servewellnet, waiting for logs...
+GET https://servewell.net/api/verse-commentary/chapter?book=Mat&chapter=5 - Ok @ 4/27/2026, 9:51:05 PM
+GET https://servewell.net/api/auth/me - Ok @ 4/27/2026, 9:51:05 PM
+GET https://servewell.net/api/auth/me - Ok @ 4/27/2026, 9:51:06 PM
+GET https://servewell.net/api/verse-commentary/chapter?book=Mat&chapter=5 - Ok @ 4/27/2026, 9:51:06 PM
+GET https://servewell.net/api/moderation/verse-commentary/queue - Ok @ 4/27/2026, 9:51:06 PM
+GET https://servewell.net/api/verse-commentary/chapter?book=Mat&chapter=5 - Ok @ 4/27/2026, 9:51:07 PM
+GET https://servewell.net/api/moderation/verse-commentary/queue - Ok @ 4/27/2026, 9:51:07 PM
+GET https://servewell.net/api/moderation/verse-commentary/queue - Ok @ 4/27/2026, 9:51:08 PM
+
+

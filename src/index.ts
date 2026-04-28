@@ -226,7 +226,8 @@ export default {
 		}
 
 		// Fallback to static assets
-		return new Response('Not Found', { status: 404 });
+		console.log(`[assets-fallback] ${method} ${url.pathname}`);
+		return env.ASSETS.fetch(request);
 	},
 
 	async scheduled(_event, env, _ctx): Promise<void> {
