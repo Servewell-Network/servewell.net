@@ -23,6 +23,10 @@
 			"binding": "VOTES",
 			"id": "fdb80cfbdf664ada848eeb605f259862",
 			"preview_id": "60a58779b57a43b196106b815a78fdd7"
+		},
+		{
+			"binding": "RECOVERY_LOG",
+			"id": "e528a388e4874f0689dadaa68e85b70f"
 		}
 	],
 	"d1_databases": [
@@ -37,7 +41,7 @@
 	},
 	"triggers": {
 		"crons": [
-			"*/15 * * * *"
+			"*/5 * * * *"
 		]
 	},
 	/**

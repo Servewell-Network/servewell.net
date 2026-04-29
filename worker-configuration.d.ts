@@ -7,12 +7,14 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		VOTES: KVNamespace;
+		RECOVERY_LOG: KVNamespace;
 		AUTH_DB: D1Database;
 		ASSETS: Fetcher;
 		AUTH_FROM_EMAIL: string;
 		AUTH_ORIGIN: string;
 		AUTH_DEVELOPER_EMAILS: string;
 		AUTH_MODERATOR_EMAILS: string;
+		CF_WORKER_API_TOKEN: string;
 	}
 }
 interface Env extends Cloudflare.Env {}

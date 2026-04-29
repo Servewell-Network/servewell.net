@@ -454,6 +454,7 @@ Trying in wrangler.jsonc
       to maybe get better error info
 Apr 26 around 8:05pm did full pre-deploy including recreating and uploading chapter and word study html.
 By morning Apr 27 it was down again.
+For more details on Apr 27 and Apr 28, see much farther down.
 
 What I said to cloudflare AI:
 I have been having tons of 404 issues with my assets. 
@@ -682,3 +683,27 @@ npx wrangler deploy
 npx wrangler types
 
 npx wrangler deploy
+
+Only worked for a few minutes Apr 27.
+
+
+Apr 27: Confirmed via Cloudflare Trace that for /-/Genesis/1, the trace shows "Matched: Workers"
+  instead of serving the static asset directly. This means the edge node doesn't have the asset
+  in its local store and falls through to the worker, which was returning a hardcoded 404.
+  Also confirmed: the Cloudflare Deployments API (re-promote version) restores service just like
+  a plain wrangler deploy does.
+
+Apr 28 (commit: 'fix: reduce downtime for chapter pages'):
+  Switched to a self-healing approach while the root cause remains unknown.
+  Three layers of recovery:
+    1. Request-level: env.ASSETS.fetch() fallback in the worker fetch handler.
+       If it returns 404 for a /-/ path, fires a non-blocking re-promote via ctx.waitUntil.
+    2. Cron-level: a proactive health check runs every 5 minutes, cycling through
+       Genesis, Matthew, Mark, Luke, John chapters 1-15 (75 slots, ~6.25hr full cycle).
+       If it finds a 404, triggers the same re-promote.
+    3. Manual: scripts/cf-redeploy.sh (npm run cf-redeploy) for immediate recovery from terminal.
+  All recovery attempts are logged to a RECOVERY_LOG KV namespace (first 5 + last 5 entries).
+  Log is readable/clearable via GET/DELETE /api/recovery-log (moderator auth required).
+
+  This mitigation is intended to be temporary. See docs/chapter-pages-404-mitigation.md for
+  full technical details and a checklist of what to remove when the root cause is fixed.

@@ -225,13 +225,26 @@ export default {
 			return handleVote(request, env, url);
 		}
 
+		// Recovery log endpoints
+		if (url.pathname === '/api/recovery-log' && method === 'GET') {
+			return handleGetRecoveryLog(request, env as AuthDbEnv);
+		}
+		if (url.pathname === '/api/recovery-log' && method === 'DELETE') {
+			return handleClearRecoveryLog(request, env as AuthDbEnv);
+		}
+
 		// Fallback to static assets
 		console.log(`[assets-fallback] ${method} ${url.pathname}`);
-		return env.ASSETS.fetch(request);
+		const assetResponse = await env.ASSETS.fetch(request);
+		if (assetResponse.status === 404 && url.pathname.startsWith('/-/')) {
+			ctx.waitUntil(triggerSelfHeal(url.pathname, env));
+		}
+		return assetResponse;
 	},
 
 	async scheduled(_event, env, _ctx): Promise<void> {
 		await runNotificationSweep(env as AuthDbEnv);
+		await runChapterHealthCheck(env);
 	},
 } satisfies ExportedHandler<Env>;
 
@@ -1927,4 +1940,147 @@ async function runNotificationSweep(env: AuthDbEnv): Promise<void> {
 			console.error('[notif] resend error', response.status, details);
 		}
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Self-heal: detect asset 404s on chapter pages and re-promote via CF API
+// ---------------------------------------------------------------------------
+
+type RecoveryEntry = {
+	ts: number;
+	path: string;
+	redeployed: boolean;
+	deployId?: string;
+	error?: string;
+};
+
+type RecoveryLogData = {
+	first: RecoveryEntry[];
+	last: RecoveryEntry[];
+	total: number;
+};
+
+const HEALTH_CHECK_BOOKS = ['Genesis', 'Matthew', 'Mark', 'Luke', 'John'];
+const HEALTH_CHECK_CHAPTERS = 15; // check chapters 1..15 of each book
+
+async function runChapterHealthCheck(env: Env): Promise<void> {
+	const slotCount = HEALTH_CHECK_BOOKS.length * HEALTH_CHECK_CHAPTERS; // 75 slots → ~6.25 hrs per cycle
+	const slotMs = 5 * 60 * 1000;
+	const slot = Math.floor(Date.now() / slotMs) % slotCount;
+	const book = HEALTH_CHECK_BOOKS[Math.floor(slot / HEALTH_CHECK_CHAPTERS)];
+	const chapter = (slot % HEALTH_CHECK_CHAPTERS) + 1;
+	const pathname = `/-/${book}/${chapter}`;
+	console.log(`[health-check] slot ${slot}/${slotCount} checking ${pathname}`);
+	try {
+		// Use ASSETS binding directly to avoid looping through the worker
+		const resp = await env.ASSETS.fetch(new Request(`https://servewell.net${pathname}`));
+		if (resp.status === 404) {
+			console.log(`[health-check] 404 detected at ${pathname}, triggering self-heal`);
+			await triggerSelfHeal(pathname, env);
+		} else {
+			console.log(`[health-check] ${pathname} → ${resp.status}`);
+		}
+	} catch (e) {
+		console.error('[health-check] error:', e);
+	}
+}
+
+const CF_ACCOUNT_ID = '0c909b900ea10618976ab9d43c3613b5';
+const CF_SCRIPT_NAME = 'servewellnet';
+const SELF_HEAL_COOLDOWN_TTL = 300; // seconds (5 min)
+
+async function triggerSelfHeal(pathname: string, env: Env): Promise<void> {
+	// Throttle: only one redeploy per cooldown window
+	const existing = await env.RECOVERY_LOG.get('cooldown');
+	if (existing !== null) {
+		console.log('[self-heal] cooldown active, skipping redeploy');
+		return;
+	}
+	await env.RECOVERY_LOG.put('cooldown', '1', { expirationTtl: SELF_HEAL_COOLDOWN_TTL });
+
+	const entry: RecoveryEntry = { ts: Date.now(), path: pathname, redeployed: false };
+
+	try {
+		const token = env.CF_WORKER_API_TOKEN;
+		if (!token) {
+			entry.error = 'CF_WORKER_API_TOKEN not configured';
+			await appendRecoveryLog(entry, env);
+			return;
+		}
+
+		// Get latest deployed version ID
+		const listResp = await fetch(
+			`https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/workers/scripts/${CF_SCRIPT_NAME}/deployments`,
+			{ headers: { Authorization: `Bearer ${token}` } }
+		);
+		if (!listResp.ok) {
+			entry.error = `list deployments failed: ${listResp.status}`;
+			await appendRecoveryLog(entry, env);
+			return;
+		}
+		const listJson = (await listResp.json()) as { result: { deployments: { versions: { version_id: string }[] }[] } };
+		const versionId = listJson.result?.deployments?.[0]?.versions?.[0]?.version_id;
+		if (!versionId) {
+			entry.error = 'could not find version ID';
+			await appendRecoveryLog(entry, env);
+			return;
+		}
+
+		// Re-promote that version
+		const promoteResp = await fetch(
+			`https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/workers/scripts/${CF_SCRIPT_NAME}/deployments`,
+			{
+				method: 'POST',
+				headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+				body: JSON.stringify({ versions: [{ version_id: versionId, percentage: 100 }] }),
+			}
+		);
+		const promoteJson = (await promoteResp.json()) as { success: boolean; result?: { id: string } };
+		if (promoteJson.success) {
+			entry.redeployed = true;
+			entry.deployId = promoteJson.result?.id;
+			console.log('[self-heal] re-promoted successfully', entry.deployId);
+		} else {
+			entry.error = `promote failed: ${JSON.stringify(promoteJson)}`;
+		}
+	} catch (e) {
+		entry.error = String(e);
+		console.error('[self-heal] error', e);
+	}
+
+	await appendRecoveryLog(entry, env);
+}
+
+async function appendRecoveryLog(entry: RecoveryEntry, env: Env): Promise<void> {
+	const raw = await env.RECOVERY_LOG.get('log');
+	const log: RecoveryLogData = raw ? (JSON.parse(raw) as RecoveryLogData) : { first: [], last: [], total: 0 };
+
+	if (log.first.length < 5) {
+		log.first.push(entry);
+	}
+	log.last.push(entry);
+	if (log.last.length > 5) {
+		log.last = log.last.slice(-5);
+	}
+	log.total += 1;
+
+	await env.RECOVERY_LOG.put('log', JSON.stringify(log));
+}
+
+async function handleGetRecoveryLog(request: Request, env: AuthDbEnv): Promise<Response> {
+	const auth = await requireModeratorAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Moderator role required' }, 403);
+
+	const raw = await env.RECOVERY_LOG.get('log');
+	const log: RecoveryLogData = raw ? (JSON.parse(raw) as RecoveryLogData) : { first: [], last: [], total: 0 };
+	return jsonResponse(log);
+}
+
+async function handleClearRecoveryLog(request: Request, env: AuthDbEnv): Promise<Response> {
+	const auth = await requireModeratorAuth(request, env);
+	if (!auth) return jsonResponse({ error: 'Moderator role required' }, 403);
+
+	await env.RECOVERY_LOG.delete('log');
+	await env.RECOVERY_LOG.delete('cooldown');
+	return jsonResponse({ cleared: true });
 }
