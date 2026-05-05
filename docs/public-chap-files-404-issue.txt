@@ -707,3 +707,46 @@ Apr 28 (commit: 'fix: reduce downtime for chapter pages'):
 
   This mitigation is intended to be temporary. See docs/chapter-pages-404-mitigation.md for
   full technical details and a checklist of what to remove when the root cause is fixed.
+
+Apr 28 (later, same day) — self-heal not working as hoped:
+  The recovery log showed 21 re-promote attempts, all returning success from the CF API, but
+  404s continued uninterrupted. Root cause: the Deployments API re-promote only flips a version
+  pointer; it does NOT re-upload or re-propagate the asset manifest. Only a real wrangler deploy
+  (which re-registers assets with Cloudflare's asset store) actually fixes the problem.
+  The self-heal cron + request-level re-promote is therefore ineffective and needs rethinking.
+
+  Tried a potentially real fix: changed run_worker_first in wrangler.jsonc from
+    ["api/*", "/auth/*"]  to  true
+  Hypothesis: with the path-list form, Cloudflare routes /-/ requests directly to the edge
+  asset store (which is broken on affected edge nodes). With run_worker_first: true, every
+  request goes through the worker first, and env.ASSETS.fetch() in the worker may reach the
+  asset store via a different internal code path that is not affected by the edge-node issue.
+  Deployed at approx 02:15 UTC Apr 29. Held up for ~2 days — best result so far.
+
+Apr 30: Removed run_worker_first entirely (no key at all in wrangler.jsonc assets config).
+  Default Cloudflare behavior without run_worker_first: assets are checked first; if no match,
+  the request falls through to the worker (because not_found_handling: "none" + worker present).
+  This is functionally the same as the old path-list form for /api/* and /auth/* routes, but
+  the question is whether it behaves differently from run_worker_first: true for /-/ pages.
+  If it breaks again, run_worker_first: true is the known-good state to revert to.
+  Watching to see if it holds.
+
+May 4 (status update): No 404s have recurred since removing run_worker_first on Apr 30.
+  This is the longest stable stretch since the issue began.
+
+  Retrospective conclusion:
+  The original 404 problem was likely caused by deploying while public/-/ was temporarily
+  deleted (suspected root cause: a stray async neighborScripts call without await, which may
+  have started the gitignoring of generated HTML chapter files). That caused Cloudflare edge
+  nodes to cache a "not found" state for those assets.
+
+  In the course of trying to fix that temporary issue, we used run_worker_first with a path
+  array (["api/*", "/auth/*"]), which routes /-/ requests directly to the edge asset store.
+  When that asset store was in a broken state on affected edge nodes, those requests failed.
+  Switching to run_worker_first: true forced everything through the worker first, which helped
+  temporarily — but even after the original asset-propagation problem resolved itself, having
+  any form of run_worker_first in place added unnecessary overhead and instability.
+
+  Current stable config: no run_worker_first key at all in wrangler.jsonc assets config.
+  This is the intended long-term state. Do not add run_worker_first back unless a new,
+  clearly distinct problem requires it.
