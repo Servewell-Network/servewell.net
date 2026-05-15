@@ -750,3 +750,36 @@ May 4 (status update): No 404s have recurred since removing run_worker_first on 
   Current stable config: no run_worker_first key at all in wrangler.jsonc assets config.
   This is the intended long-term state. Do not add run_worker_first back unless a new,
   clearly distinct problem requires it.
+
+May 13-14: Chapter pages down again. New theory is that there's a setting somewhere causing cloudflare to try to update itself from the remote github repo where the chapter pages don't exist. That must be why deploying from local fixes it for a while. The run_worker_first must have exacerbated the problem but not caused it. Deploying now while looking for the root cause setting.
+
+May 15: I did the following...
+Log in to the Cloudflare Dashboard
+Go to Workers & Pages (left menu in wide screen; have to search for it in narrow screen).
+Select the specific Worker: 'servewellnet'.
+Go to the Settings tab.
+Scroll down the page to 'Build'.
+See the explanation there: 'Connect your Worker to a Git repository for automatic builds and deployments'
+See that by the label 'Git repository' is a link with the github icon that says 'Servewell-Network/servewell.net' together with buttons including one that says 'Disconnect' as well as multiple related settings.
+Click Disconnect.
+See confirmation text: 'Disconnect Git: Once disconnected, future pushes will no longer trigger automatic deployments.'
+Click Disconnect.
+See that under Build is now just the label 'Git repository' and one button for 'Connect'.
+
+  This was almost certainly the true root cause of the entire saga.
+  Cloudflare's Git integration was deploying directly from the GitHub repo on every push.
+  Since the chapter HTML files (public/-/) are gitignored, every automatic deploy was
+  uploading the worker and non-generated assets but leaving the chapter pages absent from
+  Cloudflare's asset store. Local `npx wrangler deploy` would restore them (since the
+  generated files exist locally), but the next git push would trigger another automatic
+  deploy without them, causing 404s again.
+
+  This explains the pattern: pages would come back after a local deploy, then go down again
+  seemingly at random — which was actually correlated with git pushes.
+
+  Now that the Git integration is disconnected, all deploys go through `npx wrangler deploy`
+  run locally (after `npm run pre-deploy`), which includes the generated chapter files.
+  The CI workflow (.github/workflows/ci.yml) still runs tests on push, but no longer deploys.
+  Watching to confirm 404s do not recur.
+
+  CF_WORKER_API_TOKEN was also deleted (button said 'Delete and deploy') as no longer used.
