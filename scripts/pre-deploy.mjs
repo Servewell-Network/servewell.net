@@ -214,66 +214,9 @@ function stampChapterFiles() {
   }
 }
 
-const RECOVERY_LOG_NS = 'e528a388e4874f0689dadaa68e85b70f';
-
-async function showAndOptionallyResetRecoveryLog() {
-  console.log('\n== Recovery log (chapter page self-heal events since last clear) ==');
-  try {
-    let raw;
-    try {
-      raw = execFileSync(
-        'npx',
-        ['wrangler', 'kv', 'key', 'get', 'log', '--namespace-id', RECOVERY_LOG_NS, '--remote'],
-        { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
-      );
-    } catch {
-      console.log('  No recovery events on record.');
-      return;
-    }
-    // wrangler may emit its banner before the JSON value — find where JSON starts
-    const jsonStart = raw.indexOf('{');
-    if (jsonStart === -1) {
-      console.log('  No recovery events on record.');
-      return;
-    }
-    const log = JSON.parse(raw.slice(jsonStart));
-    if (!log || log.total === 0) {
-      console.log('  No recovery events on record.');
-      return;
-    }
-    const fmt = (e) =>
-      `    ${new Date(e.ts).toISOString()}  ${e.path.padEnd(20)}  ${
-        e.redeployed
-          ? `✓ redeployed (id: ${e.deployId ?? 'ok'})`
-          : `✗ FAILED: ${e.error}`
-      }`;
-    console.log(`  Total self-heal attempts: ${log.total}`);
-    if (log.first.length) {
-      console.log('  First events:');
-      log.first.forEach((e) => console.log(fmt(e)));
-    }
-    if (log.total > log.first.length && log.last.length) {
-      console.log('  Most recent events:');
-      log.last.forEach((e) => console.log(fmt(e)));
-    }
-    const clear = await askYesNo('  Clear recovery log now? (y/n): ');
-    if (clear) {
-      for (const key of ['log', 'cooldown']) {
-        try {
-          execFileSync('npx', ['wrangler', 'kv', 'key', 'delete', key, '--namespace-id', RECOVERY_LOG_NS, '--force', '--remote'], { stdio: ['pipe', 'pipe', 'pipe'] });
-        } catch { /* key may not exist */ }
-      }
-      console.log('  Recovery log cleared.');
-    }
-  } catch (e) {
-    console.log('  Could not read recovery log:', e instanceof Error ? e.message : String(e));
-  }
-}
-
 async function main() {
   try {
     console.log('Starting pre-deploy checks...');
-    await showAndOptionallyResetRecoveryLog();
 
     const rerunPhasing = isYes || await askYesNo('Rerun phasing (p1a-2, p1b-2, p2-3, word pages)? (y/n): ');
     if (rerunPhasing) {
