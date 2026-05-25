@@ -630,7 +630,13 @@ function renderTraditionalParagraphTokens(
           { label: '—', value: "There's no direct match for this word in the original." }
         ];
 
-    appendTokenHtml(token.text, renderWordToken(token.text, popoverId, metadataEntries));
+    const hasTrailingEmDash = token.text.endsWith('\u2014');
+    const displayText = hasTrailingEmDash ? token.text.slice(0, -1) : token.text;
+    appendTokenHtml(displayText, renderWordToken(displayText, popoverId, metadataEntries));
+    if (hasTrailingEmDash) {
+      html += ' \u2013';
+      plainText += ' \u2013';
+    }
   }
 
   return html;
@@ -1043,7 +1049,7 @@ function normalizeInternalHref(href: string): string {
   const hashIdx = href.indexOf('#');
   const pathPart = hashIdx >= 0 ? href.slice(0, hashIdx) : href;
   const fragment = hashIdx >= 0 ? href.slice(hashIdx) : '';
-  const cleanPath = pathPart.replace(/\.html?$/i, '');
+  const cleanPath = pathPart.replace(/\.html?$/i, '').replace(/_/g, '-');
   const capitalizedPath = cleanPath.replace(/(^|\/|-)([a-z])/g, (_, prefix, letter) => prefix + (letter as string).toUpperCase());
   return capitalizedPath + fragment;
 }

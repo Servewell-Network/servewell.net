@@ -2598,15 +2598,24 @@ function extractTrailingPunctuation(token: string): string {
 }
 
 function isEllipsisMarkerGroup(nonLexicalGroup: string[]): boolean {
-    if (nonLexicalGroup.length < 3) {
+    // Skip leading BSB composite continuation markers '{}' before checking
+    // for the ellipsis pattern. A '{}' token marks that the preceding lexical
+    // word's English spans multiple Hebrew morphemes; the subsequent '. . .'
+    // rows are continuation dots, not independent punctuation.
+    const firstNonContinuationIdx = nonLexicalGroup.findIndex(t => t !== '{}');
+    const group = firstNonContinuationIdx > 0
+        ? nonLexicalGroup.slice(firstNonContinuationIdx)
+        : nonLexicalGroup;
+
+    if (group.length < 3) {
         return false;
     }
 
-    if (nonLexicalGroup[0] !== '.' || nonLexicalGroup[1] !== '.') {
+    if (group[0] !== '.' || group[1] !== '.') {
         return false;
     }
 
-    return /^\.[,.;:!?]*$/.test(nonLexicalGroup[nonLexicalGroup.length - 1]);
+    return /^\.[,.;:!?]*$/.test(group[group.length - 1]);
 }
 
 function extractEllipsisCarryPunctuation(lastToken: string): string {
