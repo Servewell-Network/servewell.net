@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.4](https://github.com/Servewell-Network/servewell.net/compare/v0.1.3...v0.1.4) (2026-05-25)
+
+
+### Bug Fixes
+
+* fixing broken links and punctuation errors (periods, dashes) in traditional column ([e76b9cb](https://github.com/Servewell-Network/servewell.net/commit/e76b9cbe0fc334e2db251f8763fa784afce1c4cc))
+* scrolling issues near top of chapter page ([9b1209d](https://github.com/Servewell-Network/servewell.net/commit/9b1209d6fb2666a1959b8b03d77258d7c6e04107))
+
 ## [0.1.3](https://github.com/Servewell-Network/servewell.net/compare/v0.1.2...v0.1.3) (2026-05-25)
 
 
