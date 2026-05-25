@@ -5236,6 +5236,25 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
     }
     if (document.documentElement.dataset.appBootstrapped === "1") return;
     document.documentElement.dataset.appBootstrapped = "1";
+    {
+      const removeScrollSnap = () => {
+        document.documentElement.style.scrollSnapType = "none";
+      };
+      if ("onscrollend" in window) {
+        let fallbackTimer;
+        const onScrollEnd = () => {
+          clearTimeout(fallbackTimer);
+          removeScrollSnap();
+        };
+        window.addEventListener("scrollend", onScrollEnd, { once: true });
+        fallbackTimer = setTimeout(() => {
+          window.removeEventListener("scrollend", onScrollEnd);
+          removeScrollSnap();
+        }, 1e3);
+      } else {
+        setTimeout(removeScrollSnap, 100);
+      }
+    }
     const delegator = createDelegator();
     const shell = createShell();
     const theme = createTheme(shell);

@@ -63,6 +63,26 @@ export function jsDomFramework() {
   if (document.documentElement.dataset.appBootstrapped === '1') return;
   document.documentElement.dataset.appBootstrapped = '1';
 
+  // Remove scroll-snap-type from <html> after the initial scroll-snap has
+  // positioned the page. Use 'scrollend' if available, otherwise fall back to
+  // a short timeout. This lets the snap guide the initial landing position
+  // without interfering with subsequent free scrolling.
+  {
+    const removeScrollSnap = () => { document.documentElement.style.scrollSnapType = 'none'; };
+    if ('onscrollend' in window) {
+      let fallbackTimer: ReturnType<typeof setTimeout>;
+      const onScrollEnd = () => { clearTimeout(fallbackTimer); removeScrollSnap(); };
+      window.addEventListener('scrollend', onScrollEnd, { once: true });
+      // Safety fallback in case scroll-snap never fires scrollend (e.g. no snap target).
+      fallbackTimer = setTimeout(() => {
+        window.removeEventListener('scrollend', onScrollEnd);
+        removeScrollSnap();
+      }, 1000);
+    } else {
+      setTimeout(removeScrollSnap, 100);
+    }
+  }
+
   const delegator = createDelegator();
   const shell = createShell();
   const theme = createTheme(shell);
