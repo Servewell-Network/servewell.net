@@ -4117,8 +4117,49 @@ ${bodyText}` : prefix : bodyText;
     "unto",
     "also"
   ]);
+  var ONES = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+  var TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+  var TEENS = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+  function convertTens(n) {
+    if (n < 10) return ONES[n];
+    if (n < 20) return TEENS[n - 10];
+    return [TENS[Math.floor(n / 10)], ONES[n % 10]].filter(Boolean).join(" ");
+  }
+  function convertHundreds(n) {
+    if (n > 99) return [ONES[Math.floor(n / 100)], "hundred", convertTens(n % 100)].filter(Boolean).join(" ");
+    return convertTens(n);
+  }
+  function convertThousands(n) {
+    if (n >= 1e3) return [convertHundreds(Math.floor(n / 1e3)), "thousand", convertHundreds(n % 1e3)].filter(Boolean).join(" ");
+    return convertHundreds(n);
+  }
+  function convertMillions(n) {
+    if (n >= 1e6) return [convertMillions(Math.floor(n / 1e6)), "million", convertThousands(n % 1e6)].filter(Boolean).join(" ");
+    return convertThousands(n);
+  }
+  function numberToWords(n) {
+    if (n === 0) return "zero";
+    return convertMillions(n);
+  }
+  function expandNumericToken(token) {
+    const stripped = token.replace(/,/g, "");
+    if (!/^\d+$/.test(stripped)) return null;
+    const n = parseInt(stripped, 10);
+    if (!Number.isFinite(n) || n < 0) return null;
+    return numberToWords(n).split(" ").filter(Boolean);
+  }
   function parseQueryTokens(query) {
-    return query.split(/\s+/).filter((t) => t && !STOP_WORDS.has(t.toLowerCase()));
+    const result = [];
+    for (const t of query.split(/\s+/)) {
+      if (!t) continue;
+      const expanded = expandNumericToken(t);
+      if (expanded) {
+        result.push(...expanded.filter((w) => !STOP_WORDS.has(w)));
+      } else if (!STOP_WORDS.has(t.toLowerCase())) {
+        result.push(t);
+      }
+    }
+    return result;
   }
   function sortByRarity(lemmas, idx) {
     return [...lemmas].sort((a, b) => (idx[a] ?? 1) - (idx[b] ?? 1));

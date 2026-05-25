@@ -200,8 +200,67 @@ const STOP_WORDS = new Set([
   'from', 'with', 'into', 'upon', 'over', 'unto', 'also',
 ]);
 
+// ---------------------------------------------------------------------------
+// Number-to-words conversion
+// Adapted from https://stackoverflow.com/a/5530230
+// ---------------------------------------------------------------------------
+
+const ONES  = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+const TENS  = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+const TEENS = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+
+function convertTens(n: number): string {
+  if (n < 10) return ONES[n];
+  if (n < 20) return TEENS[n - 10];
+  return [TENS[Math.floor(n / 10)], ONES[n % 10]].filter(Boolean).join(' ');
+}
+
+function convertHundreds(n: number): string {
+  if (n > 99) return [ONES[Math.floor(n / 100)], 'hundred', convertTens(n % 100)].filter(Boolean).join(' ');
+  return convertTens(n);
+}
+
+function convertThousands(n: number): string {
+  if (n >= 1000) return [convertHundreds(Math.floor(n / 1000)), 'thousand', convertHundreds(n % 1000)].filter(Boolean).join(' ');
+  return convertHundreds(n);
+}
+
+function convertMillions(n: number): string {
+  if (n >= 1_000_000) return [convertMillions(Math.floor(n / 1_000_000)), 'million', convertThousands(n % 1_000_000)].filter(Boolean).join(' ');
+  return convertThousands(n);
+}
+
+export function numberToWords(n: number): string {
+  if (n === 0) return 'zero';
+  return convertMillions(n);
+}
+
+/**
+ * If a query token looks like an integer (digits and optional commas),
+ * expand it into its constituent English words so the search can find
+ * Literal column entries like "one hundred" / "eighty" / "thousand".
+ * Returns null if the token is not a recognisable integer.
+ */
+function expandNumericToken(token: string): string[] | null {
+  const stripped = token.replace(/,/g, '');
+  if (!/^\d+$/.test(stripped)) return null;
+  const n = parseInt(stripped, 10);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return numberToWords(n).split(' ').filter(Boolean);
+}
+
 export function parseQueryTokens(query: string): string[] {
-  return query.split(/\s+/).filter(t => t && !STOP_WORDS.has(t.toLowerCase()));
+  const result: string[] = [];
+  for (const t of query.split(/\s+/)) {
+    if (!t) continue;
+    const expanded = expandNumericToken(t);
+    if (expanded) {
+      result.push(...expanded.filter(w => !STOP_WORDS.has(w)));
+    } else if (!STOP_WORDS.has(t.toLowerCase())) {
+      result.push(t);
+    }
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
