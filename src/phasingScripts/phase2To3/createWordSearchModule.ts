@@ -5,6 +5,7 @@ import {
   resolveToken,
   parseQueryTokens,
   sortByRarity,
+  canonicalNumericForm,
 } from './wordSearchLogic';
 import {
   type LoadedWordData,
@@ -594,8 +595,16 @@ function escapeRegex(s: string): string {
 function highlightRenderings(text: string, renderings: Set<string>): string {
   let result = esc(text);
   for (const rendering of renderings) {
-    const cleaned = rendering.replace(/<[^>]*>/g, ' ').replace(/\[[^\]]*\]/g, ' ')
-      .replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    const noTags = rendering.replace(/<[^>]*>/g, ' ').replace(/\[[^\]]*\]/g, ' ').trim();
+    // Numeric tokens (digits with optional commas, e.g. '180,000'): skip the
+    // special-char stripping so the comma is preserved for a literal \b...\b match.
+    if (/^[\d,]+$/.test(noTags) && noTags.length >= 2) {
+      try {
+        result = result.replace(new RegExp(`\\b(${escapeRegex(noTags)})\\b`, 'gi'), '<mark>$1</mark>');
+      } catch { /* ignore bad patterns */ }
+      continue;
+    }
+    const cleaned = noTags.replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
     if (!cleaned || cleaned.length < 2) continue;
     try {
       result = result.replace(new RegExp(`\\b(${escapeRegex(cleaned)})\\b`, 'gi'), '<mark>$1</mark>');
@@ -650,6 +659,9 @@ async function handleInput(rawQuery: string): Promise<void> {
   const query = rawQuery.trim();
   if (!query) { clearDisplay(); return; }
   currentRawTerms = query.split(/\s+/).filter(Boolean).map(t => t.toLowerCase());
+  // Normalize numeric raw terms to canonical comma-formatted form (e.g. '180000' → '180,000')
+  // so they match the numeral format used in traditional verse text and trad-expansion patterns.
+  currentRawTerms = currentRawTerms.map(t => canonicalNumericForm(t) ?? t);
   currentAllRenderingsByVerse = new Map();
 
   // Check for verse reference before hitting the word index

@@ -4088,6 +4088,13 @@ ${bodyText}` : prefix : bodyText;
     const dot = ref.lastIndexOf(".");
     return dot !== -1 ? ref.slice(0, dot) : ref;
   }
+  function canonicalNumericForm(token) {
+    const stripped = token.replace(/,/g, "");
+    if (!/^\d+$/.test(stripped)) return null;
+    const n = parseInt(stripped, 10);
+    if (!Number.isFinite(n) || n < 0) return null;
+    return stripped.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
   var STOP_WORDS = /* @__PURE__ */ new Set([
     "a",
     "an",
@@ -4917,7 +4924,15 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
   function highlightRenderings(text, renderings) {
     let result = esc(text);
     for (const rendering of renderings) {
-      const cleaned = rendering.replace(/<[^>]*>/g, " ").replace(/\[[^\]]*\]/g, " ").replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+      const noTags = rendering.replace(/<[^>]*>/g, " ").replace(/\[[^\]]*\]/g, " ").trim();
+      if (/^[\d,]+$/.test(noTags) && noTags.length >= 2) {
+        try {
+          result = result.replace(new RegExp(`\\b(${escapeRegex(noTags)})\\b`, "gi"), "<mark>$1</mark>");
+        } catch {
+        }
+        continue;
+      }
+      const cleaned = noTags.replace(/[^a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
       if (!cleaned || cleaned.length < 2) continue;
       try {
         result = result.replace(new RegExp(`\\b(${escapeRegex(cleaned)})\\b`, "gi"), "<mark>$1</mark>");
@@ -4970,6 +4985,7 @@ button.ws-sr-word-link { background: none; border: none; cursor: pointer; text-a
       return;
     }
     currentRawTerms = query.split(/\s+/).filter(Boolean).map((t) => t.toLowerCase());
+    currentRawTerms = currentRawTerms.map((t) => canonicalNumericForm(t) ?? t);
     currentAllRenderingsByVerse = /* @__PURE__ */ new Map();
     const verseRef = parseVerseRefQuery(query);
     if (verseRef) {

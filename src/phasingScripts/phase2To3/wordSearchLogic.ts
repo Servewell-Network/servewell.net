@@ -187,6 +187,20 @@ export function parseVerseRef(ref: string): { bookCode: string; chapter: number;
 // ---------------------------------------------------------------------------
 
 /**
+ * If `token` is a pure integer (digits only, with optional commas), return the
+ * canonical comma-grouped form so it matches traditional verse text numerals.
+ * e.g. `'180000'` or `'180,000'` → `'180,000'`.
+ * Returns `null` if the token is not a recognisable integer.
+ */
+export function canonicalNumericForm(token: string): string | null {
+  const stripped = token.replace(/,/g, '');
+  if (!/^\d+$/.test(stripped)) return null;
+  const n = parseInt(stripped, 10);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return stripped.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/**
  * Split a raw query string into tokens (non-empty whitespace-delimited pieces).
  * Returns [] for empty/whitespace-only input.
  */
