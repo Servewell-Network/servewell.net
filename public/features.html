@@ -162,6 +162,13 @@
 			[data-theme="dark"] .new-badge {
 				background: #0077cc;
 			}
+			.inline-page-link {
+				color: #1d4ed8;
+				text-decoration: underline;
+			}
+			[data-theme="dark"] .inline-page-link {
+				color: #8ab4ff;
+			}
 			/* Popover styles */
 			.popover-overlay {
 				display: none;
@@ -388,7 +395,7 @@
 					<td class="why-cell"><a href="#need-concordance-word-studies" class="why-link">Concordance word studies</a></td>
 				</tr>
 				<tr id="need-recent-changes">
-					<td><span class="task-name" data-task-id="need-recent-changes">Recent Changes page</span></td>
+					<td><span class="task-name" data-task-id="need-recent-changes">Recent Changes <a href="/recent-changes" class="inline-page-link">page</a></span></td>
 					<td class="votes-cell" data-feature-id="need-recent-changes"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
 					<td class="funds-cell">$0</td>
 					<td class="why-cell"><a href="/whats-next#need-accessibility" class="why-link">Reasonable accessibility</a></td>
@@ -399,7 +406,11 @@
 					<td class="funds-cell">$0</td>
 					<td class="why-cell"><a href="#need-community-edits" class="why-link">Community edits</a></td>
 				</tr>
-				</tbody>
+				<tr id="memorize-bible-facts">
+						<td><span class="task-name" data-task-id="memorize-bible-facts"><span class="new-badge">NEW</span>Bible Facts <a href="/memorize/bible-facts" class="inline-page-link">page</a></span></td>
+						<td class="votes-cell" data-feature-id="memorize-bible-facts"><span class="votes-main">0</span><span class="votes-unverified">(+0)</span></td>
+					<td class="funds-cell">$0</td>
+					<td class="why-cell"><a href="#need-inspire-equip" class="why-link">Inspire and Equip</a></td>
 			</table>
 		</main>
 

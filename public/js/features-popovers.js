@@ -323,6 +323,10 @@
       title: 'Recent Changes page',
       content: '<p><strong>Value</strong><br>Shows what has changed on the site recently so returning visitors can quickly catch up on content and feature updates without reviewing everything manually.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps to use</strong><br>Visit the <a href="/recent-changes" style="color:var(--fg);text-decoration:underline;">Recent Changes</a> page from the navigation menu. Each entry shows the date, what changed, and a link to the affected content.</p>'
     },
+    'memorize-bible-facts': {
+      title: 'Bible Facts page',
+      content: '<p><strong>Value</strong><br>Provides questions and answers and related functionality so that a person can memorize enough facts to comprehend the overview of the history that is addressed by the Bible.</p><p><strong>Status</strong><br>Experimental</p><p><strong>Steps to use</strong><br>Visit the home page by clicking ServeWell.Net, then follow the link to &lsquo;Bible Facts Study Guide&rsquo;, then tap questions to see answers, mark answers as familiar or unfamiliar if desired, and you can also filter questions to skip the familiar ones.</p>'
+    },
 
   };
 

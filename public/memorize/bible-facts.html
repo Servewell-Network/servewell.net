@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Bible Facts | ServeWell.Net</title>
+		<meta name="description" content="Flashcard-style Q&amp;A to help you find your way around the Bible and make sense of its history." />
+		<style>
+			body {
+				margin: 2.25rem;
+				font-family: sans-serif;
+				font-size: large;
+			}
+			main {
+				max-width: 720px;
+			}
+			a {
+				color: #1d4ed8;
+			}
+			[data-theme="dark"] a {
+				color: #8ab4ff;
+			}
+			.intro {
+				line-height: 1.6;
+				color: var(--fg);
+				margin-bottom: 1.5rem;
+			}
+
+			/* ── Top controls ─────────────────────────────── */
+			.controls {
+				position: sticky;
+				top: 56px;
+				z-index: 10;
+				background: var(--bg, #fff);
+				display: flex;
+				flex-wrap: wrap;
+				gap: 1rem;
+				margin-bottom: 1.5rem;
+				padding: 0.5rem 0;
+				align-items: center;
+				font-size: 1rem;
+			}
+			.controls label {
+				display: flex;
+				align-items: center;
+				gap: 0.4rem;
+				cursor: pointer;
+				user-select: none;
+			}
+			.controls input[type="checkbox"] {
+				width: 1.1rem;
+				height: 1.1rem;
+				cursor: pointer;
+			}
+			.score-widget {
+				color: var(--muted, #555);
+				white-space: nowrap;
+				margin-right: auto;
+			}
+			.score-widget .score-pct {
+				font-weight: 600;
+				color: var(--fg);
+			}
+
+			/* ── Question list ────────────────────────────── */
+			#question-list {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+			}
+
+			.question-item {
+				border: 1px solid var(--border, #d0d0d6);
+				border-radius: 0.4rem;
+				padding: 0.65rem 0.85rem;
+				background: var(--panel, #fff);
+			}
+			[data-theme="dark"] .question-item {
+				background: var(--panel, #1c1f27);
+			}
+
+			.question-item.is-familiar-hidden {
+				display: none;
+			}
+
+			.question-row {
+				display: flex;
+				align-items: flex-start;
+				gap: 0.75rem;
+			}
+
+			/* ── details / summary ────────────────────────── */
+			.question-details {
+				flex: 1;
+				min-width: 0;
+			}
+			.question-details summary {
+				cursor: pointer;
+				list-style: none;
+				font-weight: 500;
+				line-height: 1.5;
+				padding: 0.1rem 0;
+			}
+			.question-details summary::-webkit-details-marker { display: none; }
+			.question-details summary::before {
+				content: '▶\00a0';
+				font-size: 0.7em;
+				color: var(--muted, #666);
+				transition: transform 0.15s;
+				display: inline-block;
+			}
+			.question-details[open] summary::before {
+				transform: rotate(90deg);
+			}
+			.question-answer {
+				margin-top: 0.5rem;
+				padding-top: 0.5rem;
+				border-top: 1px solid var(--border, #e0e0e6);
+				line-height: 1.6;
+				color: var(--fg);
+			}
+			.question-answer a {
+				overflow-wrap: anywhere;
+			}
+
+			/* ── Familiarity switch ───────────────────────── */
+			.fs-widget {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.2rem;
+				flex-shrink: 0;
+				margin-top: 0.05rem;
+			}
+			.fs-track {
+				display: flex;
+				align-items: center;
+				gap: 2px;
+				padding: 2px;
+			}
+			.fs-btn {
+				width: 2rem;
+				height: 2rem;
+				border-radius: 5px;
+				border: 1px solid transparent;
+				cursor: pointer;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 700;
+				font-size: 1rem;
+				line-height: 1;
+				transition: background 0.12s, color 0.12s, outline-color 0.12s;
+				background: transparent;
+			}
+			.fs-btn:focus-visible {
+				outline: 2px solid #0066cc;
+				outline-offset: 1px;
+			}
+
+			/* unfamiliar btn (left) */
+			.fs-unfamiliar-btn {
+				color: rgba(0, 80, 220, 0.28);
+			}
+			/* neutral btn (middle) — default frame */
+			.fs-neutral-btn {
+				color: var(--muted, #666);
+				font-size: 0.6rem;
+			}
+			/* familiar btn (right) */
+			.fs-familiar-btn {
+				color: rgba(20, 150, 60, 0.28);
+			}
+
+			/* When UNFAMILIAR is active */
+			.fs-widget[data-state="unfamiliar"] .fs-unfamiliar-btn {
+				background: #0055cc;
+				color: #fff;
+				outline: 2px solid #0055cc;
+				outline-offset: 0;
+			}
+			.fs-widget[data-state="unfamiliar"] .fs-neutral-btn {
+				outline: none;
+			}
+
+			/* When FAMILIAR is active */
+			.fs-widget[data-state="familiar"] .fs-familiar-btn {
+				background: #1a8c3a;
+				color: #fff;
+				outline: 2px solid #1a8c3a;
+				outline-offset: 0;
+			}
+			.fs-widget[data-state="familiar"] .fs-neutral-btn {
+				outline: none;
+			}
+
+			/* Dark-mode tweaks */
+			[data-theme="dark"] .fs-unfamiliar-btn {
+				color: rgba(90, 160, 255, 0.35);
+			}
+			[data-theme="dark"] .fs-familiar-btn {
+				color: rgba(80, 220, 110, 0.35);
+			}
+			[data-theme="dark"] .fs-neutral-btn {
+				color: #888;
+			}
+
+			.fs-label {
+				font-size: 0.7rem;
+				min-height: 1em;
+				color: var(--muted, #666);
+				text-align: center;
+				font-weight: 500;
+			}
+			.fs-widget[data-state="unfamiliar"] .fs-label {
+				color: #0055cc;
+			}
+			[data-theme="dark"] .fs-widget[data-state="unfamiliar"] .fs-label {
+				color: #5aa0ff;
+			}
+			.fs-widget[data-state="familiar"] .fs-label {
+				color: #1a8c3a;
+			}
+			[data-theme="dark"] .fs-widget[data-state="familiar"] .fs-label {
+				color: #50dc6e;
+			}
+
+			/* ── Loading/error states ─────────────────────── */
+			#load-message {
+				color: var(--muted, #666);
+				font-style: italic;
+			}
+
+			/* ── Reset popover ───────────────────────────── */
+			.popover-overlay {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.2);
+				z-index: 100;
+			}
+			.popover-overlay.active { display: block; }
+			.popover-panel {
+				position: fixed;
+				background: var(--panel, #ffffff);
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.5rem;
+				padding: 1.25rem 1rem 1rem;
+				max-width: 320px;
+				z-index: 101;
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+			}
+			.popover-close {
+				position: absolute;
+				top: 0.4rem;
+				right: 0.5rem;
+				background: none;
+				border: none;
+				font-size: 1.4rem;
+				cursor: pointer;
+				color: var(--muted, #666);
+			}
+			.popover-title {
+				font-weight: 600;
+				margin-bottom: 0.75rem;
+				color: var(--fg);
+				font-size: 1rem;
+				padding-right: 1.5rem;
+			}
+			.popover-actions {
+				display: flex;
+				gap: 0.5rem;
+				margin-top: 0.25rem;
+			}
+			.popover-actions button {
+				flex: 1;
+				padding: 0.4rem;
+				border: 1px solid var(--border, #d9d9de);
+				border-radius: 0.25rem;
+				background: var(--bar);
+				color: var(--fg);
+				cursor: pointer;
+				font-size: 1rem;
+			}
+			.popover-actions button:hover { background: var(--bg); }
+			.popover-actions button.danger {
+				background: var(--fg);
+				color: var(--bg, #fff);
+				border-color: var(--fg);
+			}
+			.popover-actions button.danger:hover { opacity: 0.85; }
+
+			@media (max-width: 500px) {
+				body { margin: 1rem; }
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Bible Facts Study Guide</h1>
+		<main>
+			<p class="intro">This quiz is to help you find your way around the Bible and make sense of it more easily. You can mark questions as familiar (memorized) or unfamiliar (needs practice) — these are only stored locally in your browser. Pray for knowledge and more importantly for kindness, humility and love.</p>
+
+		<div class="controls">
+				<span class="score-widget" id="score-widget" aria-live="polite">Done: <span class="score-pct" id="score-pct">0%</span></span>
+				<label>
+					<input type="checkbox" id="expand-all-cb" />
+					Expand all
+				</label>
+				<label>
+					<input type="checkbox" id="hide-familiar-cb" />
+					Hide familiar
+				</label>
+				<button type="button" id="reset-btn">Reset all</button>
+			</div>
+
+			<div class="popover-overlay" id="resetOverlay"></div>
+			<div class="popover-panel" id="resetPanel" style="display:none;">
+				<button class="popover-close" id="resetClose" aria-label="Cancel">✕</button>
+				<div class="popover-title">Reset all familiarity marks?</div>
+				<div class="popover-actions">
+					<button type="button" id="reset-yes-btn" class="danger">Reset</button>
+					<button type="button" id="reset-no-btn">Cancel</button>
+				</div>
+			</div>
+
+			<p id="load-message">Loading questions…</p>
+			<ul id="question-list" hidden></ul>
+		</main>
+
+		<script src="/js/servewell-app-shell.js"></script>
+		<script>
+(function () {
+	'use strict';
+
+	const STORAGE_KEY_PREFIX = 'mbh-';
+	const DATA_URL = '/memorize/bible-facts-data.json';
+
+	// ── Helpers ──────────────────────────────────────────────────────────────
+
+	function esc(s) {
+		return String(s)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
+	}
+
+	/** Convert plain text to HTML, turning [text](url) and bare https:// URLs into links. */
+	function renderText(text) {
+		if (!text) return '';
+		const re = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)|(https?:\/\/\S+)/g;
+		let result = '';
+		let last = 0;
+		let m;
+		while ((m = re.exec(text)) !== null) {
+			result += esc(text.slice(last, m.index));
+			if (m[1] !== undefined) {
+				// [text](url) style
+				result += '<a href="' + esc(m[2]) + '" target="_blank" rel="noopener">' + esc(m[1]) + '</a>';
+			} else {
+				// bare URL — strip trailing punctuation
+				const url = m[3].replace(/[.,;:!?)]+$/, '');
+				const trail = m[3].slice(url.length);
+				result += '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(url) + '</a>' + esc(trail);
+			}
+			last = m.index + m[0].length;
+		}
+		result += esc(text.slice(last));
+		return result;
+	}
+
+	function loadState(questionText) {
+		try { return localStorage.getItem(STORAGE_KEY_PREFIX + questionText) || 'neutral'; }
+		catch { return 'neutral'; }
+	}
+
+	function saveState(questionText, state) {
+		try { localStorage.setItem(STORAGE_KEY_PREFIX + questionText, state); }
+		catch { /* storage unavailable */ }
+	}
+
+	// ── Build UI ─────────────────────────────────────────────────────────────
+
+	function buildItem(item, index) {
+		const questionKey = item.Q || String(index);
+		const state = loadState(questionKey);
+
+		const li = document.createElement('li');
+		li.className = 'question-item';
+		li.dataset.index = String(index);
+
+		const row = document.createElement('div');
+		row.className = 'question-row';
+
+		// --- Familiarity switch ---
+		const widget = document.createElement('div');
+		widget.className = 'fs-widget';
+		widget.dataset.state = state;
+		widget.setAttribute('role', 'group');
+		widget.setAttribute('aria-label', 'Familiarity');
+
+		const track = document.createElement('div');
+		track.className = 'fs-track';
+
+		function makeBtn(cls, ariaLabel, symbol) {
+			const b = document.createElement('button');
+			b.className = 'fs-btn ' + cls;
+			b.setAttribute('aria-label', ariaLabel);
+			b.setAttribute('type', 'button');
+			b.textContent = symbol;
+			return b;
+		}
+
+		const unfamiliarBtn = makeBtn('fs-unfamiliar-btn', 'Mark unfamiliar', '!');
+		const neutralBtn    = makeBtn('fs-neutral-btn',    'Reset',           '·');
+		const familiarBtn   = makeBtn('fs-familiar-btn',   'Mark familiar',   '✓');
+
+		const label = document.createElement('div');
+		label.className = 'fs-label';
+
+		function applyState(s) {
+			widget.dataset.state = s;
+			label.textContent = s === 'unfamiliar' ? 'Unfamiliar' : s === 'familiar' ? 'Familiar' : '';
+			saveState(questionKey, s);
+			// Update hide-familiar visibility
+			if (s === 'familiar' && hideFamiliarCb && hideFamiliarCb.checked) {
+				li.classList.add('is-familiar-hidden');
+			} else {
+				li.classList.remove('is-familiar-hidden');
+			}
+			updateScore();
+		}
+
+		unfamiliarBtn.addEventListener('click', () => applyState('unfamiliar'));
+		neutralBtn.addEventListener('click',    () => applyState('neutral'));
+		familiarBtn.addEventListener('click',   () => applyState('familiar'));
+
+		track.append(unfamiliarBtn, neutralBtn, familiarBtn);
+		widget.append(track, label);
+
+		// Set initial label
+		label.textContent = state === 'unfamiliar' ? 'Unfamiliar' : state === 'familiar' ? 'Familiar' : '';
+
+		// --- Question details ---
+		const details = document.createElement('details');
+		details.className = 'question-details';
+
+		const summary = document.createElement('summary');
+		summary.innerHTML = (index + 1) + '. ' + renderText(item.Q || '(no question)');
+
+		const answer = document.createElement('div');
+		answer.className = 'question-answer';
+		answer.innerHTML = item.A ? renderText(item.A) : '<em>Answer not yet added.</em>';
+
+		details.append(summary, answer);
+		row.append(widget, details);
+		li.append(row);
+
+		return { li, details, widget, applyState };
+	}
+
+	// ── Controls ─────────────────────────────────────────────────────────────
+
+	let hideFamiliarCb = null;
+	let items = [];
+
+	function updateScore() {
+		const pctEl = document.getElementById('score-pct');
+		if (!pctEl || items.length === 0) return;
+		const familiar = items.filter(({ widget }) => widget.dataset.state === 'familiar').length;
+		pctEl.textContent = Math.round((familiar / items.length) * 100) + '%';
+	}
+
+	function initControls() {
+		const expandCb = document.getElementById('expand-all-cb');
+		hideFamiliarCb  = document.getElementById('hide-familiar-cb');
+
+		const resetBtn     = document.getElementById('reset-btn');
+		const resetOverlay = document.getElementById('resetOverlay');
+		const resetPanel   = document.getElementById('resetPanel');
+		const resetYesBtn  = document.getElementById('reset-yes-btn');
+		const resetNoBtn   = document.getElementById('reset-no-btn');
+		const resetClose   = document.getElementById('resetClose');
+
+		function openResetPopover() {
+			// Position near the reset button
+			const r = resetBtn.getBoundingClientRect();
+			const panelW = 320;
+			let left = Math.min(r.left, window.innerWidth - panelW - 10);
+			left = Math.max(left, 10);
+			resetPanel.style.left = left + 'px';
+			resetPanel.style.top  = (r.bottom + 8) + 'px';
+			resetPanel.style.display = 'block';
+			resetOverlay.classList.add('active');
+		}
+
+		function closeResetPopover() {
+			resetPanel.style.display = 'none';
+			resetOverlay.classList.remove('active');
+		}
+
+		resetBtn.addEventListener('click', openResetPopover);
+		resetOverlay.addEventListener('click', closeResetPopover);
+		resetClose.addEventListener('click', closeResetPopover);
+		resetNoBtn.addEventListener('click', closeResetPopover);
+
+		resetYesBtn.addEventListener('click', () => {
+			closeResetPopover();
+			for (const { applyState } of items) {
+				applyState('neutral');
+			}
+			if (hideFamiliarCb) hideFamiliarCb.checked = false;
+		});
+
+		expandCb.addEventListener('change', () => {
+			for (const { details } of items) {
+				details.open = expandCb.checked;
+			}
+		});
+
+		hideFamiliarCb.addEventListener('change', () => {
+			const hide = hideFamiliarCb.checked;
+			for (const { li, widget } of items) {
+				if (hide && widget.dataset.state === 'familiar') {
+					li.classList.add('is-familiar-hidden');
+				} else {
+					li.classList.remove('is-familiar-hidden');
+				}
+			}
+		});
+	}
+
+	// ── Load and render ──────────────────────────────────────────────────────
+
+	async function init() {
+		initControls();
+
+		const loadMsg = document.getElementById('load-message');
+		const list    = document.getElementById('question-list');
+
+		let data;
+		try {
+			const res = await fetch(DATA_URL);
+			if (!res.ok) throw new Error('HTTP ' + res.status);
+			data = await res.json();
+		} catch (err) {
+			loadMsg.textContent = 'Could not load questions. Please try refreshing.';
+			return;
+		}
+
+		if (!Array.isArray(data) || data.length === 0) {
+			loadMsg.textContent = 'No questions found.';
+			return;
+		}
+
+		const frag = document.createDocumentFragment();
+		for (let i = 0; i < data.length; i++) {
+			const built = buildItem(data[i], i);
+			items.push(built);
+			frag.appendChild(built.li);
+		}
+
+		list.appendChild(frag);
+		loadMsg.hidden = true;
+		list.hidden = false;
+		updateScore();
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+})();
+		</script>
+	</body>
+</html>

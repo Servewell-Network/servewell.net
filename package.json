@@ -59,7 +59,7 @@
 		"tsx": "^4.21.0",
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.0",
-		"wrangler": "^4.83.0"
+		"wrangler": "^4.94.0"
 	},
 	"dependencies": {
 		"wink-lemmatizer": "^3.0.4"
