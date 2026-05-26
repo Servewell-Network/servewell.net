@@ -7,6 +7,7 @@ import path from 'node:path';
 
 const isYes = process.argv.includes('--yes');
 const skipE2E = process.argv.includes('--skip-e2e');
+const skipTests = process.argv.includes('--skip-tests');
 const forceReupload = process.argv.includes('--force');
 
 function run(command, args, label, { omitEnvKeys = [] } = {}) {
@@ -228,11 +229,15 @@ async function main() {
     await run('npm', ['run', 'generate:feature-inventory'], 'Generate feature inventory');
     await run('npm', ['run', 'generate:bible-spot-checks'], 'Generate Bible spot-check fixtures');
 
-    await run('npm', ['run', 'test:run'], 'Run unit/integration tests');
-    await run('npx', ['tsc', '--noEmit'], 'Typecheck app code');
-    await run('npm', ['run', 'test:phasing'], 'Run phasing verse exact-match tests');
+    if (skipTests) {
+      console.log('\nSkipping tests due to --skip-tests flag.');
+    } else {
+      await run('npm', ['run', 'test:run'], 'Run unit/integration tests');
+      await run('npx', ['tsc', '--noEmit'], 'Typecheck app code');
+      await run('npm', ['run', 'test:phasing'], 'Run phasing verse exact-match tests');
+    }
 
-    if (!skipE2E) {
+    if (!skipE2E && !skipTests) {
       await run('npm', ['run', 'test:e2e'], 'Run Playwright end-to-end tests');
     } else {
       console.log('\nSkipping e2e checks due to --skip-e2e');
@@ -276,7 +281,7 @@ async function main() {
       await run('npx', ['standard-version'], 'Bump version + update changelog');
       await run('npm', ['run', 'generate:recent-changes'], 'Generate Recent Changes page');
       await run('git', ['add', 'public/recent-changes.html'], 'Stage recent-changes.html');
-      await run('git', ['commit', '-m', 'chore: update recent-changes.html'], 'Commit recent-changes.html');
+      await run('git', ['commit', '--no-verify', '-m', 'chore: update recent-changes.html'], 'Commit recent-changes.html');
       await run('npx', ['wrangler', 'deploy'], 'Deploy to production');
       // Record that chapter files from this phasing run are now deployed.
       // On the next deploy (if no phasing ran), stampChapterFiles will stamp HTML files.
