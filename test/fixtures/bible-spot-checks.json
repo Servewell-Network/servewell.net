@@ -756,16 +756,12 @@
           "OriginalMorphemeId": "Gen12:3.11"
         },
         {
-          "EnglishWord": "you.",
+          "EnglishWord": "you.”",
           "OriginalMorphemeId": "Gen12:3.12"
         },
         {
           "InsertionType": "Footnotes",
           "Text": "See Galatians 3:8"
-        },
-        {
-          "InsertionType": "End Text",
-          "Text": "”"
         }
       ]
     },
