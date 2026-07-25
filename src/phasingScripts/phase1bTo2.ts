@@ -359,7 +359,31 @@ async function processBSBFile(fileName: string) {
             targetSnippet?.EnglishHeadingsAndWords.push({ InsertionType: 'Footnotes', Text: fields[BsbWord.footnotes] });
         }
         if (fields[BsbWord.EndText]) {
-            targetSnippet?.EnglishHeadingsAndWords.push({ InsertionType: 'End Text', Text: fields[BsbWord.EndText] });
+            const endText = fields[BsbWord.EndText];
+            // Closing quote characters at the start of EndText belong attached to the preceding
+            // word, not as a separate text token (which would introduce an unwanted leading space).
+            const leadingCloseQuoteMatch = endText.match(/^[\u201d\u2019]+/);
+            if (leadingCloseQuoteMatch && targetSnippet) {
+                const leadingCloseQuote = leadingCloseQuoteMatch[0];
+                const remainder = endText.slice(leadingCloseQuote.length);
+                let attached = false;
+                const items = targetSnippet.EnglishHeadingsAndWords;
+                for (let k = items.length - 1; k >= 0; k--) {
+                    const item = items[k];
+                    if ('EnglishWord' in item) {
+                        item.EnglishWord += leadingCloseQuote;
+                        attached = true;
+                        break;
+                    }
+                }
+                if (!attached) {
+                    targetSnippet.EnglishHeadingsAndWords.push({ InsertionType: 'End Text', Text: endText });
+                } else if (remainder) {
+                    targetSnippet.EnglishHeadingsAndWords.push({ InsertionType: 'End Text', Text: remainder });
+                }
+            } else {
+                targetSnippet?.EnglishHeadingsAndWords.push({ InsertionType: 'End Text', Text: endText });
+            }
         }
         // console.log('   BSB transliteration:', fields[BsbWord.Translit]);
         // console.log('   BSB Strongs (Hebrew):', fields[BsbWord.StrHeb]);
