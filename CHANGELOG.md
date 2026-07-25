@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.8](https://github.com/Servewell-Network/servewell.net/compare/v0.1.6...v0.1.8) (2026-07-25)
+
+
+### Features
+
+* add a Bible Facts Study Guide ([e50af67](https://github.com/Servewell-Network/servewell.net/commit/e50af6741f047d6ab18ce3a878f940b4d03a6e9f))
+
+
+### Bug Fixes
+
+* remove space before closing quotation marks ([6eb9a2c](https://github.com/Servewell-Network/servewell.net/commit/6eb9a2ca4f6bf03226f2d31ef24bf900aac759e3))
+
 ## [0.1.7](https://github.com/Servewell-Network/servewell.net/compare/v0.1.6...v0.1.7) (2026-05-26)
 
 
