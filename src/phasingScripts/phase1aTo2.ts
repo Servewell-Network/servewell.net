@@ -150,7 +150,7 @@ async function processStepFile(fileName: string, isNt?: string) {
     }
     const fields: StepWord = line.split('\t');
     const refIdx = isNt ? GreekWord.WordAndType : SemiticWord.Ref;
-    const [docAbbr, chapStr, verseStr, wordIdx, source] = fields[refIdx].split(/\W/); // e.g., "Gen.1.1#01=L" or "Mat.1.1#01=NKO"
+    const [docAbbr, chapStr, verseStr, wordIdx, source] = (fields[refIdx] as string).replace(/\(\d+\.\d+\)/, '').split(/\W/); // e.g., "Gen.1.1#01=L" or "Mat.1.1#01=NKO" (parenthetical versification variants like "(19.40)" are stripped first)
     if (currentChapter?.ChapterNumber !== Number(chapStr) || newAncientDocDirName) {
       // Save the previous chapter, if any, to its docDir before starting a new one
       if (currentChapter && currentChapter.DocOrBookAbbreviation) {

@@ -260,7 +260,7 @@ async function main() {
 
     let approved = isYes;
     if (!approved) {
-      approved = await askYesNo('Ready to deploy now? (y/n): ');
+      approved = await askYesNo('Committed and ready to deploy now? (y/n): ');
     }
 
     if (approved) {
