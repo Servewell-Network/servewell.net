@@ -149,6 +149,19 @@ function getBook(ref: string): string {
   return BOOK_ABBREV_ALIASES[abbrev] ?? (abbrev in BOOK_TO_DISPLAY_NAME ? abbrev : 'Unknown');
 }
 
+/** Compare two morpheme refs (e.g. "Gen1:2.3") for canonical Bible order. */
+function compareRefs(a: string, b: string): number {
+  const ma = a.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
+  const mb = b.match(/^([0-9]?[A-Za-z]+)(\d+):(\d+)/);
+  if (!ma || !mb) return a.localeCompare(b);
+  const ia = BOOK_ORDER.indexOf((BOOK_ABBREV_ALIASES[ma[1]] ?? ma[1]) as any);
+  const ib = BOOK_ORDER.indexOf((BOOK_ABBREV_ALIASES[mb[1]] ?? mb[1]) as any);
+  if (ia !== ib) return ia - ib;
+  const ca = parseInt(ma[2]), cb = parseInt(mb[2]);
+  if (ca !== cb) return ca - cb;
+  return parseInt(ma[3]) - parseInt(mb[3]);
+}
+
 /**
  * Words that are secondary/grammatical when appearing alongside content
  * words in a multi-word rendering (e.g. "LIGHT OF", "THE LIGHT").
@@ -1040,15 +1053,37 @@ for (const [fileName, data] of wordFileData) {
   }
 
   // Generate overflow sub-documents if needed
-  let overflowIndex: Record<string, string> | undefined;
+  let overflowIndex: Record<string, { label: string; total: number }> | undefined;
+  let bookPreviews: Record<string, { ref: string; lit: string; trad: string; total: number }> | undefined;
   if (needsSectionOverflow) {
     const byBook = buildOverflowSlots(fileName, data);
     const activeBooks = BOOK_ORDER.filter(b => byBook.has(b));
     overflowIndex = {};
+
+    // Build bookPreviews: earliest instance per book across all slots+translations.
+    const bookPreviewMap = new Map<string, { ref: string; lit: string; trad: string }>();
+    for (const [, slot] of data.slots) {
+      for (const [, trans] of slot.translations) {
+        for (const [book, instances] of trans.instancesByBook) {
+          if (instances.length === 0) continue;
+          const inst = instances[0];
+          const existing = bookPreviewMap.get(book);
+          if (!existing || compareRefs(inst.ref, existing.ref) < 0) {
+            bookPreviewMap.set(book, { ref: inst.ref, lit: inst.lit, trad: inst.trad });
+          }
+        }
+      }
+    }
+    bookPreviews = {};
+    for (const book of activeBooks) {
+      const preview = bookPreviewMap.get(book);
+      if (preview) bookPreviews[book] = { ...preview, total: byBook.get(book)!.total };
+    }
+
     for (const book of activeBooks) {
       const ofName = overflowName(fileName, book);
       const displayName = BOOK_TO_DISPLAY_NAME[book] ?? book;
-      overflowIndex[ofName] = displayName;
+      overflowIndex[ofName] = { label: displayName, total: byBook.get(book)!.total };
       const bk = byBook.get(book)!;
       const overflowOut = {
         type: 'overflow',
@@ -1095,6 +1130,7 @@ for (const [fileName, data] of wordFileData) {
         totalSlots: data.slots.size,
       },
       ...(overflowIndex ? { overflow: overflowIndex } : {}),
+      ...(bookPreviews ? { bookPreviews } : {}),
       slots: slotsOut,
     },
   };

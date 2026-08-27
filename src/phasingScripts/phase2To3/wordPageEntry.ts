@@ -24,7 +24,14 @@ interface MetaOut {
   strongsId: string; lang: string; lemma: string;
   rootTranslation?: string; transliteration?: string; totalInstances: number; totalSlots: number;
 }
-interface AncientWordOut { _meta: MetaOut; overflow?: Record<string, string>; slots: Record<string, SlotOut>; }
+interface OverflowInfo { label: string; total: number; }
+interface BookPreviewEntry { ref: string; lit: string; trad: string; total: number; }
+interface AncientWordOut {
+  _meta: MetaOut;
+  overflow?: Record<string, OverflowInfo>;
+  bookPreviews?: Record<string, BookPreviewEntry>;
+  slots: Record<string, SlotOut>;
+}
 interface RelatedEntry { fileName: string; strongsId: string; lang: string; lemma: string; rootTranslation?: string; translit?: string; }
 interface CrossRefEntry { fileName: string; wordKey: string; strongsId: string; lang: string; lemma: string; rootTranslation?: string; translit?: string; }
 interface MainWordFile { relatedFiles?: RelatedEntry[]; crossRefs?: CrossRefEntry[]; ancientWord: AncientWordOut; }
@@ -59,6 +66,7 @@ const BOOK_ABBREV_ALIASES: Record<string, string> = {
 
 // Canonical Bible order derived from BOOK_TO_DISPLAY_NAME insertion order.
 const BOOK_ORDER: Record<string, number> = {};
+const BOOK_ORDER_ARRAY: string[] = Object.keys(BOOK_TO_DISPLAY_NAME);
 Object.keys(BOOK_TO_DISPLAY_NAME).forEach((code, i) => { BOOK_ORDER[code] = i; });
 
 // ---------------------------------------------------------------------------
@@ -185,11 +193,78 @@ function renderByTranslation(slots: Record<string, SlotOut>, fileTotal: number):
     }).join('');
 }
 
+function docInstHtml(inst: InstanceEntry, rendering?: string): string {
+  const url = refToUrl(inst.ref);
+  const refHtml = url
+    ? `<a class="ws-ref" href="${esc(url)}">${esc(formatRef(inst.ref))}</a>`
+    : `<span class="ws-ref">${esc(formatRef(inst.ref))}</span>`;
+  return [
+    `<div class="ws-instance">`,
+    refHtml,
+    rendering ? `<span class="ws-doc-rendering">${esc(rendering)}</span>` : '',
+    `<p class="ws-trad">${highlightTarget(inst.trad, rendering ?? '', false)}</p>`,
+    `<p class="ws-lit">${highlightTarget(inst.lit, rendering ?? '', true)}</p>`,
+    `</div>`,
+  ].join('');
+}
+
 /**
- * Render instances grouped by Bible book, sorted canonically within each book.
- * Each book gets a heading showing the first instance; the rest are collapsed.
+ * Render instances grouped by Bible book.
+ *
+ * When bookPreviews is provided (overflow main page): each book section shows
+ * the globally-first instance with the true total count, plus an inline link
+ * to the per-book overflow page when one exists.
+ *
+ * Otherwise (overflow sub-pages with all instances inline): collects all
+ * instances from slots and groups them by book, same as before.
  */
-function renderByDocument(slots: Record<string, SlotOut>): string {
+function renderByDocument(
+  slots: Record<string, SlotOut>,
+  bookPreviews?: Record<string, BookPreviewEntry>,
+  overflow?: Record<string, OverflowInfo>,
+): string {
+  // --- path A: main page with bookPreviews (overflow words) ---
+  if (bookPreviews && Object.keys(bookPreviews).length > 0) {
+    // Build a map from book abbreviation to its overflow file name.
+    const overflowByBook = new Map<string, { fileName: string; total: number }>();
+    if (overflow) {
+      for (const [fn, info] of Object.entries(overflow)) {
+        // Overflow file names look like "hear_Isa" — suffix after last "_" is book abbrev.
+        const m = fn.match(/_([^_]+)$/);
+        if (m) overflowByBook.set(m[1], { fileName: fn, total: info.total });
+      }
+    }
+
+    const sections: string[] = [];
+    for (const bookAbbr of BOOK_ORDER_ARRAY) {
+      const preview = bookPreviews[bookAbbr];
+      if (!preview) continue;
+      const displayName = BOOK_TO_DISPLAY_NAME[bookAbbr] ?? bookAbbr;
+      const ovInfo = overflowByBook.get(bookAbbr);
+      const total = preview.total;
+      const countLabel = `${total.toLocaleString()} instance${total === 1 ? '' : 's'}`;
+      const overflowLink = ovInfo
+        ? ` <a class="ws-book-all-link" href="https://words.servewell.net/${encodeURIComponent(ovInfo.fileName)}">see all →</a>`
+        : '';
+      const heading = `<h3 class="ws-rendering">${esc(displayName)} <span class="ws-count">(${countLabel})</span>${overflowLink}</h3>`;
+      if (total === 1 || !ovInfo) {
+        sections.push(`<section class="ws-slot"><div class="ws-translation">${heading}${docInstHtml(preview)}</div></section>`);
+      } else {
+        const moreCount = total - 1;
+        sections.push([
+          `<section class="ws-slot"><div class="ws-translation">`,
+          heading,
+          docInstHtml(preview),
+          `<p class="ws-overflow-note">${moreCount.toLocaleString()} more instance${moreCount === 1 ? '' : 's'} — `,
+          `${wordLink(ovInfo.fileName, `see all ${total.toLocaleString()} in ${displayName}`)}</p>`,
+          `</div></section>`,
+        ].join(''));
+      }
+    }
+    return sections.join('');
+  }
+
+  // --- path B: overflow sub-page (all instances inline), or non-overflow main page ---
   const flat: Array<InstanceEntry & { rendering: string }> = [];
   for (const slot of Object.values(slots)) {
     for (const [rendering, trans] of Object.entries(slot.translations)) {
@@ -198,7 +273,6 @@ function renderByDocument(slots: Record<string, SlotOut>): string {
   }
   flat.sort((a, b) => compareRefs(a.ref, b.ref));
 
-  // Group by book display name.
   const books = new Map<string, Array<InstanceEntry & { rendering: string }>>();
   for (const inst of flat) {
     const m = inst.ref.match(/^([0-9]?[A-Za-z]+)/);
@@ -210,35 +284,20 @@ function renderByDocument(slots: Record<string, SlotOut>): string {
     arr.push(inst);
   }
 
-  function instHtml(inst: InstanceEntry & { rendering: string }): string {
-    const url = refToUrl(inst.ref);
-    const refHtml = url
-      ? `<a class="ws-ref" href="${esc(url)}">${esc(formatRef(inst.ref))}</a>`
-      : `<span class="ws-ref">${esc(formatRef(inst.ref))}</span>`;
-    return [
-      `<div class="ws-instance">`,
-      refHtml,
-      `<span class="ws-doc-rendering">${esc(inst.rendering)}</span>`,
-      `<p class="ws-trad">${highlightTarget(inst.trad, inst.rendering, false)}</p>`,
-      `<p class="ws-lit">${highlightTarget(inst.lit, inst.rendering, true)}</p>`,
-      `</div>`,
-    ].join('');
-  }
-
   const sections = [...books.entries()].map(([bookName, insts]) => {
     const countLabel = `${insts.length.toLocaleString()} instance${insts.length === 1 ? '' : 's'}`;
     const heading = `<h3 class="ws-rendering">${esc(bookName)} <span class="ws-count">(${countLabel})</span></h3>`;
     const [first, ...rest] = insts;
     if (rest.length === 0) {
-      return `<section class="ws-slot"><div class="ws-translation">${heading}${instHtml(first)}</div></section>`;
+      return `<section class="ws-slot"><div class="ws-translation">${heading}${docInstHtml(first, first.rendering)}</div></section>`;
     }
     return [
       `<section class="ws-slot"><div class="ws-translation">`,
       heading,
-      instHtml(first),
+      docInstHtml(first, first.rendering),
       `<details class="ws-more">`,
       `<summary>${rest.length.toLocaleString()} more instance${rest.length === 1 ? '' : 's'}</summary>`,
-      rest.map(i => instHtml(i)).join(''),
+      rest.map(i => docInstHtml(i, i.rendering)).join(''),
       `</details>`,
       `</div></section>`,
     ].join('');
@@ -270,6 +329,9 @@ function injectGroupByStyles(): void {
     `.ws-group-by input[type="radio"]{cursor:pointer;accent-color:var(--link);}`,
     `.ws-doc-rendering{display:block;font-size:.78rem;font-weight:700;font-variant:small-caps;`,
     `letter-spacing:.02em;color:var(--muted);margin:.15rem 0 .1rem;}`,
+    `.ws-book-all-link{font-size:.8rem;font-weight:400;font-variant:normal;letter-spacing:normal;`,
+    `margin-left:.6rem;text-decoration:none;color:var(--link);}`,
+    `.ws-book-all-link:hover{text-decoration:underline;}`,
   ].join('');
   document.head.appendChild(style);
 }
@@ -293,9 +355,13 @@ function wireGroupBy(data: MainWordFile): void {
     } else if (mode === 'translation') {
       container.innerHTML = renderByTranslation(slots, fileTotal);
     } else {
-      container.innerHTML = renderByDocument(slots);
+      container.innerHTML = renderByDocument(slots, data.ancientWord.bookPreviews, data.ancientWord.overflow);
     }
     wireExpandAll();
+    // Hide the "More Instances" overflow link list in document view — those
+    // links are already surfaced inline per-book in that view.
+    const overflowLinks = document.querySelector<HTMLElement>('.ws-overflow-links');
+    if (overflowLinks) overflowLinks.hidden = (mode === 'document');
   }
 
   // Restore saved preference (default: translation).
@@ -407,7 +473,7 @@ function renderSlotsSection(slots: Record<string, SlotOut>, fileTotal: number): 
 }
 
 function renderFooter(
-  overflow: Record<string, string> | undefined,
+  overflow: Record<string, OverflowInfo> | undefined,
   relatedFiles: RelatedEntry[] | undefined,
   crossRefs: CrossRefEntry[] | undefined,
   meta: MetaOut,
@@ -422,7 +488,7 @@ function renderFooter(
     : '';
   const parts: string[] = [];
   if (overflow && Object.keys(overflow).length > 0) {
-    const items = Object.entries(overflow).map(([fn, label]) => `<li>${wordLink(fn, label)}</li>`).join('');
+    const items = Object.entries(overflow).map(([fn, info]) => `<li>${wordLink(fn, info.label)}</li>`).join('');
     parts.push(`<section class="ws-overflow-links"><h2>More Instances</h2><ul>${items}</ul></section>`);
   }
   if (relatedFiles?.length) {
