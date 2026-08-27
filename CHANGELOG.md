@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.10](https://github.com/Servewell-Network/servewell.net/compare/v0.1.9...v0.1.10) (2026-08-27)
+
+
+### Bug Fixes
+
+* trad-orig mismatch e.g., Acts 19:41, Gen 31:55 ([c0e9bab](https://github.com/Servewell-Network/servewell.net/commit/c0e9bab44b7d3715a7f175f4bf04948fe6c1f6ea))
+
 ## [0.1.9](https://github.com/Servewell-Network/servewell.net/compare/v0.1.8...v0.1.9) (2026-07-25)
 
 ## [0.1.8](https://github.com/Servewell-Network/servewell.net/compare/v0.1.6...v0.1.8) (2026-07-25)
