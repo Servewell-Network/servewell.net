@@ -74,7 +74,7 @@ Object.keys(BOOK_TO_DISPLAY_NAME).forEach((code, i) => { BOOK_ORDER[code] = i; }
 // ---------------------------------------------------------------------------
 
 const GROUPBY_KEY = 'ws-groupby';
-const DEFAULT_GROUPBY = 'translation';
+const DEFAULT_GROUPBY = 'document';
 
 // Personal pronouns stripped when normalising renderings for translation view.
 const TRANS_PRONOUNS = new Set(['I', 'HE', 'SHE', 'IT', 'THEY', 'YOU', 'WE', 'THOU', 'YE']);
@@ -248,11 +248,11 @@ function renderByDocument(
         : '';
       const heading = `<h3 class="ws-rendering">${esc(displayName)} <span class="ws-count">(${countLabel})</span>${overflowLink}</h3>`;
       if (total === 1 || !ovInfo) {
-        sections.push(`<section class="ws-slot"><div class="ws-translation">${heading}${docInstHtml(preview)}</div></section>`);
+        sections.push(`<section class="ws-slot" data-doc-display="${esc(displayName)}"><div class="ws-translation">${heading}${docInstHtml(preview)}</div></section>`);
       } else {
         const moreCount = total - 1;
         sections.push([
-          `<section class="ws-slot"><div class="ws-translation">`,
+          `<section class="ws-slot" data-doc-display="${esc(displayName)}"><div class="ws-translation">`,
           heading,
           docInstHtml(preview),
           `<p class="ws-overflow-note">${moreCount.toLocaleString()} more instance${moreCount === 1 ? '' : 's'} — `,
@@ -346,6 +346,21 @@ function wireGroupBy(data: MainWordFile): void {
   const form = document.getElementById('ws-group-by-form');
   if (!form) return;
 
+  // Parse hash params: #grammar=X&document=Y&translation=Z
+  // (any subset may be present; hash is kept in the URL for bookmarking)
+  const hashRaw = window.location.hash.slice(1);
+  const hashParams = new URLSearchParams(hashRaw);
+  const hashGrammar    = hashParams.get('grammar')    ?? undefined;
+  const hashDocument   = hashParams.get('document')   ?? undefined;
+  const hashTranslation = hashParams.get('translation') ?? undefined;
+
+  function scrollToDocumentSection(displayName: string): void {
+    const container = document.getElementById('ws-slots');
+    if (!container || !displayName || typeof CSS === 'undefined') return;
+    const target = container.querySelector<HTMLElement>(`[data-doc-display="${CSS.escape(displayName)}"]`);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   function applyMode(mode: string): void {
     const container = document.getElementById('ws-slots');
     if (!container) return;
@@ -364,13 +379,39 @@ function wireGroupBy(data: MainWordFile): void {
     if (overflowLinks) overflowLinks.hidden = (mode === 'document');
   }
 
-  // Restore saved preference (default: translation).
-  let saved = DEFAULT_GROUPBY;
-  try { saved = localStorage.getItem(GROUPBY_KEY) ?? DEFAULT_GROUPBY; } catch { /* private mode */ }
-  const radio = form.querySelector<HTMLInputElement>(`input[value="${CSS.escape(saved)}"]`);
+  // Determine initial mode:
+  //   explicit localStorage preference → honour it always
+  //   no preference + hash has document= → document view
+  //   no preference + hash has grammar= → grammar view
+  //   no preference + hash has translation= → translation view
+  //   no preference + no hash → DEFAULT_GROUPBY
+  let saved: string | null = null;
+  try { saved = localStorage.getItem(GROUPBY_KEY); } catch { /* private mode */ }
+  let initialMode: string;
+  if (saved) {
+    initialMode = saved;
+  } else if (hashDocument) {
+    initialMode = 'document';
+  } else if (hashGrammar) {
+    initialMode = 'grammar';
+  } else if (hashTranslation) {
+    initialMode = 'translation';
+  } else {
+    initialMode = DEFAULT_GROUPBY;
+  }
+
+  const radio = form.querySelector<HTMLInputElement>(`input[value="${CSS.escape(initialMode)}"]`);
   if (radio) radio.checked = true;
-  // renderMain always generates grammar; re-render now if the saved mode differs.
-  applyMode(saved);
+  // renderMain always generates grammar; re-render now if the initial mode differs.
+  applyMode(initialMode);
+
+  // Scroll to the relevant section for the current view.
+  if (initialMode === 'grammar' && hashGrammar) {
+    handleFragmentScroll(); // uses window.location.hash internally
+  } else if (initialMode === 'document' && hashDocument) {
+    scrollToDocumentSection(hashDocument);
+  }
+  // (translation scrolling could be added here when supported)
 
   form.addEventListener('change', (e) => {
     const target = e.target as HTMLInputElement;
@@ -679,9 +720,12 @@ function handleFragmentScroll(): void {
 
   injectGroupByStyles();
   wireExpandAll();
-  handleFragmentScroll();
 
-  if (!((data as OverflowFile).type === 'overflow')) {
+  if ((data as OverflowFile).type === 'overflow') {
+    // Overflow pages are always in grammar view with no group-by toggle.
+    handleFragmentScroll();
+  } else {
+    // wireGroupBy consumes the hash internally (scroll + URL cleanup).
     wireGroupBy(data as MainWordFile);
   }
 })();

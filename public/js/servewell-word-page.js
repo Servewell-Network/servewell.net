@@ -81,7 +81,7 @@
     BOOK_ORDER[code] = i;
   });
   var GROUPBY_KEY = "ws-groupby";
-  var DEFAULT_GROUPBY = "translation";
+  var DEFAULT_GROUPBY = "document";
   var TRANS_PRONOUNS = /* @__PURE__ */ new Set(["I", "HE", "SHE", "IT", "THEY", "YOU", "WE", "THOU", "YE"]);
   function esc(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -240,11 +240,11 @@
         const overflowLink = ovInfo ? ` <a class="ws-book-all-link" href="https://words.servewell.net/${encodeURIComponent(ovInfo.fileName)}">see all \u2192</a>` : "";
         const heading = `<h3 class="ws-rendering">${esc(displayName)} <span class="ws-count">(${countLabel})</span>${overflowLink}</h3>`;
         if (total === 1 || !ovInfo) {
-          sections2.push(`<section class="ws-slot"><div class="ws-translation">${heading}${docInstHtml(preview)}</div></section>`);
+          sections2.push(`<section class="ws-slot" data-doc-display="${esc(displayName)}"><div class="ws-translation">${heading}${docInstHtml(preview)}</div></section>`);
         } else {
           const moreCount = total - 1;
           sections2.push([
-            `<section class="ws-slot"><div class="ws-translation">`,
+            `<section class="ws-slot" data-doc-display="${esc(displayName)}"><div class="ws-translation">`,
             heading,
             docInstHtml(preview),
             `<p class="ws-overflow-note">${moreCount.toLocaleString()} more instance${moreCount === 1 ? "" : "s"} \u2014 `,
@@ -327,6 +327,17 @@
     const fileTotal = data.ancientWord._meta.totalInstances;
     const form = document.getElementById("ws-group-by-form");
     if (!form) return;
+    const hashRaw = window.location.hash.slice(1);
+    const hashParams = new URLSearchParams(hashRaw);
+    const hashGrammar = hashParams.get("grammar") ?? void 0;
+    const hashDocument = hashParams.get("document") ?? void 0;
+    const hashTranslation = hashParams.get("translation") ?? void 0;
+    function scrollToDocumentSection(displayName) {
+      const container = document.getElementById("ws-slots");
+      if (!container || !displayName || typeof CSS === "undefined") return;
+      const target = container.querySelector(`[data-doc-display="${CSS.escape(displayName)}"]`);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     function applyMode(mode) {
       const container = document.getElementById("ws-slots");
       if (!container) return;
@@ -342,14 +353,31 @@
       const overflowLinks = document.querySelector(".ws-overflow-links");
       if (overflowLinks) overflowLinks.hidden = mode === "document";
     }
-    let saved = DEFAULT_GROUPBY;
+    let saved = null;
     try {
-      saved = localStorage.getItem(GROUPBY_KEY) ?? DEFAULT_GROUPBY;
+      saved = localStorage.getItem(GROUPBY_KEY);
     } catch {
     }
-    const radio = form.querySelector(`input[value="${CSS.escape(saved)}"]`);
+    let initialMode;
+    if (saved) {
+      initialMode = saved;
+    } else if (hashDocument) {
+      initialMode = "document";
+    } else if (hashGrammar) {
+      initialMode = "grammar";
+    } else if (hashTranslation) {
+      initialMode = "translation";
+    } else {
+      initialMode = DEFAULT_GROUPBY;
+    }
+    const radio = form.querySelector(`input[value="${CSS.escape(initialMode)}"]`);
     if (radio) radio.checked = true;
-    applyMode(saved);
+    applyMode(initialMode);
+    if (initialMode === "grammar" && hashGrammar) {
+      handleFragmentScroll();
+    } else if (initialMode === "document" && hashDocument) {
+      scrollToDocumentSection(hashDocument);
+    }
     form.addEventListener("change", (e) => {
       const target = e.target;
       if (target.type !== "radio" || target.name !== "ws-group-by") return;
@@ -585,8 +613,9 @@
     }
     injectGroupByStyles();
     wireExpandAll();
-    handleFragmentScroll();
-    if (!(data.type === "overflow")) {
+    if (data.type === "overflow") {
+      handleFragmentScroll();
+    } else {
       wireGroupBy(data);
     }
   })();
