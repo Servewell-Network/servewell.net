@@ -12,7 +12,7 @@
 		"start": "wrangler dev",
 		"test": "vitest",
 		"test:run": "npm run test:unit && npm run test:inventory",
-		"test:unit": "vitest --run test/index.spec.ts test/api-contracts.spec.ts test/word-search-logic.spec.ts",
+		"test:unit": "vitest --run",
 		"test:contracts": "vitest --run test/api-contracts.spec.ts",
 		"test:inventory": "vitest --run --config vitest.node.config.mts test/feature-inventory.spec.ts test/rendering-regressions.spec.ts test/rendering-global-regressions.spec.ts test/transliteration-regression.spec.ts test/deploy-safety.spec.ts",
 		"test:api-only": "vitest --run test/index.spec.ts",
