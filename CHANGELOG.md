@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.12](https://github.com/Servewell-Network/servewell.net/compare/v0.1.11...v0.1.12) (2026-08-28)
+
+
+### Bug Fixes
+
+* allow sorting in word study overflow pages ([c7fb062](https://github.com/Servewell-Network/servewell.net/commit/c7fb062f79c695ffed0bbe4d8952791504796cf9))
+* stop using a grammar-only url in word study links ([20728e9](https://github.com/Servewell-Network/servewell.net/commit/20728e994bbca3cf3c6b0539cf5c8bf89ab24413))
+
 ## [0.1.11](https://github.com/Servewell-Network/servewell.net/compare/v0.1.10...v0.1.11) (2026-08-28)
 
 
