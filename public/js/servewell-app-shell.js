@@ -3405,6 +3405,7 @@ body.app-panel-open #app-shell-root .app-overlay {
         span.className = "word-translit";
         if (color) span.style.background = color;
         span.textContent = translit;
+        span.addEventListener("click", () => btn.click());
         wrap.appendChild(span);
       });
     });
@@ -3433,6 +3434,8 @@ body.app-panel-open #app-shell-root .app-overlay {
   line-height: 1.4;
   white-space: nowrap;
   display: block;
+  cursor: pointer;
+  user-select: none;
 }
 `;
     document.head.appendChild(style);

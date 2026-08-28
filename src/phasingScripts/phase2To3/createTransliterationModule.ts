@@ -70,6 +70,7 @@ function applyTransliterations(): void {
       span.className = 'word-translit';
       if (color) span.style.background = color;
       span.textContent = translit;
+      span.addEventListener('click', () => btn.click());
       wrap.appendChild(span);
     });
   });
@@ -100,6 +101,8 @@ function ensureStyle(): void {
   line-height: 1.4;
   white-space: nowrap;
   display: block;
+  cursor: pointer;
+  user-select: none;
 }
 `;
   document.head.appendChild(style);
