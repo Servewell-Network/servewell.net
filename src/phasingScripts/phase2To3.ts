@@ -44,6 +44,43 @@ const METADATA_KEY_TO_LABEL = Object.fromEntries(
 const baseDistDir = 'public/-/';
 const baseSrcDir = 'src/json-Phase2/docs';
 
+// All known Source label strings, in stable order. Index is encoded in data-m as a compact numeric.
+// OT and NT labels are included together — prose labels are globally unique so no collision.
+const SOURCE_LABELS: readonly string[] = [
+  'Common Masoretic (e.g., Leningrad)',                                                        // 0
+  'Virtually all manuscripts',                                                                  // 1
+  'Common Masoretic (Scribal qere corrections)',                                                // 2
+  'Common manuscripts, not early or outlier',                                                   // 3
+  'Early manuscripts, not common or outlier',                                                   // 4
+  'Common and outlier manuscripts, not early',                                                  // 5
+  'Early and outlier manuscripts, not common',                                                  // 6
+  'Early and common manuscripts, not outlier',                                                  // 7
+  'Outlier manuscripts only',                                                                   // 8
+  'Outlier manuscripts only (minor variation)',                                                 // 9
+  'Early Greek, not common Masoretic',                                                          // 10
+  'Common Masoretic (Leningrad and Aleppo)',                                                    // 11
+  'Common Masoretic (Leningrad, per BHS)',                                                      // 12
+  'Common Masoretic (Leningrad and Aleppo, per BHS)',                                           // 13
+  'Common Masoretic (Leningrad and Aleppo, per Ben Hayyim)',                                    // 14
+  'Common Masoretic (Leningrad, per BHS and Ben Hayyim)',                                       // 15
+  'Common Masoretic (Leningrad, per Ben Hayyim)',                                               // 16
+  'Reconstructed text based on parallels',                                                      // 17
+  'Common Masoretic (Uncorrected/ketiv text as opposed to scribal qere corrections)',           // 18
+  'Common Masoretic (Aleppo, not Leningrad)',                                                   // 19
+  'Unknown (BHS edition, not Leningrad)',                                                       // 20
+  'Common Masoretic (Cairo Codex, not Leningrad)',                                              // 21
+  'Early manuscripts (Dead Sea Scrolls)',                                                       // 22
+  'Scholarly emendation of ancient sources',                                                    // 23
+  'Formatting variant (pointing/word division)',                                                 // 24
+  'Outlier (Ben Hayyim tradition, not Leningrad)',                                              // 25
+  'Alternate punctuation variant',                                                              // 26
+  'Scribal tradition variant',                                                                  // 27
+  'Variant in some manuscripts',                                                                // 28
+];
+const SOURCE_LABEL_INDEX: Readonly<Record<string, number>> = Object.fromEntries(
+  SOURCE_LABELS.map((label, i) => [label, i])
+);
+
 type MetadataValue = string | number | undefined;
 
 interface MetadataEntry {
@@ -776,7 +813,11 @@ function serializeMetadataEntries(metadataEntries: MetadataEntry[]): string {
     .filter(({ label, value }) => label.length > 0 && value.length > 0)
     .map(({ label, value }) => {
       const compactLabel = METADATA_LABEL_TO_KEY[label] || label;
-      return `${encodeURIComponent(compactLabel)}=${encodeURIComponent(value)}`;
+      // Compress known Source labels to their numeric index for compact encoding
+      const compactValue = compactLabel === 'src' && SOURCE_LABEL_INDEX[value] !== undefined
+        ? String(SOURCE_LABEL_INDEX[value])
+        : value;
+      return `${encodeURIComponent(compactLabel)}=${encodeURIComponent(compactValue)}`;
     })
     .join('&');
 }
@@ -799,12 +840,14 @@ function renderSharedWordPopover(): string {
 function renderSharedWordPopoverScript(): string {
   const escapedPopoverId = escapeHtmlAttribute(SHARED_WORD_POPOVER_ID);
   const compactLabelMapJson = JSON.stringify(METADATA_KEY_TO_LABEL);
+  const sourceLabelsJson = JSON.stringify(SOURCE_LABELS);
 
   return [
     '<script>',
     '(function () {',
     `  const popover = document.getElementById('${escapedPopoverId}');`,
     `  const labelMap = ${compactLabelMapJson};`,
+    `  const srcLabels = ${sourceLabelsJson};`,
     '  if (!(popover instanceof HTMLElement)) return;',
     '  const title = popover.querySelector(".word-popover-title");',
     '  const metaList = popover.querySelector("[data-shared-word-meta]");',
@@ -860,6 +903,18 @@ function renderSharedWordPopoverScript(): string {
     '        link.textContent = "See all instances";',
     '        link.className = "word-meta-link";',
     '        value.appendChild(link);',
+    '      } else if (entry.label === "Source") {',
+    '        var srcIdx = parseInt(entry.value, 10);',
+    '        var srcLabel = isNaN(srcIdx) ? entry.value : (srcLabels[srcIdx] || entry.value);',
+    '        value.textContent = srcLabel;',
+    '        var hint = document.createElement("a");',
+    '        hint.href = "/about#manuscript-types";',
+    '        hint.textContent = "\u24D8";',
+    '        hint.title = "About manuscript types";',
+    '        hint.setAttribute("aria-label", "About manuscript types");',
+    '        hint.className = "word-meta-hint";',
+    '        hint.target = "_blank";',
+    '        value.appendChild(hint);',
     '      } else {',
     '        value.textContent = entry.value;',
     '      }',
@@ -1457,6 +1512,15 @@ function getChapterPageCss(): string[] {
     '.word-meta-value {',
     '  color: var(--pane-fg);',
     '  overflow-wrap: anywhere;',
+    '}',
+    '.word-meta-hint {',
+    '  color: var(--link);',
+    '  font-size: 0.85em;',
+    '  font-weight: 700;',
+    '  text-decoration: none;',
+    '  margin-left: 0.35em;',
+    '  vertical-align: middle;',
+    '  flex-shrink: 0;',
     '}',
     '.word-meta-empty {',
     '  color: var(--muted);',

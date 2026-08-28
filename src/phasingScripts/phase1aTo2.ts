@@ -150,7 +150,11 @@ async function processStepFile(fileName: string, isNt?: string) {
     }
     const fields: StepWord = line.split('\t');
     const refIdx = isNt ? GreekWord.WordAndType : SemiticWord.Ref;
-    const [docAbbr, chapStr, verseStr, wordIdx, source] = (fields[refIdx] as string).replace(/\(\d+\.\d+\)/, '').split(/\W/); // e.g., "Gen.1.1#01=L" or "Mat.1.1#01=NKO" (parenthetical versification variants like "(19.40)" are stripped first)
+    const [docAbbr, chapStr, verseStr, wordIdx, source] = (fields[refIdx] as string)
+      .replace(/\(\d+\.\d+\)/g, '')  // strip NA versification e.g. (19.40)
+      .replace(/\[\d+\.\d+\]/g, '')  // strip KJV versification e.g. [1.3]
+      .replace(/\{\d+\.\d+\}/g, '')  // strip "other" versification e.g. {8.1}
+      .split(/\W/); // e.g., "Gen.1.1#01=L" or "Mat.1.1#01=NKO"
     if (currentChapter?.ChapterNumber !== Number(chapStr) || newAncientDocDirName) {
       // Save the previous chapter, if any, to its docDir before starting a new one
       if (currentChapter && currentChapter.DocOrBookAbbreviation) {
@@ -502,21 +506,27 @@ function getSemiticSourceName(code: string): string {
   const bracket = (code.match(/[\[\(].*[\]\)]/) || [''])[0];
 
   const names: Record<string, string> = {
-    L: 'Leningrad manuscript',
-    R: 'restored text based on Leningrad parallels',
-    X: 'based on Greek sources (LXX)',
-    Q: 'Scribal qere corrections',
-    K: 'uncorrected text (ketiv)',
-    A: 'Aleppo manuscript variant',
-    B: 'Biblia Hebraica Stuttgartensia variant',
-    C: 'Cairensis manuscript variant',
-    D: 'Dead Sea / Judean Desert manuscript variant',
-    E: 'scholarly emendation of ancient sources',
-    F: 'formatting variant (pointing/word division)',
-    H: 'Ben Chaim edition variant',
-    P: 'alternate punctuation variant',
-    S: 'Scribal tradition variant',
-    V: 'variant in some manuscripts'
+    L:   'Common Masoretic (e.g., Leningrad)',
+    LA:  'Common Masoretic (Leningrad and Aleppo)',
+    LB:  'Common Masoretic (Leningrad, per BHS)',
+    LH:  'Common Masoretic (Leningrad, per Ben Hayyim)',
+    LAB: 'Common Masoretic (Leningrad and Aleppo, per BHS)',
+    LAH: 'Common Masoretic (Leningrad and Aleppo, per Ben Hayyim)',
+    LBH: 'Common Masoretic (Leningrad, per BHS and Ben Hayyim)',
+    R:   'Reconstructed text based on parallels',
+    X:   'Early Greek, not common Masoretic',
+    Q:   'Common Masoretic (Scribal qere corrections)',
+    K:   'Common Masoretic (Uncorrected/ketiv text as opposed to scribal qere corrections)',
+    A:   'Common Masoretic (Aleppo, not Leningrad)',
+    B:   'Unknown (BHS edition, not Leningrad)',
+    C:   'Common Masoretic (Cairo Codex, not Leningrad)',
+    D:   'Early manuscripts (Dead Sea Scrolls)',
+    E:   'Scholarly emendation of ancient sources',
+    F:   'Formatting variant (pointing/word division)',
+    H:   'Outlier (Ben Hayyim tradition, not Leningrad)',
+    P:   'Alternate punctuation variant',
+    S:   'Scribal tradition variant',
+    V:   'Variant in some manuscripts'
   };
 
   const name = names[base] ?? base;
@@ -540,22 +550,22 @@ function getGreekSourceName(source: string): string {
     .toUpperCase();
 
   const names: Record<string, string> = {
-    NKO: 'identical in virtually all manuscripts',
-    N: 'found in Ancient manuscripts but not Traditional manuscripts',
-    K: 'found in Traditional manuscripts but not Ancient manuscripts',
-    NK: 'found in Ancient and Traditional manuscripts',
-    KO: 'found in Traditional and Other manuscripts but not Ancient manuscripts',
-    NO: 'found in Ancient and Other manuscripts but not Traditional manuscripts',
-    'NK(O)': 'identical in Ancient and Traditional manuscripts, different in Other manuscripts',
-    'NK(O*)': 'identical in Ancient and Traditional manuscripts, barely different in Other manuscripts',
-    'N(K)(O)': 'found in Ancient manuscripts, different in Traditional and Other manuscripts',
-    'N(K*)(O*)': 'found in Ancient manuscripts, barely different in Traditional and Other manuscripts',
-    'K(O)': 'found in Traditional but not Ancient manuscripts and different in Other manuscripts',
-    'K(O*)': 'found in Traditional but not Ancient manuscripts and barely different in Other manuscripts',
-    'N(O)': 'found in Ancient but not Traditional manuscripts and different in Other manuscripts',
-    'N(O*)': 'found in Ancient but not Traditional manuscripts and barely different in Other manuscripts',
-    O: 'not found in Ancient or Traditional manuscripts, only in Other manuscripts',
-    'O*': 'not found in Ancient or Traditional manuscripts, only in Other manuscripts, and does not change the meaning',
+    NKO: 'Virtually all manuscripts',
+    N: 'Early manuscripts, not common or outlier',
+    K: 'Common manuscripts, not early or outlier',
+    NK: 'Early and common manuscripts, not outlier',
+    KO: 'Common and outlier manuscripts, not early',
+    NO: 'Early and outlier manuscripts, not common',
+    'NK(O)': 'Early and common manuscripts, different in outlier',
+    'NK(O*)': 'Early and common manuscripts, barely different in outlier',
+    'N(K)(O)': 'Early manuscripts, different in common and outlier',
+    'N(K*)(O*)': 'Early manuscripts, barely different in common and outlier',
+    'K(O)': 'Common but not early manuscripts, different in outlier',
+    'K(O*)': 'Common but not early manuscripts, barely different in outlier',
+    'N(O)': 'Early but not common manuscripts, different in outlier',
+    'N(O*)': 'Early but not common manuscripts, barely different in outlier',
+    O: 'Outlier manuscripts only',
+    'O*': 'Outlier manuscripts only (minor variation)',
   };
 
   const name = names[normalized] ?? names[raw.toUpperCase()] ?? raw;
