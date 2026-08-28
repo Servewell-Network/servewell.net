@@ -647,7 +647,7 @@ function appendAlignedWords(
         }${fields[BsbWord.BsbVersion].trim()
         }${fields[BsbWord.pnc].trim()
         }${fields[BsbWord.endQ].trim()
-        }`;
+        }`.replace(/<[^>]*>/g, ' ');
     const words = wordString.split(/\s+/).filter(Boolean);
     if (!rowOutputTarget.targetSnippet || words.length === 0) {
         return;
