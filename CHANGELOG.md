@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.11](https://github.com/Servewell-Network/servewell.net/compare/v0.1.10...v0.1.11) (2026-08-28)
+
+
+### Bug Fixes
+
+* closing parenthesis without opening ([249a7c2](https://github.com/Servewell-Network/servewell.net/commit/249a7c2d67367f8cea31e87102ebaf8dc77fd9c2))
+* document view clarity in word studies of common words ([3354744](https://github.com/Servewell-Network/servewell.net/commit/3354744868a1a9bbcf1d5a695a46468abdf800c4))
+
 ## [0.1.10](https://github.com/Servewell-Network/servewell.net/compare/v0.1.9...v0.1.10) (2026-08-27)
 
 
