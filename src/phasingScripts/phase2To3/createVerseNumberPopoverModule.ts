@@ -776,7 +776,7 @@ export function createVerseNumberPopoverModule(delegator: Delegator): AppModule 
             : [],
         };
         void syncVerseCommentaryMarkers();
-        if (activeVerseButton && qs<HTMLElement>(`#${POPOVER_ID}`)?.matches(':popover-open')) {
+        if (activeVerseButton && qs<HTMLElement>(`#${POPOVER_ID}`)?.matches(':popover-open') && !commentaryEditing) {
           void renderVersePopover(activeVerseButton, { forceRefresh: true });
         }
       };

@@ -2694,7 +2694,7 @@ body.app-panel-open #app-shell-root .app-overlay {
             roles: Array.isArray(detail?.roles) ? detail.roles.filter((role) => typeof role === "string") : []
           };
           void syncVerseCommentaryMarkers();
-          if (activeVerseButton && qs4(`#${POPOVER_ID}`)?.matches(":popover-open")) {
+          if (activeVerseButton && qs4(`#${POPOVER_ID}`)?.matches(":popover-open") && !commentaryEditing) {
             void renderVersePopover(activeVerseButton, { forceRefresh: true });
           }
         };
