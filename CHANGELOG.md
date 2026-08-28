@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.16](https://github.com/Servewell-Network/servewell.net/compare/v0.1.15...v0.1.16) (2026-08-28)
+
+
+### Bug Fixes
+
+* interlinear text should be clickable ([d3d5a1e](https://github.com/Servewell-Network/servewell.net/commit/d3d5a1e7b85b841f1dc14d145d2262bd604522d0))
+
 ## [0.1.15](https://github.com/Servewell-Network/servewell.net/compare/v0.1.14...v0.1.15) (2026-08-28)
 
 
