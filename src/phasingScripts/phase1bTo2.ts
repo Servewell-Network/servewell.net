@@ -2663,10 +2663,22 @@ function getCarryPunctuationFromNonLexicalGroup(nonLexicalGroup: string[]): stri
     return extractTrailingPunctuation(lastToken);
 }
 
+/**
+ * If a non-lexical group starts with one or more open-paren characters
+ * (e.g. the BSB token "( -"), return those parens so they can be prepended
+ * to the next lexical token rather than silently dropped.
+ */
+function getLeadPunctuationFromNonLexicalGroup(nonLexicalGroup: string[]): string {
+    const firstToken = nonLexicalGroup[0];
+    const match = firstToken.match(/^\(+/);
+    return match ? match[0] : '';
+}
+
 function cleanNonLexicalTokensFromChapter(chapter: Chapter): void {
     chapter.SnippetsAndExplanations.forEach(snippet => {
         const cleaned: (EnglishWordInfo | EnglishInsertion)[] = [];
         let i = 0;
+        let pendingLeadingPunctuation = '';
 
         while (i < snippet.EnglishHeadingsAndWords.length) {
             const entry = snippet.EnglishHeadingsAndWords[i];
@@ -2679,8 +2691,13 @@ function cleanNonLexicalTokensFromChapter(chapter: Chapter): void {
             }
 
             if (!isNonLexicalToken(entry.EnglishWord)) {
-                // Keep lexical words as-is
-                cleaned.push(entry);
+                // Attach any pending leading punctuation (e.g. open paren) as prefix.
+                if (pendingLeadingPunctuation) {
+                    cleaned.push({ ...entry, EnglishWord: pendingLeadingPunctuation + entry.EnglishWord });
+                    pendingLeadingPunctuation = '';
+                } else {
+                    cleaned.push(entry);
+                }
                 i++;
                 continue;
             }
@@ -2705,6 +2722,12 @@ function cleanNonLexicalTokensFromChapter(chapter: Chapter): void {
                 if (isEnglishWordInfo(lastEntry)) {
                     lastEntry.EnglishWord += trailingPunctuation;
                 }
+            }
+
+            // Carry any leading open-paren forward to the next lexical token.
+            const leadingPunctuation = getLeadPunctuationFromNonLexicalGroup(nonLexicalGroup);
+            if (leadingPunctuation) {
+                pendingLeadingPunctuation = leadingPunctuation + pendingLeadingPunctuation;
             }
             // All non-lexical tokens are discarded
 
