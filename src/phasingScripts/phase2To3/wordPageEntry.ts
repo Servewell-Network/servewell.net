@@ -308,8 +308,8 @@ function renderByDocument(
 /** Emit the radio-button group-by control strip. */
 function renderGroupByControl(): string {
   return [
-    `<div class="ws-group-by" role="radiogroup" aria-label="Group word study page by" id="ws-group-by-form">`,
-    `<span class="ws-group-by-label">Group word study page by</span>`,
+    `<div class="ws-group-by" role="radiogroup" aria-label="Sort word study page by" id="ws-group-by-form">`,
+    `<span class="ws-group-by-label">Sort word study page by</span>`,
     `<label><input type="radio" name="ws-group-by" value="translation"> translation</label>`,
     `<label><input type="radio" name="ws-group-by" value="grammar"> grammar</label>`,
     `<label><input type="radio" name="ws-group-by" value="document"> document</label>`,
@@ -340,7 +340,7 @@ function injectGroupByStyles(): void {
  * Wire up the group-by radio buttons, restore any saved preference,
  * and re-render #ws-slots on each change.
  */
-function wireGroupBy(data: MainWordFile): void {
+function wireGroupBy(data: MainWordFile | OverflowFile): void {
   const slots = data.ancientWord.slots;
   const fileTotal = data.ancientWord._meta.totalInstances;
   const form = document.getElementById('ws-group-by-form');
@@ -638,7 +638,17 @@ function renderOverflow(data: OverflowFile, container: HTMLElement): void {
     Object.values(data.ancientWord.slots).some(s =>
       Object.values(s.translations).some(t => t.totalInstances > 5));
 
-  const backLink = `<a class="ws-back-link" href="https://words.servewell.net/${encodeURIComponent(data.overflowFrom)}">&#8592; Back to ${esc(meta.wordKey)}</a>`;
+  const displayWord = (meta.rootTranslation ?? meta.wordKey).toUpperCase();
+  const suffix = meta.fileNumber > 1 ? ` (${meta.fileNumber})` : '';
+  const wordInfoParts: string[] = [
+    `${esc(displayWord)}${esc(suffix)}`,
+    ...(meta.transliteration ? [esc(meta.transliteration)] : []),
+    esc(meta.lemma),
+    esc(meta.lang),
+    esc(meta.strongsId),
+  ];
+
+  const backLink = `<a class="ws-back-link" href="https://words.servewell.net/${encodeURIComponent(data.overflowFrom)}">&#8592; Main page for ${esc(displayWord)}${esc(suffix)}</a>`;
   const expandBtn = hasAnyCollapse
     ? ` <button id="ws-expand-all" class="ws-expand-btn">Expand all</button>` : '';
 
@@ -647,11 +657,10 @@ function renderOverflow(data: OverflowFile, container: HTMLElement): void {
   container.innerHTML = [
     `<div class="ws-meta">`,
     backLink,
-    `<span class="ws-meta-info">${esc(data.label)}</span>`,
-    ` · <span class="ws-meta-info">${esc(meta.lang)}</span>`,
-    ` · <span class="ws-meta-info">${esc(meta.strongsId)}</span>`,
-    `<p class="ws-meta-stats">${meta.totalInstances.toLocaleString()} instance${meta.totalInstances === 1 ? '' : 's'} in this section${expandBtn}</p>`,
+    `<span class="ws-meta-info">${esc(data.label)} · ${wordInfoParts.join(' · ')}</span>`,
+    `<p class="ws-meta-stats">${meta.totalInstances.toLocaleString()} instance${meta.totalInstances === 1 ? '' : 's'} in ${esc(data.label)}${expandBtn}</p>`,
     `</div>`,
+    renderGroupByControl(),
     `<div id="ws-slots">${slotsHtml}</div>`,
   ].join('');
 }
@@ -720,12 +729,5 @@ function handleFragmentScroll(): void {
 
   injectGroupByStyles();
   wireExpandAll();
-
-  if ((data as OverflowFile).type === 'overflow') {
-    // Overflow pages are always in grammar view with no group-by toggle.
-    handleFragmentScroll();
-  } else {
-    // wireGroupBy consumes the hash internally (scroll + URL cleanup).
-    wireGroupBy(data as MainWordFile);
-  }
+  wireGroupBy(data);
 })();

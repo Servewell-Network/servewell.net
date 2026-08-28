@@ -297,8 +297,8 @@
   }
   function renderGroupByControl() {
     return [
-      `<div class="ws-group-by" role="radiogroup" aria-label="Group word study page by" id="ws-group-by-form">`,
-      `<span class="ws-group-by-label">Group word study page by</span>`,
+      `<div class="ws-group-by" role="radiogroup" aria-label="Sort word study page by" id="ws-group-by-form">`,
+      `<span class="ws-group-by-label">Sort word study page by</span>`,
       `<label><input type="radio" name="ws-group-by" value="translation"> translation</label>`,
       `<label><input type="radio" name="ws-group-by" value="grammar"> grammar</label>`,
       `<label><input type="radio" name="ws-group-by" value="document"> document</label>`,
@@ -544,17 +544,25 @@
   function renderOverflow(data, container) {
     const meta = data.ancientWord._meta;
     const hasAnyCollapse = meta.totalInstances > 30 && Object.values(data.ancientWord.slots).some((s) => Object.values(s.translations).some((t) => t.totalInstances > 5));
-    const backLink = `<a class="ws-back-link" href="https://words.servewell.net/${encodeURIComponent(data.overflowFrom)}">&#8592; Back to ${esc(meta.wordKey)}</a>`;
+    const displayWord = (meta.rootTranslation ?? meta.wordKey).toUpperCase();
+    const suffix = meta.fileNumber > 1 ? ` (${meta.fileNumber})` : "";
+    const wordInfoParts = [
+      `${esc(displayWord)}${esc(suffix)}`,
+      ...meta.transliteration ? [esc(meta.transliteration)] : [],
+      esc(meta.lemma),
+      esc(meta.lang),
+      esc(meta.strongsId)
+    ];
+    const backLink = `<a class="ws-back-link" href="https://words.servewell.net/${encodeURIComponent(data.overflowFrom)}">&#8592; Main page for ${esc(displayWord)}${esc(suffix)}</a>`;
     const expandBtn = hasAnyCollapse ? ` <button id="ws-expand-all" class="ws-expand-btn">Expand all</button>` : "";
     const { html: slotsHtml } = renderSlotsSection(data.ancientWord.slots, meta.totalInstances);
     container.innerHTML = [
       `<div class="ws-meta">`,
       backLink,
-      `<span class="ws-meta-info">${esc(data.label)}</span>`,
-      ` \xB7 <span class="ws-meta-info">${esc(meta.lang)}</span>`,
-      ` \xB7 <span class="ws-meta-info">${esc(meta.strongsId)}</span>`,
-      `<p class="ws-meta-stats">${meta.totalInstances.toLocaleString()} instance${meta.totalInstances === 1 ? "" : "s"} in this section${expandBtn}</p>`,
+      `<span class="ws-meta-info">${esc(data.label)} \xB7 ${wordInfoParts.join(" \xB7 ")}</span>`,
+      `<p class="ws-meta-stats">${meta.totalInstances.toLocaleString()} instance${meta.totalInstances === 1 ? "" : "s"} in ${esc(data.label)}${expandBtn}</p>`,
       `</div>`,
+      renderGroupByControl(),
       `<div id="ws-slots">${slotsHtml}</div>`
     ].join("");
   }
@@ -613,10 +621,6 @@
     }
     injectGroupByStyles();
     wireExpandAll();
-    if (data.type === "overflow") {
-      handleFragmentScroll();
-    } else {
-      wireGroupBy(data);
-    }
+    wireGroupBy(data);
   })();
 })();
