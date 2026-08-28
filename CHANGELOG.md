@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.14](https://github.com/Servewell-Network/servewell.net/compare/v0.1.13...v0.1.14) (2026-08-28)
+
+
+### Bug Fixes
+
+* terms for text types ([5f4a30a](https://github.com/Servewell-Network/servewell.net/commit/5f4a30a0320dd3af9ffe1e34ae532c0bc5af1c8a))
+
 ## [0.1.13](https://github.com/Servewell-Network/servewell.net/compare/v0.1.12...v0.1.13) (2026-08-28)
 
 
