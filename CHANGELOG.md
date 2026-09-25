@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.18](https://github.com/Servewell-Network/servewell.net/compare/v0.1.17...v0.1.18) (2026-09-25)
+
+
+### Bug Fixes
+
+* confusing highlighting for second occurrence of a word in a verse ([9a6fbc3](https://github.com/Servewell-Network/servewell.net/commit/9a6fbc3c7c0c4308268a52095f4e72aee5abad39))
+
 ## [0.1.17](https://github.com/Servewell-Network/servewell.net/compare/v0.1.16...v0.1.17) (2026-09-25)
 
 
