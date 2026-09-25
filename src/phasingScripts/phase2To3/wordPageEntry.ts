@@ -489,7 +489,12 @@ function renderSlotsSection(slots: Record<string, SlotOut>, fileTotal: number): 
         merged: {
           grammarFull: slot.grammarFull, grammarFn: slot.grammarFn,
           totalInstances: slot.totalInstances, totalTranslations: slot.totalTranslations,
-          translations: { ...slot.translations },
+          translations: Object.fromEntries(
+            Object.entries(slot.translations).map(([rendering, trans]) => [rendering, {
+              totalInstances: trans.totalInstances,
+              instances: [...trans.instances],
+            }]),
+          ),
         },
       });
     } else {
@@ -705,10 +710,17 @@ function handleFragmentScroll(): void {
 }
 
 // ---------------------------------------------------------------------------
+// Testable rendering helpers
+// ---------------------------------------------------------------------------
+
+export { renderByDocument, renderSlotsSection };
+
+// ---------------------------------------------------------------------------
 // Entry point
 // ---------------------------------------------------------------------------
 
 (function init() {
+  if (typeof document === 'undefined') return;
   const dataEl = document.getElementById('ws-data');
   const renderEl = document.getElementById('ws-render');
   if (!dataEl || !renderEl) return;
