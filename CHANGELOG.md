@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.17](https://github.com/Servewell-Network/servewell.net/compare/v0.1.16...v0.1.17) (2026-09-25)
+
+
+### Bug Fixes
+
+* duplication of entries in word study pages ([5923951](https://github.com/Servewell-Network/servewell.net/commit/5923951be9e9a858f284144d3fdce727529df6e9))
+
 ## [0.1.16](https://github.com/Servewell-Network/servewell.net/compare/v0.1.15...v0.1.16) (2026-08-28)
 
 
