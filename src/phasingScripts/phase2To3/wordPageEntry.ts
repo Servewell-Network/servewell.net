@@ -12,7 +12,7 @@
 // Types (mirror generateWordStudyHtml.ts interfaces)
 // ---------------------------------------------------------------------------
 
-interface InstanceEntry { ref: string; lit: string; trad: string; }
+interface InstanceEntry { ref: string; lit: string; trad: string; litTargetOccurrence?: number; }
 interface TranslationOut { totalInstances: number; instances: InstanceEntry[]; }
 interface SlotOut {
   grammarFull: string; grammarFn: string;
@@ -125,7 +125,7 @@ const SKIP_HIGHLIGHT_WORDS = new Set([
   'what','who','will','with','you','your',
 ]);
 
-function highlightTarget(rawText: string, rendering: string, isLit: boolean): string {
+function highlightTarget(rawText: string, rendering: string, isLit: boolean, occurrence?: number): string {
   const cleaned = cleanRendering(rendering);
   if (!cleaned) return esc(rawText);
   if (!isLit) {
@@ -134,7 +134,13 @@ function highlightTarget(rawText: string, rendering: string, isLit: boolean): st
   }
   const pattern = escapeRegex(cleaned);
   try {
-    return esc(rawText).replace(new RegExp(`\\b(${pattern})\\b`, 'gi'), '<mark class="ws-target">$1</mark>');
+    let matchIndex = 0;
+    return esc(rawText).replace(new RegExp(`\\b(${pattern})\\b`, 'gi'), (match) => {
+      matchIndex++;
+      return !isLit || !occurrence || matchIndex === occurrence
+        ? `<mark class="ws-target">${match}</mark>`
+        : match;
+    });
   } catch {
     return esc(rawText);
   }
@@ -203,7 +209,7 @@ function docInstHtml(inst: InstanceEntry, rendering?: string): string {
     refHtml,
     rendering ? `<span class="ws-doc-rendering">${esc(rendering)}</span>` : '',
     `<p class="ws-trad">${highlightTarget(inst.trad, rendering ?? '', false)}</p>`,
-    `<p class="ws-lit">${highlightTarget(inst.lit, rendering ?? '', true)}</p>`,
+    `<p class="ws-lit">${highlightTarget(inst.lit, rendering ?? '', true, inst.litTargetOccurrence)}</p>`,
     `</div>`,
   ].join('');
 }
@@ -430,7 +436,7 @@ function renderInstance(inst: InstanceEntry, rendering: string): string {
     `<div class="ws-instance">`,
     refHtml,
     `<p class="ws-trad">${highlightTarget(inst.trad, rendering, false)}</p>`,
-    `<p class="ws-lit">${highlightTarget(inst.lit, rendering, true)}</p>`,
+    `<p class="ws-lit">${highlightTarget(inst.lit, rendering, true, inst.litTargetOccurrence)}</p>`,
     `</div>`,
   ].join('');
 }

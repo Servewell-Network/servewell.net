@@ -158,7 +158,7 @@
     "you",
     "your"
   ]);
-  function highlightTarget(rawText, rendering, isLit) {
+  function highlightTarget(rawText, rendering, isLit, occurrence) {
     const cleaned = cleanRendering(rendering);
     if (!cleaned) return esc(rawText);
     if (!isLit) {
@@ -167,7 +167,11 @@
     }
     const pattern = escapeRegex(cleaned);
     try {
-      return esc(rawText).replace(new RegExp(`\\b(${pattern})\\b`, "gi"), '<mark class="ws-target">$1</mark>');
+      let matchIndex = 0;
+      return esc(rawText).replace(new RegExp(`\\b(${pattern})\\b`, "gi"), (match) => {
+        matchIndex++;
+        return !isLit || !occurrence || matchIndex === occurrence ? `<mark class="ws-target">${match}</mark>` : match;
+      });
     } catch {
       return esc(rawText);
     }
@@ -216,7 +220,7 @@
       refHtml,
       rendering ? `<span class="ws-doc-rendering">${esc(rendering)}</span>` : "",
       `<p class="ws-trad">${highlightTarget(inst.trad, rendering ?? "", false)}</p>`,
-      `<p class="ws-lit">${highlightTarget(inst.lit, rendering ?? "", true)}</p>`,
+      `<p class="ws-lit">${highlightTarget(inst.lit, rendering ?? "", true, inst.litTargetOccurrence)}</p>`,
       `</div>`
     ].join("");
   }
@@ -395,7 +399,7 @@
       `<div class="ws-instance">`,
       refHtml,
       `<p class="ws-trad">${highlightTarget(inst.trad, rendering, false)}</p>`,
-      `<p class="ws-lit">${highlightTarget(inst.lit, rendering, true)}</p>`,
+      `<p class="ws-lit">${highlightTarget(inst.lit, rendering, true, inst.litTargetOccurrence)}</p>`,
       `</div>`
     ].join("");
   }

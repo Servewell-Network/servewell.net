@@ -302,7 +302,7 @@ interface Chapter {
 // ---------------------------------------------------------------------------
 // Accumulator types
 // ---------------------------------------------------------------------------
-interface InstanceEntry { ref: string; lit: string; trad: string; }
+interface InstanceEntry { ref: string; lit: string; trad: string; litTargetOccurrence?: number; }
 interface TranslationAcc {
   /** Instances grouped by Bible book (canonical abbreviation). */
   instancesByBook: Map<string, InstanceEntry[]>;
@@ -517,6 +517,16 @@ function buildLiteralCtx(snippet: Snippet): string {
     .join(' ');
 }
 
+function getLiteralTargetOccurrence(snippet: Snippet, target: Morpheme, rendering: string): number {
+  const pattern = new RegExp(`\\b${rendering.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+  const literalMorphemes = snippet.OriginalMorphemes.filter(m => !m.IsPunctuation);
+  const literalThroughTarget = literalMorphemes
+    .slice(0, literalMorphemes.indexOf(target) + 1)
+    .map(m => m.EnglishMorphemeWithPunctuationInOriginalOrder)
+    .join(' ');
+  return [...literalThroughTarget.matchAll(pattern)].length;
+}
+
 function buildTraditionalCtx(snippet: Snippet): string {
   const words: string[] = [];
   for (const item of snippet.EnglishHeadingsAndWords) {
@@ -637,7 +647,13 @@ for (const filePath of allFiles) {
       const translation = slot.translations.get(renderingKey)!;
       const book = getBook(ref);
       const bookInst = translation.instancesByBook.get(book) ?? [];
-      bookInst.push({ ref, lit: litCtx, trad: tradCtx });
+      const litTargetOccurrence = getLiteralTargetOccurrence(snippet, morph, renderingKey);
+      bookInst.push({
+        ref,
+        lit: litCtx,
+        trad: tradCtx,
+        ...(litTargetOccurrence > 1 ? { litTargetOccurrence } : {}),
+      });
       translation.instancesByBook.set(book, bookInst);
 
       morphemeCount++;
