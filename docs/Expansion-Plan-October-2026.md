@@ -56,7 +56,7 @@ Wherever content is being created, users should be able to reference existing st
 
 Users can keep private, searchable notes about content they can access, including content owned by someone else. These notes are personal annotations, not fields stored on or shared as part of the page. After the page loads, authorized private annotations can be populated into the relevant popover alongside that user's unshared links. A popover can show them in a collapsed `Private Notes` section; expanding it reveals the notes and controls to edit or delete them. The precise presentation and workflow remain to be worked out.
 
-Search for private notes must be scoped to the note's owner and content they are allowed to access. Results and snippets must not reveal a private note to the page owner or other viewers unless the note is explicitly shared.
+Search for private notes must be scoped to the note's owner and content they are allowed to access. Results and excerpts must not reveal a private note to the page owner or other viewers unless the note is explicitly shared.
 ### Composite pages and subscriptions
 
 Some pages should combine information from other pages:
@@ -112,7 +112,7 @@ Treat Bible chapter pages as a page pattern with a specialized popover. Adapt it
 
 ### Trust and moderation
 
-Add an `Ambassador` role for a small, selected group of people who want to help and reach out to others. The role name fits the site's context; its definition can evolve. Initially it grants access to new features such as contact management and reminders.
+Add an `Ambassador` role for a small, selected group of people who want to help and reach out to others. The role name fits the site's context; its definition can evolve. Initially it grants access to feature areas such as contact management and reminders, but does not by itself grant access to personal data or pages; those still require ownership or an explicit share grant.
 
 The site currently has two explicit roles: Moderator and Developer. These appear as menu checkboxes for users with those privileges, allowing them to simulate the experience of users without those roles. The implied `Registrant` state is shown by the “Signed in” message; signing out returns the user to the `Visitor` state.
 
@@ -131,6 +131,8 @@ Candidate page permissions:
 - Owner, if ownership transfer and recovery rules are defined
 
 Represent permissions as grants attached to stable page IDs. A grant identifies its recipient (a user, contact group, or role), permission level, and optional expiry; an explicit public grant makes the page available to everyone. Access is denied by default, and there are no per-user or per-group deny rules that override a grant. Resolve group membership and signed-in identity on the server, never from an email address supplied by the browser, and enforce permissions on every read and write.
+
+For the first Contacts workflow, each contact list has one owner and is private by default. The owner can explicitly share the page; defer co-owned household or team lists until after the basic workflow works. Contact groups are named memberships on contacts, and composite pages derive their current members from those groups. Sharing a Contacts page shares its contacts and fields according to the page grant; keep personal `Private Notes` separate and visible only to the note's author.
 
 ### Permission-aware links and popovers
 
@@ -173,21 +175,21 @@ Private data should be searchable across pages the current user owns or has perm
 
 ### Stable references and scoped edits
 
-Pages need stable URLs, and content within a page should have stable fragment identifiers such as `<URL>#<fragment-id>`. Bible content currently uses snippet identifiers; a paragraph or newline-delimited block can be the default fragment for other content. Individual words or targets within a fragment also need stable IDs, which can use dot notation beneath the fragment ID.
+Pages need stable URLs, and content within a page should have stable fragment identifiers such as `<URL>#<fragment-id>`. A paragraph or newline-delimited block can be the default fragment for unstructured content. Individual words or targets within a fragment also need stable IDs, which can use dot notation beneath the fragment ID.
 
 When a user selects one or more words, the top-bar Options action can offer Edit if the user's permissions allow it. Editing one word can also be offered from its individual popover. The edit form should scope the change to the selected words and evaluate only public outlinks attached to those targets, not every outlink on the page.
 
-Before an edit is finalized, show the editor and moderator a temporary before/after comparison where useful. This comparison supports review and is not intended as a general version-history feature for every snippet edit.
+Before an edit is finalized, show the editor and moderator a temporary before/after comparison where useful. This comparison supports review and is not intended as a general version-history feature for every fragment edit.
 
 ### Outlink review and moderation handoff
 
 When an edit affects public outlinks, show a review form with one row per affected outlink. For each link, the decision should indicate whether to keep it, remove only the link, or remove both the link and its target document. Provide bulk actions such as select all or select none.
 
-Editors can complete the outlink review as part of their edit. If they cannot, they can refer the review to moderators, leaving the form and decisions for a moderator to complete. The process should make it possible to open target documents in other tabs while reviewing.
+Editors can complete the outlink review as part of their edit. If they cannot, they can refer the review to moderators, leaving the form and decisions for a moderator to complete. Removing an outlink and its target document requires moderator approval; the editor's choice schedules the proposal rather than deleting the target immediately. The process should make it possible to open target documents in other tabs while reviewing.
 
 ### Edit reservations and notifications
 
-To reduce conflicting edits, maintain temporary edit/review queues keyed by fragment ID. A user at the front of a fragment's queue may edit it; other users see that the fragment is currently being edited or moderated and can join the queue to be notified when it becomes available. A selection spanning multiple fragments joins the relevant queue for each fragment and may be eligible to edit only some of them at first.
+To reduce conflicting edits, maintain temporary edit/review queues keyed by fragment ID. A user at the front of a fragment's queue may edit it; other users see that the fragment is currently being edited or moderated and can join the queue to be notified when it becomes available. Reservations are expiring leases that an active editor can renew; when a lease expires, the next person in the queue may proceed. A selection spanning multiple fragments joins the relevant queue for each fragment and may be eligible to edit only some of them at first.
 
 The exact reservation and edit-form workflow remains to be designed. The notification experience also needs work: distinguish shared work such as items in `List to moderate` from personal notifications, and make both easier to notice with badges near the menu and visible nonzero counts in menu items.
 
@@ -195,7 +197,9 @@ The exact reservation and edit-form workflow remains to be designed. The notific
 
 Deletion should be recoverable before it becomes permanent. A page scheduled for deletion displays a banner explaining its status and a way to contact moderators if a visitor disagrees. Add a `View items being deleted` list to the moderation workflow, alongside `View processed items`; show each item's scheduled deletion date and let moderators rescue items from deletion.
 
-Keep tentatively deleted pages for approximately one year, then remove eligible items in a monthly cleanup job. When a shared page is scheduled for deletion, notify people who had access and give them the option to make their own copy during the recovery period. Do not notify them about every fragment edit by default, but allow interested users to opt into email notifications containing before/after content for edited fragments.
+Keep tentatively deleted pages for approximately one year, then remove eligible items in a monthly cleanup job. During that period, people who previously had access retain read-only access to the pending-deletion page so they can decide whether to make a copy, unless access is revoked for a separate safety or moderation reason. Notify them when a shared page is scheduled for deletion and give them the option to make their own copy during the recovery period. Do not notify them about every fragment edit by default, but allow interested users to opt into email notifications containing before/after content for edited fragments.
+
+Use `fragment` as the general term for an addressable part of a page, with a paragraph or newline-delimited block as the default fragment for unstructured text. Bible content can use the same general term for its addressable units; avoid introducing `snippet` as a separate product term.
 
 ## Candidate Feature Workflows
 
@@ -208,8 +212,6 @@ These are candidate applications of the shared foundations, not a required build
 - Trust-aware moderation and page sharing
 
 Build one end-to-end workflow at a time, starting with personal contacts and contact groups. This exercises structured page patterns, permissions, search, links, and popovers; task assignment and messaging can follow once those foundations are proven.
-
-💭 **Open question:** Which workflows are for an individual, a household/team, or the public? Ownership and sharing defaults may differ across those audiences. Break this into smaller questions during stage two rather than deciding it all at once.
 
 ## Developing the Plan
 
@@ -233,5 +235,5 @@ Build one end-to-end workflow at a time, starting with personal contacts and con
 2. Implement a complete path from UI through authorization and persistence, including tests for both allowed and denied access.
 3. Add migration and recovery steps for schema changes, plus tests for existing public behavior that must remain unchanged.
 4. Instrument reads, writes, storage, latency, and authorization failures. Review Cloudflare D1/R2/Workers usage as real usage accumulates.
-5. Release incrementally, verify production behavior and privacy boundaries, then use user feedback and observed usage to select the next slice.
+5. Release incrementally, verify production behavior and privacy boundaries, then use user feedback to select the next slice.
 
