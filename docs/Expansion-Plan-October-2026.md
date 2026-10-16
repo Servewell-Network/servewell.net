@@ -5,28 +5,31 @@
 Plan a coherent expansion of servewell.net rather than a set of disconnected features. The aim is a consistent experience for reading, linking, discussing, creating, and managing content, supported by a consistent developer architecture.
 
 Potential feature areas:
-- Personal reminders
 - Personal contacts and contact groups
-- Public and private comments on content, including comments on comments and comments attached to specific words
-- Personal tracking of group tasks, including recurring tasks
+- Personal reminders
+- Public and private comments on specific content words, including comments on specific words within comments (forming a theoretically infinite network of comments)
+- Curriculum building, including collaboration of teachers and interactive experiences for learners
+- Tracking of group tasks, including recurring tasks
 - Assignments that combine contacts with tasks
 - Personal message templates and messaging management that combines templates with contacts
 - Better moderation, trust, sharing, and page-level permissions
 
 These ideas overlap around shared foundations: pages, stable references within pages, identity, permissions, links, comments, and structured data. Build these foundations first so reminders, messaging, and assignments can be composed from them rather than implemented as separate systems.
 
-Start with personal contacts as the first end-to-end workflow. Task assignment depends on contacts, so it should follow rather than precede the contacts foundation.
+Start with personal contacts as the first end-to-end workflow.
+
+Curriculum building remains a candidate area and should not expand the first Contacts release. Revisit its specific workflows after the shared page, identity, and permission foundations are established.
 
 ## Content Model
 
 ### Pages and patterns
 
-Pages should be creatable from a small set of patterns. A pattern defines both how content is displayed and which actions are available from its terms or entries.
+Pages should be creatable from a small set of page patterns. A page pattern defines both how content is displayed and which actions are available from its terms or entries.
 
 Initial patterns to consider:
 - Plain text
 - Markdown text
-- Structured pages with optional validation or constraints, including:
+- Structured pages with optional data validation, including:
   - Unordered lists
   - Sorted lists
   - Ordered lists with numbers or letters
@@ -37,32 +40,39 @@ Initial patterns to consider:
 
 ### Structured values and templates
 
-A structured page can supply allowed values or schemas to another page. A template for contacts could define:
-- Unique name: String
-- Casual name: String
-- Friend of: Contact.UniqueName
-- Born: Date
-- Groups: ContactGroup
+A structured page can supply allowed values or schemas to another page.
 
-When creating a personal contacts page as a sorted list, the user could start from a copy of the Contact template. Each entry would suggest the defined fields and their types. If the user adds fields, offer the option to update that page's copy of the template. If a field name matches a recently created structured page, suggest that page as its type.
+For example, a simple page called ContactGroups, using the 'sorted list' page pattern with 'Text as GroupName' data validation, could supply allowed values to a Contacts page based on a template-based data validation for the Contacts page.
 
-Templates could also support message text such as `Hi ${Contact.CasualName}`. While editing, typing `${` or `:` could offer standard types and recently used structured pages.
+A template called Contact could define:
+- Unique name (UniqueName): Text
+- Casual name (CasualName): Text
+- Friends: List<Contact.UniqueName>
+- Birthdate: Date
+- Groups: List<ContactGroup.GroupName>
+
+When creating a personal contacts page as a new sorted list, the user could start from a copy of the Contact template. Each entry would suggest the defined fields and their types. If the user adds fields, offer the option to update that page's copy of the template, with a selected checkox to allow the field name and type to also be sent to moderators for possible inclusion in the shared template copy. If a field name matches a recently created structured page, suggest that page as its type. Templates could also support message text such as `Hi ${Contact.CasualName}`. While editing, typing `${` or `:` could offer standard types and recently used structured pages.
 
 Treat templates as versioned schemas. Pages can keep using their current template version, and the owner chooses when to adopt a newer version. This allows templates to improve without silently changing existing pages.
 
+When a template owner publishes a new version, pages using an older version can show their owner that an update is available. The owner can review a field-by-field comparison and choose to adopt the new version. For the first implementation, adoption should add new fields without deleting or renaming existing custom fields; if a new field overlaps or conflicts with a local field, let the owner map or rename it explicitly. Defer automatic schema merging and migration of existing values until real template changes demonstrate the need.
+
 ### References, links, and search
 
-Wherever content is being created, users should be able to reference existing structured values, probably by typing `@`. For example, autocomplete could find `Contact.UniqueName` or `Content.CasualName`, then create a link to that stable entry in its source page. It should also support selecting a structured page and then one of its entries.
+While creating content, users can type `@` to insert a reference to a value in a structured page. For example, typing `@Contacts.Mar` can offer a contact such as Marcus Reese, with display choices such as the unique name `@MarcusReese` or casual name `@Marcus`. The inserted reference remains linked to the contact's stable entry ID, for example `<ContactsURL>#MarcusReese`, regardless of which display name is shown.
 
 Users can keep private, searchable notes about content they can access, including content owned by someone else. These notes are personal annotations, not fields stored on or shared as part of the page. After the page loads, authorized private annotations can be populated into the relevant popover alongside that user's unshared links. A popover can show them in a collapsed `Private Notes` section; expanding it reveals the notes and controls to edit or delete them. The precise presentation and workflow remain to be worked out.
 
 Search for private notes must be scoped to the note's owner and content they are allowed to access. Results and excerpts must not reveal a private note to the page owner or other viewers unless the note is explicitly shared.
+
 ### Composite pages and subscriptions
 
-Some pages should combine information from other pages:
-- A messaging view could combine message templates with contacts, or with contacts tagged `message-recipient`, and sort recipients by most recently contacted.
-- An assignment view could combine recurring tasks with a filtered contact group. People who have done a task recently go toward the back of the queue; people who have not done it recently are easier to assign.
-- An assignment page could have a separate contact queue for each recurring task. A dated task entry could use a schema where task descriptions are keys and contact groups are typed values. Selecting a group could open a popover with its members and sorting options.
+Composite pages can combine shared sources while supporting distinct workflows:
+- A messaging view combines message templates and contacts tagged `message-recipient`, sorted by most recently contacted. The user can select a drafted message for use outside the site, then mark it sent; only marking it sent updates contact recency. The initial workflow does not send the message itself.
+- An assignment view combines recurring tasks and filtered contact groups, maintaining a separate queue per task so that people who have done a task recently move toward the back and people who have not done it recently are easiest to select. A dated task entry can use task names as keys and contact groups as value types; selecting a group opens a popover where one member can be chosen as the assignee.
+
+💭 **Open question:** Should the messaging view also record other kinds of contact, such as a phone call or an in-person visit, or is marking sent messages enough for the first version?
+Track contact history with optional `Email`, `Text`, `Call`, `Visit`, and `Other` selections; selecting `Other` reveals a text field. A general `Done` action records the selected interaction. For messages, selecting a draft does not update recency; the user explicitly marks it sent.
 
 These composite pages are subscribers to their source pages. If Contacts changes, a subscriber should remove contacts that were deleted or no longer match its filter, and add newly eligible contacts to the end of the queue so that people not recently selected remain easiest to assign.
 
@@ -70,77 +80,82 @@ Persist user decisions and activity, such as queue position and last assignment,
 
 Refresh composite pages on demand by default. Revisit automatic updates if a workflow requires immediate consistency.
 
+Here, “on demand” means recompute derived membership and ordering when the user opens the composite page, and provide a refresh action for updates while the page remains open. Do not push background updates initially. Preserve user activity such as assignment history and queue decisions while refreshing the derived set of eligible contacts.
+
 ## Interaction Model
 
 ### Word and entry actions
 
 The main interaction surfaces today include ordinary links and pages, word popovers in Bible chapter pages, and expandable details in word-study pages and the quiz. The next iteration should focus on links and popovers and bring word-study and quiz interactions into alignment where useful.
 
-Any term in structured or unstructured content is either:
+Any term in structured or unstructured content is probably tappable:
 - A link, styled so it is recognizable as a link; or
-- A popover trigger, which can look like ordinary text when it is not a link.
+- A button, styled so it is recognizable as a button; or
+- A popover trigger, which can look like ordinary text because it is not a link.
+One likely exception is titles, which may not do anything when tapped, although even that is debatable.
 
 For structured values, a solid value should link to its line or entry in its source page. An instance of a field name, such as `UniqueName`, should link to its definition. The destination can in turn expose its own popover and related actions.
+
+If a structured data set becomes too large to display at once, use expandable sections and load entries on demand. For example, Contacts could have collapsed sections by letter; following `@Contacts.MarcusReese` could open the M section and load Marcus Reese if it is not already present.
 
 The default word or entry popover should show:
 - Existing links associated with that target
 - A way to link to existing content
 - A way to create a linked page and link to it in one action
 - A way to offer a correction to the page editors
-- Other context-specific actions, such as voting, when appropriate
+- Other context-specific actions, such as voting, when those actions are specified by the page pattern
+- Less useful reference information later in the popover rather than earlier (and make it clear if scrolling is required to see the bottom of the popover content).
 
-Some standard page patterns could create conventional links automatically. For example, trusted users could create a word-choice discussion page that starts with the word's context and offers pros, cons, alternatives, and reasons. Other standard links could be “more of this” or “more about this” for research and related material.
+Some standard page patterns could create conventional links automatically. For example, trusted users could create a word-choice discussion page that starts with the word's context and offers pros, cons, alternatives, and reasons. Another standard link could be “More about this” for research and related material.
 
 Use a consistent popover structure across page patterns, while allowing each pattern to contribute its relevant actions. This gives users one interaction model without forcing Bible words, contacts, and task entries to expose identical options.
 
 ### Text selection and multi-target actions
 
-A single tap on a word can open its popover. A long press currently begins native text selection and exposes the browser's usual actions such as Copy and Cut. In addition, when text is selected, the top bar should mostly be replaced by `Options` and `Cancel` actions.
+A single tap on a word opens its popover. A long press currently begins native text selection and exposes the browser's usual actions such as Copy and Cut. When text is selected, the top bar should mostly be replaced by `Popover` and `Cancel` actions.
 
-The selection Options view should show links common to all selected words and offer actions that apply to all of them, such as adding a link or offering a correction. The resulting relationship should be attached to each selected word.
+The selection popover aggregates the popovers of the individual words. It should show links common to all selected words and offer actions that apply to all of them, such as adding a link or offering a correction. The resulting relationship should be attached to each selected word. Use “popover” consistently in code, user-facing documentation, and interaction labels; reserve “options” for the choices inside a popover.
 
-For a selection, show links that apply to every selected word first. Follow these with links that apply to any selected word. If the list is too long, place the remaining items in a collapsed `more` disclosure. This lets shared links and comments rise to the top as the selection grows, while still helping users discover more links when few are shared.
+For a selection of words, show links that apply to every selected word first. Follow these with links that apply to any selected word. If the list is too long, place the remaining items in a collapsed `more` disclosure. This lets shared links and comments rise to the top as the selection grows, while still helping users discover more links when few exist.
 
 ### Bible chapter pattern
 
-Treat Bible chapter pages as a page pattern with a specialized popover. Adapt it to the shared interaction model:
+Treat Bible chapter pages as a page pattern to specify what's in the popover. Adapt it to the shared interaction model:
 - Move the root sound value near the top and include it as part of the “all instances” link.
 - Provide ways to add links and offer corrections.
 - Put less frequently useful reference information later in the popover.
 
 ## Identity, Trust, Sharing, and Permissions
 
-### Trust and moderation
+### Site Roles
 
-Add an `Ambassador` role for a small, selected group of people who want to help and reach out to others. The role name fits the site's context; its definition can evolve. Initially it grants access to feature areas such as contact management and reminders, but does not by itself grant access to personal data or pages; those still require ownership or an explicit share grant.
+Add an `Ambassador` role for an initially small, selected group of people who want to help and reach out to others. The role name fits the site's context; its definition can evolve. Initially it grants access to feature areas such as contact management and reminders, but does not by itself grant access to personal data or pages; those still require ownership or an explicit share grant.
 
-The site currently has two explicit roles: Moderator and Developer. These appear as menu checkboxes for users with those privileges, allowing them to simulate the experience of users without those roles. The implied `Registrant` state is shown by the “Signed in” message; signing out returns the user to the `Visitor` state.
+The site currently has two explicit roles: Moderator and Developer. These appear as menu checkboxes for users with those privileges, allowing them to simulate the experience of users without those roles. The implied `Registrant` state is shown by the “Signed in” message; signing out returns the user to the `Visitor` state. These states can be thought of as pseudo-roles.
 
-### Sharing and roles
+### Sharing and permissions
 
 Allow authorized users to share pages with:
 - Named email addresses, with or without sending a notification
 - Contact groups
 - The public
 
-Candidate page permissions:
+Candidate page permissions (i.e., per-page roles):
 - Viewer
 - Commenter
 - Contributor, with non-destructive edits
 - Editor
 - Owner, if ownership transfer and recovery rules are defined
 
-Represent permissions as grants attached to stable page IDs. A grant identifies its recipient (a user, contact group, or role), permission level, and optional expiry; an explicit public grant makes the page available to everyone. Access is denied by default, and there are no per-user or per-group deny rules that override a grant. Resolve group membership and signed-in identity on the server, never from an email address supplied by the browser, and enforce permissions on every read and write.
+Separate page-class defaults from per-page grants. Developer-configured public pages can be publicly viewable and commentable subject to moderation; role-restricted page classes can require a specific role. User-authored public pages can use the same public-commenter default, subject to moderation. Personal pages under `/my/` are private to their owner unless explicitly shared. There are no per-user or per-group deny rules that override a grant. Resolve group membership and signed-in identity on the server, never from an email address supplied by the browser, and enforce permissions on every read and write.
 
-For the first Contacts workflow, each contact list has one owner and is private by default. The owner can explicitly share the page; defer co-owned household or team lists until after the basic workflow works. Contact groups are named memberships on contacts, and composite pages derive their current members from those groups. Sharing a Contacts page shares its contacts and fields according to the page grant; keep personal `Private Notes` separate and visible only to the note's author.
+For the first Contacts workflow, each contact list has one owner and is private by default. The owner can explicitly share the page; defer co-owned household or team lists until after the basic workflow works. Contact groups are named memberships on contacts, and composite pages derive their current members from those groups. Sharing a Contacts page shares its contacts and fields according to the page grant; keep personal `Private Notes` separate and visible only to the note's author. The initial group-sharing direction is to share a selected group as a live subset, rather than sharing the entire Contacts page; details are in [Contact Group Sharing Design](contact-group-sharing-design.md).
+
+Reserve `/my/*` as the URL namespace for private, user-scoped pages and configure only matching requests to invoke the Worker before static assets. The Worker must validate the signed-in user and page/group grants before returning private data, then access D1 or R2 as appropriate. The path selects the private request-handling route; it does not itself prove identity or grant access. Public static pages outside `/my/*` continue to use asset-first delivery and do not need to invoke the Worker.
 
 ### Permission-aware links and popovers
 
-Most links will appear inside popovers. After a page loads, client code could request the current user's visible links for that page and populate multiple word or entry popovers from one response. If a user opens a popover before its private links have loaded, show a loading state rather than briefly implying that no links exist.
-
-Public links can be part of the page's public static data and do not need that authenticated round trip. Private links must be returned only after the backend authorizes the requesting user. The response can group multiple links by target ID.
-
-Fetch a page's authorized private links in one response and group them by target ID. Keep that response private to the authenticated user; do not place it in shared CDN-cached HTML or cache it across users. Assume the link set is usually small and defer lazy loading or other optimizations until measured usage shows a need.
+Include public links in public static page data. After the page loads, fetch the current user's private links in one authenticated response grouped by target ID, and populate the relevant popovers. Keep that response private to the user and out of shared CDN caches. If a popover opens before it arrives, show a loading state rather than implying there are no private links. Assume link sets are small initially; optimize further only if observed usage requires it.
 
 
 ## Architecture, Storage, and Delivery
@@ -159,11 +174,14 @@ Clarify the source of truth for each content class:
 - Private user pages and private attachments must not be placed in a public asset directory or a publicly readable R2 bucket.
 - D1 can hold users, page metadata, permissions, links, and searchable indexes; larger page bodies and attachments can live in private R2.
 
-The current public word pages are deployed to R2 at `words.servewell.net`; they are not all committed as generated HTML files in the GitHub repository. The main site's Worker already serves static assets from `public/` and handles authenticated APIs. Private content could be served behind that Worker from private R2 without exposing an R2 hostname in browser URLs.
+The current public word pages are deployed to R2 at `words.servewell.net`; they are not all committed as generated HTML files in the GitHub repository. The main site's Worker already serves static assets from `public/` and handles authenticated APIs. Private content should be served behind that Worker from private R2 without exposing an R2 hostname in browser URLs.
 
 Workers static assets are limited to 20,000 files per Worker version on the Free plan and 100,000 on Paid. Requests that match static assets are served without invoking Worker code and are free/unlimited under current Workers pricing. R2 has unlimited objects/storage per bucket, with its own storage and operation pricing. Public R2 custom domains are not private storage.
 
 Use `servewell.net/my/...` for personal pages rather than a separate subdomain. This keeps them on the authenticated application host, where the current host-only session cookie is available. Treat the browser-facing URL as independent of the physical R2 bucket so storage can move later without changing page links.
+
+
+Reserve app-controlled namespace roots under `/my/`: `/my/Contacts/` for the Contacts application, `/my/Private/<slug>` for owner-only pages, and `/my/Proposed/<slug>` for pages awaiting moderation for public publication. A proposed page remains private to its author and moderators until approval; approval publishes it to the separate direct-R2 hostname `comments.servewell.net/<slug>`. Use stable page IDs internally and treat URLs as routes or aliases. Validate comment slugs against existing comment routes. In the create/link workflow, label the checkbox “Propose for public publication and moderation”; avoid “public domain,” which can imply copyright status. The separate hostname means theme preference will not automatically carry over from Bible or main-site pages; that handoff still needs a design. See [Comment Pages and URL Design](comment-pages-url-design.md) for the linked-page lifecycle and URL rules.
 
 ### Search and indexing
 
@@ -175,9 +193,9 @@ Private data should be searchable across pages the current user owns or has perm
 
 ### Stable references and scoped edits
 
-Pages need stable URLs, and content within a page should have stable fragment identifiers such as `<URL>#<fragment-id>`. A paragraph or newline-delimited block can be the default fragment for unstructured content. Individual words or targets within a fragment also need stable IDs, which can use dot notation beneath the fragment ID.
+Pages need stable URLs, and content within a page should have stable fragment identifiers for the typical pattern `<URL>#<fragment-id>`. A paragraph or newline-delimited block is the default fragment for unstructured content. Individual words or targets within a fragment also need stable IDs, which can use dot notation beneath the fragment ID.
 
-When a user selects one or more words, the top-bar Options action can offer Edit if the user's permissions allow it. Editing one word can also be offered from its individual popover. The edit form should scope the change to the selected words and evaluate only public outlinks attached to those targets, not every outlink on the page.
+When a user selects one or more words, the top-bar Popover action can offer Edit if the user's permissions allow it. Editing one word can also be offered from its individual popover. The edit form should scope the change to the selected words and evaluate only public outlinks attached to those targets, not every outlink on the page.
 
 Before an edit is finalized, show the editor and moderator a temporary before/after comparison where useful. This comparison supports review and is not intended as a general version-history feature for every fragment edit.
 
@@ -185,7 +203,7 @@ Before an edit is finalized, show the editor and moderator a temporary before/af
 
 When an edit affects public outlinks, show a review form with one row per affected outlink. For each link, the decision should indicate whether to keep it, remove only the link, or remove both the link and its target document. Provide bulk actions such as select all or select none.
 
-Editors can complete the outlink review as part of their edit. If they cannot, they can refer the review to moderators, leaving the form and decisions for a moderator to complete. Removing an outlink and its target document requires moderator approval; the editor's choice schedules the proposal rather than deleting the target immediately. The process should make it possible to open target documents in other tabs while reviewing.
+Editors can complete the outlink review as part of their edit. If they choose not to complete it, they can refer the review to moderators, leaving the remainder of the form and decisions for a moderator to complete. Removing an outlink and its target document requires moderator approval; the editor's choice schedules the proposal rather than deleting the target immediately. The process should make it possible to open target documents in other tabs while reviewing.
 
 ### Edit reservations and notifications
 
@@ -201,17 +219,7 @@ Keep tentatively deleted pages for approximately one year, then remove eligible 
 
 Use `fragment` as the general term for an addressable part of a page, with a paragraph or newline-delimited block as the default fragment for unstructured text. Bible content can use the same general term for its addressable units; avoid introducing `snippet` as a separate product term.
 
-## Candidate Feature Workflows
-
-These are candidate applications of the shared foundations, not a required build order:
-- Contacts and contact groups
-- Reminders
-- Recurring group tasks and assignment queues
-- Message templates and contact-aware messaging management
-- Public/private comments and word-level discussion
-- Trust-aware moderation and page sharing
-
-Build one end-to-end workflow at a time, starting with personal contacts and contact groups. This exercises structured page patterns, permissions, search, links, and popovers; task assignment and messaging can follow once those foundations are proven.
+Implementation should proceed one end-to-end workflow at a time, starting with personal Contacts and contact groups. That first slice exercises structured pages, ownership and sharing, search, references, and popovers. Reminders, assignments, messaging, comments, and curriculum can follow as separate workflows once the shared foundations are proven.
 
 ## Developing the Plan
 
