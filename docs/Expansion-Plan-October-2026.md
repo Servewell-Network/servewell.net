@@ -18,6 +18,8 @@ These ideas overlap around shared foundations: pages, stable references within p
 
 Start with personal contacts as the first end-to-end workflow.
 
+The initial Contacts outcome, scenarios, proposed data contract, acceptance criteria, and implementation sequence are captured in [Contacts MVP Implementation Brief](contacts-mvp.md). Treat that brief as a working specification for the first vertical slice, not as a commitment to the later feature areas.
+
 Curriculum building remains a candidate area and should not expand the first Contacts release. Revisit its specific workflows after the shared page, identity, and permission foundations are established.
 
 ## Content Model
@@ -42,26 +44,29 @@ Initial patterns to consider:
 
 A structured page can supply allowed values or schemas to another page.
 
-For example, a simple page called ContactGroups, using the 'sorted list' page pattern with 'Text as GroupName' data validation, could supply allowed values to a Contacts page based on a template-based data validation for the Contacts page.
+The public catalog at `/form-templates/`, versioned origins, local schema view at `/my/contacts/_fields`, inherited-field overrides, and type catalog are detailed in [Form Templates and Local Field Schemas](form-templates-design.md). Contacts MVP includes the minimal template-backed foundation: immutable Contact v1, structured types, a pinned local schema, schema-driven form/validation, and a read-only field view. Add/Override editing and origin migration remain follow-ons.
+
+For example, ContactGroups at `/my/contact-groups/`, using the sorted-list page pattern with a required Unique Text Group Name field, supplies allowed values to the optional Groups field on Contacts. Its field definition is `/my/contact-groups/_fields#Group_Name`.
 
 A template called Contact could define:
-- Unique name (UniqueName): Text
-- Casual name (CasualName): Text
+- Unique name (UniqueName): Unique Text (required, single-line)
+- Casual name (CasualName): Text Line
 - Friends: List<Contact.UniqueName>
 - Birthdate: Date
 - Groups: List<ContactGroup.GroupName>
+- Notes: Text Multiline
+
+Only Unique Name is required; all other Contact fields are optional. The type catalog distinguishes Text Line from Text Multiline instead of a generic Text type. Notes is ordinary contact data and is included when a contact is shared if present; author-only Private Notes remains separate and excluded from contact sharing.
 
 When creating a personal contacts page as a new sorted list, the user could start from a copy of the Contact template. Each entry would suggest the defined fields and their types. If the user adds fields, offer the option to update that page's copy of the template, with a selected checkox to allow the field name and type to also be sent to moderators for possible inclusion in the shared template copy. If a field name matches a recently created structured page, suggest that page as its type. Templates could also support message text such as `Hi ${Contact.CasualName}`. While editing, typing `${` or `:` could offer standard types and recently used structured pages.
 
-Treat templates as versioned schemas. Pages can keep using their current template version, and the owner chooses when to adopt a newer version. This allows templates to improve without silently changing existing pages.
-
-When a template owner publishes a new version, pages using an older version can show their owner that an update is available. The owner can review a field-by-field comparison and choose to adopt the new version. For the first implementation, adoption should add new fields without deleting or renaming existing custom fields; if a new field overlaps or conflicts with a local field, let the owner map or rename it explicitly. Defer automatic schema merging and migration of existing values until real template changes demonstrate the need.
+Treat templates as versioned schemas. Resolve `latest` during initialization and pin the resulting immutable version. Changing an existing schema's origin or version is forbidden for now, both in the UI and on the server. Owner-reviewed comparison, mapping, and version adoption are future work; define data preservation, validation, and recovery before enabling them.
 
 ### References, links, and search
 
 While creating content, users can type `@` to insert a reference to a value in a structured page. For example, typing `@Contacts.Mar` can offer a contact such as Marcus Reese, with display choices such as the unique name `@MarcusReese` or casual name `@Marcus`. The inserted reference remains linked to the contact's stable entry ID, for example `<ContactsURL>#MarcusReese`, regardless of which display name is shown.
 
-Users can keep private, searchable notes about content they can access, including content owned by someone else. These notes are personal annotations, not fields stored on or shared as part of the page. After the page loads, authorized private annotations can be populated into the relevant popover alongside that user's unshared links. A popover can show them in a collapsed `Private Notes` section; expanding it reveals the notes and controls to edit or delete them. The precise presentation and workflow remain to be worked out.
+Users can keep private, searchable notes about content they can access, including content owned by someone else. These notes are personal annotations, not fields stored on or shared as part of the page. After the page loads, authorized private annotations can be populated into the relevant popover alongside that user's unshared links. A popover can show them in a collapsed `Private Notes` section; expanding it reveals the notes and controls to edit or delete them. Before choosing an implementation order, validate the reusable model against both a contact and a Bible/content target in [Private Annotations Design](private-annotations-design.md).
 
 Search for private notes must be scoped to the note's owner and content they are allowed to access. Results and excerpts must not reveal a private note to the page owner or other viewers unless the note is explicitly shared.
 
@@ -71,7 +76,6 @@ Composite pages can combine shared sources while supporting distinct workflows:
 - A messaging view combines message templates and contacts tagged `message-recipient`, sorted by most recently contacted. The user can select a drafted message for use outside the site, then mark it sent; only marking it sent updates contact recency. The initial workflow does not send the message itself.
 - An assignment view combines recurring tasks and filtered contact groups, maintaining a separate queue per task so that people who have done a task recently move toward the back and people who have not done it recently are easiest to select. A dated task entry can use task names as keys and contact groups as value types; selecting a group opens a popover where one member can be chosen as the assignee.
 
-💭 **Open question:** Should the messaging view also record other kinds of contact, such as a phone call or an in-person visit, or is marking sent messages enough for the first version?
 Track contact history with optional `Email`, `Text`, `Call`, `Visit`, and `Other` selections; selecting `Other` reveals a text field. A general `Done` action records the selected interaction. For messages, selecting a draft does not update recency; the user explicitly marks it sent.
 
 These composite pages are subscribers to their source pages. If Contacts changes, a subscriber should remove contacts that were deleted or no longer match its filter, and add newly eligible contacts to the end of the queue so that people not recently selected remain easiest to assign.
@@ -181,7 +185,7 @@ Workers static assets are limited to 20,000 files per Worker version on the Free
 Use `servewell.net/my/...` for personal pages rather than a separate subdomain. This keeps them on the authenticated application host, where the current host-only session cookie is available. Treat the browser-facing URL as independent of the physical R2 bucket so storage can move later without changing page links.
 
 
-Reserve app-controlled namespace roots under `/my/`: `/my/Contacts/` for the Contacts application, `/my/Private/<slug>` for owner-only pages, and `/my/Proposed/<slug>` for pages awaiting moderation for public publication. A proposed page remains private to its author and moderators until approval; approval publishes it to the separate direct-R2 hostname `comments.servewell.net/<slug>`. Use stable page IDs internally and treat URLs as routes or aliases. Validate comment slugs against existing comment routes. In the create/link workflow, label the checkbox “Propose for public publication and moderation”; avoid “public domain,” which can imply copyright status. The separate hostname means theme preference will not automatically carry over from Bible or main-site pages; that handoff still needs a design. See [Comment Pages and URL Design](comment-pages-url-design.md) for the linked-page lifecycle and URL rules.
+Reserve app-controlled namespace roots under `/my/`: `/my/` is the authenticated index of personal areas visible to the user; `/my/contacts/` is the Contacts application; `/my/private/<slug>` holds private pages; and `/my/proposed/<slug>` holds pages awaiting moderation for public publication. `/my` redirects to `/my/`, and the index must not reveal private page metadata to other users. Proposed pages remain private to their author and moderators until approval; approval publishes them to the separate direct-R2 hostname `comments.servewell.net/<slug>`. Use stable page IDs internally and treat URLs as routes or aliases. Validate comment slugs against existing comment routes. In the create/link workflow, label the checkbox “Propose for public publication and moderation”; avoid “public domain,” which can imply copyright status. The separate hostname means theme preference will not automatically carry over from Bible or main-site pages; that handoff still needs a design. See [Comment Pages and URL Design](comment-pages-url-design.md) for the linked-page lifecycle and URL rules.
 
 ### Search and indexing
 
