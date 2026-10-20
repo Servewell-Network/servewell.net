@@ -6,7 +6,7 @@
 
 - Let a user create a link and its destination page in one streamlined workflow from an existing page or selected word.
 - Keep the existing page fast and publicly cacheable where appropriate; load private links for the signed-in viewer after the page loads.
-- Keep private working pages private until their owner explicitly shares them or submits them for public publication and moderation.
+- Keep private working pages private until their owner explicitly shares them or submits them for public review.
 - Keep page identity stable if its URL changes during publication, rename, or migration.
 - Serve approved comment pages directly from a dedicated R2 custom domain without invoking the site Worker on public page reads.
 
@@ -17,7 +17,7 @@ The first path segment below `/my/` is application-controlled, not user-selected
 - `/my/` is the authenticated index of personal areas and pages visible to the current user. `/my` redirects to `/my/`. It must not reveal private page names or metadata to signed-out visitors or other users.
 - `/my/contacts/` is the Contacts application and its subroutes.
 - `/my/private/<slug>` is an owner-only personal page.
-- `/my/proposed/<slug>` is a page submitted for possible public publication. While pending, it is visible only to its author and authorized moderators.
+- `/my/proposed/<slug>` is a page submitted for possible publication. While pending, it is visible only to its author and authorized moderators.
 
 The user may select or edit a page slug only within the namespace the application assigns. Namespace names and reserved application paths cannot be claimed as user page names. Use canonical lowercase paths and normalize trailing slashes consistently.
 
@@ -27,7 +27,7 @@ On approval, publish the page at `https://comments.servewell.net/<slug>`, served
 
 From an existing page or selected word/fragment, the popover offers “Create linked page.” The author chooses a page pattern, enters an initial title/body, and sees the generated destination before saving. The system creates the page, then creates the relationship from the source target to the new page.
 
-The form includes an unchecked option labeled **“Propose for public publication and moderation.”** Helper text should say that the page remains private to the author and moderators until approved. Do not say “offer to the public domain”: “public domain” can mean a copyright status rather than public visibility.
+The form includes an unchecked option labeled **“Offer this page for public review.”** Helper text says: "If approved, this contribution will be published for everyone to read. Until then, it remains private to you and authorized moderators." Public-domain dedication is intentional and is handled by the separate short consent step below; selecting a moderation option alone must not be treated as copyright consent.
 
 - Unchecked: save to `/my/private/<slug>`; only the owner can read or edit unless they explicitly share it.
 - Checked: save to `/my/proposed/<slug>`; allow the author to edit and moderators to review; do not expose it as a public page before approval.
@@ -37,6 +37,34 @@ The form includes an unchecked option labeled **“Propose for public publicatio
 The created link can be public or private independently of the destination page. A private link is returned only to its author/authorized viewers after the existing source page loads. A public link may be included in public page data or public JSON. The UI must not leak a private destination URL through shared HTML, public link indexes, or cacheable responses.
 
 A public link therefore cannot expose a private or pending destination; making its relationship public requires a publishable destination and review of the source context. Do not publish a private contact name, quote, or source URL simply because the author proposes a linked page. Review link visibility separately from destination-page approval. Creation/publication must be retry-safe: failed page/link or R2 writes must not leave a broken public link or mark an unpublished object as live.
+
+## Contribution Consent
+
+The intended policy is that original public contributions are donated for unrestricted reuse. Proposed mechanism: [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/), which includes a public-domain dedication and fallback license. This is a product-policy draft, not final legal text; have qualified counsel review wording, effective timing, jurisdictional issues, and existing contributions before enabling public submissions.
+
+Keep the interaction short and humane. Do not require a long custom legal agreement or use a summary to hide additional obligations. Show the important consequences directly, with optional links to the standard CC0 explanation and legal instrument.
+
+Proposed unchecked consent statement:
+
+> I agree to dedicate my original contribution under CC0 1.0, and I have the rights needed to do so.
+
+Visible explanation beside it:
+
+> Others may copy, change, and share it, including commercially and without crediting you. Once the dedication takes effect, removing the page does not undo it or recall copies. This does not dedicate your private contacts, notes, or drafts.
+
+Keep the moderation action separate: `Submit for public review`. Do not precheck consent or require dedication merely to sign in, save a private draft, or share privately. Allow the user to keep the page private instead. Before consent is finalized, tell the contributor exactly when dedication takes effect; do not hide that trigger in a linked document.
+
+Record affirmative consent server-side against the specific submitted contribution/revision, authenticated user ID, timestamp, consent wording version, and instrument/version. Content changed after consent needs coverage by an explicit submission/edit policy; never silently apply dedication to unrelated future content or old submissions. Submission and moderation approval are separate from rights status.
+
+Contributors can dedicate only rights they hold. Identify third-party quotations, imported texts, images, and their licenses separately; do not label an entire mixed-rights page CC0 or imply that a contributor can waive another person's rights. Dedication does not authorize disclosure of personal information. Preserve provenance and rights metadata in generated public output without exposing private consent/account records. This process reduces ambiguity but does not guarantee protection from complaints or lawsuits.
+
+### Review and Test Gates
+
+- Decide whether dedication takes effect at explicit submission or publication, and specify withdrawal/rejection behavior consistently with legal review. State the chosen trigger in the visible explanation before launch.
+- Define repeat-submission/public-edit consent without long agreements; changes to terms must never be accepted silently.
+- Test that saving private data or selecting proposal status does not itself dedicate or publish it; affirmative consent is required for public contributions.
+- Test that consent covers the approved content revision and that rights/provenance metadata survives publication without leaking private records.
+- Apply the reviewed policy explicitly to public comments, corrections, and shared templates; do not assume historical contributions or existing third-party material are covered.
 
 ## Routing and Authorization
 
@@ -70,7 +98,7 @@ For private pages, slugs need only be unique within the owner's `/my/private/` n
 
 - On rejection, does the page remain at `/my/proposed/<slug>` for private editing, move to `/my/private/<slug>`, or let the author choose? Suggested default: retain the private page and allow the author to revise or move it.
 - Does approving a proposal make the page public and commentable by default, subject to moderation, or should the author choose a narrower public policy during submission? Suggested default: make it public-commentable subject to the site's existing moderation policy, with the moderator able to require a different setting.
-- Who may propose a page for public publication: any registrant, only Ambassadors, or a permission on the source page? Suggested default: require an explicit page-level capability; role may grant eligibility but must not grant access to private source or destination data.
+- Who may submit a page for public review: any registrant, only Ambassadors, or a permission on the source page? Suggested default: require an explicit page-level capability; role may grant eligibility but must not grant access to private source or destination data.
 - May users later rename a public slug? Suggested default: yes, by retaining a redirect/object at the previous comments-host path while preserving the stable page ID.
 - For `/my/private/`, is this intended as a general personal-page area with explicit optional sharing, or strictly owner-only storage? Suggested default: owner-only unless the owner explicitly shares it.
 - Can the app generate a slug from the title and let users edit it, or should it ask for a slug separately? Suggested default: generate an editable slug from the title, then validate and reserve it on save.

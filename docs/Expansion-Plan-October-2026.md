@@ -66,7 +66,7 @@ Treat templates as versioned schemas. Resolve `latest` during initialization and
 
 While creating content, users can type `@` to insert a reference to a value in a structured page. For example, typing `@Contacts.Mar` can offer a contact such as Marcus Reese, with display choices such as the unique name `@MarcusReese` or casual name `@Marcus`. The inserted reference remains linked to the contact's stable entry ID, for example `<ContactsURL>#MarcusReese`, regardless of which display name is shown.
 
-For Contacts MVP, the contact's Notes field is the first insertion host. Canonical reference URLs use opaque random identifiers such as `/my/contacts/#contact-<id>`, not readable-name fragments from the illustrative example above. Keep names out of URLs to reduce exposure in copied links, history, and tooling. HTTPS normally hides paths/queries from network observers and fragments are not transmitted in HTTP, but opaque IDs do not conceal the site's hostname or substitute for access control.
+For Contacts MVP, the contact's Notes field is the first insertion host. Canonical reference URLs use opaque random identifiers such as `/my/contacts/#contact-<id>`, not readable-name fragments from the illustrative example above. Keep names out of URLs to reduce exposure in copied links, history, and tooling.
 
 Users can keep private, searchable notes about content they can access, including content owned by someone else. These notes are personal annotations, not fields stored on or shared as part of the page. After the page loads, authorized private annotations can be populated into the relevant popover alongside that user's unshared links. A popover can show them in a collapsed `Private Notes` section; expanding it reveals the notes and controls to edit or delete them. Before choosing an implementation order, validate the reusable model against both a contact and a Bible/content target in [Private Annotations Design](private-annotations-design.md).
 
@@ -86,7 +86,7 @@ Persist user decisions and activity, such as queue position and last assignment,
 
 Refresh composite pages on demand by default. Revisit automatic updates if a workflow requires immediate consistency.
 
-Here, “on demand” means recompute derived membership and ordering when the user opens the composite page, and provide a refresh action for updates while the page remains open. Do not push background updates initially. Preserve user activity such as assignment history and queue decisions while refreshing the derived set of eligible contacts.
+Here, “on demand” means recompute derived membership and ordering when the user opens the composite page, and provide a refresh action for updates while the page remains open. Do not push background updates initially (except perhaps for users that are actively editing another part of the page). Preserve user activity such as assignment history and queue decisions while refreshing the derived set of eligible contacts.
 
 ## Interaction Model
 
@@ -139,7 +139,9 @@ Add an `Ambassador` role for an initially small, selected group of people who wa
 
 Contacts early access requires Ambassador. If that eligibility is lost, retain read/export/delete access to existing personal data while disabling creation and editing.
 
-The site currently has two explicit roles: Moderator and Developer. These appear as menu checkboxes for users with those privileges, allowing them to simulate the experience of users without those roles. The implied `Registrant` state is shown by the “Signed in” message; signing out returns the user to the `Visitor` state. These states can be thought of as pseudo-roles.
+Role checkboxes can only reduce the user's effective privileges for simulation; they cannot assign roles or bypass server checks. Distinguish switching off an assigned role from actually losing that role. The server remains authoritative for role membership and allowed actions.
+
+The site currently has two explicit roles: Moderator and Developer. These appear as menu checkboxes for users with those privileges, allowing them to simulate the experience of users without those roles. The Ambassador role should also have a similar checkbox. The implied `Registrant` state is shown by the “Signed in” message; signing out returns the user to the `Visitor` state. These states can be thought of as pseudo-roles.
 
 ### Sharing and permissions
 
@@ -160,6 +162,12 @@ Separate page-class defaults from per-page grants. Developer-configured public p
 For the first Contacts workflow, each contact list has one owner and is private by default; sharing is not enabled in that MVP. The next sharing slice exposes a selected contact group as a live subset rather than the entire Contacts page. Ordinary Notes accompanies a shared contact when present; author-only Private Notes does not. Defer co-owned household or team lists. Contact groups are named memberships on contacts, and composite pages derive their current members from those groups. Details and unresolved field/provenance rules are in [Contact Group Sharing Design](contact-group-sharing-design.md).
 
 Reserve `/my/*` as the URL namespace for private, user-scoped pages and configure only matching requests to invoke the Worker before static assets. The Worker must validate the signed-in user and page/group grants before returning private data, then access D1 or R2 as appropriate. The path selects the private request-handling route; it does not itself prove identity or grant access. Public static pages outside `/my/*` continue to use asset-first delivery and do not need to invoke the Worker.
+
+### Public contribution rights and consent
+
+Public contributions are intended to be donated for unrestricted reuse, not merely made publicly readable. Use a short, plain-language consent step separate from submission for moderation. CC0 1.0 is the proposed dedication mechanism, subject to legal review before public contributions launch. Show the essential consequences at the point of consent: others may copy, change, and redistribute the contribution, including commercially and without attribution; removing a page does not recall copies or undo an effective dedication. Do not require a long site-specific legal agreement or hide additional obligations behind the short explanation.
+
+Use an unchecked affirmative control, with a link to the standard CC0 explanation and instrument for readers who want details. The contributor must have the rights needed to make the dedication. Third-party material keeps its own rights and must be identified and handled separately; dedication does not waive anyone else's privacy rights. Private Contacts, Notes, drafts, and limited sharing are not dedicated merely by using the site. Record the contribution/revision, user, time, and consent-text/instrument version. Final wording, when dedication takes effect, and treatment of existing contributions require review before implementation; consent is not moderation approval or a guarantee against disputes. See [Comment Pages and URL Design](comment-pages-url-design.md#contribution-consent) for the proposed interaction.
 
 ### Permission-aware links and popovers
 
@@ -189,7 +197,7 @@ Workers static assets are limited to 20,000 files per Worker version on the Free
 Use `servewell.net/my/...` for personal pages rather than a separate subdomain. This keeps them on the authenticated application host, where the current host-only session cookie is available. Treat the browser-facing URL as independent of the physical R2 bucket so storage can move later without changing page links.
 
 
-Reserve app-controlled namespace roots under `/my/`: `/my/` is the authenticated index of personal areas visible to the user; `/my/contacts/` is the Contacts application; `/my/private/<slug>` holds private pages; and `/my/proposed/<slug>` holds pages awaiting moderation for public publication. `/my` redirects to `/my/`, and the index must not reveal private page metadata to other users. Proposed pages remain private to their author and moderators until approval; approval publishes them to the separate direct-R2 hostname `comments.servewell.net/<slug>`. Use stable page IDs internally and treat URLs as routes or aliases. Validate comment slugs against existing comment routes. In the create/link workflow, label the checkbox “Propose for public publication and moderation”; avoid “public domain,” which can imply copyright status. The separate hostname means theme preference will not automatically carry over from Bible or main-site pages; that handoff still needs a design. See [Comment Pages and URL Design](comment-pages-url-design.md) for the linked-page lifecycle and URL rules.
+Reserve app-controlled namespace roots under `/my/`: `/my/` is the authenticated index of personal areas visible to the user; `/my/contacts/` is the Contacts application; `/my/private/<slug>` holds private pages; and `/my/proposed/<slug>` holds pages awaiting moderation before publication. `/my` redirects to `/my/`, and the index must not reveal private page metadata to other users. Proposed pages remain private to their author and moderators until approval; approval publishes them to the separate direct-R2 hostname `comments.servewell.net/<slug>`. Use stable page IDs internally and treat URLs as routes or aliases. Validate comment slugs against existing comment routes. In the create/link workflow, separate short public-domain dedication consent from submission for public review; neither is implied by saving private content. The separate hostname means theme preference will not automatically carry over from Bible or main-site pages; that handoff still needs a design. See [Comment Pages and URL Design](comment-pages-url-design.md) for the linked-page lifecycle and URL rules.
 
 ### Search and indexing
 
