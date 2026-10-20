@@ -36,6 +36,8 @@ The form includes an unchecked option labeled **“Propose for public publicatio
 
 The created link can be public or private independently of the destination page. A private link is returned only to its author/authorized viewers after the existing source page loads. A public link may be included in public page data or public JSON. The UI must not leak a private destination URL through shared HTML, public link indexes, or cacheable responses.
 
+A public link therefore cannot expose a private or pending destination; making its relationship public requires a publishable destination and review of the source context. Do not publish a private contact name, quote, or source URL simply because the author proposes a linked page. Review link visibility separately from destination-page approval. Creation/publication must be retry-safe: failed page/link or R2 writes must not leave a broken public link or mark an unpublished object as live.
+
 ## Routing and Authorization
 
 The exact `/my` path and `/my/*` should be routed to the Worker before static asset matching. Public routes outside that namespace retain the current asset-first path, so ordinary public page hits do not invoke Worker code. Avoid a blanket `run_worker_first: true`; verify that no private page is present in `public/`.
@@ -51,6 +53,10 @@ Approved comment pages are generated/materialized into a dedicated public R2 buc
 This avoids the Workers Static Assets file-count limit and per-request Worker execution, but it requires a separate generation and deployment pipeline for comments. The public bucket is intentionally public; never upload pending proposals, private destinations, or private link data to it. Unpublishing or deleting a page requires removing/replacing the R2 object and handling cached copies according to the tentative-deletion and recovery policy.
 
 The word-study pages already demonstrate the separate-host pattern. Dark/light theme state does not automatically carry between hostnames because browser storage is origin-scoped. Theme handoff from Bible pages or the main site to `comments.servewell.net` is unresolved and must be designed; this architecture does not solve it automatically.
+
+Direct R2 delivery covers public HTML/data reads, not authenticated interactions. The existing host-only session cookie is not sent to `comments.servewell.net`; signed-in actions and private-link loading need an explicit integration with `servewell.net` APIs. Specify narrowly allowed origins, credentialed requests and CSRF protection, and private/no-store responses before enabling those interactions. Do not broaden the session cookie to all subdomains or put tokens in links as an incidental workaround. Cross-origin API calls can invoke the Worker even though the public page request does not.
+
+Before this later slice ships, specify publication states and retries (approved versus successfully published), slug reservation ownership/expiry, and cache handling for edits, tentative deletion, and permanent removal. R2 object metadata alone is not an HTTP redirect: renamed public slugs need an explicit redirect mechanism or a generated redirect page. These are comment-publication gates, not Contacts MVP prerequisites.
 
 ## Slug Allocation and Collisions
 

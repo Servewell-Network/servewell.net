@@ -37,6 +37,8 @@ The current Wrangler configuration is asset-first and does not declare `run_work
 
 ## Decisions Still Needed
 
+- How should Form Field resolution distinguish owner-created groups from accepted imported groups? The MVP reference `/my/contact-groups/_fields#Group_Name` resolves local groups only; do not silently broaden it to another owner's records when sharing is enabled. Define imported membership, provenance, and allowed-value authorization before that slice.
+- Which related fields may reveal data outside the shared group? In particular, Friends and other group memberships must not expose unrelated contacts or private group names merely because one contact is shared.
 - Which other contact fields are included when a group is shared? Ordinary Notes is already included when present, and Private Notes is excluded. Use a deliberate field allowlist for the remaining fields and future additions.
 - Can recipients add private notes to imported contacts? The likely answer is yes, since notes belong to their author, not the source contact owner.
 - Can recipients edit shared contact fields, or must they make a copy first? A conservative first version would keep source fields read-only and provide an explicit copy action.

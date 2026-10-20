@@ -75,6 +75,8 @@ Only Unique Name is required, including a nonempty value after trimming. Casual 
 
 Notes is ordinary contact data of type Text Multiline. Preserve line breaks and escape text on display. When a contact is shared, its Notes is included if present; it is not an author-only Private Note. Private Notes remains a separate annotation capability and is not included in contact sharing.
 
+For Contacts MVP, Notes is also the first host for explicitly inserted `@Contacts` references. Keep its text safe and multiline, with validated stable-ID reference tokens stored alongside it rather than raw HTML. Reference rendering and serialization extend the field's editing behavior without introducing arbitrary rich markup or changing its sharing policy. See the Contacts brief for privacy, deletion, and concurrency contracts.
+
 Groups is part of Contacts MVP. The owner's group data set is at `/my/contact-groups/`, with its read-only schema at `/my/contact-groups/_fields` and the stable Group Name field link `/my/contact-groups/_fields#Group_Name`. Group Name is required Unique Text within that owner's group data set. Resolve this Form Field reference in the consuming user's context and store selected group IDs, not copied group names. These routes expose the existing group-management model, not a second independent group store.
 
 ## Validation and TDD
@@ -93,6 +95,12 @@ Groups is part of Contacts MVP. The owner's group data set is at `/my/contact-gr
 
 Include the published Contact v1 definition, its `latest` discovery route, the implemented type catalog, a per-list pinned schema/version reference, stable field IDs, structured type expressions, and an owner-authorized read-only `/my/contacts/_fields` view in Contacts MVP. Generate the contact form and server-side validation from these definitions rather than maintaining an unrelated hard-coded form. Storage can still use dedicated contact/group tables; a form schema is not a user-editable SQL schema, and changing form definitions must never directly issue arbitrary database DDL.
 
+Before implementing schema-driven CRUD, specify a versioned machine-readable definition: stable template/version and field IDs, labels, requiredness, field order, and structured type arguments. Map those stable field IDs to the supported contact columns and relationship repositories through an explicit server-owned adapter; never turn a field label or client-supplied schema into a SQL identifier. Publish the human-readable template and machine-readable definition from the same source. Initialization must atomically pin an allowed version and create the owner's schema/list; malformed or unsupported definitions fail without leaving partial data.
+
+The Group Name data set also needs a pinned definition and stable field identity, with the same owner-scoped initialization rules. The type reference to an owner's field is contextual metadata, not a server-side fetch of an arbitrary private URL. Test that Friends and Groups resolve to the intended local data sets without exposing another owner's values. Record the concrete serialized definition and adapter contract before implementing their consumers.
+
 Implement the types required for the initial Contact fields: Text Line, Text Multiline, Unique Text, Date, List, and Form Field. Remove the generic Text type from this proposed catalog. The public catalog must distinguish implemented types from unimplemented candidates. Translation templates and Bible pipeline integration remain later work.
 
 Defer Add Field, Override Field, field disabling/removal, configurable required/default constraints, origin/version adoption, generic schema migrations, and accessible reordering. Preserve origin relationships and ordering in the model now, but do not expose nonfunctional editing controls. Before allowing removal or type changes on populated fields, define recovery and validation behavior.
+
+In the Validation and TDD list above, read-only view, type validation, owner isolation, immutable versions, and pinned initialization tests belong to MVP. Tests of local overrides, label editing, and ordering belong to their later editing slices; they are not prerequisites for releasing the read-only foundation.

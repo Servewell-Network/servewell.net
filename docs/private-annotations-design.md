@@ -35,7 +35,7 @@ Proposed fields:
 
 - `id`: stable annotation ID.
 - `author_user_id`: owner from the authenticated session.
-- `target_type`: constrained identifier for the target class; initially `contact` only.
+- `target_type`: constrained identifier for a supported target resolver; validate both contact and Bible/content cases in the prototype rather than assuming contact-only support.
 - `target_id`: stable ID within that target class.
 - `body`: private note text.
 - `created_at`, `updated_at`.
@@ -59,7 +59,7 @@ The prototype should answer whether one storage/API/popover abstraction cleanly 
 
 ## Access Rules for Future Targets
 
-When notes are extended beyond contacts:
+For every supported target type:
 
 1. Resolve the stable target and verify that the requester can read it.
 2. Read or mutate only annotations where `author_user_id` equals the authenticated user ID.
@@ -84,5 +84,5 @@ Use focused red-green-refactor slices after the target model is validated:
 
 - If target access is later revoked, may the note's author access the note from a private notes index, or is it hidden until target access returns?
 - What retention/export behavior applies to annotations when the target is deleted, the author account is deleted, or a legal/privacy deletion is requested?
-- Which future target type should be added first after contacts: pages, fragments/words, or comment pages?
+- Which target types should be enabled in the first production annotation slice after the comparative prototype? Contacts is not a prerequisite or presumed first target.
 - Should multi-target selection create one annotation per target, or a single annotation associated with the selection as a set? Suggested initial behavior for a future multi-word note: one annotation per target, created atomically, unless users need a shared note spanning the selection.

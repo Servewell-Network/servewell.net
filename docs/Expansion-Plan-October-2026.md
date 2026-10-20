@@ -66,6 +66,8 @@ Treat templates as versioned schemas. Resolve `latest` during initialization and
 
 While creating content, users can type `@` to insert a reference to a value in a structured page. For example, typing `@Contacts.Mar` can offer a contact such as Marcus Reese, with display choices such as the unique name `@MarcusReese` or casual name `@Marcus`. The inserted reference remains linked to the contact's stable entry ID, for example `<ContactsURL>#MarcusReese`, regardless of which display name is shown.
 
+For Contacts MVP, the contact's Notes field is the first insertion host. Canonical reference URLs use opaque random identifiers such as `/my/contacts/#contact-<id>`, not readable-name fragments from the illustrative example above. Keep names out of URLs to reduce exposure in copied links, history, and tooling. HTTPS normally hides paths/queries from network observers and fragments are not transmitted in HTTP, but opaque IDs do not conceal the site's hostname or substitute for access control.
+
 Users can keep private, searchable notes about content they can access, including content owned by someone else. These notes are personal annotations, not fields stored on or shared as part of the page. After the page loads, authorized private annotations can be populated into the relevant popover alongside that user's unshared links. A popover can show them in a collapsed `Private Notes` section; expanding it reveals the notes and controls to edit or delete them. Before choosing an implementation order, validate the reusable model against both a contact and a Bible/content target in [Private Annotations Design](private-annotations-design.md).
 
 Search for private notes must be scoped to the note's owner and content they are allowed to access. Results and excerpts must not reveal a private note to the page owner or other viewers unless the note is explicitly shared.
@@ -135,6 +137,8 @@ Treat Bible chapter pages as a page pattern to specify what's in the popover. Ad
 
 Add an `Ambassador` role for an initially small, selected group of people who want to help and reach out to others. The role name fits the site's context; its definition can evolve. Initially it grants access to feature areas such as contact management and reminders, but does not by itself grant access to personal data or pages; those still require ownership or an explicit share grant.
 
+Contacts early access requires Ambassador. If that eligibility is lost, retain read/export/delete access to existing personal data while disabling creation and editing.
+
 The site currently has two explicit roles: Moderator and Developer. These appear as menu checkboxes for users with those privileges, allowing them to simulate the experience of users without those roles. The implied `Registrant` state is shown by the “Signed in” message; signing out returns the user to the `Visitor` state. These states can be thought of as pseudo-roles.
 
 ### Sharing and permissions
@@ -153,7 +157,7 @@ Candidate page permissions (i.e., per-page roles):
 
 Separate page-class defaults from per-page grants. Developer-configured public pages can be publicly viewable and commentable subject to moderation; role-restricted page classes can require a specific role. User-authored public pages can use the same public-commenter default, subject to moderation. Personal pages under `/my/` are private to their owner unless explicitly shared. There are no per-user or per-group deny rules that override a grant. Resolve group membership and signed-in identity on the server, never from an email address supplied by the browser, and enforce permissions on every read and write.
 
-For the first Contacts workflow, each contact list has one owner and is private by default. The owner can explicitly share the page; defer co-owned household or team lists until after the basic workflow works. Contact groups are named memberships on contacts, and composite pages derive their current members from those groups. Sharing a Contacts page shares its contacts and fields according to the page grant; keep personal `Private Notes` separate and visible only to the note's author. The initial group-sharing direction is to share a selected group as a live subset, rather than sharing the entire Contacts page; details are in [Contact Group Sharing Design](contact-group-sharing-design.md).
+For the first Contacts workflow, each contact list has one owner and is private by default; sharing is not enabled in that MVP. The next sharing slice exposes a selected contact group as a live subset rather than the entire Contacts page. Ordinary Notes accompanies a shared contact when present; author-only Private Notes does not. Defer co-owned household or team lists. Contact groups are named memberships on contacts, and composite pages derive their current members from those groups. Details and unresolved field/provenance rules are in [Contact Group Sharing Design](contact-group-sharing-design.md).
 
 Reserve `/my/*` as the URL namespace for private, user-scoped pages and configure only matching requests to invoke the Worker before static assets. The Worker must validate the signed-in user and page/group grants before returning private data, then access D1 or R2 as appropriate. The path selects the private request-handling route; it does not itself prove identity or grant access. Public static pages outside `/my/*` continue to use asset-first delivery and do not need to invoke the Worker.
 
@@ -215,6 +219,8 @@ To reduce conflicting edits, maintain temporary edit/review queues keyed by frag
 
 The exact reservation and edit-form workflow remains to be designed. The notification experience also needs work: distinguish shared work such as items in `List to moderate` from personal notifications, and make both easier to notice with badges near the menu and visible nonzero counts in menu items.
 
+For Contacts, one contact record is one fragment, and reservations are per tab and server-enforced. Same-user duplicate tabs explain that the contact is being edited elsewhere (or has unsaved changes when confirmed) rather than using multi-user queue wording; focusing the editing tab is best-effort, with a manual fallback. Later collaborative editing uses reserved ten-minute windows, showing both start and end times and notifying users of optional earlier opportunities. Missing a window allows another turn rather than permanently losing access. Enforce deadlines without discarding drafts. Different contacts remain editable concurrently and receive authorized pushed updates of committed changes. This editing synchronization is separate from on-demand composite-page refresh. Scheduling, reconnect behavior, service-availability qualifications, and push transport are tracked in the Contacts implementation readiness gates.
+
 ### Tentative deletion and recovery
 
 Deletion should be recoverable before it becomes permanent. A page scheduled for deletion displays a banner explaining its status and a way to contact moderators if a visitor disagrees. Add a `View items being deleted` list to the moderation workflow, alongside `View processed items`; show each item's scheduled deletion date and let moderators rescue items from deletion.
@@ -226,6 +232,8 @@ Use `fragment` as the general term for an addressable part of a page, with a par
 Implementation should proceed one end-to-end workflow at a time, starting with personal Contacts and contact groups. That first slice exercises structured pages, ownership and sharing, search, references, and popovers. Reminders, assignments, messaging, comments, and curriculum can follow as separate workflows once the shared foundations are proven.
 
 ## Developing the Plan
+
+Implementation-readiness refinements are tracked in [Contacts MVP Implementation Brief](contacts-mvp.md#implementation-readiness-gates). In particular, settle the reference insertion host, canonical reference IDs/aliases, Friends behavior, deletion retention, API/concurrency limits, and Ambassador rollout eligibility before implementing the affected slices. These are review gates, not permission to invent defaults silently. Later sharing, annotations, and comment-publication decisions remain in their companion documents and must not block the routing baseline or read-only template prototype.
 
 1. Turn the candidate feature areas into user outcomes and concrete scenarios. Keep this document as the shared product/architecture direction, not a substitute for implementation specs.
 2. Choose one vertical slice at a time. For each, write acceptance criteria covering normal use, permissions, failure states, accessibility, and mobile behavior.

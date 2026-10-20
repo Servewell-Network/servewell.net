@@ -4,7 +4,7 @@
 
 ## Outcome
 
-A signed-in registrant can create and manage a private Contacts list at `/my/contacts/`, add contacts to named groups, find contacts by name or group, and insert stable contact references into other content. Another registrant cannot read or modify this data by guessing a URL or identifier.
+A signed-in Ambassador can create and manage a private Contacts list at `/my/contacts/` during early access, add contacts to named groups, find contacts by name or group, and insert stable contact references into other content. Another registrant cannot read or modify this data by guessing a URL or identifier. Ambassador grants feature eligibility, not access to another user's data. Former Ambassadors retain read/export/delete access to their existing data but cannot create or edit it.
 
 The list has one owner and is private by default. Keep public/approved pages on their current asset-first delivery path. Requests under `/my/*` are routed through the Worker, which validates the existing session and authorizes each operation.
 
@@ -35,13 +35,15 @@ The list has one owner and is private by default. Keep public/approved pages on 
 2. I add a contact with a unique name and optional casual name, birthdate, friends, groups, and multiline Notes for information that does not fit the fixed fields.
 3. I search for a person using either their unique name or casual name and navigate to that contact's stable entry.
 4. I create a group such as `churchMembers`, add/remove contacts, and filter the Contacts view by that group.
-5. While writing another page, I type `@Contacts.Mar`, choose a contact/display label, and insert a reference that continues to resolve if the contact's displayed name changes.
+5. While editing a contact's Notes, I type `@Contacts.Mar`, choose a contact/display label, and insert a reference that continues to resolve if the contact's displayed name changes. Notes is the first insertion host; a general page editor is not required.
 6. I edit or delete my contact/group and see consistent results in search, group membership, and references.
 7. A signed-out visitor or a different registrant requests my Contacts URL or API data and receives no private contact data.
 
 ## Data Contract Proposal
 
 Use stable opaque IDs and owner IDs in storage. The user-facing unique name is a validated field, not the database key.
+
+Separate contact identity, reference display, and URL aliases. An inserted reference stores the list ID, opaque contact ID, and selected display form (Unique Name or Casual Name); its visible label can be `@MarcusReese` or `@Marcus`. Typing `@Contacts.Mar` is the lookup gesture, not the persisted identity. Readable fragments such as `#MarcusReese` in overview examples are aliases, not database keys; renaming a contact must not retarget an existing reference. Resolve IDs only through an authorized endpoint, and never treat possession of a reference as a share grant.
 
 - `contact_lists`: `id`, `owner_user_id`, timestamps. One list per owner for the initial workflow.
 - Each list also stores its pinned template/version ID and local schema ID. Persist stable field IDs, structured type definitions, and field order; initially the local schema has inherited fields only. Public template definitions remain immutable. See [Form Templates and Local Field Schemas](form-templates-design.md).
@@ -50,11 +52,23 @@ Use stable opaque IDs and owner IDs in storage. The user-facing unique name is a
 - `contact_group_members`: `(group_id, contact_id)` with uniqueness and foreign keys.
 - `contact_friends`: `(contact_id, friend_contact_id)` with uniqueness and foreign keys; both contacts must belong to the same list.
 
+Friends is directional: adding Susan to George's Friends does not add George to Susan's Friends. Reject self-references on the server and in database constraints where possible.
+
+Canonical contact links use `/my/contacts/#contact-<opaque-id>` with a full randomly generated identifier, not the person's name or a short guessable counter. Visible labels may contain names, but new contact URLs must not. This reduces personal information in copied links, browser history, screenshots, and tooling. HTTPS normally encrypts paths/query strings in transit, and fragments are not sent in HTTP requests; the hostname may still be observable, and endpoints/browser tooling can expose full URLs. Opaque IDs reduce exposure, not provide anonymity or authorization.
+
 For unique names and group names, preserve the original spelling for display and compare a key derived by trimming whitespace, normalizing to Unicode NFC, and applying Unicode case folding. Enforce this in one shared validation function and with database constraints where possible. Reject `:` in ordinary group names because it is reserved for the display of imported shared groups in a later sharing slice.
+
+Persist the normalized comparison keys named in the uniqueness constraints. Use one versioned normalization policy on the server and test composed/decomposed characters and case-fold expansions; JavaScript lowercasing and SQLite's built-in NOCASE alone are not full Unicode case folding. Reject empty normalized required names. List initialization and relationship updates must be atomic/idempotent, with list-ownership consistency enforced for both ends of group/friend relationships, not just independent foreign keys.
 
 Every query must scope by the authenticated `owner_user_id` or prove an accepted share grant. Never accept `owner_user_id` as an authority from the request body. Do not return private contact records in cacheable HTML or shared CDN responses.
 
 Notes is an optional ordinary contact field of type Text Multiline, edited with a multiline input. Preserve its text and line breaks and render it as escaped plain text, not HTML or executable markup. It is private with the owner-only Contacts list in this MVP. When contact sharing is implemented, Notes is included whenever present on a shared contact, unlike author-only Private Notes. Note-body search is not added to the MVP search scope by this field alone.
+
+Notes also supports explicitly inserted contact-reference tokens. Persist escaped text plus validated structured reference metadata, not executable HTML or names parsed as identity. Preserve line breaks and safe plain-text fallback labels. Index internal reference targets for impact lookup; deleting a contact keeps embedded Notes references attached to its retired ID as unavailable, never rewrites them to a replacement contact. External/copied links cannot reliably be found or rewritten. Define token serialization and edit-range maintenance before implementing autocomplete.
+
+Deleting a contact removes it from active Friends/group membership, releases its Unique Name for reuse, and moves its personal data into owner-accessible Trash for one year. Purge personal fields, including Notes, after that period; preserve only the minimal retired-ID information required to prevent reference retargeting. A new contact with a reused name always receives a new ID. If restoration encounters a reused name, require a new unique name rather than merging identities. Backup expiry, account deletion/export, and any exceptional privacy erasure rules must be documented before release; one-year Trash is not a reason to retain purged data indefinitely elsewhere.
+
+Initial practical limits: Unique Name, Casual Name, and Group Name each allow 200 Unicode code points; Notes allows 20,000. List/search responses contain at most 50 contacts with pagination, not a total-contact quota. Specify companion request-byte and relationship-list bounds in the API contract.
 
 ## Route and UI Contract
 
@@ -73,14 +87,16 @@ Notes is an optional ordinary contact field of type Text Multiline, edited with 
 
 ### Before/after static-routing regression
 
-Verify the current behavior before changing Wrangler routing, then repeat the same check after adding the narrow `/my/*` Worker-first pattern. Use a local integration harness that adds a test-only response header such as `X-Test-Worker-Invoked: 1` to every response produced by Worker code, including responses returned through `env.ASSETS.fetch()`. Do not ship this marker in production.
+Verify the current behavior before changing Wrangler routing, then repeat the same check after adding the exact `/my` path and narrow `/my/*` Worker-first pattern. Use a local integration harness that adds a test-only response header such as `X-Test-Worker-Invoked: 1` to every response produced by Worker code, including responses returned through `env.ASSETS.fetch()`. Do not ship this marker in production.
 
 1. Start from the current asset-first configuration and request a known public asset outside `/my/*` (for example, `/about.html`). Assert the response is successful, contains the expected asset content, and has no `X-Test-Worker-Invoked` header. Save the response status/body hash as the baseline.
-2. Add only `/my/*` to `assets.run_worker_first` and repeat the exact public-asset request. Assert its status and body hash are unchanged and the Worker-invocation marker remains absent. This proves ordinary public static traffic still bypasses the Worker after the routing change.
+2. Add only `/my` and `/my/*` to `assets.run_worker_first` and repeat the exact public-asset request. Assert its status and body hash are unchanged and the Worker-invocation marker remains absent. Probe a chapter page and a JavaScript asset too. This proves ordinary public static traffic still bypasses the Worker after the routing change.
 3. Probe `/my`, `/my/`, and a nested `/my/contacts/` route while signed out, without automatically following redirects. Assert the Worker marker is present: `/my` redirects only to `/my/`, and the canonical/nested pages show the generic sign-in-required view without private metadata. Test an unknown nested private path too: its signed-out response must not reveal whether a private resource exists. This proves the exact root and private namespace reach the Worker.
 4. Keep the integration test as a regression test for both routing properties. Fail the test if configuration is broadened to `run_worker_first: true` or another pattern that matches the public-asset probe.
 
 The test must exercise Wrangler's actual asset-routing behavior, not just call the Worker handler directly; a unit test of the handler cannot prove that a matching public asset bypasses Worker execution.
+
+Validate the marker harness with a known dynamic request in both configurations; absence of a marker is meaningful only if instrumentation is working. Use HTTP requests without browser scripts so page-load auth/API calls are not confused with the asset request itself. Add a temporary synthetic asset under `/my/` in the isolated test fixture to prove authentication runs even when a matching asset exists; do not add private data or this test asset to production. Keep the baseline and candidate inputs identical apart from the intended route configuration/handler changes.
 
 ## Acceptance Criteria
 
@@ -91,6 +107,7 @@ The test must exercise Wrangler's actual asset-routing behavior, not just call t
 - Signed-out requests to private routes/APIs do not return contact data.
 - Browser tests cover the private-area message, Sign in and Home actions, safe return after authentication, and authorization rechecking. API tests assert `401` JSON, and neither path exposes resource existence before authentication.
 - The server derives identity from the validated session; changing client-supplied email/user IDs does not change ownership.
+- Cookie-authenticated mutations enforce a documented CSRF defense and reject untrusted origins; CORS and hidden buttons are not authorization. Test missing/invalid session, expired session, cross-owner IDs, and forged mutation requests. Log diagnostic IDs and outcomes, not contact names, Notes, or request bodies.
 - Requests for `/my/*` reach the Worker before any static-asset match; ordinary public static routes remain asset-first.
 
 ### Contact/group behavior
@@ -139,7 +156,7 @@ Good test-first contracts for this MVP:
 - Notes: test empty, multiline, Unicode, clearing, cross-owner denial, and safe display of HTML-like text.
 - Template foundation: initialization pins an immutable version; changing `latest` leaves existing lists unchanged; schema reads are owner-authorized; UI and server reject origin changes and unsupported types.
 
-For the static-routing change, run the before/after integration probe against the current Wrangler configuration first and record the public asset response/Worker marker as the baseline. Then add only `/my/*` to Worker-first routing and rerun the same probe: the public asset must still bypass the Worker, while a `/my/` request must enter it. Keep this as a routing regression test.
+For the static-routing change, run the before/after integration probe against the current Wrangler configuration first and record the public asset response/Worker marker as the baseline. Then add only `/my` and `/my/*` to Worker-first routing and rerun the same probe: the public asset must still bypass the Worker, while private routes must enter it. Keep this as a routing regression test.
 
 For UI work, first prototype uncertain interactions such as the Contacts empty state, contact editor, and popover/autocomplete on desktop and mobile. Once the interaction is agreed, write tests for observable behavior, keyboard access, loading/empty/error states, and stable reference insertion. Avoid brittle tests that assert exact layout markup or colors.
 
@@ -159,13 +176,13 @@ Defer or test later when their contracts are defined: live group sharing, propos
 - **Google Contacts import (deferred):** No import, Google OAuth, or synchronization work is scheduled. Revisit only when explicitly prioritized; it is not a prerequisite for Contacts MVP or its immediate follow-ons.
 - **Shared contact groups:** Implement as a separate slice after owner-only Contacts is stable. Use [Contact Group Sharing Design](contact-group-sharing-design.md) to resolve the field allowlist, recipient edits, revocation, removal notices, and copy behavior before enabling sharing.
 - **Private annotations:** Validate the reusable model with a small prototype on both a contact and a Bible/content target before deciding whether it belongs before or after Contacts MVP. Resolve target identity, target-access requirements, author-only search, and popover loading in [Private Annotations Design](private-annotations-design.md).
-- **Deleted-contact references:** Before implementation, decide how to retain an unavailable stable ID without retaining unnecessary personal data. Specify whether this uses a minimal tombstone, how long it persists, and how deletion/export requests affect it.
+- **Deleted-contact lifecycle:** One-year Trash and safe name reuse are approved MVP requirements. Before deletion ships, specify minimal retired-ID storage, restore collisions, scheduled purge, backup expiry, and account deletion/export behavior; do not defer these safeguards beyond release.
 - **Template evolution:** Origin/version changes remain forbidden until a separate comparison/mapping, data validation, and recovery workflow is designed and tested. Add Field and Override Field editing, additional validators, and accessible reordering follow the read-only MVP foundation in [Form Templates and Local Field Schemas](form-templates-design.md).
 
 ## Suggested Build Sequence
 
 1. Write the routing integration probe and run it against the current config to establish the asset-first baseline.
-2. Add the narrow `/my/*` Worker-first route rule and authenticated route handling; rerun the probe and preserve public asset behavior.
+2. Add the exact `/my` and narrow `/my/*` Worker-first route rules and authenticated route handling; rerun the probe and preserve public asset behavior.
 3. Write failing tests for normalization and owner-scoped data access, then add the D1 schema/migration and repository functions until they pass.
 	Include the Contact v1/type definitions, pinned local schema, read-only `_fields` view, and shared form/server validation in this foundation before implementing CRUD forms.
 4. Implement list/contact/group CRUD in small test-backed slices, including validation and deletion/reference behavior.
@@ -173,3 +190,16 @@ Defer or test later when their contracts are defined: live group sharing, propos
 6. Implement owner-scoped search and `@Contacts` autocomplete/reference insertion with tests for stable IDs and privacy.
 7. Run focused and full relevant tests, verify migrations and rollback/recovery, and review D1 usage before enabling it for users.
 8. After this slice is stable, implement selected-group sharing from the separate design note.
+
+## Implementation Readiness Gates
+
+The product defaults above are settled; the following contracts still need resolution before their affected implementation slices. Technical choices can be recorded with tests during implementation; product choices need explicit review. They do not block writing the routing baseline or read-only schema prototype.
+
+- **Settled product choices:** Notes hosts reference insertion; canonical links use opaque contact-ID fragments; Friends is directional without self-references; deleted names may be reused without retargeting references; Trash retains data for one year; early access requires Ambassador with read/export/delete access retained after eligibility is lost. The practical limits above are approved.
+- **Reference/storage contract:** Define and test the Notes token representation, authorized ID resolution, reference index, and restore-name conflict behavior. Notes reference support is not a new rich-HTML editor or private-annotation feature.
+- **Fragment boundary (settled):** One contact record is one editable fragment, including its fields and group memberships. Different contacts can be edited concurrently. Keep server-enforced, tab-specific reservations and per-fragment revisions; reject expired leases and stale saves even if the client ignores the UI. Pushed committed updates must not overwrite the receiving editor's unsaved draft.
+- **Same-user tabs:** Do not present a competing editor or automatically start a multi-user turn countdown when the same user opens a reserved contact in another tab. When unsaved edits are confirmed, show "You made unsaved changes on this contact in another tab." Otherwise say the contact is being edited elsewhere without claiming a draft exists. Offer a best-effort action to focus the editing tab when a usable window handle exists; independently opened tabs and browser policies may prevent this. Same-origin messaging can coordinate status but cannot reliably focus an arbitrary tab. Fall back to asking the user to return to that tab. A focus action does not transfer the edit lease. Test same-user conflicts across devices as well, where switching tabs is unavailable.
+- **Multi-user windows (later collaborative editing):** When multiple authorized users can edit the same fragment, allocate server-backed ten-minute windows and show current local time plus the user's next reserved start/end times. Example: "It's now 8:43pm. Your next guaranteed window is 8:53-9:03pm, and if it starts early, we'll send you an in-app notification." An early turn is an optional opportunity, not grounds to shorten or forfeit an unacknowledged reserved window. Later queued users receive their own scheduled windows rather than all being promised a turn within ten minutes. Missing a window is not a permanent loss of access; allow requesting another turn. Enforce deadlines on the server, freeze expired editing/saving, and preserve drafts rather than auto-saving or discarding them. Qualify guarantees on service availability and continued authorization, and reconcile the schedule after outages. This workflow is not needed merely to coordinate the owner-only MVP's duplicate tabs.
+- **Concurrency details to confirm:** Decide save-versus-handoff timing, lease renewal without contention, reconnect/abandonment behavior, and an authorized push transport. Before collaborative windows ship, specify atomic scheduling, notification delivery, early-turn acceptance, missed-window requeueing, and consistent deadlines across clients using server time. A browser countdown alone cannot enforce fairness. Prototype the owner-only reservation and two-contact update behavior before CRUD editing ships; implement the multi-user scheduling UI with the later collaborative-editing slice.
+- **Writes and errors:** Record exact request/response shapes, request-byte/relationship limits, pagination, and consistent non-disclosing errors before API implementation. Include revision and lease ownership in the write contract; implement these technical choices with focused tests.
+- **Release gate (approved):** Require isolated-database migration tests, signed-out/cross-owner denial, mutation-security tests, unchanged public static routing, synthetic mobile/desktop slideshow review, and documented backup/recovery. Verify expiry/handoff, stale-write rejection, disconnect/reconnect, and cross-owner push isolation. Test Trash restoration/purge and former-Ambassador read/export/delete. Keep public routes unchanged and do not apply migrations to production as part of planning/prototyping.
