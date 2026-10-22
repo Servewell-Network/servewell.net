@@ -27,7 +27,7 @@ On approval, publish the page at `https://comments.servewell.net/<slug>`, served
 
 From an existing page or selected word/fragment, the popover offers “Create linked page.” The author chooses a page pattern, enters an initial title/body, and sees the generated destination before saving. The system creates the page, then creates the relationship from the source target to the new page.
 
-The form includes an unchecked option labeled **“Offer this page for public review.”** Helper text says: "If approved, this contribution will be published for everyone to read. Until then, it remains private to you and authorized moderators." Public-domain dedication is intentional and is handled by the separate short consent step below; selecting a moderation option alone must not be treated as copyright consent.
+The form includes an unchecked option labeled **“Offer this page for public review.”** Helper text says: "If approved, this contribution will be published for everyone to read and use. Until then, it remains private to you and authorized moderators." Public-domain dedication is a separate consent step described in [Contribution Consent](#contribution-consent); selecting this review option alone is not copyright consent.
 
 - Unchecked: save to `/my/private/<slug>`; only the owner can read or edit unless they explicitly share it.
 - Checked: save to `/my/proposed/<slug>`; allow the author to edit and moderators to review; do not expose it as a public page before approval.

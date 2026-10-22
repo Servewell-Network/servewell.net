@@ -241,7 +241,7 @@ Implementation should proceed one end-to-end workflow at a time, starting with p
 
 ## Developing the Plan
 
-Implementation-readiness refinements are tracked in [Contacts MVP Implementation Brief](contacts-mvp.md#implementation-readiness-gates). In particular, settle the reference insertion host, canonical reference IDs/aliases, Friends behavior, deletion retention, API/concurrency limits, and Ambassador rollout eligibility before implementing the affected slices. These are review gates, not permission to invent defaults silently. Later sharing, annotations, and comment-publication decisions remain in their companion documents and must not block the routing baseline or read-only template prototype.
+Implementation-readiness refinements are tracked in [Contacts MVP Implementation Brief](contacts-mvp.md#implementation-readiness-gates). Its product decisions are settled, and its reference/storage, concurrency, write/error, and release contracts are defined in the brief's Engineering Contracts section, pending doc review and focused tests before implementation. These are review gates, not permission to invent defaults silently. Later sharing, annotations, and comment-publication decisions remain in their companion documents and must not block the routing baseline or read-only template prototype.
 
 1. Turn the candidate feature areas into user outcomes and concrete scenarios. Keep this document as the shared product/architecture direction, not a substitute for implementation specs.
 2. Choose one vertical slice at a time. For each, write acceptance criteria covering normal use, permissions, failure states, accessibility, and mobile behavior.
