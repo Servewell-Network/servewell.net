@@ -239,6 +239,44 @@ Use `fragment` as the general term for an addressable part of a page, with a par
 
 Implementation should proceed one end-to-end workflow at a time, starting with personal Contacts and contact groups. That first slice exercises structured pages, ownership and sharing, search, references, and popovers. Reminders, assignments, messaging, comments, and curriculum can follow as separate workflows once the shared foundations are proven.
 
+## Standards Alignment
+
+This plan does not adopt heavyweight standards runtimes, but it does align the internal model and public surfaces with a small set of existing vocabularies. The goal is to avoid inventing private shapes where a public shape already exists, so that future import/export and federation are serializers rather than translations.
+
+### Internal model: typed tree with reference edges
+
+The canonical internal shape is a **typed tree with reference edges**:
+- Every addressable thing is an **item**: a page, a fragment, a field, a contact, a comment, a word target. Items have an opaque ID, a type, and ordered children.
+- Items contain items (a Contacts page contains contact fragments; a contact contains fields; a field contains words).
+- Items also hold **references** to other items (a Notes token, a popover link, a group membership). References are edges, not containment.
+- This is the cycle that makes the graph web-shaped: pages → fragments → fields → words → links → pages. It is not a pure tree because references create loops, but the containment backbone remains a tree.
+
+This shape is deliberately small. It maps to SysML v2 by using `item` as the generic term for any node and `part` only where we need the definition/usage distinction (for example, a page pattern as a definition, a concrete page as its usage). A lease or reservation is modeled as a state. We do not author in SysML v2 syntax now; we name internal concepts after its metamodel terms and keep a JSON sidecar mapping so future import/export is a mapping exercise, not a redesign.
+
+### Standards we support (subsets)
+
+| Standard | Subset we use | Where it appears |
+|---|---|---|
+| **JSON-LD** | `@context`, `@type`, `@id`, ordered `@list` | The shared JSON floor for all Linked Data standards below. |
+| **schema.org** | `Article`, `Person`, `DefinedTerm`, `ItemList`, `CreativeWork` | Public pages render JSON-LD for search engines. Private pages embed the same markup when it can be generated from the same authorized data as the visible page, served with `no-store`, so an owner can preview the public view without a separate channel. |
+| **W3C Web Annotation Data Model** | `Annotation`, `TextualBody`, `FragmentSelector`, `TextPositionSelector` | Comments and private annotations are stored as annotation-shaped objects; the fragment ID is the target. |
+| **ActivityStreams 2.0** | `Note`, `Article`, `OrderedCollection` | Comments and comment lists are shaped as AS2 objects. This does not enable federation, but keeps ActivityPub as a future serializer rather than a translation. |
+| **SysML v2** | `item`, `part`, `state`, `requirement` | Internal concept names in docs and a machine-readable sidecar mapping our types to SysML v2 metaclasses. No SysML tooling is required now. |
+| **SKOS** | `Concept`, `broader`, `narrower`, `prefLabel` | Word-study and trad-index taxonomies align to SKOS concepts. |
+| **Creative Commons RDF** | `cc:Work`, `cc:license`, `cc:dedicatedTo` | Contribution consent records carry machine-readable CC0 dedication metadata. |
+
+### Standards we defer or watch
+
+- **OWL reasoning**: no inference engine; SKOS is enough for taxonomy.
+- **AT Protocol / Nostr**: different identity model; revisit if ActivityPub federation becomes a requirement.
+- **SysML v1 tooling**: v2's API and textual notation are the only relevant line.
+- **RDFa / Microdata**: superseded by JSON-LD for our purposes.
+- **DID / Solid**: heavier identity/privacy machinery than our threat model needs.
+
+### Implementation rule
+
+When adding a new content type, first ask: does it already fit one of the shapes above? If not, extend the internal typed tree and record the mapping in the sidecar; do not invent a second private shape for the same concept.
+
 ## Developing the Plan
 
 Implementation-readiness refinements are tracked in [Contacts MVP Implementation Brief](contacts-mvp.md#implementation-readiness-gates). Its product decisions are settled, and its reference/storage, concurrency, write/error, and release contracts are defined in the brief's Engineering Contracts section, pending doc review and focused tests before implementation. These are review gates, not permission to invent defaults silently. Later sharing, annotations, and comment-publication decisions remain in their companion documents and must not block the routing baseline or read-only template prototype.
