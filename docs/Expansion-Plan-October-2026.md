@@ -255,6 +255,8 @@ The canonical internal shape is a **typed tree with reference edges**:
 
 This shape is deliberately small. It maps to SysML v2 by using `item` as the generic term for any node and `part` only where we need the definition/usage distinction (for example, a page pattern as a definition, a concrete page as its usage). A lease or reservation is modeled as a state. We do not author in SysML v2 syntax now; we name internal concepts after its metamodel terms and keep a JSON sidecar mapping so future import/export is a mapping exercise, not a redesign.
 
+SysML v2 alignment is a foundation, not an ornament. Every planned feature is more referencing structure over the same graph: messaging pages reference contacts, assignments reference contacts and tasks, curriculum references everything. Naming concepts after the metamodel from the start means each new feature inherits diagrammability and self-description for free — a friends-of-friends view, a message-recipient view, and an assignment view become viewpoints over one model rather than one-off reports — and it avoids retrofitting ten ad-hoc page shapes later. The value is consistency between model and views, not the pictures themselves. Design rule: when defining a new feature's data, ask "what is the item, and what is the connection?" rather than only "what are the tables?"
+
 ### Standards we support (subsets)
 
 | Standard | Subset we use | Where it appears |
@@ -277,7 +279,7 @@ This shape is deliberately small. It maps to SysML v2 by using `item` as the gen
 
 ### Implementation rule
 
-When adding a new content type, first ask: does it already fit one of the shapes above? If not, extend the internal typed tree and record the mapping in the sidecar; do not invent a second private shape for the same concept.
+When adding a new content type, first ask: does it already fit one of the shapes above? If not, extend the internal typed tree and record the mapping in the sidecar; do not invent a second private shape for the same concept. A first validation experiment: once the Contacts data contract exists, hand-write a SysML v2 export of a small multi-contact fixture and check whether pilot tooling renders the friends connection graph as expected. That tests the sidecar mapping cheaply before any feature depends on it.
 
 ## Developing the Plan
 
