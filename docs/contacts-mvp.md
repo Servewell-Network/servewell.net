@@ -4,7 +4,7 @@
 
 ## Outcome
 
-A signed-in Ambassador can create and manage a private Contacts list at `/my/contacts/` during early access, add contacts to named groups, find contacts by name or group, and insert stable contact references into other content. Another registrant cannot read or modify this data by guessing a URL or identifier. Ambassador grants feature eligibility, not access to another user's data. Former Ambassadors retain read/export/delete access to their existing data but cannot create or edit it.
+A signed-in Ambassador can create and manage a private Contacts list at `/my/contacts/`, add contacts to named groups, find contacts by searching content such as name or groups or notes using the existing native find-in-page browser tool, and insert stable contact references into other content. Another registrant cannot read or modify this data by guessing a URL or identifier. Ambassador grants early eligibility for features, not access to another user's data. Former Ambassadors retain read/export/delete access to their existing data but cannot create or edit it.
 
 The list has one owner and is private by default. Keep public/approved pages on their current asset-first delivery path. Requests under `/my/*` are routed through the Worker, which validates the existing session and authorizes each operation.
 
@@ -12,13 +12,17 @@ The list has one owner and is private by default. Keep public/approved pages on 
 
 ### Included
 
-- Create the signed-in user's Contacts list on first use.
+- Change https://servewell.net/list-to-moderate to https://servewell.net/moderator-page and change the page title from List to Moderate to Moderator Page.
+- Give moderators on Moderator Page a field to enter an email address with a checkbox for Ambassador status and a Send button, which causes an invitation to be sent to that email address with a magic link causing them to be immediately signed in (with Ambassador status if the checkbox was selected).
+- Let the Account item have a badge -- gray with a lighter gray text count of 0 by default, and make the Account button and its badge a link to the /my page where they can see (if they're not Ambassador) a non-deletable message with a button that says ask to become Ambassador if you want access to the Contacts feature. That button can send moderators an email with the request and a link to Moderator Page. When the Account badge is gray/0, there is no badge on the hamburger menu icon.
+- Send an in-app notification to all users when they are given Ambassador status, meaning their account item in the menu has an orange badge with a white text count of 1 and a badge on the hamburger menu icon with the same count in the same color, and that early notification should include congratulations on receiving early access to the Contacts feature. They'll see the Contacts link there. They should also see an x on the notification to delete it. It can also go away a day after it's viewed. The checkboxes for roles should also be moved into the /my page, out of the menu.
+- Create the Contacts list on first use, initiated by clicking the Contacts link in the /my page or in any other way going to the /my/contacts page.
 - Create, read, update, and delete contacts owned by that user.
 - Store the initial Contact fields: required Unique Name (Unique Text), optional Casual Name (Text Line), Birthdate, Friends (references to other contacts), Groups, and Notes (Text Multiline). Only Unique Name is required; lists may be empty.
 - Initialize the list from the published Contact template, pin its immutable version, and use its structured field/type definitions for form rendering and server validation. Provide an owner-authorized read-only `/my/contacts/_fields` view linked from the per-page menu.
 - Create, rename, and delete named groups owned by the user.
 - Add/remove contacts to/from groups; show groups and their members.
-- Search the user's contacts by unique name, casual name, and group.
+- Render the full list so the browser's native find-in-page can match names, groups, and notes: the MVP does not paginate the list view, and any collapsed letter sections auto-expand or render their text for matching. In-app server search is deferred; see [Expansion Plan](Expansion-Plan-October-2026.md#search-and-indexing).
 - Resolve `@Contacts.<query>` into autocomplete results and insert a reference tied to a stable contact ID, not a display string or mutable slug.
 - Show a contact detail view or popover with links to the source entry and permitted actions.
 
@@ -28,12 +32,13 @@ The list has one owner and is private by default. Keep public/approved pages on 
 - Live imported groups, acceptance invitations, group revocation, and deprecation/copy flows. These are specified separately and should follow the private owner workflow.
 - Arbitrary user-defined fields, notes on arbitrary page/word targets, messaging delivery, reminders, assignments, and curriculum tools.
 - Public Contacts pages.
+- In-app server search over contacts. The MVP relies on the browser's native find-in-page over the fully rendered list; the `@Contacts.<query>` autocomplete gesture for reference insertion is unaffected. Scoped server search across an expanding graph of pages is deferred — see [Expansion Plan](Expansion-Plan-October-2026.md#search-and-indexing).
 
 ## User Scenarios
 
 1. As a signed-in registrant, I open `/my/contacts/` and see my list, or an empty-state action to create it.
 2. I add a contact with a unique name and optional casual name, birthdate, friends, groups, and multiline Notes for information that does not fit the fixed fields.
-3. I search for a person using either their unique name or casual name and navigate to that contact's stable entry.
+3. I use the browser's find-in-page to locate a person by unique name, casual name, group, or note text and navigate to that contact's stable entry.
 4. I create a group such as `churchMembers`, add/remove contacts, and filter the Contacts view by that group.
 5. While editing a contact's Notes, I type `@Contacts.Mar`, choose a contact/display label, and insert a reference that continues to resolve if the contact's displayed name changes. Notes is the first insertion host; a general page editor is not required.
 6. I edit or delete my contact/group and see consistent results in search, group membership, and references.
@@ -62,7 +67,7 @@ Persist the normalized comparison keys named in the uniqueness constraints. Use 
 
 Every query must scope by the authenticated `owner_user_id` or prove an accepted share grant. Never accept `owner_user_id` as an authority from the request body. Do not return private contact records in cacheable HTML or shared CDN responses.
 
-Notes is an optional ordinary contact field of type Text Multiline, edited with a multiline input. Preserve its text and line breaks and render it as escaped plain text, not HTML or executable markup. It is private with the owner-only Contacts list in this MVP. When contact sharing is implemented, Notes is included whenever present on a shared contact, unlike author-only Private Notes. Note-body search is not added to the MVP search scope by this field alone.
+Notes is an optional ordinary contact field of type Text Multiline, edited with a multiline input. Preserve its text and line breaks and render it as escaped plain text, not HTML or executable markup. It is private with the owner-only Contacts list in this MVP. When contact sharing is implemented, Notes is included whenever present on a shared contact, unlike author-only Private Notes. Notes text is findable via the browser's find-in-page over the fully rendered list; in-app server search is deferred.
 
 Notes also supports explicitly inserted contact-reference tokens. Persist escaped text plus validated structured reference metadata, not executable HTML or names parsed as identity. Preserve line breaks and safe plain-text fallback labels. Index internal reference targets for impact lookup; deleting a contact keeps embedded Notes references attached to its retired ID as unavailable, never rewrites them to a replacement contact. External/copied links cannot reliably be found or rewritten. Define token serialization and edit-range maintenance before implementing autocomplete.
 
@@ -117,7 +122,7 @@ Validate the marker harness with a known dynamic request in both configurations;
 - Notes can be created, updated, and cleared; multiline and Unicode text round-trip without losing line breaks, and HTML-like text displays literally without executing. Notes follows the same owner-access checks as other contact fields.
 - Group membership updates are idempotent and do not create duplicate memberships.
 - Deleting a contact removes it from active group membership and friend lists. Existing references retain the stable contact ID and display an unavailable-contact state rather than silently resolving to a different contact.
-- Search and group filtering return only authorized records and stable contact IDs.
+- Group filtering and the fully rendered list return only authorized records and stable contact IDs, and the rendered list text supports the browser's find-in-page across names, groups, and notes.
 - Contact forms and server validators use the same pinned schema definitions. `_fields` shows the origin and field/type definitions without mutation controls; attempted origin/version changes are rejected by the server.
 
 ### References
@@ -129,7 +134,7 @@ Validate the marker harness with a known dynamic request in both configurations;
 ### Regression and operation
 
 - Add worker/API tests for unauthenticated denial, owner access, cross-owner denial, and validation failures.
-- Add client tests for contact editing, group membership, search, and reference resolution.
+- Add client tests for contact editing, group membership, find-in-page rendering, and reference resolution.
 - Add a migration test and a rollback/recovery note before deploying schema changes.
 - Run and preserve the before/after static-routing regression above when introducing `/my/*` Worker-first routing.
 - Add a Contacts visual-preview fixture to the `pre-deploy.mjs` slideshow so shared CSS or component changes are inspected before deployment.
@@ -187,7 +192,7 @@ Defer or test later when their contracts are defined: live group sharing, propos
 	Include the Contact v1/type definitions, pinned local schema, read-only `_fields` view, and shared form/server validation in this foundation before implementing CRUD forms.
 4. Implement list/contact/group CRUD in small test-backed slices, including validation and deletion/reference behavior.
 5. Prototype and implement the responsive Contacts UI; add behavior/accessibility tests for agreed interactions.
-6. Implement owner-scoped search and `@Contacts` autocomplete/reference insertion with tests for stable IDs and privacy.
+6. Implement `@Contacts` autocomplete/reference insertion with tests for stable IDs and privacy. Autocomplete is the only server-side contact lookup in this slice; it is scoped to the owner's list and returns minimal display fields.
 7. Run focused and full relevant tests, verify migrations and rollback/recovery, and review D1 usage before enabling it for users.
 8. After this slice is stable, implement selected-group sharing from the separate design note.
 
@@ -222,7 +227,7 @@ This applies the settled fragment boundary: one contact record is one fragment, 
 
 ### API shapes, limits, and errors
 
-- **Paths:** Follow the existing flat convention (`/api/auth/me`, `/api/vote/<id>/<direction>`): `GET /api/my/contacts` and `POST /api/my/contacts` (idempotent list initialization), `/api/my/contacts/contact/<id>` for read/update/delete, `/api/my/contacts/groups` for group management, `/api/my/contacts/search`, and `/api/my/contacts/autocomplete`. Exact names may be finalized in code review as long as they keep this convention.
+- **Paths:** Follow the existing flat convention (`/api/auth/me`, `/api/vote/<id>/<direction>`): `GET /api/my/contacts` and `POST /api/my/contacts` (idempotent list initialization), `/api/my/contacts/contact/<id>` for read/update/delete, `/api/my/contacts/groups` for group management, and `/api/my/contacts/autocomplete`. No `/search` endpoint ships in this slice; the MVP list is fully rendered for find-in-page, and server search is deferred. Exact names may be finalized in code review as long as they keep this convention.
 - **Envelopes:** Success responses return the JSON resource directly. Errors return `{ "error": { "code": "UPPER_SNAKE_CODE", "message": "user-safe text" } }`, plus a `fieldErrors` map for validation failures. No stack traces, no echoed request bodies, no internal table names. Server logs carry diagnostic IDs and outcomes only, never names or Notes content.
 - **Status map:** `401` for unauthenticated requests (JSON, never the browser sign-in view); uniform `404` for nonexistent and cross-owned resources so existence is never disclosed; `400` with `fieldErrors` for validation failures, including duplicate normalized names and invalid dates or references; `409` for a stale `baseRevision` or a lost/expired lease; `413` above the byte cap; `429` above the rate budget. All private responses use private/no-store cache headers.
 - **Limits (initial values, tuned with tests):** Request body at most 128 KB, which fits a 20,000-code-point Notes value in UTF-8 with room for other fields and token syntax; Friends per contact at most 100; groups per list at most 200; contact-reference tokens in a single Notes value at most 100 (a token is one inserted `@` reference, not a character or word); mutations at most 60 per minute per user. There is no total-contact quota.

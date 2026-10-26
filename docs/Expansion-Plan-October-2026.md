@@ -205,6 +205,8 @@ Search must respect the same visibility rules as direct page reads. For private 
 
 Private data should be searchable across pages the current user owns or has permission to access. Search results, snippets, autocomplete, and counts must observe those same permissions.
 
+**Deferred: unified scoped search.** The existing site search covers translated (Bible) material only. Contacts MVP intentionally relies on the browser's native find-in-page over a fully rendered list rather than adding server search. As the graph of pages grows — Bible content, contacts, private pages, comments, and public contributions — reintroduce a unified search entry point with explicit user-controlled scope: everything, Bible only, or non-Bible pages. Private scopes search only what the searcher owns or can access, and results/snippets/counts must not leak across permission boundaries. Server-side private search is a prerequisite for content too large to render for find-in-page; capture its design before any page class outgrows full rendering.
+
 ## Editing, Review, and Retention
 
 ### Stable references and scoped edits
