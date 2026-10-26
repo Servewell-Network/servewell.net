@@ -26,9 +26,9 @@ Curriculum building remains a candidate area and should not expand the first Con
 
 ### Pages and patterns
 
-Pages should be creatable from a small set of page patterns. A page pattern defines both how content is displayed and which actions are available from its terms or entries.
+Pages should be creatable from a small set of page pattern building blocks. A page pattern defines how content is displayed, how its terms or entries are identified as popover targets, and which sections and actions appear in those popovers.
 
-Initial patterns to consider:
+Initial building blocks to consider:
 - Plain text
 - Markdown text
 - Structured pages with optional data validation, including:
@@ -40,15 +40,36 @@ Initial patterns to consider:
 - Template pages that define schemas and allowed values for other pages
 - Composite pages that present or coordinate information from multiple pages
 
+### Pattern catalogs
+
+Three parallel versioned catalogs hold the reusable pattern/template definitions; all are public, read-only, and immutable per version with `latest` aliases resolved at initialization:
+
+- `/form-templates/` — per-item data schemas (see [Form Templates and Local Field Schemas](form-templates-design.md)). Directories name the item type: `/form-templates/contact/v1`.
+- `/page-patterns/` — page-level behavior. Composite patterns declare their building block and item type together; `/page-patterns/contacts/v1` says "structured page, sorted list, each item validated by `/form-templates/contact/v1`" plus the pattern's popover default. A plural directory names the page concept; it delegates item shape to the singular form template.
+- `/popover-patterns/` — popover structure. `/popover-patterns/basic/v1` is the first slice's default: links and comments, no link/page creation. A field-name popover is a shared instance (all Unique Name name-taps open the same field-definition popover); a field-value popover is per value (tapping Marcus's name versus Susan's name uses the same pattern populated with that entry's data).
+
+Pattern definitions are developer-authored and versioned, like form templates. Users pick patterns for their pages; they do not edit pattern definitions in this phase.
+
+### Popover specification
+
+Every page pattern carries an explicit popover default, so what appears in a popover is declared rather than hard-wired per page. The page pattern's popover declaration specifies:
+
+- **Targets:** which terms or entries on the page are popover-addressable. A sorted-list pattern's targets are its entries (one contact record per target); a Bible chapter pattern's targets are its words.
+- **Pattern:** the default popover pattern for those targets (initially `/popover-patterns/basic/v1`). A form template may override the popover pattern per field, separately for field-name targets and field-value targets.
+- **Sections and actions:** the popover pattern defines the ordered named sections — such as links, private notes, reference data, or actions — rendered in declared order, individually collapsible, with less frequently useful material later. A page pattern may contribute additional actions within its popover declaration (voting on a discussion page; Edit on the Contacts page, which opens the record editor under the reservation rules in [Contacts MVP Implementation Brief](contacts-mvp.md#reservations-savehandoff-and-reconnect)).
+- **Data:** for each section, what its rows contain and where they come from. Public section data ships with cacheable page data or public JSON; private sections (unshared links, private notes) arrive via the authenticated fetch described in [Permission-aware links and popovers](#permission-aware-links-and-popovers). A spec must never place private data in a public section.
+
+The popover default is part of the page pattern definition and is versioned with it, so changing a pattern's popover is a reviewable contract change. Page patterns and popover patterns may each inherit and extend a base version. The data template controls entry fields and types; the page pattern controls page behavior and its popover default; the popover pattern controls section structure. None of the three invents a second place to say another's job.
+
 ### Structured values and templates
 
 A structured page can supply allowed values or schemas to another page.
 
 The public catalog at `/form-templates/`, versioned origins, local schema view at `/my/contacts/_fields`, inherited-field overrides, and type catalog are detailed in [Form Templates and Local Field Schemas](form-templates-design.md). Contacts MVP includes the minimal template-backed foundation: immutable Contact v1, structured types, a pinned local schema, schema-driven form/validation, and a read-only field view. Add/Override editing and origin migration remain follow-ons.
 
-For example, ContactGroups at `/my/contact-groups/`, using the sorted-list page pattern with a required Unique Text Group Name field, supplies allowed values to the optional Groups field on Contacts. Its field definition is `/my/contact-groups/_fields#Group_Name`.
+For example, the ContactGroups page at `/my/contact-groups/` uses a sorted-list page pattern with the required Unique Text Group Name field, and supplies allowed values to the optional Groups field on Contacts. Its field definition is `/my/contact-groups/_fields#Group_Name`.
 
-A template called Contact could define:
+A form template called Contact (`/form-templates/contact/v1`) defines:
 - Unique name (UniqueName): Unique Text (required, single-line)
 - Casual name (CasualName): Text Line
 - Friends: List<Contact.UniqueName>
@@ -114,7 +135,7 @@ The default word or entry popover should show:
 
 Some standard page patterns could create conventional links automatically. For example, trusted users could create a word-choice discussion page that starts with the word's context and offers pros, cons, alternatives, and reasons. Another standard link could be “More about this” for research and related material.
 
-Use a consistent popover structure across page patterns, while allowing each pattern to contribute its relevant actions. This gives users one interaction model without forcing Bible words, contacts, and task entries to expose identical options.
+Use a consistent popover structure across page patterns: each page pattern declares its popover pattern default (with per-field overrides allowed), and each popover pattern defines the sections and contributed actions. This gives users one interaction model without forcing Bible words, contacts, and task entries to expose identical options.
 
 ### Text selection and multi-target actions
 

@@ -5,7 +5,7 @@
 ## Routes and Discovery
 
 - `/form-templates/` is the public template catalog, organized to parallel application areas where useful, not to expose a user's private `/my/` contents.
-- `/form-templates/contacts/latest` resolves or redirects to a published immutable version such as `/form-templates/contacts/v1`.
+- `/form-templates/contact/latest` resolves or redirects to a published immutable version such as `/form-templates/contact/v1`. Template directories name the item type (singular `contact`), not the page that uses it.
 - `/form-templates/translation/latest` identifies a template for Bible translation/chapter content used under `/-/`.
 - `/form-templates/_types` lists supported type names, descriptions, argument rules, and examples.
 - `/my/contacts/_fields` is the authenticated owner's local Contacts schema editor. Reserve `_fields` as an app-controlled subroute, not a user contact slug.
@@ -16,7 +16,7 @@ The translation template must account for chapter, fragment, word, and language-
 
 ## Owner's Field Editor
 
-Near the top of `/my/contacts/_fields`, show the origin template, initially `/form-templates/contacts/v1`, as a read-only link. In the MVP, follow it with the read-only inherited fields and their types. The following local editing controls belong to the subsequent schema-editing slice.
+Near the top of `/my/contacts/_fields`, show the origin template, initially `/form-templates/contact/v1`, as a read-only link. In the MVP, follow it with the read-only inherited fields and their types. The following local editing controls belong to the subsequent schema-editing slice.
 
 Inherited definitions remain read-only. Each will offer an `Override Field` action that opens a small form for the replacement name and type. Saving creates a local override linked to the inherited field; it does not mutate the public template or destroy the original definition. An `Add Field` action at the bottom opens the same form for a new local field. Show the effective definition and enough origin information to explain an override, and allow the owner to cancel before saving.
 
@@ -60,7 +60,7 @@ Store types as structured expressions, not strings to be split on `>` or commas.
 
 ## Contacts Example
 
-`/form-templates/contacts/v1` defines the following initial fields:
+`/form-templates/contact/v1` defines the following initial fields:
 
 ```text
 Unique Name: Unique Text
