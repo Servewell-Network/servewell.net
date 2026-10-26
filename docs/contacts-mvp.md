@@ -25,8 +25,9 @@ The list has one owner and is private by default. Keep public/approved pages on 
 - Render the full list so the browser's native find-in-page can match names, groups, and notes: the MVP does not paginate the list view, and any collapsed letter sections auto-expand or render their text for matching. In-app server search is deferred; see [Expansion Plan](Expansion-Plan-October-2026.md#search-and-indexing).
 - Resolve `@Contacts.<query>` into autocomplete results and insert a reference tied to a stable contact ID, not a display string or mutable slug.
 - Show a contact detail view or popover with links to the source entry and permitted actions.
+- Import contacts from CSV or TSV via file upload or paste: one required header row whose column names match Contact field names (normalized per the name rules), a required Unique Name column with all other fields optional, a parse-and-preview step showing row-level errors before anything is written, and an all-or-nothing confirmed commit. Delimiter (comma or tab) is auto-detected from the header line. The 128 KB request-body cap applies. Unknown columns, unknown group names, invalid dates, and duplicate normalized unique names — within the file or against the existing list — are reported as row errors; nothing is imported until the batch is clean. Friends is excluded from import columns because name-based resolution is order-dependent at import time; importing Friends is a follow-on.
 
-### Not in the first slice
+### Not in the first slice (see also 'Follow-ons')
 
 - Sharing a whole Contacts list or selected groups with other registrants.
 - Live imported groups, acceptance invitations, group revocation, and deprecation/copy flows. These are specified separately and should follow the private owner workflow.
@@ -42,7 +43,8 @@ The list has one owner and is private by default. Keep public/approved pages on 
 4. I create a group such as `churchMembers`, add/remove contacts, and filter the Contacts view by that group.
 5. While editing a contact's Notes, I type `@Contacts.Mar`, choose a contact/display label, and insert a reference that continues to resolve if the contact's displayed name changes. Notes is the first insertion host; a general page editor is not required.
 6. I edit or delete my contact/group and see consistent results in search, group membership, and references.
-7. A signed-out visitor or a different registrant requests my Contacts URL or API data and receives no private contact data.
+7. I export a spreadsheet from elsewhere, upload or paste it as CSV/TSV with a header row, review the parsed preview and fix flagged rows, and confirm to add the batch — or get a clear error list with nothing partially imported.
+8. A signed-out visitor or a different registrant requests my Contacts URL or API data and receives no private contact data.
 
 ## Data Contract Proposal
 
@@ -177,7 +179,8 @@ Defer or test later when their contracts are defined: live group sharing, propos
 
 ## Follow-ons
 
-- **Custom fields:** Revisit after fixed Contact fields, template updates, and moderator review are working. Decide field types, per-field visibility/search, and how user fields may be proposed for the shared template.
+- **Custom fields:** Revisit after fixed Contact fields, template updates, and moderator review are working. Decide field types, per-field visibility/search, and how user fields may be proposed for the shared template. Custom-field columns would then also become importable; the v1 importer only accepts the fixed Contact field names.
+- **Import Friends column (deferred):** CSV/TSV import in the first slice covers Unique Name, Casual Name, Birthdate, Groups, and Notes. A Friends column requires resolving contact names that may appear later in the same file or not at all; define two-pass resolution and error reporting before adding it. A possible direction: accept canonical reference tokens as well as names.
 - **Google Contacts import (deferred):** No import, Google OAuth, or synchronization work is scheduled. Revisit only when explicitly prioritized; it is not a prerequisite for Contacts MVP or its immediate follow-ons.
 - **Shared contact groups:** Implement as a separate slice after owner-only Contacts is stable. Use [Contact Group Sharing Design](contact-group-sharing-design.md) to resolve the field allowlist, recipient edits, revocation, removal notices, and copy behavior before enabling sharing.
 - **Private annotations:** Validate the reusable model with a small prototype on both a contact and a Bible/content target before deciding whether it belongs before or after Contacts MVP. Resolve target identity, target-access requirements, author-only search, and popover loading in [Private Annotations Design](private-annotations-design.md).
