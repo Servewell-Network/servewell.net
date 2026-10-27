@@ -68,14 +68,14 @@ Casual Name: Text Line
 Friends: List > Form Field > /my/contacts/_fields#Unique_Name
 Birthdate: Date > YYYY-MM-DD
 Groups: List > Form Field > /my/contact-groups/_fields#Group_Name
-Notes: Text Multiline
+Other Notes: Text Multiline
 ```
 
-Only Unique Name is required, including a nonempty value after trimming. Casual Name, Friends, Birthdate, Groups, and Notes are optional; list fields may contain zero entries. Store requiredness explicitly in the published field definition and use it in both the form and server validation. User-configurable requiredness remains deferred.
+Only Unique Name is required, including a nonempty value after trimming. Casual Name, Friends, Birthdate, Groups, and Other Notes are optional; list fields may contain zero entries. Store requiredness explicitly in the published field definition and use it in both the form and server validation. User-configurable requiredness remains deferred.
 
-Notes is ordinary contact data of type Text Multiline. Preserve line breaks and escape text on display. When a contact is shared, its Notes is included if present; it is not an author-only Private Note. Private Notes remains a separate annotation capability and is not included in contact sharing.
+Other Notes is ordinary contact data of type Text Multiline. Preserve line breaks and escape text on display. When a contact is shared, its Other Notes is included if present; it is distinct from an author-only popover note marked Private, which is not included in contact sharing.
 
-For Contacts MVP, Notes is also the first host for explicitly inserted `@Contacts` references. Keep its text safe and multiline, with validated stable-ID reference tokens stored alongside it rather than raw HTML. Reference rendering and serialization extend the field's editing behavior without introducing arbitrary rich markup or changing its sharing policy. See the Contacts brief for privacy, deletion, and concurrency contracts.
+For Contacts MVP, Other Notes is also the first host for explicitly inserted `@Contacts` references. Keep its text safe and multiline, with validated stable-ID reference tokens stored alongside it rather than raw HTML. Reference rendering and serialization extend the field's editing behavior without introducing arbitrary rich markup or changing its sharing policy. See the Contacts brief for privacy, deletion, and concurrency contracts.
 
 Groups is part of Contacts MVP. The owner's group data set is at `/my/contact-groups/`, with its read-only schema at `/my/contact-groups/_fields` and the stable Group Name field link `/my/contact-groups/_fields#Group_Name`. Group Name is required Unique Text within that owner's group data set. Resolve this Form Field reference in the consuming user's context and store selected group IDs, not copied group names. These routes expose the existing group-management model, not a second independent group store.
 

@@ -81,9 +81,9 @@ A form template called Contact (`/form-templates/contact/v1`) defines:
 - Friends: List<Contact.UniqueName>
 - Birthdate: Date
 - Groups: List<ContactGroup.GroupName>
-- Notes: Text Multiline
+- Other Notes: Text Multiline
 
-Only Unique Name is required; all other Contact fields are optional. The type catalog distinguishes Text Line from Text Multiline instead of a generic Text type. Notes is ordinary contact data and is included when a contact is shared if present; author-only Private Notes remains separate and excluded from contact sharing.
+Only Unique Name is required; all other Contact fields are optional. The type catalog distinguishes Text Line from Text Multiline instead of a generic Text type. Other Notes is ordinary contact data and is included when a contact is shared if present; author-only popover notes marked Private remain separate and excluded from contact sharing.
 
 When creating a personal contacts page as a new sorted list, the user could start from a copy of the Contact template. Each entry would suggest the defined fields and their types. If the user adds fields, offer the option to update that page's copy of the template, with a selected checkox to allow the field name and type to also be sent to moderators for possible inclusion in the shared template copy. If a field name matches a recently created structured page, suggest that page as its type. Templates could also support message text such as `Hi ${Contact.CasualName}`. While editing, typing `${` or `:` could offer standard types and recently used structured pages.
 
@@ -93,7 +93,7 @@ Treat templates as versioned schemas. Resolve `latest` during initialization and
 
 While creating content, users can type `@` to insert a reference to a value in a structured page. For example, typing `@Contacts.Mar` can offer a contact such as Marcus Reese, with display choices such as the unique name `@MarcusReese` or casual name `@Marcus`. The inserted reference remains linked to the contact's stable entry ID, for example `<ContactsURL>#MarcusReese`, regardless of which display name is shown.
 
-For Contacts MVP, the contact's Notes field is the first insertion host. Canonical reference URLs use opaque random identifiers such as `/my/contacts/#contact-<id>`, not readable-name fragments from the illustrative example above. Keep names out of URLs to reduce exposure in copied links, history, and tooling.
+For Contacts MVP, the contact's Other Notes field is the first insertion host. Canonical reference URLs use opaque random identifiers such as `/my/contacts/#contact-<id>`, not readable-name fragments from the illustrative example above. Keep names out of URLs to reduce exposure in copied links, history, and tooling.
 
 Users can keep private, searchable notes about content they can access, including content owned by someone else. These notes are personal annotations, not fields stored on or shared as part of the page. After the page loads, authorized private annotations can be populated into the relevant popover alongside that user's unshared links. A popover can show them in a collapsed `Private Notes` section; expanding it reveals the notes and controls to edit or delete them. Before choosing an implementation order, validate the reusable model against both a contact and a Bible/content target in [Private Annotations Design](private-annotations-design.md).
 
@@ -215,7 +215,10 @@ Clarify the source of truth for each content class:
 - Application source code and curated source data belong in the repository.
 - Generated public content is an output, not an authoring surface; it can be deployed as static assets or to public R2.
 - Private user pages and private attachments must not be placed in a public asset directory or a publicly readable R2 bucket.
-- D1 can hold users, page metadata, permissions, links, and searchable indexes; larger page bodies and attachments can live in private R2.
+- **Default placement rule:** Store page records in D1 when the page's contract requires database-enforced uniqueness, relationships across records, atomic multi-record updates, or indexed owner-scoped lookup. Store large, mostly self-contained page bodies—such as general unstructured Markdown without those relational constraints—in private R2, with D1 holding the owner/page mapping, permissions, revision, and any indexes needed to locate or authorize the object. A page may be hybrid: structured constrained records in D1 and large free-text bodies or attachments in private R2.
+- The page pattern and form template define validation and interaction semantics; they do not imply a matching SQL table schema. The storage adapter enforces the declared constraints using the suitable backend (D1 constraints/transactions or application validation plus revision-checked R2 writes). Do not mirror all R2 content into D1 merely to repeat the template; keep only the metadata/indexes needed for authorization and required queries.
+- Contacts uses D1 under this rule: unique names, symmetric Friends pairs, group relationships, owner-scoped lookup, and atomic updates are central to its contract. Its bounded `Other Notes` field remains part of the D1 contact record in this MVP. Larger unstructured Markdown pages without comparable relational rules are candidates for private R2. Revisit placement if measured payload size, write contention, or operational costs justify a different representation; R2 object writes still need revision/concurrency control and do not provide multi-object transactions.
+- D1 can also hold users, page metadata, permissions, links, reservations, and searchable indexes; larger page bodies and attachments can live in private R2.
 
 The current public word pages are deployed to R2 at `words.servewell.net`; they are not all committed as generated HTML files in the GitHub repository. The main site's Worker already serves static assets from `public/` and handles authenticated APIs. Private content should be served behind that Worker from private R2 without exposing an R2 hostname in browser URLs.
 
