@@ -123,7 +123,7 @@ One likely exception is titles, which may not do anything when tapped, although 
 
 For structured values, a solid value should link to its line or entry in its source page. An instance of a field name, such as `UniqueName`, should link to its definition. The destination can in turn expose its own popover and related actions.
 
-If a structured data set becomes too large to display at once, use expandable sections and load entries on demand. For example, Contacts could have collapsed sections by letter; following `@Contacts.MarcusReese` could open the M section and load Marcus Reese if it is not already present.
+If a structured data set becomes too large to display at once, use expandable sections. For Contacts MVP, load the complete authorized list after initial render so browser find-in-page and local autocomplete work across all entries; letter sections may be visually collapsed but their data is already loaded. Later, if measured payload or rendering costs justify it, consider loading collapsed sections on demand, with an explicit search strategy for entries not yet fetched.
 
 The default word or entry popover should show:
 - Existing links associated with that target
