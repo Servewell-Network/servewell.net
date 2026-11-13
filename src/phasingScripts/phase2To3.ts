@@ -26,6 +26,7 @@ const METADATA_LABEL_TO_KEY: Record<string, string> = {
   'Grammar Function': 'gf',
   Language: 'lg',
   "Strong's Root": 'sr',
+  'Root': 'r',
   'Root Script': 'rs',
   'Root Sound': 'rsnd',
   'Root Idea': 'rt',
@@ -86,6 +87,17 @@ type MetadataValue = string | number | undefined;
 interface MetadataEntry {
   label: string;
   value: MetadataValue;
+}
+
+// Combined "Root" row: transliterated root + English root on one line.
+// Returns '' when neither part exists; empty values are filtered out by
+// renderWordMetadata and serializeMetadataEntries, so the row is omitted.
+function combinedRootValue(morpheme: Snippet['OriginalMorphemes'][number]): string {
+  const sound = morpheme.OriginalRootTransliteration
+    ? String(morpheme.OriginalRootTransliteration).trim()
+    : '';
+  const idea = morpheme.EnglishRootTranslation ? String(morpheme.EnglishRootTranslation).trim() : '';
+  return [sound, idea].filter((part) => part.length > 0).join(' — ');
 }
 
 interface RenderableTokenPart {
@@ -438,19 +450,18 @@ function renderLiteralPane(snippet: Snippet, idPrefix = ''): string {
         : `${snippetKey}-literal-${tokenOrdinal}`;
       const popoverId = `popover-${toSafeDomId(popoverSeed)}`;
       const metadataEntries: MetadataEntry[] = [
-        { label: 'Version Type', value: 'Literal' },
-        { label: 'Instance ID', value: morpheme.MorphemeId },
-        { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
+        { label: 'Root', value: combinedRootValue(morpheme) },
+        { label: 'Occurrences', value: morpheme.OccurrencesFile },
         { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+        { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
         { label: 'Grammar Code', value: morpheme.OriginalMorphemeGrammarCode },
         { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
-        { label: 'Language', value: morpheme.OriginalLanguage },
         { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
         { label: 'Root Script', value: morpheme.OriginalRootScript },
-        { label: 'Root Sound', value: morpheme.OriginalRootTransliteration },
-        { label: 'Root Idea', value: morpheme.EnglishRootTranslation },
         { label: 'Source', value: morpheme.Source },
-        { label: 'Occurrences', value: morpheme.OccurrencesFile }
+        { label: 'Language', value: morpheme.OriginalLanguage },
+        { label: 'Instance ID', value: morpheme.MorphemeId },
+        { label: 'Version Type', value: 'Literal' }
       ];
 
       renderParts.push({
