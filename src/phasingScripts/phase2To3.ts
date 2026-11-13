@@ -493,18 +493,17 @@ function renderTraditionalPane(snippet: Snippet, idPrefix = ''): string {
   for (const morpheme of snippet.OriginalMorphemes) {
     if (!morpheme.MorphemeId) continue;
     literalMetaByMorphemeId.set(morpheme.MorphemeId, [
-      { label: 'Instance ID', value: morpheme.MorphemeId },
-      { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
+      { label: 'Root', value: combinedRootValue(morpheme) },
+      { label: 'Occurrences', value: morpheme.OccurrencesFile },
       { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+      { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
       { label: 'Grammar Code', value: morpheme.OriginalMorphemeGrammarCode },
       { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
-      { label: 'Language', value: morpheme.OriginalLanguage },
       { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
       { label: 'Root Script', value: morpheme.OriginalRootScript },
-      { label: 'Root Sound', value: morpheme.OriginalRootTransliteration },
-      { label: 'Root Idea', value: morpheme.EnglishRootTranslation },
       { label: 'Source', value: morpheme.Source },
-      { label: 'Occurrences', value: morpheme.OccurrencesFile }
+      { label: 'Language', value: morpheme.OriginalLanguage },
+      { label: 'Instance ID', value: morpheme.MorphemeId }
     ]);
   }
 
@@ -672,7 +671,7 @@ function renderTraditionalParagraphTokens(
         : token.originalMorphemeId;
     const literalEntries = matchMorphemeId ? literalMetaByMorphemeId.get(matchMorphemeId) : undefined;
     const metadataEntries: MetadataEntry[] = literalEntries
-      ? [{ label: 'Version Type', value: 'Traditional' }, ...literalEntries]
+      ? [...literalEntries, { label: 'Version Type', value: 'Traditional' }]
       : [
           { label: 'Version Type', value: 'Traditional' },
           { label: '—', value: "There's no direct match for this word in the original." }
