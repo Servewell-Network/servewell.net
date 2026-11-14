@@ -26,6 +26,7 @@ const METADATA_LABEL_TO_KEY: Record<string, string> = {
   'Grammar Function': 'gf',
   Language: 'lg',
   "Strong's Root": 'sr',
+  'Root': 'r',
   'Root Script': 'rs',
   'Root Sound': 'rsnd',
   'Root Idea': 'rt',
@@ -86,6 +87,17 @@ type MetadataValue = string | number | undefined;
 interface MetadataEntry {
   label: string;
   value: MetadataValue;
+}
+
+// Combined "Root" row: transliterated root + English root on one line.
+// Returns '' when neither part exists; empty values are filtered out by
+// renderWordMetadata and serializeMetadataEntries, so the row is omitted.
+function combinedRootValue(morpheme: Snippet['OriginalMorphemes'][number]): string {
+  const sound = morpheme.OriginalRootTransliteration
+    ? String(morpheme.OriginalRootTransliteration).trim()
+    : '';
+  const idea = morpheme.EnglishRootTranslation ? String(morpheme.EnglishRootTranslation).trim() : '';
+  return [sound, idea].filter((part) => part.length > 0).join(' — ');
 }
 
 interface RenderableTokenPart {
@@ -438,19 +450,18 @@ function renderLiteralPane(snippet: Snippet, idPrefix = ''): string {
         : `${snippetKey}-literal-${tokenOrdinal}`;
       const popoverId = `popover-${toSafeDomId(popoverSeed)}`;
       const metadataEntries: MetadataEntry[] = [
-        { label: 'Version Type', value: 'Literal' },
-        { label: 'Instance ID', value: morpheme.MorphemeId },
-        { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
+        { label: 'Root', value: combinedRootValue(morpheme) },
+        { label: 'Occurrences', value: morpheme.OccurrencesFile },
         { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+        { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
         { label: 'Grammar Code', value: morpheme.OriginalMorphemeGrammarCode },
         { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
-        { label: 'Language', value: morpheme.OriginalLanguage },
         { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
         { label: 'Root Script', value: morpheme.OriginalRootScript },
-        { label: 'Root Sound', value: morpheme.OriginalRootTransliteration },
-        { label: 'Root Idea', value: morpheme.EnglishRootTranslation },
         { label: 'Source', value: morpheme.Source },
-        { label: 'Occurrences', value: morpheme.OccurrencesFile }
+        { label: 'Language', value: morpheme.OriginalLanguage },
+        { label: 'Instance ID', value: morpheme.MorphemeId },
+        { label: 'Version Type', value: 'Literal' }
       ];
 
       renderParts.push({
@@ -482,18 +493,17 @@ function renderTraditionalPane(snippet: Snippet, idPrefix = ''): string {
   for (const morpheme of snippet.OriginalMorphemes) {
     if (!morpheme.MorphemeId) continue;
     literalMetaByMorphemeId.set(morpheme.MorphemeId, [
-      { label: 'Instance ID', value: morpheme.MorphemeId },
-      { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
+      { label: 'Root', value: combinedRootValue(morpheme) },
+      { label: 'Occurrences', value: morpheme.OccurrencesFile },
       { label: 'Transliteration', value: morpheme.OriginalMorphemeTransliteration },
+      { label: 'Original Script', value: morpheme.OriginalMorphemeScript },
       { label: 'Grammar Code', value: morpheme.OriginalMorphemeGrammarCode },
       { label: 'Grammar', value: morpheme.OriginalMorphemeGrammar },
-      { label: 'Language', value: morpheme.OriginalLanguage },
       { label: "Strong's Root", value: morpheme.OriginalRootStrongsID },
       { label: 'Root Script', value: morpheme.OriginalRootScript },
-      { label: 'Root Sound', value: morpheme.OriginalRootTransliteration },
-      { label: 'Root Idea', value: morpheme.EnglishRootTranslation },
       { label: 'Source', value: morpheme.Source },
-      { label: 'Occurrences', value: morpheme.OccurrencesFile }
+      { label: 'Language', value: morpheme.OriginalLanguage },
+      { label: 'Instance ID', value: morpheme.MorphemeId }
     ]);
   }
 
@@ -661,7 +671,7 @@ function renderTraditionalParagraphTokens(
         : token.originalMorphemeId;
     const literalEntries = matchMorphemeId ? literalMetaByMorphemeId.get(matchMorphemeId) : undefined;
     const metadataEntries: MetadataEntry[] = literalEntries
-      ? [{ label: 'Version Type', value: 'Traditional' }, ...literalEntries]
+      ? [...literalEntries, { label: 'Version Type', value: 'Traditional' }]
       : [
           { label: 'Version Type', value: 'Traditional' },
           { label: '—', value: "There's no direct match for this word in the original." }
@@ -1460,6 +1470,7 @@ function getChapterPageCss(): string[] {
     '}',
     '.word-popover {',
     '  max-width: min(92vw, 26rem);',
+    '  container-type: inline-size;',
     '  border: 1px solid var(--popover-border);',
     '  border-radius: 0.6rem;',
     '  padding: 0.6rem 0.75rem;',
@@ -1504,6 +1515,11 @@ function getChapterPageCss(): string[] {
     '  grid-template-columns: 8rem minmax(0, 1fr);',
     '  gap: 0.3rem 0.65rem;',
     '  margin: 0.2rem 0;',
+    '}',
+    '@container (max-width: 22rem) {',
+    '  .word-meta-row {',
+    '    grid-template-columns: 1fr;',
+    '  }',
     '}',
     '.word-meta-label {',
     '  color: var(--muted);',
