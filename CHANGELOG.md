@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.19](https://github.com/Servewell-Network/servewell.net/compare/v0.1.18...v0.1.19) (2026-11-15)
+
+
+### Bug Fixes
+
+* improve Bible word popover usability ([56e5aa7](https://github.com/Servewell-Network/servewell.net/commit/56e5aa776ca27ce58dfd8997560c9b1f677c3d63))
+
 ## [0.1.18](https://github.com/Servewell-Network/servewell.net/compare/v0.1.17...v0.1.18) (2026-09-25)
 
 
