@@ -99,6 +99,57 @@ Before implementing schema-driven CRUD, specify a versioned machine-readable def
 
 The Group Name data set also needs a pinned definition and stable field identity, with the same owner-scoped initialization rules. The type reference to an owner's field is contextual metadata, not a server-side fetch of an arbitrary private URL. Test that Friends and Groups resolve to the intended local data sets without exposing another owner's values. Record the concrete serialized definition and adapter contract before implementing their consumers.
 
+### Proposed serialized definitions and adapter
+
+The following JSON is a review proposal for the v1 serialization contract, not an implementation artifact. The published immutable definition is canonical; the human-readable template page and type notation are generated from it so labels and types cannot drift. `fieldId` values are stable identifiers, `order` is explicit, and type expressions are structured nodes. The `owner.*` data-set references are symbolic: the server resolves them to the authenticated owner's initialized data sets, never to a URL or owner ID supplied by the template or request.
+
+```json
+{
+	"format": "servewell.form-template/v1",
+	"templateId": "contact",
+	"version": 1,
+	"fields": [
+		{ "fieldId": "contact.unique-name", "label": "Unique Name", "order": 10, "required": true, "type": { "kind": "uniqueText", "normalization": "unicode-nfc-casefold-v1" } },
+		{ "fieldId": "contact.casual-name", "label": "Casual Name", "order": 20, "required": false, "type": { "kind": "textLine" } },
+		{ "fieldId": "contact.friends", "label": "Friends", "order": 30, "required": false, "type": { "kind": "list", "items": { "kind": "formField", "dataSet": "owner.contacts", "fieldId": "contact.unique-name" } } },
+		{ "fieldId": "contact.birthdate", "label": "Birthdate", "order": 40, "required": false, "type": { "kind": "date", "format": "YYYY-MM-DD" } },
+		{ "fieldId": "contact.groups", "label": "Groups", "order": 50, "required": false, "type": { "kind": "list", "items": { "kind": "formField", "dataSet": "owner.contact-groups", "fieldId": "contact-group.name" } } },
+		{ "fieldId": "contact.other-notes", "label": "Other Notes", "order": 60, "required": false, "type": { "kind": "textMultiline" } }
+	]
+}
+```
+
+The owner-scoped Group Name data set has a separate immutable definition and stable field ID. It uses the same normalization policy and is stored in the Contacts list's group tables; it is not a second independently owned group store.
+
+```json
+{
+	"format": "servewell.form-template/v1",
+	"templateId": "contact-group",
+	"version": 1,
+	"fields": [
+		{ "fieldId": "contact-group.name", "label": "Group Name", "order": 10, "required": true, "type": { "kind": "uniqueText", "normalization": "unicode-nfc-casefold-v1" } }
+	]
+}
+```
+
+The client uses labels and resolved values for display, but only stable IDs cross persistence boundaries. For example, a Groups chip is selected by its displayed name and submits a group ID; rename changes the displayed label without changing membership identity. The same applies to Friends, whose UI may display a contact name while the relationship is keyed by contact ID.
+
+The following adapter is server-owned code, not part of the published template. It maps the allowlisted field IDs to existing tables and domain operations. It must not construct SQL identifiers from field IDs, labels, or request data.
+
+Field IDs use a dotted namespace and kebab-case names (for example, `contact.unique-name`) to keep template identity separate from storage details. Database tables and columns use the existing snake_case convention (for example, `contacts.unique_name`). These names are not mechanically converted; each mapping below is explicit so labels and schema IDs cannot accidentally become SQL identifiers.
+
+| Field ID | Server-owned persistence and validation |
+| --- | --- |
+| `contact.unique-name` | `contacts.unique_name` and its normalized comparison key; enforce uniqueness within the owner list. |
+| `contact.casual-name` | `contacts.casual_name`; validate as optional single-line text. |
+| `contact.friends` | Read/write `contact_friends` through the symmetric-pair operation; validate that both contact IDs belong to the owner's list and reject self-links. |
+| `contact.birthdate` | `contacts.birthdate`; validate a real calendar date in `YYYY-MM-DD` form or accept absence. |
+| `contact.groups` | Read/write `contact_group_members` through group membership operations; validate group IDs against the owner's list. Resolve names for display and autocomplete from `contact_groups`. |
+| `contact.other-notes` | `contacts.other_notes` plus the Other Notes reference validation/index operation; preserve multiline text and enforce its length limit. |
+| `contact-group.name` | `contact_groups.group_name` and its normalized comparison key; enforce uniqueness within the owner's list. |
+
+Initialization resolves the allowed immutable Contact and Contact Group versions from server configuration, then atomically creates the owner's Contacts list, pins both origins and the local schema IDs, and makes the owner-scoped group data set available. A concurrent or retried initialization returns the existing initialized list. An unsupported version, unknown field/type ID, unresolved field reference, or failed write aborts the transaction without partial initialization. The client cannot choose an origin version, owner, table, column, or adapter mapping.
+
 Implement the types required for the initial Contact fields: Text Line, Text Multiline, Unique Text, Date, List, and Form Field. Remove the generic Text type from this proposed catalog. The public catalog must distinguish implemented types from unimplemented candidates. Translation templates and Bible pipeline integration remain later work.
 
 Defer Add Field, Override Field, field disabling/removal, configurable required/default constraints, origin/version adoption, generic schema migrations, and accessible reordering. Preserve origin relationships and ordering in the model now, but do not expose nonfunctional editing controls. Before allowing removal or type changes on populated fields, define recovery and validation behavior.
